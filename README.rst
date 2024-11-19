@@ -118,9 +118,9 @@ Licensed under the EUPL_
     :alt: Code style
     :target: https://github.com/psf/black
 
-.. |docker| image:: https://img.shields.io/docker/v/maykinmedia/woo-publications?sort=semver
+.. |docker| image:: https://img.shields.io/docker/v/maykinmedia/woo-publications-api?sort=semver
     :alt: Docker image
-    :target: https://hub.docker.com/r/maykinmedia/woo-publications
+    :target: https://hub.docker.com/r/maykinmedia/woo-publications-api
 
 .. |python-versions| image:: https://img.shields.io/badge/python-3.12%2B-blue.svg
     :alt: Supported Python version

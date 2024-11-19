@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: maykinmedia/woo-publications
+  IMAGE_NAME: maykinmedia/woo-publications-api
   DJANGO_SETTINGS_MODULE: woo_publications.conf.ci
   DOCKER_BUILDKIT: '1'
 

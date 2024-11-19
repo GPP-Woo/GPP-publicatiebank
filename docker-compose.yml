@@ -86,7 +86,7 @@ services:
       context: .
       args:
         RELEASE: ${RELEASE:-latest}
-    image: maykinmedia/woo-publications:${RELEASE:-latest}
+    image: maykinmedia/woo-publications-api:${RELEASE:-latest}
     environment: &web_env
       - DJANGO_SETTINGS_MODULE=woo_publications.conf.docker
       - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
