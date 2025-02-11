@@ -5,16 +5,19 @@ set -e
 LOGLEVEL=${CELERY_LOGLEVEL:-INFO}
 CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-1}
 
-QUEUE=${1:-${CELERY_WORKER_QUEUE:=celery}}
-WORKER_NAME=${2:-${CELERY_WORKER_NAME:="${QUEUE}"@%n}}
+QUEUE=${CELERY_WORKER_QUEUE:=celery}
+WORKER_NAME=${CELERY_WORKER_NAME:="${QUEUE}"@%n}
+
+_binary=$(which celery)
+
+if [[ "$ENABLE_COVERAGE" ]]; then
+    _binary="coverage run $_binary"
+fi
 
 echo "Starting celery worker $WORKER_NAME with queue $QUEUE"
-exec celery worker \
-    --app woo_publications \
+exec $_binary --workdir src --app woo_publications.celery worker \
     -Q $QUEUE \
     -n $WORKER_NAME \
     -l $LOGLEVEL \
-    --workdir src \
     -O fair \
     -c $CONCURRENCY
-

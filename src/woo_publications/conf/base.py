@@ -258,3 +258,27 @@ ZGW_CONSUMERS_IGNORE_OAS_FIELDS = True
 SENDFILE_BACKEND = config("SENDFILE_BACKEND", default="django_sendfile.backends.nginx")
 SENDFILE_ROOT = PRIVATE_MEDIA_ROOT
 SENDFILE_URL = PRIVATE_MEDIA_URL
+
+#
+# CELERY - async task queue
+#
+# CELERY_BROKER_URL  defined in open-api-framework
+# CELERY_RESULT_BACKEND  defined in open-api-framework
+
+# Add (by default) 1 (soft), 5 (hard) minute timeouts to all Celery tasks.
+CELERY_TASK_TIME_LIMIT = config("CELERY_TASK_HARD_TIME_LIMIT", default=5 * 60)  # hard
+CELERY_TASK_SOFT_TIME_LIMIT = config(
+    "CELERY_TASK_SOFT_TIME_LIMIT", default=1 * 60
+)  # soft
+
+CELERY_BEAT_SCHEDULE = {}
+
+# Only ACK when the task has been executed. This prevents tasks from getting lost, with
+# the drawback that tasks should be idempotent (if they execute partially, the mutations
+# executed will be executed again!)
+CELERY_TASK_ACKS_LATE = True
+
+# ensure that no tasks are scheduled to a worker that may be running a very long-running
+# operation, leading to idle workers and backed-up workers. The `-O fair` option
+# *should* have the same effect...
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1

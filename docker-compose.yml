@@ -81,8 +81,8 @@ services:
       - db
       - redis
 
-  web: &web_build
-    build:
+  web:
+    build: &web_build
       context: .
       args:
         RELEASE: ${RELEASE:-latest}
@@ -100,6 +100,9 @@ services:
       - DISABLE_2FA=true
       - DJANGO_SUPERUSER_PASSWORD=admin
       - ALLOWED_HOSTS=*
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERY_LOGLEVEL=DEBUG
       # Environment labeling
       - SHOW_ENVIRONMENT=yes
       - ENVIRONMENT_LABEL=docker-compose
@@ -109,7 +112,7 @@ services:
       - ./docker/fixtures/:/app/fixtures
       - media:/app/media
       - log:/app/log
-    extra_hosts:
+    extra_hosts: &web_extra_hosts
       - "host.docker.internal:host-gateway"
       # required because Open Zaak otherwise treats our /catalogi/api/v1/ endpoints as
       # internal
@@ -119,6 +122,28 @@ services:
     depends_on:
       - db
       - redis
+
+  celery:
+    build: *web_build
+    image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    environment: *web_env
+    command: /celery_worker.sh
+    volumes: *web_volumes
+    extra_hosts: *web_extra_hosts
+    depends_on:
+      - db
+      - redis
+
+  celery-flower:
+    build: *web_build
+    image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    environment: *web_env
+    command: /celery_flower.sh
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+      - celery
 
 volumes:
   db:
