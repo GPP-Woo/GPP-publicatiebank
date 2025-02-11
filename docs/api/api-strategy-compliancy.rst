@@ -27,5 +27,5 @@ a part of `Nederlandse API Strategie`_.
    API-48,Leave off trailing slashes from API endpoints,Yes
    API-51,Publish OAS at the base-URI in JSON-format,Yes
 
-.. _`API Designrules`: https://docs.geostandaarden.nl/api/API-Designrules/
+.. _`API Designrules`: https://gitdocumentatie.logius.nl/publicatie/api/adr/
 .. _`Nederlandse API Strategie`: https://docs.geostandaarden.nl/api/API-Strategie/

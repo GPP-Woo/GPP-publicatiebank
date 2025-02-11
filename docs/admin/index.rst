@@ -14,7 +14,7 @@ Volg de volgende stappen om toegang te krijgen tot de Admin-omgeving:
 
 1. Ga naar de URL waarop het 'WOO Publications'-component is geïnstalleerd, bijvoorbeeld https://woo-publicaties.gemeente.nl/.
 2. Je ziet een webpagina met enige informatie over het component. In het midden staat een grote, rode knop "Beheer". Klik daarop.
-3. Afhankleijk van de lokale inrichting dien je nog handmatig in te loggen, of wordt je automatisch ingelogd.
+3. Afhankelijk van de lokale inrichting dien je nog handmatig in te loggen, of word je automatisch ingelogd.
 4. Na het inloggen kom je direct terecht op het dashboard van de Admin-omgeving.
 
 Menubalk
