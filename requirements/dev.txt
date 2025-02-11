@@ -163,7 +163,7 @@ cssselect==1.2.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   pyquery
-django==4.2.17
+django==4.2.19
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -536,7 +536,7 @@ itypes==1.2.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   coreapi
-jinja2==3.1.4
+jinja2==3.1.5
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
