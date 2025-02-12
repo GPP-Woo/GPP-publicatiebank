@@ -27,10 +27,10 @@ from uuid import uuid4
 from django.core.files import File
 from django.test import TestCase
 
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..client import get_client
-from .factories import ServiceFactory
 
 DOCUMENT_TYPE_URL = (
     "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"

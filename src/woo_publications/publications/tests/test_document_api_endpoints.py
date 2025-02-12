@@ -21,7 +21,7 @@ from woo_publications.api.tests.mixins import (
 )
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.documents_api.client import get_client
-from woo_publications.contrib.documents_api.tests.factories import ServiceFactory
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.logging.logevent import audit_api_create
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.metadata.constants import InformationCategoryOrigins

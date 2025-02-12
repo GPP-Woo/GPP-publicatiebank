@@ -23,10 +23,9 @@ from furl import furl
 from rest_framework.reverse import reverse
 from zgw_consumers.client import build_client
 
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import InformationCategoryFactory
 from woo_publications.utils.tests.vcr import VCRMixin
-
-from .factories import ServiceFactory
 
 
 class DocumentsApiIntegrationTests(VCRMixin, LiveServerTestCase):
