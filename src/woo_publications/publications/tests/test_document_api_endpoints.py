@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -1107,6 +1108,35 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         response_data = response.json()
 
         self.assertEqual(response_data["officieleTitel"], "changed officiele_title")
+
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    def test_publish_document_schedules_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            identifier="document-1",
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            creatiedatum="2024-01-01",
+        )
+        detail_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                detail_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        latest_doc = Document.objects.order_by("-pk").first()
+        assert latest_doc is not None
+        mock_index_document_delay.assert_called_once_with(document_id=latest_doc.pk)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
