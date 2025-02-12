@@ -30,6 +30,7 @@ cbor2==5.6.4
     # via webauthn
 celery==5.4.0
     # via
+    #   -r requirements/base.in
     #   flower
     #   notifications-api-common
     #   open-api-framework
@@ -257,7 +258,7 @@ jsonschema==4.23.0
     # via drf-spectacular
 jsonschema-specifications==2023.12.1
     # via jsonschema
-kombu==5.4.1
+kombu==5.4.2
     # via celery
 markdown==3.7
     # via django-markup
@@ -375,7 +376,9 @@ typing-extensions==4.12.2
     #   qrcode
     #   zgw-consumers
 tzdata==2024.1
-    # via celery
+    # via
+    #   celery
+    #   kombu
 uritemplate==4.1.1
     # via
     #   coreapi

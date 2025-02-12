@@ -1,4 +1,5 @@
 # Pure python dependencies
+celery
 furl
 
 # Django packages
