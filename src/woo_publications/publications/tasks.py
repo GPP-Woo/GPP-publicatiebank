@@ -41,5 +41,15 @@ def index_document(*, document_id: int) -> str | None:
         )
         return
 
+    if (
+        not (pub_status := document.publicatie.publicatiestatus)
+        == PublicationStatusOptions.published
+    ):
+        logger.info(
+            "Related publication of document has publication status %s, skipping.",
+            pub_status,
+        )
+        return
+
     with get_client(service) as client:
         return client.index_document(document)
