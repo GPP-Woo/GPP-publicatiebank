@@ -61,7 +61,7 @@ coreapi==2.3.3
     # via commonground-api-common
 coreschema==0.0.4
     # via coreapi
-cryptography==43.0.1
+cryptography==44.0.1
     # via
     #   django-simple-certmanager
     #   josepy
@@ -299,7 +299,7 @@ pyjwt==2.9.0
     #   commonground-api-common
     #   gemma-zds-client
     #   zgw-consumers
-pyopenssl==24.2.1
+pyopenssl==25.0.0
     # via
     #   josepy
     #   webauthn
@@ -373,6 +373,7 @@ tornado==6.4.2
 typing-extensions==4.12.2
     # via
     #   mozilla-django-oidc-db
+    #   pyopenssl
     #   qrcode
     #   zgw-consumers
 tzdata==2024.1
