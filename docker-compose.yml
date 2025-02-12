@@ -91,12 +91,15 @@ services:
       - DB_USER=gppzoeken
       - DB_HOST=db
       - CACHE_DEFAULT=redis:6379/3
-      - CACHE_AXES=redis:6379/4
+      - CACHE_AXES=redis:6379/3
       - ODS_SUPERUSER_USERNAME=admin
       - ODS_SUPERUSER_EMAIL=admin@host.docker.internal
       - DISABLE_2FA=true
       - DJANGO_SUPERUSER_PASSWORD=admin
       - ALLOWED_HOSTS=*
+      - CELERY_BROKER_URL=redis://redis:6379/4
+      - CELERY_RESULT_BACKEND=redis://redis:6379/4
+      - CELERY_LOGLEVEL=INFO
       # ES is deliberately not configured yet, as long as the API works it's enough for this component.
       - INIT_ES_INDICES=false
       - ELASTICSEARCH_HOST=http://es:9200/

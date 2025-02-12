@@ -17,7 +17,7 @@ class ServiceFactory(_ServiceFactory):
         )
         for_gpp_search_docker_compose = factory.Trait(
             label="GPP Zoeken (docker-compose)",
-            api_root="http://gpp-zoeken:8000/api/v1/",
+            api_root="http://localhost:8002/api/v1/",
             api_type=APITypes.orc,
             auth_type=AuthTypes.api_key,
             header_key="Authorization",
