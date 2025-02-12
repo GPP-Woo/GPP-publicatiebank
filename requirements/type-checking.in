@@ -2,6 +2,7 @@
 -r ci.txt
 
 pyright
+celery-types
 django-stubs
 django-stubs-ext
 djangorestframework-stubs

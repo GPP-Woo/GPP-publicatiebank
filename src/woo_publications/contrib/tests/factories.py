@@ -15,3 +15,11 @@ class ServiceFactory(_ServiceFactory):
             client_id="woo-publications-dev",
             secret="insecure-yQL9Rzh4eHGVmYx5w3J2gu",
         )
+        for_gpp_search_docker_compose = factory.Trait(
+            label="GPP Zoeken (docker-compose)",
+            api_root="http://localhost:8002/api/v1/",
+            api_type=APITypes.orc,
+            auth_type=AuthTypes.api_key,
+            header_key="Authorization",
+            header_value="Token insecure-RySD8u5xkb9PH6AJtaZV4Y",
+        )

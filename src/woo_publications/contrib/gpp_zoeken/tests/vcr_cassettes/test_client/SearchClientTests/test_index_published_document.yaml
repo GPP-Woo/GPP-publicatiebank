@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: '{"uuid": "38213b98-c299-429e-aa30-8b36278118a3", "publicatie": "e57b37cb-7e14-4f33-be59-d0a3c07cbb38",
+      "publisher": {"uuid": "adccf063-b75c-4820-9833-e8cc0ec23e50", "naam": "view"},
+      "identifier": "", "officieleTitel": "foreign", "verkorteTitel": "", "omschrijving":
+      "", "creatiedatum": "2025-01-22", "registratiedatum": "2025-02-12T15:21:48.540626+00:00",
+      "laatstGewijzigdDatum": "2025-02-12T15:21:48.540635+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '415'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/documenten
+  response:
+    body:
+      string: '{"taskId":"d459d529-fd79-4f6c-95b3-9b0d284a5c5a"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+version: 1

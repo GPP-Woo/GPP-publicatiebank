@@ -2,7 +2,7 @@ from typing import Sequence
 
 import factory
 
-from woo_publications.contrib.documents_api.tests.factories import ServiceFactory
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 

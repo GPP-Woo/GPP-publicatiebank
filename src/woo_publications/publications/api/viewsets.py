@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterable
+from functools import partial
 from typing import override
 from uuid import UUID
 
@@ -30,6 +31,7 @@ from woo_publications.logging.service import (
 )
 
 from ..models import Document, Publication
+from ..tasks import index_document
 from .filters import DocumentFilterSet, PublicationFilterSet
 from .serializers import (
     DocumentSerializer,
@@ -107,6 +109,13 @@ class DocumentViewSet(
         woo_document.register_in_documents_api(
             build_absolute_uri=self.request.build_absolute_uri,
         )
+
+    @transaction.atomic()
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        document = serializer.instance
+        assert document is not None
+        transaction.on_commit(partial(index_document.delay, document_id=document.pk))
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
