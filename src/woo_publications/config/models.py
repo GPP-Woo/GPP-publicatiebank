@@ -28,6 +28,7 @@ class GlobalConfiguration(SingletonModel):
         ),
         null=True,
         blank=False,
+        related_name="+",
     )
     organisation_rsin = models.CharField(
         _("organisation RSIN"),
@@ -36,6 +37,20 @@ class GlobalConfiguration(SingletonModel):
             "The RSIN of the municipality that owns the documents in the Documents API."
         ),
         validators=[validate_rsin],
+    )
+
+    gpp_search_service = models.ForeignKey(
+        "zgw_consumers.Service",
+        on_delete=models.PROTECT,
+        limit_choices_to={"api_type": APITypes.orc},
+        verbose_name=_("GPP Search service"),
+        help_text=_(
+            "The service to use for search index operations to make the content "
+            "publicly available."
+        ),
+        null=True,
+        blank=False,
+        related_name="+",
     )
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
