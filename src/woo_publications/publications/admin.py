@@ -100,6 +100,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "show_filesize",
         "identifier",
         "registratiedatum",
+        "upload_complete",
         "show_actions",
     )
     fieldsets = [
@@ -140,6 +141,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "document_service",
                     "document_uuid",
                     "lock",
+                    "upload_complete",
                 )
             },
         ),

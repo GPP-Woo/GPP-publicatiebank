@@ -255,6 +255,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "object_data": {
                     "id": published_document.pk,
                     "lock": "",
+                    "upload_complete": False,
                     "uuid": str(published_document.uuid),
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
@@ -398,6 +399,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
                 "identifier": "document-1",
                 "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
                 "lock": "",
+                "upload_complete": False,
                 "officiele_titel": "changed officiele_title",
                 "omschrijving": "changed omschrijving",
                 "publicatie": publication.pk,

@@ -310,6 +310,13 @@ class Document(ModelOwnerMixin, models.Model):
             "The lock value to be able to update this document in the Documents API.",
         ),
     )
+    upload_complete = models.BooleanField(
+        _("upload completed"),
+        default=False,
+        help_text=_(
+            "Marker to indicate if the upload to the Documenten API is finalized."
+        ),
+    )
 
     # Private property managed by the getter and setter below.
     _zgw_document: ZGWDocument | None = None
@@ -473,5 +480,9 @@ class Document(ModelOwnerMixin, models.Model):
             completed = client.check_uploads_complete(document_uuid=self.document_uuid)
             if completed:
                 client.unlock_document(uuid=self.document_uuid, lock=self.lock)
+
+                self.lock = ""
+                self.upload_complete = True
+                self.save(update_fields=("lock", "upload_complete"))
 
         return completed

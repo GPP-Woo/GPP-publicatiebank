@@ -68,6 +68,7 @@ Documenthandelingen zijn verplichte gegevens in de DiWoo-standaard.
 * ``Documents API Service``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Document UUID``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Documentvergrendelingscode``. Systeemveld, bevat de vergrendelingscode van een bestand in de Documenten API.
+* ``Upload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
 
 Publicaties
 ------------

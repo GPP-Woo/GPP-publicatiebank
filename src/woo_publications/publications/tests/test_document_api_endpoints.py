@@ -1475,6 +1475,12 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 # read the binary data and check that it matches what we uploaded
                 self.assertEqual(file_response.content, b"aAaAa")
 
+            with self.subTest("lock id cleared and flag updated"):
+                document.refresh_from_db()
+
+                self.assertEqual(document.lock, "")
+                self.assertTrue(document.upload_complete)
+
     def test_upload_with_multiple_parts(self):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
