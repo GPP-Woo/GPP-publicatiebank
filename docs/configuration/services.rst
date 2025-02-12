@@ -28,7 +28,7 @@ edit page.
 Documents API configuration
 ---------------------------
 
-Currently, GPP-Publicatiebank depends on one required service: the
+GPP-Publicatiebank depends on the
 `Documents API <https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/>`_.
 
 What you'll need
@@ -64,5 +64,45 @@ Configuration in the registration component
     - ``Documents API service``: select the service that you created in step 4.
     - ``RSIN organisation``: enter the RSIN obtained from the requirements in the
       previous section.
+
+8. Save the changes.
+
+GPP-Zoeken configuration
+------------------------
+
+GPP-Publicatiebank depends on the `GPP Zoeken <https://gpp-zoeken.readthedocs.io/>`_
+service to make publications available in the citizen portal. A service needs to be
+configured for this. If no service is configured, indexing operations will be skipped.
+
+What you'll need
+~~~~~~~~~~~~~~~~
+
+* The API root URL, e.g. ``https://gpp-zoeken.example.com/api/v1/``
+* API credentials, typically a token: e.g. ``TtYjZpmv9uRg3BxrMQ2z5d``
+
+Configuration in the registration component
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Navigate to the **Admin** environment.
+2. In the menu, navigate to **Configuration** > **Services**.
+3. Click the **Add service** button in the top right of the screen.
+4. Fill out the form fields:
+
+    - ``Label``: a label so you can recognize the service in a choice list, e.g. "GPP-Zoeken  ".
+    - ``Type``: select "ORC (Overige)"
+    - ``API root URL``: enter the obtained base URL of the API, e.g.
+      ``https://gpp-zoeken.example.com/api/v1/`` from the examples in the previous
+      section.
+    - ``Authorization type``: select "API key"
+    - ``Header key`` enter ``Authorization``
+    - ``Header value``: enter ``Token <token value>``, for example
+      ``Token TtYjZpmv9uRg3BxrMQ2z5d``.
+
+5. Save the changes.
+6. Now, we must instruct the application to use this service. Navigate to
+   **Configuration** > **General configuration**.
+7. Fill out the form fields and find:
+
+    - ``GPP Search service``: select the service that you created in step 4.
 
 8. Save the changes.
