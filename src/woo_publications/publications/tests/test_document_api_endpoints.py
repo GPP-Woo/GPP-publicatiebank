@@ -1426,7 +1426,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ["Ensure this field has no more than 1 elements."],
         )
 
-    def test_upload_file_parts(self):
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    def test_upload_file_parts(self, mock_index_document_delay: MagicMock):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=5,
@@ -1443,15 +1444,16 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             },
         )
 
-        response = self.client.put(
-            endpoint,
-            data={"inhoud": SimpleUploadedFile("dummy.txt", b"aAaAa")},
-            format="multipart",
-            headers={
-                **AUDIT_HEADERS,
-                "Host": "host.docker.internal:8000",
-            },
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.put(
+                endpoint,
+                data={"inhoud": SimpleUploadedFile("dummy.txt", b"aAaAa")},
+                format="multipart",
+                headers={
+                    **AUDIT_HEADERS,
+                    "Host": "host.docker.internal:8000",
+                },
+            )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["documentUploadVoltooid"])
@@ -1475,13 +1477,17 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 # read the binary data and check that it matches what we uploaded
                 self.assertEqual(file_response.content, b"aAaAa")
 
-            with self.subTest("lock id cleared and flag updated"):
-                document.refresh_from_db()
+        with self.subTest("lock id cleared and flag updated"):
+            document.refresh_from_db()
 
-                self.assertEqual(document.lock, "")
-                self.assertTrue(document.upload_complete)
+            self.assertEqual(document.lock, "")
+            self.assertTrue(document.upload_complete)
 
-    def test_upload_with_multiple_parts(self):
+        with self.subTest("document index task is scheduled"):
+            mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    def test_upload_with_multiple_parts(self, mock_index_document_delay: MagicMock):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=105,
@@ -1498,18 +1504,20 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             },
         )
 
-        response = self.client.put(
-            endpoint,
-            data={"inhoud": SimpleUploadedFile("dummy.txt", b"A" * 100)},
-            format="multipart",
-            headers={
-                **AUDIT_HEADERS,
-                "Host": "host.docker.internal:8000",
-            },
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.put(
+                endpoint,
+                data={"inhoud": SimpleUploadedFile("dummy.txt", b"A" * 100)},
+                format="multipart",
+                headers={
+                    **AUDIT_HEADERS,
+                    "Host": "host.docker.internal:8000",
+                },
+            )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.json()["documentUploadVoltooid"])
+        mock_index_document_delay.assert_not_called()
 
         with get_client(document.document_service) as client:
             with self.subTest("expected documents API state"):

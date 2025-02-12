@@ -167,6 +167,11 @@ class DocumentViewSet(
             # XXX: should we transform these error responses?
             raise serializers.ValidationError(detail=_response.json()) from exc
 
+        if is_completed:
+            transaction.on_commit(
+                partial(index_document.delay, document_id=document.pk)
+            )
+
         response_serializer = DocumentStatusSerializer(
             instance={"document_upload_voltooid": is_completed}
         )

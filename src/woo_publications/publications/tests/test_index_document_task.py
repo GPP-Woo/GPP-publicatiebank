@@ -52,7 +52,8 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
 
     def test_index_published_document(self):
         doc = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
+            publicatiestatus=PublicationStatusOptions.published,
+            upload_complete=True,
         )
 
         remote_task_id = index_document(document_id=doc.pk)
