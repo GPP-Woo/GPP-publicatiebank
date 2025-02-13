@@ -5,7 +5,7 @@ from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.gpp_zoeken.client import get_client
 from woo_publications.publications.constants import PublicationStatusOptions
 
-from .models import Document
+from .models import Document, Publication
 
 logger = logging.getLogger(__name__)
 
@@ -36,3 +36,29 @@ def index_document(*, document_id: int) -> str | None:
 
     with get_client(service) as client:
         return client.index_document(document)
+
+
+@app.task
+def index_publication(*, publication_id: int) -> str | None:
+    """
+    Offer the publication data to the gpp-zoeken service for indexing.
+
+    If no service is configured or the publication status is not suitable
+    for public indexing, then the index operation is skipped.
+
+    :returns: The remote task ID or None if the indexing was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info("No GPP search service configured, skipping the indexing task.")
+        return
+
+    publication = Publication.objects.get(pk=publication_id)
+    if (
+        current_status := publication.publicatiestatus
+    ) != PublicationStatusOptions.published:
+        logger.info("Publication has publication status %s, skipping.", current_status)
+        return
+
+    with get_client(service) as client:
+        return client.index_publication(publication)
