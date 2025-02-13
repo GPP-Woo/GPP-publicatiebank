@@ -82,7 +82,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         transaction.on_commit(
             partial(index_publication.delay, publication_id=object.pk)
         )
-        return super().log_addition(request, object, message)
+        return super().log_change(request, object, message)
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
@@ -200,7 +200,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
     def log_change(self, request, object, message):
         transaction.on_commit(partial(index_document.delay, document_id=object.pk))
-        return super().log_addition(request, object, message)
+        return super().log_change(request, object, message)
 
     @admin.display(description=_("at time"))
     def at_time(self, obj: Document) -> datetime:
