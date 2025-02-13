@@ -369,7 +369,6 @@ class TestDocumentAdmin(WebTest):
         self.assertRedirects(
             update_response, reverse("admin:publications_document_changelist")
         )
-        document.refresh_from_db()
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
 
