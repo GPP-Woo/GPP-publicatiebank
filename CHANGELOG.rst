@@ -2,6 +2,14 @@
 Release notes
 =============
 
+dev (UNRELEASED)
+================
+
+* We now track whether the document file uploads have completed or not.
+* Added GPP-Zoeken integration (opt-in). To opt in, you must configure the appropriate
+  service to use and update your infrastructure to deploy the celery containers to
+  process background tasks.
+
 1.0.0-rc.0 (2024-12-12)
 =======================
 

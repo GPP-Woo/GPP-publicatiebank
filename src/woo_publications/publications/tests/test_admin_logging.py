@@ -290,6 +290,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": published_document.pk,
                     "lock": "",
+                    "upload_complete": False,
                     "uuid": str(published_document.uuid),
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
@@ -431,6 +432,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": document.pk,
                     "lock": "",
+                    "upload_complete": False,
                     "uuid": str(document.uuid),
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
@@ -542,6 +544,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_service": None,
                     "document_uuid": None,
                     "lock": "",
+                    "upload_complete": False,
                 },
                 "_cached_object_repr": "title",
             }
@@ -612,6 +615,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": document.pk,
                     "lock": "",
+                    "upload_complete": False,
                     "uuid": str(document.uuid),
                     "identifier": "document-1",
                     "publicatie": publication.id,
@@ -680,6 +684,7 @@ class TestDocumentAdminAuditLogging(WebTest):
             "object_data": {
                 "id": added_item.pk,
                 "lock": "",
+                "upload_complete": False,
                 "uuid": str(added_item.uuid),
                 "identifier": identifier,
                 "publicatie": publication.pk,
@@ -764,6 +769,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": document.pk,
                     "lock": "",
+                    "upload_complete": False,
                     "uuid": str(document.uuid),
                     "identifier": identifier,
                     "publicatie": publication.pk,
@@ -824,6 +830,7 @@ class TestDocumentAdminAuditLogging(WebTest):
             "object_data": {
                 "id": document.pk,
                 "lock": "",
+                "upload_complete": False,
                 "uuid": str(document.uuid),
                 "identifier": identifier,
                 "publicatie": publication.pk,

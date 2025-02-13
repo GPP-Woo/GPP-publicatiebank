@@ -34,5 +34,22 @@ def index_document(*, document_id: int) -> str | None:
         logger.info("Document has publication status %s, skipping.", current_status)
         return
 
+    if not document.upload_complete:
+        logger.info(
+            "Document upload is not yet complete, skipping.",
+            extra={"document": document.uuid},
+        )
+        return
+
+    if (
+        not (pub_status := document.publicatie.publicatiestatus)
+        == PublicationStatusOptions.published
+    ):
+        logger.info(
+            "Related publication of document has publication status %s, skipping.",
+            pub_status,
+        )
+        return
+
     with get_client(service) as client:
         return client.index_document(document)
