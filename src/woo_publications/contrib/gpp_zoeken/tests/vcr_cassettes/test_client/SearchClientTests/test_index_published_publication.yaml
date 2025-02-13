@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: '{"uuid": "7ebcd4bf-c3bd-4edf-aa22-a8f0730b89b8", "publisher": {"uuid":
+      "cbf38541-c444-4318-8d2e-25f92a096986", "naam": "suggest"}, "informatieCategorieen":
+      [], "officieleTitel": "could", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
+      "2025-02-13T10:24:48.509126+00:00", "laatstGewijzigdDatum": "2025-02-13T10:24:48.509505+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '343'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/publicaties
+  response:
+    body:
+      string: '{"taskId":"e6e9c530-eb1d-425c-9aed-3c5132325deb"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Date:
+      - Thu, 13 Feb 2025 10:24:48 GMT
+      Referrer-Policy:
+      - same-origin
+      Server:
+      - WSGIServer/0.2 CPython/3.12.6
+      Server-Timing:
+      - TimerPanel_utime;dur=24.226999999999776;desc="User CPU time", TimerPanel_stime;dur=13.199999999999878;desc="System
+        CPU time", TimerPanel_total;dur=37.42699999999965;desc="Total CPU time", TimerPanel_total_time;dur=56.667560995265376;desc="Elapsed
+        time", SQLPanel_sql_time;dur=0.9084490011446178;desc="SQL 1 queries", CachePanel_total_time;dur=0;desc="Cache
+        0 Calls"
+      Vary:
+      - Accept
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      djdt-store-id:
+      - 385f35d358874f56a7c1b68cf508da18
+    status:
+      code: 202
+      message: Accepted
+version: 1
