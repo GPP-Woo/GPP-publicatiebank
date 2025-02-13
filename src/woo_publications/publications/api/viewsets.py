@@ -318,7 +318,7 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
 
     @transaction.atomic()
     def perform_update(self, serializer):
-        super().perform_create(serializer)
+        super().perform_update(serializer)
         publication = serializer.instance
         assert publication is not None
         transaction.on_commit(

@@ -1248,7 +1248,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
     @patch("woo_publications.publications.api.viewsets.index_publication.delay")
     def test_publish_publication_update_schedules_index_task(
-        self, mock_index_document_delay: MagicMock
+        self, mock_index_publication_delay: MagicMock
     ):
         publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept,
@@ -1268,13 +1268,13 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         latest_publication = Publication.objects.order_by("-pk").first()
         assert latest_publication is not None
-        mock_index_document_delay.assert_called_once_with(
+        mock_index_publication_delay.assert_called_once_with(
             publication_id=latest_publication.pk
         )
 
     @patch("woo_publications.publications.api.viewsets.index_publication.delay")
     def test_publish_publication_create_schedules_index_task(
-        self, mock_index_document_delay: MagicMock
+        self, mock_index_publication_delay: MagicMock
     ):
         ic = InformationCategoryFactory.create(
             oorsprong=InformationCategoryOrigins.value_list
@@ -1303,6 +1303,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         latest_publication = Publication.objects.order_by("-pk").first()
         assert latest_publication is not None
-        mock_index_document_delay.assert_called_once_with(
+        mock_index_publication_delay.assert_called_once_with(
             publication_id=latest_publication.pk
         )
