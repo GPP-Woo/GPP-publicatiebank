@@ -23,8 +23,6 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
 
     def setUp(self):
         super().setUp()
-
-        GlobalConfiguration.clear_cache
         self.addCleanup(GlobalConfiguration.clear_cache)
 
     def test_index_skipped_if_no_client_configured(self):
