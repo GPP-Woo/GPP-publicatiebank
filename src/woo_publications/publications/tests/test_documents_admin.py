@@ -1,4 +1,5 @@
 import uuid
+from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -259,6 +260,41 @@ class TestDocumentAdmin(WebTest):
                 str(added_item.soort_handeling), DocumentActionTypeOptions.received
             )
 
+    @patch("woo_publications.publications.admin.index_document.delay")
+    def test_document_create_schedules_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        publication = PublicationFactory.create()
+        identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
+
+        response = self.app.get(
+            reverse("admin:publications_document_add"),
+            user=self.user,
+        )
+
+        form = response.forms["document_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatie"] = publication.id
+        form["identifier"] = identifier
+        form["officiele_titel"] = "The official title of this document"
+        form["verkorte_titel"] = "The title"
+        form["creatiedatum"] = "2024-01-01"
+        form["omschrijving"] = (
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
+            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+        )
+        form["soort_handeling"].select(text=DocumentActionTypeOptions.received.label)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            add_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            add_response, reverse("admin:publications_document_changelist")
+        )
+        added_item = Document.objects.order_by("-pk").first()
+        assert added_item is not None
+        mock_index_document_delay.assert_called_once_with(document_id=added_item.pk)
+
     def test_document_admin_update(self):
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
@@ -305,6 +341,36 @@ class TestDocumentAdmin(WebTest):
         self.assertEqual(
             str(document.soort_handeling), DocumentActionTypeOptions.received
         )
+
+    @patch("woo_publications.publications.admin.index_document.delay")
+    def test_document_update_schedules_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        )
+        reverse_url = reverse(
+            "admin:publications_document_change",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["document_form"]
+        form["officiele_titel"] = "changed official title"
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response, reverse("admin:publications_document_changelist")
+        )
+
+        mock_index_document_delay.assert_called_once_with(document_id=document.pk)
 
     def test_document_admin_delete(self):
         document = DocumentFactory.create(

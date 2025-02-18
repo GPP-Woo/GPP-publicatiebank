@@ -1,6 +1,8 @@
 from datetime import datetime
+from functools import partial
 
 from django.contrib import admin
+from django.db import transaction
 from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils.html import format_html_join
@@ -8,19 +10,17 @@ from django.utils.translation import gettext_lazy as _
 
 from furl import furl
 
-from woo_publications.logging.service import (
-    AdminAuditLogMixin,
-    AuditLogInlineformset,
-    get_logs_link,
-)
+from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 from woo_publications.metadata.models import Organisation
 
 from .constants import PublicationStatusOptions
+from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication
+from .tasks import index_document, index_publication
 
 
 class DocumentInlineAdmin(admin.StackedInline):
-    formset = AuditLogInlineformset
+    formset = DocumentAuditLogInlineformset
     model = Document
     readonly_fields = (
         "registratiedatum",
@@ -71,6 +71,18 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         if obj.publicatiestatus == PublicationStatusOptions.revoked:
             obj.revoke_own_published_documents(request.user)
         super().save_model(request, obj, form, change)
+
+    def log_addition(self, request, object, message):
+        transaction.on_commit(
+            partial(index_publication.delay, publication_id=object.pk)
+        )
+        return super().log_addition(request, object, message)
+
+    def log_change(self, request, object, message):
+        transaction.on_commit(
+            partial(index_publication.delay, publication_id=object.pk)
+        )
+        return super().log_change(request, object, message)
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
@@ -181,6 +193,14 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             '<a href="{}">{}</a>',
             actions,
         )
+
+    def log_addition(self, request, object, message):
+        transaction.on_commit(partial(index_document.delay, document_id=object.pk))
+        return super().log_addition(request, object, message)
+
+    def log_change(self, request, object, message):
+        transaction.on_commit(partial(index_document.delay, document_id=object.pk))
+        return super().log_change(request, object, message)
 
     @admin.display(description=_("at time"))
     def at_time(self, obj: Document) -> datetime:
