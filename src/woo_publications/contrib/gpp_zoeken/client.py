@@ -11,9 +11,14 @@ from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
 
 from woo_publications.publications.constants import PublicationStatusOptions
-from woo_publications.publications.models import Document
+from woo_publications.publications.models import Document, Publication
 
-from .typing import IndexDocumentBody, IndexDocumentResponse
+from .typing import (
+    IndexDocumentBody,
+    IndexDocumentResponse,
+    IndexPublicationBody,
+    IndexPublicationResponse,
+)
 
 __all__ = ["get_client"]
 
@@ -52,4 +57,38 @@ class GPPSearchClient(NLXClient):
         response.raise_for_status()
 
         response_data: IndexDocumentResponse = response.json()
+        return response_data["taskId"]
+
+    def index_publication(self, publication: Publication):
+        """
+        Synchronize a publication to the search index.
+        """
+
+        if publication.publicatiestatus != PublicationStatusOptions.published:
+            raise ValueError("The publication does not have 'published' status!")
+
+        body: IndexPublicationBody = {
+            "uuid": str(publication.uuid),
+            "publisher": {
+                "uuid": str(publication.publisher.uuid),
+                "naam": publication.publisher.naam,
+            },
+            "informatieCategorieen": [
+                {
+                    "uuid": str(informatiecategorie.uuid),
+                    "naam": informatiecategorie.naam,
+                }
+                for informatiecategorie in publication.informatie_categorieen.all()
+            ],
+            "officieleTitel": publication.officiele_titel,
+            "verkorteTitel": publication.verkorte_titel,
+            "omschrijving": publication.omschrijving,
+            "registratiedatum": publication.registratiedatum.isoformat(),
+            "laatstGewijzigdDatum": publication.laatst_gewijzigd_datum.isoformat(),
+        }
+
+        response = self.post("publicaties", json=body)
+        response.raise_for_status()
+
+        response_data: IndexPublicationResponse = response.json()
         return response_data["taskId"]

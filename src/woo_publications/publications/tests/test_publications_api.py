@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -1244,3 +1245,64 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Publication.objects.filter(uuid=publication.uuid).exists())
+
+    @patch("woo_publications.publications.api.viewsets.index_publication.delay")
+    def test_publish_publication_update_schedules_index_task(
+        self, mock_index_publication_delay: MagicMock
+    ):
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                detail_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        latest_publication = Publication.objects.order_by("-pk").first()
+        assert latest_publication is not None
+        mock_index_publication_delay.assert_called_once_with(
+            publication_id=latest_publication.pk
+        )
+
+    @patch("woo_publications.publications.api.viewsets.index_publication.delay")
+    def test_publish_publication_create_schedules_index_task(
+        self, mock_index_publication_delay: MagicMock
+    ):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        list_url = reverse("api:publication-list")
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid)],
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "publisher": str(organisation.uuid),
+            "verantwoordelijke": str(organisation.uuid),
+            "opsteller": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "verkorteTitel": "one",
+            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        }
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                list_url,
+                data=data,
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        latest_publication = Publication.objects.order_by("-pk").first()
+        assert latest_publication is not None
+        mock_index_publication_delay.assert_called_once_with(
+            publication_id=latest_publication.pk
+        )

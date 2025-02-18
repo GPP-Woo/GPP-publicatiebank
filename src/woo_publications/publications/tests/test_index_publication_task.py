@@ -5,11 +5,11 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
-from ..tasks import index_document
-from .factories import DocumentFactory
+from ..tasks import index_publication
+from .factories import PublicationFactory
 
 
-class IndexDocumentTaskTests(VCRMixin, TestCase):
+class IndexPublicationTaskTests(VCRMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -29,53 +29,31 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
         config = GlobalConfiguration.get_solo()
         config.gpp_search_service = None
         config.save()
-        doc = DocumentFactory.create(
+        publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
+        remote_task_id = index_publication(publication_id=publication.pk)
 
         self.assertIsNone(remote_task_id)
 
-    def test_index_skipped_for_unpublished_document(self):
+    def test_index_skipped_for_unpublished_publication(self):
         for publication_status in PublicationStatusOptions:
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            doc = DocumentFactory.create(publicatiestatus=publication_status)
+            publication = PublicationFactory.create(publicatiestatus=publication_status)
             with self.subTest(publication_status=publication_status):
-                remote_task_id = index_document(document_id=doc.pk)
+                remote_task_id = index_publication(publication_id=publication.pk)
 
                 self.assertIsNone(remote_task_id)
 
-    def test_index_skipped_for_unpublished_publication(self):
-        doc = DocumentFactory.create(
-            publicatie__publicatiestatus=PublicationStatusOptions.concept,
-            publicatiestatus=PublicationStatusOptions.published,
-            upload_complete=True,
+    def test_index_published_publication(self):
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
-
-        self.assertIsNone(remote_task_id)
-
-    def test_index_skipped_for_incomplete_uploads(self):
-        doc = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            upload_complete=False,
-        )
-
-        remote_task_id = index_document(document_id=doc.pk)
-
-        self.assertIsNone(remote_task_id)
-
-    def test_index_published_document(self):
-        doc = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            upload_complete=True,
-        )
-
-        remote_task_id = index_document(document_id=doc.pk)
+        remote_task_id = index_publication(publication_id=publication.pk)
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

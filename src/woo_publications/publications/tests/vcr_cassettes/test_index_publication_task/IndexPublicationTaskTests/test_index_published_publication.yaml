@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: '{"uuid": "53f2856a-b022-4fb1-985f-0727f1560053", "publisher": {"uuid":
+      "e867448e-402a-4a78-862d-88443c1d619b", "naam": "card"}, "informatieCategorieen":
+      [], "officieleTitel": "threat", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
+      "2025-02-13T10:38:14.989433+00:00", "laatstGewijzigdDatum": "2025-02-13T10:38:14.990231+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '341'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/publicaties
+  response:
+    body:
+      string: '{"taskId":"c9e9e857-8ef0-43f0-890b-4f1d84651543"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Date:
+      - Thu, 13 Feb 2025 10:38:15 GMT
+      Referrer-Policy:
+      - same-origin
+      Server:
+      - WSGIServer/0.2 CPython/3.12.6
+      Server-Timing:
+      - TimerPanel_utime;dur=20.289;desc="User CPU time", TimerPanel_stime;dur=0.0;desc="System
+        CPU time", TimerPanel_total;dur=20.289;desc="Total CPU time", TimerPanel_total_time;dur=25.445874001889024;desc="Elapsed
+        time", SQLPanel_sql_time;dur=0.5877069997950457;desc="SQL 1 queries", CachePanel_total_time;dur=0;desc="Cache
+        0 Calls"
+      Vary:
+      - Accept
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      djdt-store-id:
+      - fc76d0d8c7374332be114551246cb1a6
+    status:
+      code: 202
+      message: Accepted
+version: 1
