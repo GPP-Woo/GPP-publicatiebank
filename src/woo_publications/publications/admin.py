@@ -1,8 +1,10 @@
 from datetime import datetime
 from functools import partial
 
+from django import forms
 from django.contrib import admin
 from django.db import transaction
+from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils.html import format_html_join
@@ -12,6 +14,7 @@ from furl import furl
 
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 from woo_publications.metadata.models import Organisation
+from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
@@ -67,22 +70,19 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             return False
         return super().has_change_permission(request, obj)
 
-    def save_model(self, request, obj, form, change):
-        if obj.publicatiestatus == PublicationStatusOptions.revoked:
+    def save_model(
+        self, request: HttpRequest, obj: Publication, form: forms.Form, change: bool
+    ):
+        assert is_authenticated_request(request)
+        if is_revoked := obj.publicatiestatus == PublicationStatusOptions.revoked:
             obj.revoke_own_published_documents(request.user)
+
         super().save_model(request, obj, form, change)
 
-    def log_addition(self, request, object, message):
-        transaction.on_commit(
-            partial(index_publication.delay, publication_id=object.pk)
-        )
-        return super().log_addition(request, object, message)
-
-    def log_change(self, request, object, message):
-        transaction.on_commit(
-            partial(index_publication.delay, publication_id=object.pk)
-        )
-        return super().log_change(request, object, message)
+        if not is_revoked:
+            transaction.on_commit(
+                partial(index_publication.delay, publication_id=obj.pk)
+            )
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
@@ -179,6 +179,13 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
 
+    def save_model(
+        self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
+    ):
+        super().save_model(request, obj, form, change)
+
+        transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+
     @admin.display(description=_("file size"), ordering="bestandsomvang")
     def show_filesize(self, obj: Document) -> str:
         return filesizeformat(obj.bestandsomvang)
@@ -193,14 +200,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             '<a href="{}">{}</a>',
             actions,
         )
-
-    def log_addition(self, request, object, message):
-        transaction.on_commit(partial(index_document.delay, document_id=object.pk))
-        return super().log_addition(request, object, message)
-
-    def log_change(self, request, object, message):
-        transaction.on_commit(partial(index_document.delay, document_id=object.pk))
-        return super().log_change(request, object, message)
 
     @admin.display(description=_("at time"))
     def at_time(self, obj: Document) -> datetime:
