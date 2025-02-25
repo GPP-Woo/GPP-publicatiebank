@@ -529,11 +529,25 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_publications_admin_delete(self):
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_publications_admin_delete(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+    ):
         publication = PublicationFactory.create(
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        )
+        published_document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
+        )
+        DocumentFactory.create(
+            publicatie=publication, publicatiestatus=PublicationStatusOptions.revoked
         )
         reverse_url = reverse(
             "admin:publications_publication_delete",
@@ -546,10 +560,20 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms[1]
 
-        response = form.submit()
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Publication.objects.filter(uuid=publication.uuid).exists())
+        self.assertFalse(Document.objects.filter(uuid=published_document.uuid).exists())
+
+        self.assertEqual(mock_remove_from_index_by_uuid_delay.call_count, 2)
+        mock_remove_from_index_by_uuid_delay.assert_any_call(
+            model_name="Publication", uuid=str(publication.uuid)
+        )
+        mock_remove_from_index_by_uuid_delay.assert_any_call(
+            model_name="Document", uuid=str(published_document.uuid)
+        )
 
     @patch("woo_publications.publications.formset.index_document.delay")
     def test_inline_document_create_schedules_index_task(

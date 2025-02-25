@@ -103,6 +103,33 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 partial(index_publication.delay, publication_id=obj.pk)
             )
 
+    def delete_model(self, request: HttpRequest, obj: Publication):
+        published_document_uuids = list(
+            Document.objects.filter(
+                publicatiestatus=PublicationStatusOptions.published,
+                publicatie=obj,
+            ).values_list("uuid", flat=True)
+        )
+
+        super().delete_model(request, obj)
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Publication",
+                    uuid=str(obj.uuid),
+                )
+            )
+            for document_uuid in published_document_uuids:
+                transaction.on_commit(
+                    partial(
+                        remove_from_index_by_uuid.delay,
+                        model_name="Document",
+                        uuid=str(document_uuid),
+                    )
+                )
+
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
         actions = [
