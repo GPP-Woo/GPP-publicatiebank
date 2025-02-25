@@ -5,7 +5,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
-from ..tasks import remove_publication_from_index
+from ..tasks import remove_from_index_by_uuid, remove_publication_from_index
 from .factories import PublicationFactory
 
 
@@ -53,6 +53,16 @@ class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
         )
 
         remote_task_id = remove_publication_from_index(publication_id=publication.pk)
+
+        self.assertIsNotNone(remote_task_id)
+        self.assertIsInstance(remote_task_id, str)
+        self.assertNotEqual(remote_task_id, "")
+
+    def test_remove_by_uuid(self):
+        remote_task_id = remove_from_index_by_uuid(
+            model_name="Publication",
+            uuid="86b4df60-36d6-478e-8866-1293a5eac725",
+        )
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

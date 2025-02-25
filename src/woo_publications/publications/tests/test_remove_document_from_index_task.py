@@ -5,7 +5,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
-from ..tasks import remove_document_from_index
+from ..tasks import remove_document_from_index, remove_from_index_by_uuid
 from .factories import DocumentFactory
 
 
@@ -52,6 +52,16 @@ class RemoveDocumentFromIndexTaskTests(VCRMixin, TestCase):
         )
 
         remote_task_id = remove_document_from_index(document_id=doc.pk)
+
+        self.assertIsNotNone(remote_task_id)
+        self.assertIsInstance(remote_task_id, str)
+        self.assertNotEqual(remote_task_id, "")
+
+    def test_remove_by_uuid(self):
+        remote_task_id = remove_from_index_by_uuid(
+            model_name="Document",
+            uuid="fc8fc2db-829e-48d5-83b2-0a9364bfe717",
+        )
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

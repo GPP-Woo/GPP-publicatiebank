@@ -404,8 +404,12 @@ class TestDocumentAdmin(WebTest):
             document_id=document.pk
         )
 
-    def test_document_admin_delete(self):
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_document_admin_delete(
+        self, mock_remove_from_index_by_uuid_delay: MagicMock
+    ):
         document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -421,11 +425,16 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms[1]
 
-        response = form.submit()
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
             Document.objects.filter(identifier=document.identifier).exists()
+        )
+        mock_remove_from_index_by_uuid_delay.assert_called_once_with(
+            model_name="Document",
+            uuid=str(document.uuid),
         )
 
     def test_document_admin_service_select_box_only_displays_document_apis(self):
