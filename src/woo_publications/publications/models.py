@@ -1,4 +1,5 @@
 import uuid
+from functools import partial
 from typing import Callable
 from uuid import UUID
 
@@ -136,6 +137,8 @@ class Publication(ModelOwnerMixin, models.Model):
     def revoke_own_published_documents(
         self, user: User | ActingUser, remarks: str | None = None
     ) -> None:
+        from .tasks import remove_document_from_index
+
         published_documents = (
             self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
                 publicatiestatus=PublicationStatusOptions.published
@@ -145,6 +148,11 @@ class Publication(ModelOwnerMixin, models.Model):
         # get a list of IDs of published documents, make sure to evaluate the queryset so it's not affected by
         # the `update` query
         document_ids_to_log = list(published_documents.values_list("pk", flat=True))
+        for document_id in document_ids_to_log:
+            transaction.on_commit(
+                partial(remove_document_from_index.delay, document_id=document_id)
+            )
+
         published_documents.update(
             publicatiestatus=PublicationStatusOptions.revoked,
             laatst_gewijzigd_datum=timezone.now(),

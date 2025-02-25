@@ -253,7 +253,7 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms["publication_form"]
         form["informatie_categorieen"].force_value([ic.id])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publisher"] = str(organisation.pk)
         form["verantwoordelijke"] = str(organisation.pk)
         form["opsteller"] = str(organisation.pk)
@@ -419,8 +419,43 @@ class TestPublicationsAdmin(WebTest):
             publication_id=publication.pk
         )
 
+    @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
+    def test_publication_update_schedules_remove_from_index_task(
+        self, mock_remove_publication_from_index_delay: MagicMock
+    ):
+        publication = PublicationFactory.create(
+            uuid="b89742ec-9dd2-4617-86c5-e39e1b4d9907",
+            publicatiestatus=PublicationStatusOptions.published,
+            informatie_categorieen=[InformationCategoryFactory.create()],
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        mock_remove_publication_from_index_delay.assert_called_once_with(
+            publication_id=publication.pk
+        )
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
     def test_publications_when_revoking_publication_the_published_documents_also_get_revoked(
         self,
+        mock_remove_document_from_index_delay: MagicMock,
     ):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
@@ -448,7 +483,9 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms["publication_form"]
         form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
-        response = form.submit(name="_save")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
 
@@ -466,6 +503,9 @@ class TestPublicationsAdmin(WebTest):
         )
         self.assertEqual(
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
+        )
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=published_document.pk
         )
 
     def test_publications_admin_not_allowed_to_update_when_publication_is_revoked(self):

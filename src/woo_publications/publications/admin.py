@@ -24,6 +24,7 @@ from .tasks import (
     index_publication,
     remove_document_from_index,
     remove_from_index_by_uuid,
+    remove_publication_from_index,
 )
 
 
@@ -79,12 +80,25 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         self, request: HttpRequest, obj: Publication, form: forms.Form, change: bool
     ):
         assert is_authenticated_request(request)
-        if is_revoked := obj.publicatiestatus == PublicationStatusOptions.revoked:
+
+        new_status = obj.publicatiestatus
+        original_status = form.initial.get("publicatiestatus")
+        is_status_change = change and new_status != original_status
+        is_published = new_status == PublicationStatusOptions.published
+        is_revoked = new_status == PublicationStatusOptions.revoked
+
+        if is_revoked and is_status_change:
             obj.revoke_own_published_documents(request.user)
 
         super().save_model(request, obj, form, change)
 
-        if not is_revoked:
+        if change and is_status_change and not is_published:
+            # remove publication itself
+            transaction.on_commit(
+                partial(remove_publication_from_index.delay, publication_id=obj.pk)
+            )
+
+        if is_published:
             transaction.on_commit(
                 partial(index_publication.delay, publication_id=obj.pk)
             )
