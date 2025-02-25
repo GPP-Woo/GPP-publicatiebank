@@ -1,5 +1,5 @@
 import logging
-from typing import Literal
+from typing import Literal, assert_never
 from uuid import UUID
 
 from woo_publications.celery import app
@@ -176,3 +176,5 @@ def remove_from_index_by_uuid(
                     uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
                 )
                 return client.remove_publication_from_index(publication)
+            case _:  # pragma: no cover
+                assert_never(model_name)

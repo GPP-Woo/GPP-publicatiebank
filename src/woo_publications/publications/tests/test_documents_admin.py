@@ -437,6 +437,27 @@ class TestDocumentAdmin(WebTest):
             uuid=str(document.uuid),
         )
 
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_document_admin_delete_unpublished(
+        self, mock_remove_from_index_by_uuid_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+        reverse_url = reverse(
+            "admin:publications_document_delete",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+        form = response.forms[1]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+        mock_remove_from_index_by_uuid_delay.assert_not_called()
+
     def test_document_admin_service_select_box_only_displays_document_apis(self):
         service = ServiceFactory.create(
             api_root="https://example.com/",

@@ -139,6 +139,8 @@ class DocumentViewSet(
                 transaction.on_commit(
                     partial(remove_document_from_index.delay, document_id=document.pk)
                 )
+            case _:  # pragma: no cover
+                pass
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
@@ -370,3 +372,5 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
                         publication_id=publication.pk,
                     )
                 )
+            case _:  # pragma: no cover
+                pass

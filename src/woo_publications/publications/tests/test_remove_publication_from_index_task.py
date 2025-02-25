@@ -67,3 +67,15 @@ class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)
         self.assertNotEqual(remote_task_id, "")
+
+    def test_remove_by_uuid_skipped_if_no_client_configured(self):
+        config = GlobalConfiguration.get_solo()
+        config.gpp_search_service = None
+        config.save()
+
+        remote_task_id = remove_from_index_by_uuid(
+            model_name="Publication",
+            uuid="86b4df60-36d6-478e-8866-1293a5eac725",
+        )
+
+        self.assertIsNone(remote_task_id)

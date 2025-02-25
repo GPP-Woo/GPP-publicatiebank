@@ -66,3 +66,15 @@ class RemoveDocumentFromIndexTaskTests(VCRMixin, TestCase):
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)
         self.assertNotEqual(remote_task_id, "")
+
+    def test_remove_by_uuid_skipped_if_no_client_configured(self):
+        config = GlobalConfiguration.get_solo()
+        config.gpp_search_service = None
+        config.save()
+
+        remote_task_id = remove_from_index_by_uuid(
+            model_name="Document",
+            uuid="fc8fc2db-829e-48d5-83b2-0a9364bfe717",
+        )
+
+        self.assertIsNone(remote_task_id)

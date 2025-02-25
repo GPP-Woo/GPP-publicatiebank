@@ -535,6 +535,7 @@ class TestPublicationsAdmin(WebTest):
         mock_remove_from_index_by_uuid_delay: MagicMock,
     ):
         publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -574,6 +575,28 @@ class TestPublicationsAdmin(WebTest):
         mock_remove_from_index_by_uuid_delay.assert_any_call(
             model_name="Document", uuid=str(published_document.uuid)
         )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_publications_admin_delete_unpublished(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+    ):
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_delete",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+        form = response.forms[1]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+        mock_remove_from_index_by_uuid_delay.assert_not_called()
 
     @patch("woo_publications.publications.formset.index_document.delay")
     def test_inline_document_create_schedules_index_task(
