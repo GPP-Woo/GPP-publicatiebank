@@ -253,7 +253,7 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms["publication_form"]
         form["informatie_categorieen"].force_value([ic.id])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publisher"] = str(organisation.pk)
         form["verantwoordelijke"] = str(organisation.pk)
         form["opsteller"] = str(organisation.pk)
@@ -419,8 +419,43 @@ class TestPublicationsAdmin(WebTest):
             publication_id=publication.pk
         )
 
+    @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
+    def test_publication_update_schedules_remove_from_index_task(
+        self, mock_remove_publication_from_index_delay: MagicMock
+    ):
+        publication = PublicationFactory.create(
+            uuid="b89742ec-9dd2-4617-86c5-e39e1b4d9907",
+            publicatiestatus=PublicationStatusOptions.published,
+            informatie_categorieen=[InformationCategoryFactory.create()],
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        mock_remove_publication_from_index_delay.assert_called_once_with(
+            publication_id=publication.pk
+        )
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
     def test_publications_when_revoking_publication_the_published_documents_also_get_revoked(
         self,
+        mock_remove_document_from_index_delay: MagicMock,
     ):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
@@ -448,7 +483,9 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms["publication_form"]
         form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
-        response = form.submit(name="_save")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
 
@@ -466,6 +503,9 @@ class TestPublicationsAdmin(WebTest):
         )
         self.assertEqual(
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
+        )
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=published_document.pk
         )
 
     def test_publications_admin_not_allowed_to_update_when_publication_is_revoked(self):
@@ -489,11 +529,26 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_publications_admin_delete(self):
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_publications_admin_delete(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+    ):
         publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        )
+        published_document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
+        )
+        DocumentFactory.create(
+            publicatie=publication, publicatiestatus=PublicationStatusOptions.revoked
         )
         reverse_url = reverse(
             "admin:publications_publication_delete",
@@ -506,10 +561,42 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms[1]
 
-        response = form.submit()
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Publication.objects.filter(uuid=publication.uuid).exists())
+        self.assertFalse(Document.objects.filter(uuid=published_document.uuid).exists())
+
+        self.assertEqual(mock_remove_from_index_by_uuid_delay.call_count, 2)
+        mock_remove_from_index_by_uuid_delay.assert_any_call(
+            model_name="Publication", uuid=str(publication.uuid)
+        )
+        mock_remove_from_index_by_uuid_delay.assert_any_call(
+            model_name="Document", uuid=str(published_document.uuid)
+        )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_publications_admin_delete_unpublished(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+    ):
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_delete",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+        form = response.forms[1]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+        mock_remove_from_index_by_uuid_delay.assert_not_called()
 
     @patch("woo_publications.publications.formset.index_document.delay")
     def test_inline_document_create_schedules_index_task(
@@ -588,3 +675,48 @@ class TestPublicationsAdmin(WebTest):
         )
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.admin.index_publication.delay")
+    def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):
+        published_publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.concept)
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
+        form["action"] = "sync_to_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        mock_index_publication_delay.assert_called_once_with(
+            publication_id=published_publication.pk
+        )
+
+    @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
+    def test_remove_from_index_bulk_action(
+        self, mock_remove_publication_from_index_delay: MagicMock
+    ):
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Publication.objects.all()]
+        form["action"] = "remove_from_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        for doc_id in Publication.objects.values_list("pk", flat=True):
+            mock_remove_publication_from_index_delay.assert_any_call(
+                publication_id=doc_id
+            )

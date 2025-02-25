@@ -1,0 +1,78 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.3
+    method: DELETE
+    uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
+  response:
+    body:
+      string: '{"taskId":"754ba5c2-2169-436f-9b83-020d2a8b14a5"}'
+    headers:
+      Allow:
+      - DELETE, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.3
+    method: DELETE
+    uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
+  response:
+    body:
+      string: '{"taskId":"41bf1327-5a11-48a4-9654-73f64e1fc043"}'
+    headers:
+      Allow:
+      - DELETE, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+version: 1

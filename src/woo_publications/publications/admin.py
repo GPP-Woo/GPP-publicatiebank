@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
 from functools import partial
 
 from django import forms
-from django.contrib import admin
-from django.db import transaction
+from django.contrib import admin, messages
+from django.db import models, transaction
 from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils.html import format_html_join
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext
 
 from furl import furl
 
@@ -19,7 +21,95 @@ from woo_publications.typing import is_authenticated_request
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication
-from .tasks import index_document, index_publication
+from .tasks import (
+    index_document,
+    index_publication,
+    remove_document_from_index,
+    remove_from_index_by_uuid,
+    remove_publication_from_index,
+)
+
+
+@admin.action(
+    description=_("Send the selected %(verbose_name_plural)s to the search index")
+)
+def sync_to_index(
+    modeladmin: PublicationAdmin | DocumentAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication | Document],
+):
+    model = queryset.model
+    filtered_qs = queryset.filter(publicatiestatus=PublicationStatusOptions.published)
+    if model is Document:
+        filtered_qs = filtered_qs.filter(
+            publicatie__publicatiestatus=PublicationStatusOptions.published
+        )
+
+    num_objects = filtered_qs.count()
+
+    if model is Publication:
+        task_fn = index_publication
+        kwarg_name = "publication_id"
+    elif model is Document:
+        task_fn = index_document
+        kwarg_name = "document_id"
+    else:  # pragma: no cover
+        raise ValueError("Unsupported model: %r", model)
+
+    for obj in filtered_qs.iterator():
+        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+
+    modeladmin.message_user(
+        request,
+        ngettext(
+            "{count} {verbose_name} scheduled for background processing.",
+            "{count} {verbose_name_plural} scheduled for background processing.",
+            num_objects,
+        ).format(
+            count=num_objects,
+            verbose_name=model._meta.verbose_name,
+            verbose_name_plural=model._meta.verbose_name_plural,
+        ),
+        messages.SUCCESS,
+    )
+
+
+@admin.action(
+    description=_("Remove the selected %(verbose_name_plural)s from the search index")
+)
+def remove_from_index(
+    modeladmin: PublicationAdmin | DocumentAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication | Document],
+):
+    model = queryset.model
+    num_objects = queryset.count()
+
+    if model is Publication:
+        task_fn = remove_publication_from_index
+        kwarg_name = "publication_id"
+    elif model is Document:
+        task_fn = remove_document_from_index
+        kwarg_name = "document_id"
+    else:  # pragma: no cover
+        raise ValueError("Unsupported model: %r", model)
+
+    for obj in queryset.iterator():
+        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+
+    modeladmin.message_user(
+        request,
+        ngettext(
+            "{count} {verbose_name} scheduled for background processing.",
+            "{count} {verbose_name_plural} scheduled for background processing.",
+            num_objects,
+        ).format(
+            count=num_objects,
+            verbose_name=model._meta.verbose_name,
+            verbose_name_plural=model._meta.verbose_name_plural,
+        ),
+        messages.SUCCESS,
+    )
 
 
 class DocumentInlineAdmin(admin.StackedInline):
@@ -64,6 +154,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
+    actions = [sync_to_index, remove_from_index]
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
@@ -74,15 +165,55 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         self, request: HttpRequest, obj: Publication, form: forms.Form, change: bool
     ):
         assert is_authenticated_request(request)
-        if is_revoked := obj.publicatiestatus == PublicationStatusOptions.revoked:
+
+        new_status = obj.publicatiestatus
+        original_status = form.initial.get("publicatiestatus")
+        is_status_change = change and new_status != original_status
+        is_published = new_status == PublicationStatusOptions.published
+        is_revoked = new_status == PublicationStatusOptions.revoked
+
+        if is_revoked and is_status_change:
             obj.revoke_own_published_documents(request.user)
 
         super().save_model(request, obj, form, change)
 
-        if not is_revoked:
+        if change and is_status_change and not is_published:
+            # remove publication itself
+            transaction.on_commit(
+                partial(remove_publication_from_index.delay, publication_id=obj.pk)
+            )
+
+        if is_published:
             transaction.on_commit(
                 partial(index_publication.delay, publication_id=obj.pk)
             )
+
+    def delete_model(self, request: HttpRequest, obj: Publication):
+        published_document_uuids = list(
+            Document.objects.filter(
+                publicatiestatus=PublicationStatusOptions.published,
+                publicatie=obj,
+            ).values_list("uuid", flat=True)
+        )
+
+        super().delete_model(request, obj)
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Publication",
+                    uuid=str(obj.uuid),
+                )
+            )
+            for document_uuid in published_document_uuids:
+                transaction.on_commit(
+                    partial(
+                        remove_from_index_by_uuid.delay,
+                        model_name="Document",
+                        uuid=str(document_uuid),
+                    )
+                )
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
@@ -178,13 +309,37 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
     )
     date_hierarchy = "registratiedatum"
+    actions = [sync_to_index, remove_from_index]
 
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
     ):
         super().save_model(request, obj, form, change)
 
-        transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+        new_status = obj.publicatiestatus
+        is_published = new_status == PublicationStatusOptions.published
+
+        if change:
+            original_status = form.initial["publicatiestatus"]
+            if new_status != original_status and not is_published:
+                transaction.on_commit(
+                    partial(remove_document_from_index.delay, document_id=obj.pk)
+                )
+
+        if is_published:
+            transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+
+    def delete_model(self, request: HttpRequest, obj: Document):
+        super().delete_model(request, obj)
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Document",
+                    uuid=str(obj.uuid),
+                )
+            )
 
     @admin.display(description=_("file size"), ordering="bestandsomvang")
     def show_filesize(self, obj: Document) -> str:

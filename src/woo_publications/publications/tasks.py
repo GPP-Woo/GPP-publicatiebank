@@ -1,4 +1,6 @@
 import logging
+from typing import Literal, assert_never
+from uuid import UUID
 
 from woo_publications.celery import app
 from woo_publications.config.models import GlobalConfiguration
@@ -56,6 +58,37 @@ def index_document(*, document_id: int) -> str | None:
 
 
 @app.task
+def remove_document_from_index(*, document_id: int) -> str | None:
+    """
+    Remove the document from the GPP Zoeken index, if the status requires it.
+
+    If no service is configured or the document publication status is published, then
+    the remove-from-index-operation is skipped.
+
+    :returns: The remote task ID or None if the index removal was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info(
+            "No GPP search service configured, skipping the index removal task."
+        )
+        return
+
+    document = Document.objects.get(pk=document_id)
+    if (
+        current_status := document.publicatiestatus
+    ) == PublicationStatusOptions.published:
+        logger.info(
+            "Document has publication status %s, skipping index removal.",
+            current_status,
+        )
+        return
+
+    with get_client(service) as client:
+        return client.remove_document_from_index(document)
+
+
+@app.task
 def index_publication(*, publication_id: int) -> str | None:
     """
     Offer the publication data to the gpp-zoeken service for indexing.
@@ -79,3 +112,69 @@ def index_publication(*, publication_id: int) -> str | None:
 
     with get_client(service) as client:
         return client.index_publication(publication)
+
+
+@app.task
+def remove_publication_from_index(*, publication_id: int) -> str | None:
+    """
+    Remove the publication from the GPP Zoeken index, if the status requires it.
+
+    If no service is configured or the publication status is published, then
+    the remove-from-index-operation is skipped.
+
+    :returns: The remote task ID or None if the index removal was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info(
+            "No GPP search service configured, skipping the index removal task."
+        )
+        return
+
+    publication = Publication.objects.get(pk=publication_id)
+    if (
+        current_status := publication.publicatiestatus
+    ) == PublicationStatusOptions.published:
+        logger.info(
+            "publication has publication status %s, skipping index removal.",
+            current_status,
+        )
+        return
+
+    with get_client(service) as client:
+        return client.remove_publication_from_index(publication)
+
+
+@app.task
+def remove_from_index_by_uuid(
+    *,
+    model_name: Literal["Document", "Publication"],
+    uuid: str | UUID,
+) -> str | None:
+    """
+    Force removal from the index for records that are deleted from the databse.
+
+    We must create instances on the fly because the DB records have been deleted on
+    successful database transaction commit.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info(
+            "No GPP search service configured, skipping the index removal task."
+        )
+        return
+
+    with get_client(service) as client:
+        match model_name:
+            case "Document":
+                document = Document(
+                    uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
+                )
+                return client.remove_document_from_index(document)
+            case "Publication":
+                publication = Publication(
+                    uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
+                )
+                return client.remove_publication_from_index(publication)
+            case _:  # pragma: no cover
+                assert_never(model_name)

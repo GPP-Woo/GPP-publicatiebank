@@ -273,7 +273,7 @@ class TestDocumentAdmin(WebTest):
         )
 
         form = response.forms["document_form"]
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "The official title of this document"
@@ -347,6 +347,7 @@ class TestDocumentAdmin(WebTest):
         self, mock_index_document_delay: MagicMock
     ):
         document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -372,8 +373,43 @@ class TestDocumentAdmin(WebTest):
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
 
-    def test_document_admin_delete(self):
+    @patch("woo_publications.publications.admin.remove_document_from_index.delay")
+    def test_document_update_schedules_remove_from_index_task(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
         document = DocumentFactory.create(
+            uuid="82687820-90f2-4c6d-a73b-2e1201a3a76a",
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        reverse_url = reverse(
+            "admin:publications_document_change",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["document_form"]
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response, reverse("admin:publications_document_changelist")
+        )
+
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=document.pk
+        )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_document_admin_delete(
+        self, mock_remove_from_index_by_uuid_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -389,12 +425,38 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms[1]
 
-        response = form.submit()
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
             Document.objects.filter(identifier=document.identifier).exists()
         )
+        mock_remove_from_index_by_uuid_delay.assert_called_once_with(
+            model_name="Document",
+            uuid=str(document.uuid),
+        )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_document_admin_delete_unpublished(
+        self, mock_remove_from_index_by_uuid_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+        reverse_url = reverse(
+            "admin:publications_document_delete",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+        form = response.forms[1]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+        mock_remove_from_index_by_uuid_delay.assert_not_called()
 
     def test_document_admin_service_select_box_only_displays_document_apis(self):
         service = ServiceFactory.create(
@@ -421,3 +483,60 @@ class TestDocumentAdmin(WebTest):
         # test that default and document service are selectable but the zaak service isn't
         service_option_values = [option[0] for option in document_select.options]
         self.assertEqual(service_option_values, ["", str(service.pk)])
+
+    @patch("woo_publications.publications.admin.index_document.delay")
+    def test_index_bulk_action(self, mock_index_document_delay: MagicMock):
+        published_doc = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "sync_to_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        mock_index_document_delay.assert_called_once_with(document_id=published_doc.pk)
+
+    @patch("woo_publications.publications.admin.remove_document_from_index.delay")
+    def test_remove_from_index_bulk_action(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "remove_from_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        for doc_id in Document.objects.values_list("pk", flat=True):
+            mock_remove_document_from_index_delay.assert_any_call(document_id=doc_id)

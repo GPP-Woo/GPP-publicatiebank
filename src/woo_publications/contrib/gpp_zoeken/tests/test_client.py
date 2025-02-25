@@ -41,6 +41,38 @@ class SearchClientTests(VCRMixin, TestCase):
         self.assertIsInstance(task_id, str)
         self.assertNotEqual(task_id, "")
 
+    def test_remove_unpublished_document_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        for publication_status in PublicationStatusOptions:
+            if publication_status == PublicationStatusOptions.published:
+                continue
+
+            doc = DocumentFactory.build(
+                publicatiestatus=publication_status,
+                uuid="5e033c6c-6430-46c1-9efd-05899ec63382",
+            )
+
+            with self.subTest(publication_status), get_client(service) as client:
+                task_id = client.remove_document_from_index(doc)
+
+                self.assertIsNotNone(task_id)
+                self.assertIsInstance(task_id, str)
+                self.assertNotEqual(task_id, "")
+
+    def test_remove_published_document_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        doc = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+
+        with (
+            get_client(service) as client,
+            self.assertRaises(ValueError),
+        ):
+            client.remove_document_from_index(doc)
+
     def test_index_unpublished_publication(self):
         service = ServiceFactory.build(for_gpp_search_docker_compose=True)
         client = get_client(service)
@@ -69,3 +101,35 @@ class SearchClientTests(VCRMixin, TestCase):
         self.assertIsNotNone(task_id)
         self.assertIsInstance(task_id, str)
         self.assertNotEqual(task_id, "")
+
+    def test_remove_unpublished_publication_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        for publication_status in PublicationStatusOptions:
+            if publication_status == PublicationStatusOptions.published:
+                continue
+
+            doc = PublicationFactory.build(
+                publicatiestatus=publication_status,
+                uuid="5e033c6c-6430-46c1-9efd-05899ec63382",
+            )
+
+            with self.subTest(publication_status), get_client(service) as client:
+                task_id = client.remove_publication_from_index(doc)
+
+                self.assertIsNotNone(task_id)
+                self.assertIsInstance(task_id, str)
+                self.assertNotEqual(task_id, "")
+
+    def test_remove_published_publication_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        doc = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+
+        with (
+            get_client(service) as client,
+            self.assertRaises(ValueError),
+        ):
+            client.remove_publication_from_index(doc)
