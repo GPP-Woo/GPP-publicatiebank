@@ -36,7 +36,7 @@ def get_publication_information_categories(
     publication: Publication,
 ) -> list[PublicationInformatieCategorie]:
     qs = publication.informatie_categorieen.values("uuid", "naam")
-    return list(qs)  # type: ignore
+    return [{"naam": item["naam"], "uuid": str(item["uuid"])} for item in qs]
 
 
 class GPPSearchClient(NLXClient):
