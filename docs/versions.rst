@@ -93,3 +93,21 @@ uploads mechanism.
    1.3             Should work
    1.4             Tested in CI (based on Open Zaak 1.16)
    ==============  ==========================
+
+GPP Zoeken
+**********
+
+GPP Zoeken manages the search index to facilitate full text and faceted search.
+
+.. seealso::
+
+    See the :ref:`configuration <configuration_services>` docs.
+
+.. table:: GPP Zoeken API version support
+   :widths: auto
+
+   =============== ==========================
+   GPP Zoeken API  Status
+   =============== ==========================
+   latest (dev)    Tested in CI
+   =============== ==========================

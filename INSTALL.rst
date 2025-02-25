@@ -95,6 +95,16 @@ development machine.
 example file included in the same directory.
 
 
+Interaction with GPP Zoeken is done via Celery tasks. To run the workers, you need to
+have Redis (the message broker) running. Start the workers with:
+
+.. code-block:: bash
+
+    ./bin/celery_worker.sh
+
+Check that script for available environment variables to modify the behaviour.
+
+
 .. _install_etc_hosts:
 
 Setting up ``/etc/hosts``
