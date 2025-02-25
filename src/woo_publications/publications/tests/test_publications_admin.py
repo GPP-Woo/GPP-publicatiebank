@@ -675,3 +675,25 @@ class TestPublicationsAdmin(WebTest):
         )
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.admin.index_publication.delay")
+    def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):
+        published_publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.concept)
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
+        form["action"] = "sync_to_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        mock_index_publication_delay.assert_called_once_with(
+            publication_id=published_publication.pk
+        )

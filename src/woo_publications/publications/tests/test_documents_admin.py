@@ -483,3 +483,30 @@ class TestDocumentAdmin(WebTest):
         # test that default and document service are selectable but the zaak service isn't
         service_option_values = [option[0] for option in document_select.options]
         self.assertEqual(service_option_values, ["", str(service.pk)])
+
+    @patch("woo_publications.publications.admin.index_document.delay")
+    def test_index_bulk_action(self, mock_index_document_delay: MagicMock):
+        published_doc = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "sync_to_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        mock_index_document_delay.assert_called_once_with(document_id=published_doc.pk)
