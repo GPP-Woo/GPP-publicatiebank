@@ -32,7 +32,12 @@ from woo_publications.logging.service import (
 
 from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
-from ..tasks import index_document, index_publication, remove_document_from_index
+from ..tasks import (
+    index_document,
+    index_publication,
+    remove_document_from_index,
+    remove_publication_from_index,
+)
 from .filters import DocumentFilterSet, PublicationFilterSet
 from .serializers import (
     DocumentSerializer,
@@ -341,9 +346,27 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
 
     @transaction.atomic()
     def perform_update(self, serializer):
-        super().perform_update(serializer)
         publication = serializer.instance
         assert publication is not None
-        transaction.on_commit(
-            partial(index_publication.delay, publication_id=publication.pk)
-        )
+        original_status = publication.publicatiestatus
+        super().perform_update(serializer)
+        new_status = publication.publicatiestatus
+
+        match (original_status, new_status):
+            # from anything to published -> reindex (even if no status is changed,
+            # update the metadata)
+            case (_, PublicationStatusOptions.published):
+                transaction.on_commit(
+                    partial(index_publication.delay, publication_id=publication.pk)
+                )
+            # from published to anything else -> remove from index
+            case (
+                PublicationStatusOptions.published,
+                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
+            ):
+                transaction.on_commit(
+                    partial(
+                        remove_publication_from_index.delay,
+                        publication_id=publication.pk,
+                    )
+                )

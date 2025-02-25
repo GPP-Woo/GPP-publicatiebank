@@ -5,11 +5,11 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
-from ..tasks import remove_document_from_index
-from .factories import DocumentFactory
+from ..tasks import remove_publication_from_index
+from .factories import PublicationFactory
 
 
-class RemoveDocumentFromIndexTaskTests(VCRMixin, TestCase):
+class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -29,29 +29,30 @@ class RemoveDocumentFromIndexTaskTests(VCRMixin, TestCase):
         config = GlobalConfiguration.get_solo()
         config.gpp_search_service = None
         config.save()
-        doc = DocumentFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
 
-        remote_task_id = remove_document_from_index(document_id=doc.pk)
+        remote_task_id = remove_publication_from_index(publication_id=publication.pk)
 
         self.assertIsNone(remote_task_id)
 
-    def test_index_skipped_for_published_document(self):
-        doc = DocumentFactory.create(
+    def test_remove_from_index_skipped_for_published_publication(self):
+        publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published
         )
 
-        remote_task_id = remove_document_from_index(document_id=doc.pk)
+        remote_task_id = remove_publication_from_index(publication_id=publication.pk)
 
         self.assertIsNone(remote_task_id)
 
-    def test_remove_revoked_document(self):
-        doc = DocumentFactory.create(
+    def test_remove_revoked_publication(self):
+        publication = PublicationFactory.create(
             uuid="1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b",
             publicatiestatus=PublicationStatusOptions.revoked,
-            upload_complete=True,
         )
 
-        remote_task_id = remove_document_from_index(document_id=doc.pk)
+        remote_task_id = remove_publication_from_index(publication_id=publication.pk)
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

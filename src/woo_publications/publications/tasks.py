@@ -60,8 +60,8 @@ def remove_document_from_index(*, document_id: int) -> str | None:
     """
     Remove the document from the GPP Zoeken index, if the status requires it.
 
-    If no service is configured or the document publication status is not suitable
-    for public indexing, then the index operation is skipped.
+    If no service is configured or the document publication status is published, then
+    the remove-from-index-operation is skipped.
 
     :returns: The remote task ID or None if the index removal was skipped.
     """
@@ -110,3 +110,34 @@ def index_publication(*, publication_id: int) -> str | None:
 
     with get_client(service) as client:
         return client.index_publication(publication)
+
+
+@app.task
+def remove_publication_from_index(*, publication_id: int) -> str | None:
+    """
+    Remove the publication from the GPP Zoeken index, if the status requires it.
+
+    If no service is configured or the publication status is published, then
+    the remove-from-index-operation is skipped.
+
+    :returns: The remote task ID or None if the index removal was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info(
+            "No GPP search service configured, skipping the index removal task."
+        )
+        return
+
+    publication = Publication.objects.get(pk=publication_id)
+    if (
+        current_status := publication.publicatiestatus
+    ) == PublicationStatusOptions.published:
+        logger.info(
+            "publication has publication status %s, skipping index removal.",
+            current_status,
+        )
+        return
+
+    with get_client(service) as client:
+        return client.remove_publication_from_index(publication)

@@ -45,3 +45,7 @@ class RemoveDocumentFromIndexResponse(TypedDict):
 
 class IndexPublicationResponse(TypedDict):
     taskId: str
+
+
+class RemovePublicationFromIndexResponse(TypedDict):
+    taskId: str
