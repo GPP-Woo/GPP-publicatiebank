@@ -1,9 +1,9 @@
 interactions:
 - request:
-    body: '{"uuid": "7ebcd4bf-c3bd-4edf-aa22-a8f0730b89b8", "publisher": {"uuid":
-      "cbf38541-c444-4318-8d2e-25f92a096986", "naam": "suggest"}, "informatieCategorieen":
-      [], "officieleTitel": "could", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
-      "2025-02-13T10:24:48.509126+00:00", "laatstGewijzigdDatum": "2025-02-13T10:24:48.509505+00:00"}'
+    body: '{"uuid": "75bb9879-64b9-4d63-b7f8-3579a5800172", "publisher": {"uuid":
+      "e302e9f3-53de-4f3a-a544-265758911ae8", "naam": "fire"}, "informatieCategorieen":
+      [], "officieleTitel": "summer", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
+      "2025-02-25T20:58:49.065485+00:00", "laatstGewijzigdDatum": "2025-02-25T20:58:49.066048+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -14,7 +14,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '343'
+      - '341'
       Content-Type:
       - application/json
       User-Agent:
@@ -23,7 +23,7 @@ interactions:
     uri: http://localhost:8002/api/v1/publicaties
   response:
     body:
-      string: '{"taskId":"e6e9c530-eb1d-425c-9aed-3c5132325deb"}'
+      string: '{"taskId":"7763c07b-3e92-4c6b-9c92-6d98fb8086bd"}'
     headers:
       Allow:
       - POST, OPTIONS
@@ -33,25 +33,55 @@ interactions:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
-      Date:
-      - Thu, 13 Feb 2025 10:24:48 GMT
       Referrer-Policy:
       - same-origin
-      Server:
-      - WSGIServer/0.2 CPython/3.12.6
-      Server-Timing:
-      - TimerPanel_utime;dur=24.226999999999776;desc="User CPU time", TimerPanel_stime;dur=13.199999999999878;desc="System
-        CPU time", TimerPanel_total;dur=37.42699999999965;desc="Total CPU time", TimerPanel_total_time;dur=56.667560995265376;desc="Elapsed
-        time", SQLPanel_sql_time;dur=0.9084490011446178;desc="SQL 1 queries", CachePanel_total_time;dur=0;desc="Cache
-        0 Calls"
-      Vary:
-      - Accept
       X-Content-Type-Options:
       - nosniff
       X-Frame-Options:
       - DENY
-      djdt-store-id:
-      - 385f35d358874f56a7c1b68cf508da18
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: '{"uuid": "92358a72-df80-4e4e-b769-6800550c86e6", "publisher": {"uuid":
+      "48262845-cbdd-42f8-b77e-a7ff4c09f790", "naam": "glass"}, "informatieCategorieen":
+      [], "officieleTitel": "whatever", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
+      "2025-02-25T21:04:32.594845+00:00", "laatstGewijzigdDatum": "2025-02-25T21:04:32.595541+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '344'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/publicaties
+  response:
+    body:
+      string: '{"taskId":"bba66741-00ac-408e-a49c-b82722a2f124"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
     status:
       code: 202
       message: Accepted

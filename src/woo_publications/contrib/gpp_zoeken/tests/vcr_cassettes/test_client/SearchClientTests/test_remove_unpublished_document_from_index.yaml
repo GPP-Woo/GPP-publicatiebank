@@ -18,7 +18,7 @@ interactions:
     uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"754ba5c2-2169-436f-9b83-020d2a8b14a5"}'
+      string: '{"taskId":"c9d59cf7-7a50-42a8-a9ae-cca323f6d1dd"}'
     headers:
       Allow:
       - DELETE, OPTIONS
@@ -56,7 +56,83 @@ interactions:
     uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"41bf1327-5a11-48a4-9654-73f64e1fc043"}'
+      string: '{"taskId":"5aefdae7-c518-47fa-a4ac-2222b5cb0abc"}'
+    headers:
+      Allow:
+      - DELETE, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.3
+    method: DELETE
+    uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
+  response:
+    body:
+      string: '{"taskId":"51cb80fc-a92b-4599-98c6-72b5fa88ded3"}'
+    headers:
+      Allow:
+      - DELETE, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.3
+    method: DELETE
+    uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
+  response:
+    body:
+      string: '{"taskId":"09e53062-5523-49fe-ba17-3cb5924e37cd"}'
     headers:
       Allow:
       - DELETE, OPTIONS

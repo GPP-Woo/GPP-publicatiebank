@@ -1,10 +1,10 @@
 interactions:
 - request:
-    body: '{"uuid": "38213b98-c299-429e-aa30-8b36278118a3", "publicatie": "e57b37cb-7e14-4f33-be59-d0a3c07cbb38",
-      "publisher": {"uuid": "adccf063-b75c-4820-9833-e8cc0ec23e50", "naam": "view"},
-      "identifier": "", "officieleTitel": "foreign", "verkorteTitel": "", "omschrijving":
-      "", "creatiedatum": "2025-01-22", "registratiedatum": "2025-02-12T15:21:48.540626+00:00",
-      "laatstGewijzigdDatum": "2025-02-12T15:21:48.540635+00:00"}'
+    body: '{"uuid": "bd1b4370-16dc-43ff-9f94-f7765883724f", "publicatie": "c61ee647-cd69-4642-b57f-14618cd836fd",
+      "publisher": {"uuid": "18629983-78ee-468f-b5da-4de2a61ddf80", "naam": "base"},
+      "informatieCategorieen": [], "identifier": "", "officieleTitel": "attack", "verkorteTitel":
+      "", "omschrijving": "", "creatiedatum": "2025-02-09", "registratiedatum": "2025-02-25T21:07:09.454621+00:00",
+      "laatstGewijzigdDatum": "2025-02-25T21:07:09.454633+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -15,7 +15,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '415'
+      - '443'
       Content-Type:
       - application/json
       User-Agent:
@@ -24,7 +24,7 @@ interactions:
     uri: http://localhost:8002/api/v1/documenten
   response:
     body:
-      string: '{"taskId":"d459d529-fd79-4f6c-95b3-9b0d284a5c5a"}'
+      string: '{"taskId":"0e8ad69d-e22d-419d-966e-853d73339e42"}'
     headers:
       Allow:
       - POST, OPTIONS
