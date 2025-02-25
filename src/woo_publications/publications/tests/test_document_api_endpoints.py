@@ -1138,6 +1138,72 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         assert latest_doc is not None
         mock_index_document_delay.assert_called_once_with(document_id=latest_doc.pk)
 
+    @patch(
+        "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
+    )
+    def test_revoke_document_schedules_index_removal_task(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            identifier="document-1",
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            creatiedatum="2024-01-01",
+        )
+        detail_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                detail_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        latest_doc = Document.objects.order_by("-pk").first()
+        assert latest_doc is not None
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=latest_doc.pk
+        )
+
+    @patch(
+        "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
+    )
+    def test_concept_document_schedules_index_removal_task(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            identifier="document-1",
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            creatiedatum="2024-01-01",
+        )
+        detail_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                detail_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        latest_doc = Document.objects.order_by("-pk").first()
+        assert latest_doc is not None
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=latest_doc.pk
+        )
+
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):

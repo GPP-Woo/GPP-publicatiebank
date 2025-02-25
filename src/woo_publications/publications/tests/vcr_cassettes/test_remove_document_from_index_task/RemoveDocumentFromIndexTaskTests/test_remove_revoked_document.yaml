@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.3
+    method: DELETE
+    uri: http://localhost:8002/api/v1/documenten/23dd6592-8b12-4296-b214-a98a5adf42ce
+  response:
+    body:
+      string: '{"taskId":"794a1c94-c0bd-432b-b050-d6e2df49054a"}'
+    headers:
+      Allow:
+      - DELETE, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+version: 1

@@ -39,5 +39,9 @@ class IndexDocumentResponse(TypedDict):
     taskId: str
 
 
+class RemoveDocumentFromIndexResponse(TypedDict):
+    taskId: str
+
+
 class IndexPublicationResponse(TypedDict):
     taskId: str

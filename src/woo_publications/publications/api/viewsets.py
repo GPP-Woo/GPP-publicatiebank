@@ -30,8 +30,9 @@ from woo_publications.logging.service import (
     extract_audit_parameters,
 )
 
+from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
-from ..tasks import index_document, index_publication
+from ..tasks import index_document, index_publication, remove_document_from_index
 from .filters import DocumentFilterSet, PublicationFilterSet
 from .serializers import (
     DocumentSerializer,
@@ -112,10 +113,27 @@ class DocumentViewSet(
 
     @transaction.atomic()
     def perform_update(self, serializer):
-        super().perform_update(serializer)
         document = serializer.instance
         assert document is not None
-        transaction.on_commit(partial(index_document.delay, document_id=document.pk))
+        original_status = document.publicatiestatus
+        super().perform_update(serializer)
+        new_status = document.publicatiestatus
+
+        match (original_status, new_status):
+            # from anything to published -> reindex (even if no status is changed,
+            # update the metadata)
+            case (_, PublicationStatusOptions.published):
+                transaction.on_commit(
+                    partial(index_document.delay, document_id=document.pk)
+                )
+            # from published to anything else -> remove from index
+            case (
+                PublicationStatusOptions.published,
+                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
+            ):
+                transaction.on_commit(
+                    partial(remove_document_from_index.delay, document_id=document.pk)
+                )
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)

@@ -18,6 +18,7 @@ from .typing import (
     IndexDocumentResponse,
     IndexPublicationBody,
     IndexPublicationResponse,
+    RemoveDocumentFromIndexResponse,
 )
 
 __all__ = ["get_client"]
@@ -57,6 +58,16 @@ class GPPSearchClient(NLXClient):
         response.raise_for_status()
 
         response_data: IndexDocumentResponse = response.json()
+        return response_data["taskId"]
+
+    def remove_document_from_index(self, document: Document) -> str:
+        if document.publicatiestatus == PublicationStatusOptions.published:
+            raise ValueError("The document has 'published' status!")
+
+        response = self.delete(f"documenten/{document.uuid}")
+        response.raise_for_status()
+
+        response_data: RemoveDocumentFromIndexResponse = response.json()
         return response_data["taskId"]
 
     def index_publication(self, publication: Publication):
