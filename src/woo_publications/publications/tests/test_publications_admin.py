@@ -718,5 +718,5 @@ class TestPublicationsAdmin(WebTest):
 
         for doc_id in Publication.objects.values_list("pk", flat=True):
             mock_remove_publication_from_index_delay.assert_any_call(
-                publication_id=doc_id
+                publication_id=doc_id, force=True
             )

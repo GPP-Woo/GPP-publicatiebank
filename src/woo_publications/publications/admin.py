@@ -95,7 +95,9 @@ def remove_from_index(
         raise ValueError("Unsupported model: %r", model)
 
     for obj in queryset.iterator():
-        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+        transaction.on_commit(
+            partial(task_fn.delay, force=True, **{kwarg_name: obj.pk})
+        )
 
     modeladmin.message_user(
         request,

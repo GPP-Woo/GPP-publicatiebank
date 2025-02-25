@@ -539,4 +539,6 @@ class TestDocumentAdmin(WebTest):
             form.submit()
 
         for doc_id in Document.objects.values_list("pk", flat=True):
-            mock_remove_document_from_index_delay.assert_any_call(document_id=doc_id)
+            mock_remove_document_from_index_delay.assert_any_call(
+                document_id=doc_id, force=True
+            )

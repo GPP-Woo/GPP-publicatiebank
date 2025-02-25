@@ -58,7 +58,7 @@ def index_document(*, document_id: int) -> str | None:
 
 
 @app.task
-def remove_document_from_index(*, document_id: int) -> str | None:
+def remove_document_from_index(*, document_id: int, force: bool = False) -> str | None:
     """
     Remove the document from the GPP Zoeken index, if the status requires it.
 
@@ -76,8 +76,10 @@ def remove_document_from_index(*, document_id: int) -> str | None:
 
     document = Document.objects.get(pk=document_id)
     if (
-        current_status := document.publicatiestatus
-    ) == PublicationStatusOptions.published:
+        not force
+        and (current_status := document.publicatiestatus)
+        == PublicationStatusOptions.published
+    ):
         logger.info(
             "Document has publication status %s, skipping index removal.",
             current_status,
@@ -115,7 +117,9 @@ def index_publication(*, publication_id: int) -> str | None:
 
 
 @app.task
-def remove_publication_from_index(*, publication_id: int) -> str | None:
+def remove_publication_from_index(
+    *, publication_id: int, force: bool = False
+) -> str | None:
     """
     Remove the publication from the GPP Zoeken index, if the status requires it.
 
@@ -133,8 +137,10 @@ def remove_publication_from_index(*, publication_id: int) -> str | None:
 
     publication = Publication.objects.get(pk=publication_id)
     if (
-        current_status := publication.publicatiestatus
-    ) == PublicationStatusOptions.published:
+        not force
+        and (current_status := publication.publicatiestatus)
+        == PublicationStatusOptions.published
+    ):
         logger.info(
             "publication has publication status %s, skipping index removal.",
             current_status,
