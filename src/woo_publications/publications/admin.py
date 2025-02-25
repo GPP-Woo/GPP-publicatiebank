@@ -74,6 +74,44 @@ def sync_to_index(
     )
 
 
+@admin.action(
+    description=_("Remove the selected %(verbose_name_plural)s from the search index")
+)
+def remove_from_index(
+    modeladmin: PublicationAdmin | DocumentAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication | Document],
+):
+    model = queryset.model
+    num_objects = queryset.count()
+
+    if model is Publication:
+        task_fn = remove_publication_from_index
+        kwarg_name = "publication_id"
+    elif model is Document:
+        task_fn = remove_document_from_index
+        kwarg_name = "document_id"
+    else:  # pragma: no cover
+        raise ValueError("Unsupported model: %r", model)
+
+    for obj in queryset.iterator():
+        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+
+    modeladmin.message_user(
+        request,
+        ngettext(
+            "{count} {verbose_name} scheduled for background processing.",
+            "{count} {verbose_name_plural} scheduled for background processing.",
+            num_objects,
+        ).format(
+            count=num_objects,
+            verbose_name=model._meta.verbose_name,
+            verbose_name_plural=model._meta.verbose_name_plural,
+        ),
+        messages.SUCCESS,
+    )
+
+
 class DocumentInlineAdmin(admin.StackedInline):
     formset = DocumentAuditLogInlineformset
     model = Document
@@ -116,7 +154,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
-    actions = [sync_to_index]
+    actions = [sync_to_index, remove_from_index]
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
@@ -271,7 +309,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
     )
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index]
+    actions = [sync_to_index, remove_from_index]
 
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool

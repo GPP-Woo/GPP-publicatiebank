@@ -510,3 +510,33 @@ class TestDocumentAdmin(WebTest):
             form.submit()
 
         mock_index_document_delay.assert_called_once_with(document_id=published_doc.pk)
+
+    @patch("woo_publications.publications.admin.remove_document_from_index.delay")
+    def test_remove_from_index_bulk_action(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "remove_from_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        for doc_id in Document.objects.values_list("pk", flat=True):
+            mock_remove_document_from_index_delay.assert_any_call(document_id=doc_id)
