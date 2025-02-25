@@ -273,7 +273,7 @@ class TestDocumentAdmin(WebTest):
         )
 
         form = response.forms["document_form"]
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "The official title of this document"
@@ -347,6 +347,7 @@ class TestDocumentAdmin(WebTest):
         self, mock_index_document_delay: MagicMock
     ):
         document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -371,6 +372,37 @@ class TestDocumentAdmin(WebTest):
         )
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.admin.remove_document_from_index.delay")
+    def test_document_update_schedules_remove_from_index_task(
+        self, mock_remove_document_from_index_delay: MagicMock
+    ):
+        document = DocumentFactory.create(
+            uuid="82687820-90f2-4c6d-a73b-2e1201a3a76a",
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        reverse_url = reverse(
+            "admin:publications_document_change",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["document_form"]
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response, reverse("admin:publications_document_changelist")
+        )
+
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=document.pk
+        )
 
     def test_document_admin_delete(self):
         document = DocumentFactory.create(

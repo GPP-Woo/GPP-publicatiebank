@@ -19,7 +19,7 @@ from woo_publications.typing import is_authenticated_request
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication
-from .tasks import index_document, index_publication
+from .tasks import index_document, index_publication, remove_document_from_index
 
 
 class DocumentInlineAdmin(admin.StackedInline):
@@ -184,7 +184,18 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     ):
         super().save_model(request, obj, form, change)
 
-        transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+        new_status = obj.publicatiestatus
+        is_published = new_status == PublicationStatusOptions.published
+
+        if change:
+            original_status = form.initial["publicatiestatus"]
+            if new_status != original_status and not is_published:
+                transaction.on_commit(
+                    partial(remove_document_from_index.delay, document_id=obj.pk)
+                )
+
+        if is_published:
+            transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
 
     @admin.display(description=_("file size"), ordering="bestandsomvang")
     def show_filesize(self, obj: Document) -> str:
