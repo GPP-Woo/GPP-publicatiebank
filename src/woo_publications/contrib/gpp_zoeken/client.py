@@ -18,6 +18,7 @@ from .typing import (
     IndexDocumentResponse,
     IndexPublicationBody,
     IndexPublicationResponse,
+    PublicationInformatieCategorie,
     RemoveDocumentFromIndexResponse,
     RemovePublicationFromIndexResponse,
 )
@@ -29,6 +30,13 @@ logger = logging.getLogger(__name__)
 
 def get_client(service: Service) -> GPPSearchClient:
     return build_client(service=service, client_factory=GPPSearchClient)
+
+
+def get_publication_information_categories(
+    publication: Publication,
+) -> list[PublicationInformatieCategorie]:
+    qs = publication.informatie_categorieen.values("uuid", "naam")
+    return list(qs)  # type: ignore
 
 
 class GPPSearchClient(NLXClient):
@@ -46,6 +54,9 @@ class GPPSearchClient(NLXClient):
                 "uuid": str(document.publicatie.publisher.uuid),
                 "naam": document.publicatie.publisher.naam,
             },
+            "informatieCategorieen": get_publication_information_categories(
+                document.publicatie
+            ),
             "identifier": document.identifier,
             "officieleTitel": document.officiele_titel,
             "verkorteTitel": document.verkorte_titel,
@@ -85,13 +96,9 @@ class GPPSearchClient(NLXClient):
                 "uuid": str(publication.publisher.uuid),
                 "naam": publication.publisher.naam,
             },
-            "informatieCategorieen": [
-                {
-                    "uuid": str(informatiecategorie.uuid),
-                    "naam": informatiecategorie.naam,
-                }
-                for informatiecategorie in publication.informatie_categorieen.all()
-            ],
+            "informatieCategorieen": get_publication_information_categories(
+                publication
+            ),
             "officieleTitel": publication.officiele_titel,
             "verkorteTitel": publication.verkorte_titel,
             "omschrijving": publication.omschrijving,

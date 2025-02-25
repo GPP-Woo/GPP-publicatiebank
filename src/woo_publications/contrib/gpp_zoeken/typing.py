@@ -15,6 +15,7 @@ class IndexDocumentBody(TypedDict):
     uuid: str
     publicatie: str
     publisher: PublicationPublisher
+    informatieCategorieen: List[PublicationInformatieCategorie]
     identifier: str
     officieleTitel: str
     verkorteTitel: str
