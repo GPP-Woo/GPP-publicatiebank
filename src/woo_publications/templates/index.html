@@ -75,13 +75,13 @@
         <div class="landing-page__nav-buttons">
 
             <div class="button-group">
-                <a href="{% url 'api:api-schema-json' %}" class="button">
-                    <i class="fas fa-file-alt"></i>
-                    {% trans "Open API specification" %}
-                </a>
                 <a href="{% url 'api:api-docs' %}" class="button">
                     <i class="fas fa-wifi"></i>
                     {% trans "API docs (ReDoc)" %}
+                </a>
+                <a href="{% url 'api:api-schema-json' %}" class="button">
+                    <i class="fas fa-file-alt"></i>
+                    {% trans "Open API specification" %}
                 </a>
             </div>
 
