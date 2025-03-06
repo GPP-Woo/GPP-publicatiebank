@@ -65,6 +65,8 @@ def sync_to_index(
                     index_document.delay, document_id=obj.pk, download_url=document_url
                 )
             )
+        else:  # pragma: no cover
+            assert False, "unreachable"
 
     modeladmin.message_user(
         request,

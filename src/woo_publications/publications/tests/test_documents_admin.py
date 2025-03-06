@@ -293,7 +293,13 @@ class TestDocumentAdmin(WebTest):
         )
         added_item = Document.objects.order_by("-pk").first()
         assert added_item is not None
-        mock_index_document_delay.assert_called_once_with(document_id=added_item.pk)
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(added_item.uuid)}
+        )
+        mock_index_document_delay.assert_called_once_with(
+            document_id=added_item.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     def test_document_admin_update(self):
         with freeze_time("2024-09-25T14:00:00-00:00"):
@@ -356,6 +362,9 @@ class TestDocumentAdmin(WebTest):
             "admin:publications_document_change",
             kwargs={"object_id": document.id},
         )
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
 
         response = self.app.get(reverse_url, user=self.user)
 
@@ -371,7 +380,10 @@ class TestDocumentAdmin(WebTest):
             update_response, reverse("admin:publications_document_changelist")
         )
 
-        mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+        mock_index_document_delay.assert_called_once_with(
+            document_id=document.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")
     def test_document_update_schedules_remove_from_index_task(
@@ -502,6 +514,9 @@ class TestDocumentAdmin(WebTest):
             reverse("admin:publications_document_changelist"),
             user=self.user,
         )
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(published_doc.uuid)}
+        )
         form = changelist.forms["changelist-form"]
 
         form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
@@ -509,7 +524,10 @@ class TestDocumentAdmin(WebTest):
         with self.captureOnCommitCallbacks(execute=True):
             form.submit()
 
-        mock_index_document_delay.assert_called_once_with(document_id=published_doc.pk)
+        mock_index_document_delay.assert_called_once_with(
+            document_id=published_doc.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")
     def test_remove_from_index_bulk_action(

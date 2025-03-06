@@ -619,7 +619,7 @@ class TestPublicationsAdmin(WebTest):
         form = response.forms["publication_form"]
         form["document_set-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
         add_dynamic_field(
-            form, "document_set-0-publicatiestatus", PublicationStatusOptions.concept
+            form, "document_set-0-publicatiestatus", PublicationStatusOptions.published
         )
         add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
         add_dynamic_field(form, "document_set-0-officiele_titel", "title")
@@ -645,7 +645,7 @@ class TestPublicationsAdmin(WebTest):
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
 
     @patch("woo_publications.publications.formset.index_document.delay")
-    def test_inline_document_update_schedules_index_task(
+    def test_inline_document_create_with_status_concept_does_not_start_task(
         self, mock_index_document_delay: MagicMock
     ):
         ic = InformationCategoryFactory.create()
@@ -653,7 +653,54 @@ class TestPublicationsAdmin(WebTest):
             informatie_categorieen=[ic],
             officiele_titel="title one",
         )
-        document = DocumentFactory.create(publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["document_set-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
+        add_dynamic_field(
+            form, "document_set-0-publicatiestatus", PublicationStatusOptions.concept
+        )
+        add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
+        add_dynamic_field(form, "document_set-0-officiele_titel", "title")
+        add_dynamic_field(form, "document_set-0-creatiedatum", "17-10-2024")
+        add_dynamic_field(form, "document_set-0-bestandsformaat", "application/pdf")
+        add_dynamic_field(form, "document_set-0-bestandsnaam", "foo.pdf")
+        add_dynamic_field(form, "document_set-0-bestandsomvang", "0")
+        add_dynamic_field(
+            form,
+            "document_set-0-soort_handeling",
+            DocumentActionTypeOptions.declared.value,
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        mock_index_document_delay.assert_not_called()
+
+    @patch("woo_publications.publications.formset.index_document.delay")
+    def test_inline_document_update_with_status_published_schedules_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        document = DocumentFactory.create(
+            publicatie=publication, publicatiestatus=PublicationStatusOptions.published
+        )
         reverse_url = reverse(
             "admin:publications_publication_change",
             kwargs={"object_id": publication.id},
@@ -675,6 +722,149 @@ class TestPublicationsAdmin(WebTest):
         )
 
         mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    def test_inline_document_update_with_status_concept_schedules_index_removal_task(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        document = DocumentFactory.create(publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        add_dynamic_field(
+            form, "document_set-0-publicatiestatus", PublicationStatusOptions.concept
+        )
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    def test_inline_document_update_with_status_revoked_schedules_index_removal_task(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        document = DocumentFactory.create(publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        add_dynamic_field(
+            form, "document_set-0-publicatiestatus", PublicationStatusOptions.revoked
+        )
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    def test_inline_document_delete_schedules_index_removal_task(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["document_set-0-DELETE"] = True
+
+        with self.captureOnCommitCallbacks(execute=True):
+            deletion_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            deletion_response,
+            reverse("admin:publications_publication_changelist"),
+        )
+
+        self.assertFalse(Document.objects.filter(pk=document.pk).exists())
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    def test_inline_document_delete_do_not_schedules_index_removal_task_when_not_published(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        for publicationstatus in [
+            PublicationStatusOptions.concept,
+            PublicationStatusOptions.revoked,
+        ]:
+            with self.subTest(publicationstatus):
+                document = DocumentFactory.create(
+                    publicatie=publication,
+                    publicatiestatus=publicationstatus,
+                )
+                reverse_url = reverse(
+                    "admin:publications_publication_change",
+                    kwargs={"object_id": publication.id},
+                )
+
+                response = self.app.get(reverse_url, user=self.user)
+
+                self.assertEqual(response.status_code, 200)
+
+                form = response.forms["publication_form"]
+                form["document_set-0-DELETE"] = True
+
+                with self.captureOnCommitCallbacks(execute=True):
+                    deletion_response = form.submit(name="_save")
+
+                self.assertRedirects(
+                    deletion_response,
+                    reverse("admin:publications_publication_changelist"),
+                )
+
+                self.assertFalse(Document.objects.filter(pk=document.pk).exists())
+                mock_remove_document_from_index.assert_not_called()
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):
