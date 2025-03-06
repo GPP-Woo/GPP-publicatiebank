@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task
-def index_document(*, document_id: int) -> str | None:
+def index_document(*, document_id: int, download_url: str = "") -> str | None:
     """
     Offer the document data to the gpp-zoeken service for indexing.
 
@@ -54,7 +54,7 @@ def index_document(*, document_id: int) -> str | None:
         return
 
     with get_client(service) as client:
-        return client.index_document(document)
+        return client.index_document(document=document, download_url=download_url)
 
 
 @app.task

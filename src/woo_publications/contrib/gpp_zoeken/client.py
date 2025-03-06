@@ -40,7 +40,7 @@ def get_publication_information_categories(
 
 
 class GPPSearchClient(NLXClient):
-    def index_document(self, document: Document) -> str:
+    def index_document(self, document: Document, download_url: str = "") -> str:
         """
         Synchronize a document to the search index.
         """
@@ -64,6 +64,8 @@ class GPPSearchClient(NLXClient):
             "creatiedatum": document.creatiedatum.isoformat(),
             "registratiedatum": document.registratiedatum.isoformat(),
             "laatstGewijzigdDatum": document.laatst_gewijzigd_datum.isoformat(),
+            "fileSize": document.bestandsomvang,
+            "downloadUrl": download_url,
         }
 
         response = self.post("documenten", json=body)

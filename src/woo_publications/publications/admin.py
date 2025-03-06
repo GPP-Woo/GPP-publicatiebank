@@ -28,6 +28,7 @@ from .tasks import (
     remove_from_index_by_uuid,
     remove_publication_from_index,
 )
+from .utils import absolute_document_download_uri
 
 
 @admin.action(
@@ -47,17 +48,23 @@ def sync_to_index(
 
     num_objects = filtered_qs.count()
 
-    if model is Publication:
-        task_fn = index_publication
-        kwarg_name = "publication_id"
-    elif model is Document:
-        task_fn = index_document
-        kwarg_name = "document_id"
-    else:  # pragma: no cover
-        raise ValueError("Unsupported model: %r", model)
+    if model not in [Publication, Document]:  # pragma: no cover
+        raise ValueError("Unknown model: %r", model)
 
     for obj in filtered_qs.iterator():
-        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+        if model is Publication:
+            transaction.on_commit(
+                partial(index_publication.delay, publication_id=obj.pk)
+            )
+        elif model is Document:
+            document_url = absolute_document_download_uri(
+                request, document_uuid=obj.uuid
+            )
+            transaction.on_commit(
+                partial(
+                    index_document.delay, document_id=obj.pk, download_url=document_url
+                )
+            )
 
     modeladmin.message_user(
         request,
@@ -329,7 +336,14 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
 
         if is_published:
-            transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+            download_url = absolute_document_download_uri(
+                request, document_uuid=obj.uuid
+            )
+            transaction.on_commit(
+                partial(
+                    index_document.delay, document_id=obj.pk, download_url=download_url
+                )
+            )
 
     def delete_model(self, request: HttpRequest, obj: Document):
         super().delete_model(request, obj)

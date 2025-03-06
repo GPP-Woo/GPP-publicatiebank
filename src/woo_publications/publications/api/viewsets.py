@@ -38,6 +38,7 @@ from ..tasks import (
     remove_document_from_index,
     remove_publication_from_index,
 )
+from ..utils import absolute_document_download_uri
 from .filters import DocumentFilterSet, PublicationFilterSet
 from .serializers import (
     DocumentSerializer,
@@ -128,8 +129,15 @@ class DocumentViewSet(
             # from anything to published -> reindex (even if no status is changed,
             # update the metadata)
             case (_, PublicationStatusOptions.published):
+                document_url = absolute_document_download_uri(
+                    self.request, document_uuid=document.uuid
+                )
                 transaction.on_commit(
-                    partial(index_document.delay, document_id=document.pk)
+                    partial(
+                        index_document.delay,
+                        document_id=document.pk,
+                        download_url=document_url,
+                    )
                 )
             # from published to anything else -> remove from index
             case (
@@ -193,8 +201,15 @@ class DocumentViewSet(
             raise serializers.ValidationError(detail=_response.json()) from exc
 
         if is_completed:
+            document_url = absolute_document_download_uri(
+                self.request, document_uuid=document.uuid
+            )
             transaction.on_commit(
-                partial(index_document.delay, document_id=document.pk)
+                partial(
+                    index_document.delay,
+                    document_id=document.pk,
+                    download_url=document_url,
+                )
             )
 
         response_serializer = DocumentStatusSerializer(
