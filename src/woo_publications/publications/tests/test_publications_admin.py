@@ -642,7 +642,13 @@ class TestPublicationsAdmin(WebTest):
         )
         document = Document.objects.get()
 
-        mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
+        mock_index_document_delay.assert_called_once_with(
+            document_id=document.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     @patch("woo_publications.publications.formset.index_document.delay")
     def test_inline_document_create_with_status_concept_does_not_start_task(
@@ -721,7 +727,13 @@ class TestPublicationsAdmin(WebTest):
             reverse("admin:publications_publication_changelist"),
         )
 
-        mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
+        mock_index_document_delay.assert_called_once_with(
+            document_id=document.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     @patch("woo_publications.publications.formset.remove_document_from_index.delay")
     def test_inline_document_update_with_status_concept_schedules_index_removal_task(

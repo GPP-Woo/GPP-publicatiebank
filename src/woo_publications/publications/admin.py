@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import partial
+from typing import Any
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.options import InlineModelAdmin
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
@@ -225,6 +227,22 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                         uuid=str(document_uuid),
                     )
                 )
+
+    def get_formset_kwargs(
+        self,
+        request: HttpRequest,
+        obj: Publication | None,
+        inline: InlineModelAdmin[Any, Publication],
+        prefix: str,
+    ):
+        kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
+
+        # add the request to the create formset instance so that we can generate absolute
+        # URLs
+        if isinstance(inline, DocumentInlineAdmin):
+            kwargs["request"] = request
+
+        return kwargs
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
