@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import partial
+from typing import Any
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.options import InlineModelAdmin
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
@@ -47,17 +49,24 @@ def sync_to_index(
 
     num_objects = filtered_qs.count()
 
-    if model is Publication:
-        task_fn = index_publication
-        kwarg_name = "publication_id"
-    elif model is Document:
-        task_fn = index_document
-        kwarg_name = "document_id"
-    else:  # pragma: no cover
-        raise ValueError("Unsupported model: %r", model)
+    if model not in [Publication, Document]:  # pragma: no cover
+        raise ValueError("Unknown model: %r", model)
 
     for obj in filtered_qs.iterator():
-        transaction.on_commit(partial(task_fn.delay, **{kwarg_name: obj.pk}))
+        if model is Publication:
+            transaction.on_commit(
+                partial(index_publication.delay, publication_id=obj.pk)
+            )
+        elif model is Document:
+            assert isinstance(obj, Document)
+            document_url = obj.absolute_document_download_uri(request)
+            transaction.on_commit(
+                partial(
+                    index_document.delay, document_id=obj.pk, download_url=document_url
+                )
+            )
+        else:  # pragma: no cover
+            assert False, "unreachable"
 
     modeladmin.message_user(
         request,
@@ -217,6 +226,22 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     )
                 )
 
+    def get_formset_kwargs(
+        self,
+        request: HttpRequest,
+        obj: Publication | None,
+        inline: InlineModelAdmin[Any, Publication],
+        prefix: str,
+    ):
+        kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
+
+        # add the request to the create formset instance so that we can generate absolute
+        # URLs
+        if isinstance(inline, DocumentInlineAdmin):
+            kwargs["request"] = request
+
+        return kwargs
+
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
         actions = [
@@ -329,7 +354,12 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
 
         if is_published:
-            transaction.on_commit(partial(index_document.delay, document_id=obj.pk))
+            download_url = obj.absolute_document_download_uri(request)
+            transaction.on_commit(
+                partial(
+                    index_document.delay, document_id=obj.pk, download_url=download_url
+                )
+            )
 
     def delete_model(self, request: HttpRequest, obj: Document):
         super().delete_model(request, obj)

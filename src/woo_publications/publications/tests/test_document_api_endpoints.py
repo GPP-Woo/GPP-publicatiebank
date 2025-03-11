@@ -1136,7 +1136,13 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         latest_doc = Document.objects.order_by("-pk").first()
         assert latest_doc is not None
-        mock_index_document_delay.assert_called_once_with(document_id=latest_doc.pk)
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(latest_doc.uuid)}
+        )
+        mock_index_document_delay.assert_called_once_with(
+            document_id=latest_doc.pk,
+            download_url=f"http://testserver{download_url}",
+        )
 
     @patch(
         "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
@@ -1509,6 +1515,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
             },
         )
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.put(
@@ -1550,7 +1559,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertTrue(document.upload_complete)
 
         with self.subTest("document index task is scheduled"):
-            mock_index_document_delay.assert_called_once_with(document_id=document.pk)
+            mock_index_document_delay.assert_called_once_with(
+                document_id=document.pk,
+                download_url=f"http://host.docker.internal:8000{download_url}",
+            )
 
     @patch("woo_publications.publications.api.viewsets.index_document.delay")
     def test_upload_with_multiple_parts(self, mock_index_document_delay: MagicMock):

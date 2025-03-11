@@ -128,8 +128,13 @@ class DocumentViewSet(
             # from anything to published -> reindex (even if no status is changed,
             # update the metadata)
             case (_, PublicationStatusOptions.published):
+                document_url = document.absolute_document_download_uri(self.request)
                 transaction.on_commit(
-                    partial(index_document.delay, document_id=document.pk)
+                    partial(
+                        index_document.delay,
+                        document_id=document.pk,
+                        download_url=document_url,
+                    )
                 )
             # from published to anything else -> remove from index
             case (
@@ -193,8 +198,13 @@ class DocumentViewSet(
             raise serializers.ValidationError(detail=_response.json()) from exc
 
         if is_completed:
+            document_url = document.absolute_document_download_uri(self.request)
             transaction.on_commit(
-                partial(index_document.delay, document_id=document.pk)
+                partial(
+                    index_document.delay,
+                    document_id=document.pk,
+                    download_url=document_url,
+                )
             )
 
         response_serializer = DocumentStatusSerializer(
