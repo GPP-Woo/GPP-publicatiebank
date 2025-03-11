@@ -30,7 +30,6 @@ from .tasks import (
     remove_from_index_by_uuid,
     remove_publication_from_index,
 )
-from .utils import absolute_document_download_uri
 
 
 @admin.action(
@@ -59,9 +58,8 @@ def sync_to_index(
                 partial(index_publication.delay, publication_id=obj.pk)
             )
         elif model is Document:
-            document_url = absolute_document_download_uri(
-                request, document_uuid=obj.uuid
-            )
+            assert isinstance(obj, Document)
+            document_url = obj.absolute_document_download_uri(request)
             transaction.on_commit(
                 partial(
                     index_document.delay, document_id=obj.pk, download_url=document_url
@@ -356,9 +354,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
 
         if is_published:
-            download_url = absolute_document_download_uri(
-                request, document_uuid=obj.uuid
-            )
+            download_url = obj.absolute_document_download_uri(request)
             transaction.on_commit(
                 partial(
                     index_document.delay, document_id=obj.pk, download_url=download_url

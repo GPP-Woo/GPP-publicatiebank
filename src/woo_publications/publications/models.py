@@ -6,6 +6,7 @@ from uuid import UUID
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models, transaction
+from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -409,6 +410,14 @@ class Document(ModelOwnerMixin, models.Model):
         Set the (created) ZGWDocument in the cache.
         """
         self._zgw_document = document
+
+    def absolute_document_download_uri(self, request: HttpRequest) -> str:
+        """
+        Creates the absolute document URI for the document-download endpoint.
+        """
+        return reverse(
+            "api:document-download", kwargs={"uuid": str(self.uuid)}, request=request
+        )
 
     @transaction.atomic()
     def register_in_documents_api(

@@ -8,7 +8,6 @@ from woo_publications.logging.admin_tools import AuditLogInlineformset
 from .constants import PublicationStatusOptions
 from .models import Document
 from .tasks import index_document, remove_document_from_index
-from .utils import absolute_document_download_uri
 
 
 class DocumentAuditLogInlineformset(AuditLogInlineformset):
@@ -21,9 +20,7 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
     def save_new(self, form, commit=True):
         document = super().save_new(form, commit)
         if document.publicatiestatus == PublicationStatusOptions.published:
-            download_url = absolute_document_download_uri(
-                self.request, document_uuid=document.uuid
-            )
+            download_url = document.absolute_document_download_uri(self.request)
             transaction.on_commit(
                 partial(
                     index_document.delay,
@@ -36,9 +33,7 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
     def save_existing(self, form, obj: Document, commit=True):
         match obj.publicatiestatus:
             case PublicationStatusOptions.published:
-                download_url = absolute_document_download_uri(
-                    self.request, document_uuid=obj.uuid
-                )
+                download_url = obj.absolute_document_download_uri(self.request)
                 transaction.on_commit(
                     partial(
                         index_document.delay,
