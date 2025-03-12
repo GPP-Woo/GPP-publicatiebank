@@ -29,25 +29,23 @@ msgstr "acties"
 
 #: woo_publications/accounts/models.py:19
 msgid "username"
-msgstr "gebruikersnaam"
+msgstr ""
 
 #: woo_publications/accounts/models.py:23
 msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
 msgstr ""
-"Vereist. 150 tekens of minder. Alleen letters, cijfers en @/,/+/-/_ tekens "
-"zijn toegestaan."
 
 #: woo_publications/accounts/models.py:27
 msgid "A user with that username already exists."
-msgstr "Een gebruiker met deze gebruikersnaam bestaat al."
+msgstr ""
 
 #: woo_publications/accounts/models.py:30
 msgid "first name"
-msgstr "voornaam"
+msgstr ""
 
 #: woo_publications/accounts/models.py:31
 msgid "last name"
-msgstr "achternaam"
+msgstr ""
 
 #: woo_publications/accounts/models.py:32
 msgid "email address"
@@ -55,45 +53,44 @@ msgstr "e-mailadres"
 
 #: woo_publications/accounts/models.py:34
 msgid "staff status"
-msgstr "stafstatus"
+msgstr ""
 
 #: woo_publications/accounts/models.py:36
 msgid "Designates whether the user can log into this admin site."
-msgstr "Bepaalt of de gebruiker zich op deze beheerwebsite kan aanmelden."
+msgstr ""
 
 #: woo_publications/accounts/models.py:39
 msgid "active"
-msgstr "actief"
+msgstr ""
 
 #: woo_publications/accounts/models.py:42
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
-"Bepaalt of deze gebruiker als actief dient te worden behandeld. U kunt dit "
-"uitvinken in plaats van een gebruiker te verwijderen."
 
 #: woo_publications/accounts/models.py:46
 msgid "date joined"
-msgstr "datum toegetreden"
+msgstr ""
 
 #: woo_publications/accounts/models.py:54
 msgid "user"
-msgstr "gebruiker"
+msgstr ""
 
 #: woo_publications/accounts/models.py:55
 msgid "users"
-msgstr "gebruikers"
+msgstr ""
 
 #: woo_publications/accounts/utils.py:23
 msgid "You need to be superuser to create other superusers."
 msgstr ""
-"U dient een supergebruiker te zijn om andere supergebruikers aan te maken."
+"Je moet een supergebruiker te zijn om andere supergebruikers aan te maken."
 
 #: woo_publications/accounts/utils.py:49
 msgid ""
 "You cannot create or update a user with more permissions than yourself."
-msgstr "U kunt een gebruiker niet meer rechten geven dan u zelf heeft."
+msgstr ""
+"Je kunt geen gebruiker aanmaken of updaten die meer rechten dan jezelf heeft."
 
 #: woo_publications/api/authorization.py:14
 msgid "Invalid token."
