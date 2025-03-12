@@ -102,7 +102,7 @@ paths:
         schema:
           type: string
           format: date
-        description: Filter documents that were created before or on the given value.
+        description: Filter documenten op creatiedatum op of voor de opgegeven datumtijd.
       - in: query
         name: creatiedatumVanaf
         schema:
@@ -143,8 +143,8 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Filter documents that were last modified before or on the given
-          value.
+        description: Filter documenten op laastste wijzigingsdatum op of voor de opgegeven
+          datumtijd.
       - in: query
         name: laatstGewijzigdDatumVanaf
         schema:
@@ -197,8 +197,8 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Filter documents that were registered before or on the given
-          value.
+        description: Filter documenten op registratiedatum op of voor de opgegeven
+          datumtijd.
       - in: query
         name: registratiedatumVanaf
         schema:
@@ -1101,8 +1101,8 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Filter publications that were registered before or on the given
-          value.
+        description: Filter publicaties op registratiedatum op of voor de opgegeven
+          datumtijd.
       - in: query
         name: registratiedatumVanaf
         schema:
