@@ -109,5 +109,5 @@ GPP Zoeken manages the search index to facilitate full text and faceted search.
    =============== ==========================
    GPP Zoeken API  Status
    =============== ==========================
-   latest (dev)    Tested in CI
+   1.0.0-rc.0      Tested in CI
    =============== ==========================

@@ -2,8 +2,8 @@
 Release notes
 =============
 
-dev (UNRELEASED)
-================
+1.1.0-beta.0 (2025-03-12)
+=========================
 
 * We now track whether the document file uploads have completed or not.
 * Added GPP-Zoeken integration (opt-in). To opt in, you must configure the appropriate

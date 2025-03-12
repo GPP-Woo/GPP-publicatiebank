@@ -2,7 +2,7 @@
 Openbare Documenten Registratie
 ===============================
 
-:Version: 1.0.0-rc.0
+:Version: 1.1.0-beta.0
 :Source: https://github.com/GPP-Woo/GPP-publicatiebank
 :Keywords: WOO, Openbare Documenten, NL, Open Data
 
