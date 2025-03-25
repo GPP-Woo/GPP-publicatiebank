@@ -95,7 +95,7 @@ development machine.
 example file included in the same directory.
 
 
-Interaction with GPP Zoeken is done via Celery tasks. To run the workers, you need to
+Interaction with GPP-zoeken is done via Celery tasks. To run the workers, you need to
 have Redis (the message broker) running. Start the workers with:
 
 .. code-block:: bash

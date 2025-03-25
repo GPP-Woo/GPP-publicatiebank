@@ -70,7 +70,7 @@ Configuration in the registration component
 GPP-Zoeken configuration
 ------------------------
 
-GPP-Publicatiebank depends on the `GPP Zoeken <https://gpp-zoeken.readthedocs.io/>`_
+GPP-Publicatiebank depends on the `GPP-zoeken <https://gpp-zoeken.readthedocs.io/>`_
 service to make publications available in the citizen portal. A service needs to be
 configured for this. If no service is configured, indexing operations will be skipped.
 

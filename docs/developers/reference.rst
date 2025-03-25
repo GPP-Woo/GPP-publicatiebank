@@ -35,11 +35,11 @@ Typically, we leverage Open Zaak for this (in development).
 
 Publication and document resources have a particular publication status - at the time of
 writing these are ``concept``, ``published`` and ``revoked``. Published resources are
-pushed to the GPP Zoeken API to be included in an Elastic Search index to power the
+pushed to the GPP-zoeken API to be included in an Elastic Search index to power the
 GPP Burgerportaal for search. When a resource is revoked, it is removed from the index
 again.
 
-Index operations (and by extension the interaction with GPP Zoeken) is done
+Index operations (and by extension the interaction with GPP-zoeken) is done
 asynchronously using Celery tasks, after the database transaction is committed.
 
 Database schema

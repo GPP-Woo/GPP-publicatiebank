@@ -60,7 +60,7 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
 @app.task
 def remove_document_from_index(*, document_id: int, force: bool = False) -> str | None:
     """
-    Remove the document from the GPP Zoeken index, if the status requires it.
+    Remove the document from the GPP-zoeken index, if the status requires it.
 
     If no service is configured or the document publication status is published, then
     the remove-from-index-operation is skipped.
@@ -121,7 +121,7 @@ def remove_publication_from_index(
     *, publication_id: int, force: bool = False
 ) -> str | None:
     """
-    Remove the publication from the GPP Zoeken index, if the status requires it.
+    Remove the publication from the GPP-zoeken index, if the status requires it.
 
     If no service is configured or the publication status is published, then
     the remove-from-index-operation is skipped.
