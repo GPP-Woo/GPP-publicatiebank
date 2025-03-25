@@ -32,7 +32,7 @@ een publicatie horen, zoals:
 * publicaties en bijhorende documenten
 * metamodellen/metagegevens
 
-Het component koppelt met de GPP zoeken en zorgt dat de metagegevens en inhoud van
+Het component koppelt met de GPP-zoeken en zorgt dat de metagegevens en inhoud van
 documenten geïndexeerd worden zodat het burgerportaal deze kan doorzoeken. De gegevens
 worden aangeboden in een formaat zodat deze aan de
 `Woo-Metadata-standaard <https://standaarden.overheid.nl/diwoo/metadata>`_ voldoen.
