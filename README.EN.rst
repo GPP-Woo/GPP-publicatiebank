@@ -32,7 +32,7 @@ publications, such as:
 * publications and associated documents
 * metadata models and expected shapes of metadata
 
-The component interfaces with a search index (TODO) and ensures the metadata and content
+The component interfaces with a GPP zoeken and ensures the metadata and content
 of documents is indexed, enabling the citizen portal to search through the publications.
 The data is provided in a format making it suitable to be indexed by the national
 crawler, by complying with the
