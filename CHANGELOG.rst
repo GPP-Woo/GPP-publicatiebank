@@ -2,6 +2,12 @@
 Release notes
 =============
 
+1.1.0-rc.0 (2025-03-26)
+=======================
+
+* Updated the documentation to describe new features.
+* Fixed broken API spec link in the documentation.
+
 1.1.0-beta.0 (2025-03-12)
 =========================
 
