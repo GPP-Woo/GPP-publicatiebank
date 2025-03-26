@@ -27,6 +27,7 @@ The backend contains the storage and exposes the API.
    =============== ===========
    Backend version API version
    =============== ===========
+   1.1.0           1.0.0
    1.0.0           1.0.0
    =============== ===========
 
