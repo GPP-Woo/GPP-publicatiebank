@@ -58,6 +58,14 @@ class Publication(ModelOwnerMixin, models.Model):
             "The information categories clarify the kind of information present in the publication."
         ),
     )
+    onderwerpen = models.ManyToManyField(
+        "publications.topic",
+        verbose_name=_("topics"),
+        help_text=_(
+            "The topics clarify the kind of information present in the publication."
+        ),
+        blank=True,
+    )
     publisher = models.ForeignKey(
         "metadata.organisation",
         verbose_name=_("publisher"),
