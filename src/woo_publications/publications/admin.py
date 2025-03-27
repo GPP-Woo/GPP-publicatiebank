@@ -21,7 +21,7 @@ from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
-from .formset import DocumentAuditLogInlineformset
+from .formset import DocumentAuditLogInlineformset, ThroughModelInlineFormset
 from .models import Document, Publication, Topic
 from .tasks import (
     index_document,
@@ -145,7 +145,10 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "uuid",
         "show_actions",
     )
-    autocomplete_fields = ("informatie_categorieen",)
+    autocomplete_fields = (
+        "informatie_categorieen",
+        "onderwerpen",
+    )
     raw_id_fields = (
         "publisher",
         "verantwoordelijke",
@@ -400,6 +403,23 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         return obj.publicatie.verantwoordelijke
 
 
+class PublicationInline(admin.StackedInline):
+    formset = ThroughModelInlineFormset
+    model = Publication.onderwerpen.through
+    autocomplete_fields = ("publication",)
+    extra = 0
+
+    # TODO: allow altering of inlineformset
+    def has_add_permission(self, request: HttpRequest, obj=None):
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None):
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None):
+        return False
+
+
 @admin.register(Topic)
 class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = (
@@ -424,6 +444,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
         "promoot",
     )
+    inlines = (PublicationInline,)
     date_hierarchy = "registratiedatum"
     # TODO: uncomment actions when we offer the data to GPP-zoeken
     # actions = [sync_to_index, remove_from_index]
