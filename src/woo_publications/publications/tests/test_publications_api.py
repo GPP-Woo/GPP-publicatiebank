@@ -26,7 +26,7 @@ from woo_publications.metadata.tests.factories import (
 
 from ..constants import PublicationStatusOptions
 from ..models import Publication
-from .factories import DocumentFactory, PublicationFactory
+from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -109,9 +109,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         ic, ic2 = InformationCategoryFactory.create_batch(
             2, oorsprong=InformationCategoryOrigins.value_list
         )
+        topic = TopicFactory.create()
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
+                onderwerpen=[topic],
                 publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -139,6 +141,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid": str(publication.uuid),
                 "informatieCategorieen": [str(ic.uuid)],
                 "diWooInformatieCategorieen": [str(ic.uuid)],
+                "onderwerpen": [str(topic.uuid)],
                 "publisher": str(publication.publisher.uuid),
                 "verantwoordelijke": None,
                 "opsteller": None,
@@ -158,6 +161,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid": str(publication2.uuid),
                 "informatieCategorieen": [str(ic2.uuid)],
                 "diWooInformatieCategorieen": [str(ic2.uuid)],
+                "onderwerpen": [],
                 "publisher": str(publication2.publisher.uuid),
                 "verantwoordelijke": None,
                 "opsteller": None,
@@ -194,6 +198,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(publication.uuid),
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [],
             "publisher": str(publication.publisher.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
@@ -209,6 +214,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(publication2.uuid),
             "informatieCategorieen": [str(ic2.uuid)],
             "diWooInformatieCategorieen": [str(ic2.uuid)],
+            "onderwerpen": [],
             "publisher": str(publication2.publisher.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
@@ -390,6 +396,61 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             ) % {"value": str(fake_ic)}
 
             self.assertEqual(data["informatieCategorieen"], [error_message])
+
+    def test_list_publications_filter_topic(self):
+        topic, topic2, topic3, topic4 = TopicFactory.create_batch(4)
+
+        publication = PublicationFactory.create(onderwerpen=[topic])
+        publication2 = PublicationFactory.create(onderwerpen=[topic2])
+        publication3 = PublicationFactory.create(onderwerpen=[topic3, topic4])
+
+        list_url = reverse("api:publication-list")
+
+        with self.subTest("filter on a single topic"):
+            response = self.client.get(
+                list_url,
+                {"onderwerpen": str(topic.uuid)},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(data["results"], "uuid", str(publication.uuid), 1)
+
+        with self.subTest("filter on multiple topics"):
+            response = self.client.get(
+                list_url,
+                {"onderwerpen": f"{topic2.uuid},{topic3.uuid}"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(data["results"], "uuid", str(publication2.uuid), 1)
+            self.assertItemInResults(data["results"], "uuid", str(publication3.uuid), 1)
+
+        with self.subTest("filter with invalid uuid"):
+            fake_topic = uuid4()
+            response = self.client.get(
+                list_url,
+                {"onderwerpen": f"{fake_topic}"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            data = response.json()
+            error_message = _(
+                "Select a valid choice. %(value)s is not one of the available choices."
+            ) % {"value": str(fake_topic)}
+
+            self.assertEqual(data["onderwerpen"], [error_message])
 
     def test_list_publications_filter_registratie_datum(self):
         ic = InformationCategoryFactory.create(
@@ -646,6 +707,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(publication.uuid),
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [],
             "publisher": str(publication.publisher.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
@@ -661,6 +723,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(publication2.uuid),
             "informatieCategorieen": [str(ic2.uuid)],
             "diWooInformatieCategorieen": [str(ic2.uuid)],
+            "onderwerpen": [],
             "publisher": str(publication2.publisher.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
@@ -781,8 +844,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         ic = InformationCategoryFactory.create(
             oorsprong=InformationCategoryOrigins.value_list
         )
+        topic = TopicFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            onderwerpen=[topic],
             publicatiestatus=PublicationStatusOptions.concept,
             officiele_titel="title one",
             verkorte_titel="one",
@@ -802,6 +867,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(publication.uuid),
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [str(topic.uuid)],
             "publisher": str(publication.publisher.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
@@ -889,6 +955,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         ic, ic2 = InformationCategoryFactory.create_batch(
             2, oorsprong=InformationCategoryOrigins.value_list
         )
+        topic = TopicFactory.create()
         organisation, organisation2, organisation3 = OrganisationFactory.create_batch(
             3, is_actief=True
         )
@@ -985,6 +1052,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("complete data"):
             data = {
                 "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
+                "onderwerpen": [str(topic.uuid)],
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
@@ -1004,6 +1072,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "uuid"
                 ],  # uuid gets generated so we are just testing that its there
                 "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
+                "onderwerpen": [str(topic.uuid)],
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
@@ -1025,6 +1094,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_update_publication(self):
+        topic = TopicFactory.create()
         ic, ic2 = InformationCategoryFactory.create_batch(
             2, oorsprong=InformationCategoryOrigins.value_list
         )
@@ -1062,6 +1132,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("complete data"):
             data = {
                 "informatieCategorieen": [str(ic2.uuid)],
+                "onderwerpen": [str(topic.uuid)],
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
@@ -1082,6 +1153,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 ],  # uuid gets generated so we are just testing that its there
                 "informatieCategorieen": [str(ic2.uuid)],
                 "diWooInformatieCategorieen": [str(ic2.uuid)],
+                "onderwerpen": [str(topic.uuid)],
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
@@ -1095,6 +1167,61 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             }
 
             self.assertEqual(response_data, expected_data)
+
+    def test_update_publication_onderwerpen_field(self):
+        topic = TopicFactory.create()
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            onderwerpen=[topic],
+            publisher=organisation,
+            publicatiestatus=PublicationStatusOptions.concept,
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        with self.subTest("update without onderwerpen doesn't alter the value"):
+            data = {
+                "informatieCategorieen": [str(ic.uuid)],
+                "publisher": str(organisation.uuid),
+                "verantwoordelijke": str(organisation.uuid),
+                "opsteller": str(organisation.uuid),
+                "publicatiestatus": PublicationStatusOptions.published,
+                "officieleTitel": "changed offical title",
+                "verkorteTitel": "changed short title",
+                "omschrijving": "changed description",
+            }
+
+            response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json()["onderwerpen"], [str(topic.uuid)])
+
+        with self.subTest("update onderwerpen with empty list"):
+            data = {
+                "informatieCategorieen": [str(ic.uuid)],
+                "onderwerpen": [],  # relevant field
+                "publisher": str(organisation.uuid),
+                "verantwoordelijke": str(organisation.uuid),
+                "opsteller": str(organisation.uuid),
+                "publicatiestatus": PublicationStatusOptions.published,
+                "officieleTitel": "changed offical title",
+                "verkorteTitel": "changed short title",
+                "omschrijving": "changed description",
+            }
+
+            response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json()["onderwerpen"], [])
 
     def test_update_revoked_publication_cannot_be_modified(self):
         ic = InformationCategoryFactory.create(
@@ -1139,9 +1266,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         ic = InformationCategoryFactory.create(
             oorsprong=InformationCategoryOrigins.value_list
         )
+        topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            onderwerpen=[topic],
             publisher=organisation,
             officiele_titel="title one",
             verkorte_titel="one",
@@ -1165,6 +1294,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             ],  # uuid gets generated so we are just testing that its there
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [str(topic.uuid)],
             "publisher": str(organisation.uuid),
             "verantwoordelijke": None,
             "opsteller": None,
