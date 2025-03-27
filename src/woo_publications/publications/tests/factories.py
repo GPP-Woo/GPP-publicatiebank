@@ -6,7 +6,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
-from ..models import Document, Publication
+from ..models import Document, Publication, Topic
 
 
 class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
@@ -48,3 +48,10 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
             ),
             document_uuid=factory.Faker("uuid4"),
         )
+
+
+class TopicFactory(factory.django.DjangoModelFactory[Topic]):
+    officiele_titel = factory.Faker("word")
+
+    class Meta:  # pyright: ignore
+        model = Topic
