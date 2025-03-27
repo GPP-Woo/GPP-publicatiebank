@@ -128,3 +128,39 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
+
+Onderwerpen
+-----------
+
+Een *onderwerp* bestaat uit een aantal gegevens en kan gekoppeld zijn aan een of meerdere *publicaties* (TODO) (zie hierboven).
+
+In het beheerscherm van de *onderwerp* wordt een lijst getoond van alle *onderwerp*-registraties, die zijn opgeslagen in het "WOO Publicaties"-component.
+Op dit scherm zijn de volgende acties mogelijk:
+
+* Rechtsboven zit een knop **onderwerp toevoegen** waarmee een registratie toegevoegd kan worden.
+* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-regsitraties aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *onderwerp*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
+* Bij een *onderwerp*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
+* Bij een *onderwerp*-registratie kan op **Toon logs** (rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
+
+Wanneer bij een *onderwerp*-registratie op  de `officiële titel` wordt geklikt, wordt een scherm geopend met de *onderwerp*-details.
+Hierop zien we:
+
+* **Alle metadatavelden**. Deze lichten we hieronder toe.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *onderwerp*-registratie.
+* Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de Admin-interface zijn uitgevoerd op de registratie.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
+* Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
+
+Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+
+* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp. (DiWoo : ``officieleTitel``)
+* ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp. (DiWoo : ``omschrijving``)
+* ``Status``. De status van het onderwerp. "Gepubliceerd" betekent dat het onderwerp online vindbaar en raadpleegbaar is. "Ingetrokken" is offline voor de buitenwereld.
+* ``Promoot``. TODO
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo : ``identifier``)
+* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het onderwerp nieuw is toegevoegd.
+* ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het onderwerp voor het laatst gewijzigd was.
