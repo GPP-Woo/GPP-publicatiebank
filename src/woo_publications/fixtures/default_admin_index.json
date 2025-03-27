@@ -160,6 +160,10 @@
             [
                 "publications",
                 "publication"
+            ],
+            [
+                "publications",
+                "topic"
             ]
         ]
     }
