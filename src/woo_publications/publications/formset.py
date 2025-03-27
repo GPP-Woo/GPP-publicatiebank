@@ -1,6 +1,7 @@
 from functools import partial
 
 from django.db import transaction
+from django.forms import BaseInlineFormSet
 from django.http import HttpRequest
 
 from woo_publications.logging.admin_tools import AuditLogInlineformset
@@ -53,3 +54,10 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
                 partial(remove_document_from_index.delay, document_id=obj.pk)
             )
         super().delete_existing(obj, commit)
+
+
+class ThroughModelInlineFormset(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        assert "_django_user" in kwargs
+        del kwargs["_django_user"]
+        super().__init__(*args, **kwargs)
