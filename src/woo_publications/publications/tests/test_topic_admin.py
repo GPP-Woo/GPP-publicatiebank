@@ -9,7 +9,7 @@ from woo_publications.accounts.tests.factories import UserFactory
 
 from ..constants import TopicStatusOptions
 from ..models import Topic
-from .factories import TopicFactory
+from .factories import PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
@@ -208,3 +208,23 @@ class TestTopicAdmin(WebTest):
         response = form.submit()
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Topic.objects.filter(uuid=topic.uuid).exists())
+
+    def test_topic_inline_publications_show(self):
+        topic = TopicFactory.create()
+        PublicationFactory.create(
+            officiele_titel="title one",
+        )
+        PublicationFactory.create(
+            onderwerpen=[topic],
+            officiele_titel="title two",
+        )
+
+        reverse_url = reverse(
+            "admin:publications_topic_change",
+            kwargs={"object_id": topic.pk},
+        )
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "title one", 0)
+        self.assertContains(response, "title two", 1)
