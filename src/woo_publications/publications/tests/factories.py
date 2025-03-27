@@ -29,6 +29,19 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
         if extracted:
             obj.informatie_categorieen.set(extracted)
 
+    @factory.post_generation
+    def onderwerpen(
+        obj: Publication,  # pyright: ignore[reportGeneralTypeIssues]
+        create: bool,
+        extracted: Sequence[Topic],
+        **kwargs,
+    ):
+        if not create:
+            return
+
+        if extracted:
+            obj.onderwerpen.set(extracted)
+
 
 class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     publicatie = factory.SubFactory(PublicationFactory)
