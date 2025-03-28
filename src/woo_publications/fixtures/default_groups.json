@@ -250,6 +250,26 @@
                 "publication"
             ],
             [
+                "add_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "change_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "delete_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "view_topic",
+                "publications",
+                "topic"
+            ],
+            [
                 "view_session",
                 "sessions",
                 "session"
@@ -446,6 +466,26 @@
                 "view_publication",
                 "publications",
                 "publication"
+            ],
+            [
+                "add_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "change_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "delete_topic",
+                "publications",
+                "topic"
+            ],
+            [
+                "view_topic",
+                "publications",
+                "topic"
             ]
         ]
     }
