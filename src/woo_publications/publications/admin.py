@@ -436,6 +436,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     search_fields = (
         "uuid",
+        "publication__uuid",
         "officiele_titel",
     )
     list_filter = (
