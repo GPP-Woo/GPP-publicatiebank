@@ -558,3 +558,12 @@ class Topic(models.Model):
 
     def __str__(self):
         return self.officiele_titel
+
+    def clean(self):
+        super().clean()
+        if not self.pk and self.publicatiestatus == TopicStatusOptions.revoked:
+            raise ValidationError(
+                _("You cannot create a {revoked} topic.").format(
+                    revoked=TopicStatusOptions.revoked.label.lower()
+                )
+            )
