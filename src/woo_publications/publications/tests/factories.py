@@ -6,7 +6,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
-from ..models import Document, Publication
+from ..models import Document, Publication, Topic
 
 
 class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
@@ -29,6 +29,19 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
         if extracted:
             obj.informatie_categorieen.set(extracted)
 
+    @factory.post_generation
+    def onderwerpen(
+        obj: Publication,  # pyright: ignore[reportGeneralTypeIssues]
+        create: bool,
+        extracted: Sequence[Topic],
+        **kwargs,
+    ):
+        if not create:
+            return
+
+        if extracted:
+            obj.onderwerpen.set(extracted)
+
 
 class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     publicatie = factory.SubFactory(PublicationFactory)
@@ -48,3 +61,10 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
             ),
             document_uuid=factory.Faker("uuid4"),
         )
+
+
+class TopicFactory(factory.django.DjangoModelFactory[Topic]):
+    officiele_titel = factory.Faker("word")
+
+    class Meta:  # pyright: ignore
+        model = Topic

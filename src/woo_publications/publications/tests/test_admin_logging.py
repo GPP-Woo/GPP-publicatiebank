@@ -15,9 +15,13 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication
-from .factories import DocumentFactory, PublicationFactory
+from ..constants import (
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+    TopicStatusOptions,
+)
+from ..models import Document, Publication, Topic
+from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
@@ -40,6 +44,7 @@ class TestPublicationAdminAuditLogging(WebTest):
     def test_admin_create(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
+        topic = TopicFactory.create()
         organisation, organisation2 = OrganisationFactory.create_batch(
             2, is_actief=True
         )
@@ -51,7 +56,8 @@ class TestPublicationAdminAuditLogging(WebTest):
 
         form = response.forms["publication_form"]
         # Force the value because the select box options get loaded in with js
-        form["informatie_categorieen"].force_value([ic.id, ic2.id])
+        form["informatie_categorieen"].force_value([ic.pk, ic2.pk])
+        form["onderwerpen"].force_value([topic.pk])
         form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
         form["publisher"] = str(organisation.pk)
         form["verantwoordelijke"] = str(organisation.pk)
@@ -78,6 +84,7 @@ class TestPublicationAdminAuditLogging(WebTest):
             "object_data": {
                 "id": added_item.pk,
                 "informatie_categorieen": [ic.pk, ic2.pk],
+                "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
                 "officiele_titel": "The official title of this publication",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
@@ -97,6 +104,7 @@ class TestPublicationAdminAuditLogging(WebTest):
     def test_admin_update(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
+        topic, topic2 = TopicFactory.create_batch(2)
         organisation, organisation2 = OrganisationFactory.create_batch(
             2, is_actief=True
         )
@@ -106,6 +114,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 verantwoordelijke=organisation,
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
+                onderwerpen=[topic, topic2],
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -121,6 +130,7 @@ class TestPublicationAdminAuditLogging(WebTest):
 
         form = response.forms["publication_form"]
         form["informatie_categorieen"].select_multiple(texts=[ic.naam])
+        form["onderwerpen"].select_multiple(texts=[topic.officiele_titel])
         form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
         form["publisher"] = str(organisation2.pk)
         form["verantwoordelijke"] = str(organisation2.pk)
@@ -159,6 +169,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": publication.pk,
                     "informatie_categorieen": [ic.pk],
+                    "onderwerpen": [topic.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
@@ -178,6 +189,7 @@ class TestPublicationAdminAuditLogging(WebTest):
     def test_admin_update_revoke_published_documents_when_revoking_publication(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
+        topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         with freeze_time("2024-09-27T00:14:00-00:00"):
             publication = PublicationFactory.create(
@@ -185,6 +197,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 verantwoordelijke=organisation,
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
+                onderwerpen=[topic],
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -260,6 +273,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": publication.pk,
                     "informatie_categorieen": [ic.pk, ic2.pk],
+                    "onderwerpen": [topic.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -316,10 +330,12 @@ class TestPublicationAdminAuditLogging(WebTest):
     def test_admin_delete(self):
         assert not TimelineLogProxy.objects.exists()
         information_category = InformationCategoryFactory.create()
+        topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         with freeze_time("2024-09-27T00:14:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[information_category],
+                onderwerpen=[topic],
                 publicatiestatus=PublicationStatusOptions.concept,
                 publisher=organisation,
                 verantwoordelijke=organisation,
@@ -353,6 +369,7 @@ class TestPublicationAdminAuditLogging(WebTest):
             "object_data": {
                 "id": publication.pk,
                 "informatie_categorieen": [information_category.pk],
+                "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-27T00:14:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -849,6 +866,167 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "soort_handeling": DocumentActionTypeOptions.declared,
             },
             "_cached_object_repr": "title one",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+
+@disable_admin_mfa()
+class TestTopicAdminAuditLogging(WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+
+    def test_topic_admin_log_create(self):
+        reverse_url = reverse("admin:publications_topic_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "Lorem Ipsum"
+        form["omschrijving"] = (
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        )
+        form["publicatiestatus"] = TopicStatusOptions.published
+        form["promoot"] = False
+
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            form.submit(name="_save")
+
+        added_item = Topic.objects.get()
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.create,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": added_item.pk,
+                "uuid": str(added_item.uuid),
+                "officiele_titel": "Lorem Ipsum",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "publicatiestatus": TopicStatusOptions.published,
+                "promoot": False,
+                "registratiedatum": "2024-09-24T12:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_topic_admin_log_update(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            topic = TopicFactory.create(
+                publicatiestatus=TopicStatusOptions.published,
+                officiele_titel="title one",
+            )
+
+        reverse_url = reverse(
+            "admin:publications_topic_change",
+            kwargs={"object_id": topic.pk},
+        )
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "changed official title"
+        form["omschrijving"] = "changed description"
+        form["publicatiestatus"] = TopicStatusOptions.revoked
+        form["promoot"] = True
+
+        with freeze_time("2024-09-27T12:00:00-00:00"):
+            response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(TimelineLogProxy.objects.count(), 2)
+
+        topic.refresh_from_db()
+
+        read_log, update_log = TimelineLogProxy.objects.order_by("pk")
+
+        with self.subTest("read audit logging"):
+            expected_data = {
+                "event": Events.read,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "_cached_object_repr": "title one",
+            }
+
+            self.assertEqual(read_log.extra_data, expected_data)
+
+        with self.subTest("update audit logging"):
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": topic.pk,
+                    "uuid": str(topic.uuid),
+                    "officiele_titel": "changed official title",
+                    "omschrijving": "changed description",
+                    "publicatiestatus": TopicStatusOptions.revoked,
+                    "promoot": True,
+                    "registratiedatum": "2024-09-24T12:00:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
+                },
+                "_cached_object_repr": "changed official title",
+            }
+
+            self.assertEqual(update_log.extra_data, expected_data)
+
+    def test_topic_admin_log_delete(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            topic = TopicFactory.create(
+                officiele_titel="Lorem Ipsum",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                publicatiestatus=TopicStatusOptions.published,
+                promoot=True,
+            )
+
+        reverse_url = reverse(
+            "admin:publications_topic_delete",
+            kwargs={"object_id": topic.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms[1]
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.delete,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": topic.pk,
+                "uuid": str(topic.uuid),
+                "officiele_titel": "Lorem Ipsum",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "publicatiestatus": TopicStatusOptions.published,
+                "promoot": True,
+                "registratiedatum": "2024-09-24T12:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
+            },
+            "_cached_object_repr": "Lorem Ipsum",
         }
 
         self.assertEqual(log.extra_data, expected_data)

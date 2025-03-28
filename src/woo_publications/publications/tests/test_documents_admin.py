@@ -86,13 +86,13 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, publication.identifier, 1)
 
-        with self.subTest("filter_on_verkorte_titel"):
-            form["q"] = "two"
+        with self.subTest("filter_on_uuid"):
+            form["q"] = str(publication.uuid)
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, publication2.identifier, 1)
+            self.assertContains(search_response, publication.identifier, 1)
 
         with self.subTest("filter_on_verkorte_titel"):
             form["q"] = str(publication.identifier)

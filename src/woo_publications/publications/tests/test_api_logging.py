@@ -16,7 +16,7 @@ from woo_publications.metadata.tests.factories import (
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Publication
-from .factories import DocumentFactory, PublicationFactory
+from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -61,10 +61,12 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
     def test_create_logging(self):
         assert not TimelineLogProxy.objects.exists()
         ic = InformationCategoryFactory.create()
+        topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         url = reverse("api:publication-list")
         data = {
             "informatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [str(topic.uuid)],
             "publicatiestatus": PublicationStatusOptions.concept,
             "publisher": str(organisation.uuid),
             "verantwoordelijke": str(organisation.uuid),
@@ -86,7 +88,8 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "acting_user": {"identifier": "id", "display_name": "username"},
             "object_data": {
                 "id": publication.pk,
-                "informatie_categorieen": [ic.id],
+                "informatie_categorieen": [ic.pk],
+                "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -107,6 +110,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         assert not TimelineLogProxy.objects.exists()
         organisation = OrganisationFactory.create(is_actief=True)
         ic = InformationCategoryFactory.create()
+        topic = TopicFactory.create()
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
@@ -124,6 +128,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         )
         data = {
             "informatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [str(topic.uuid)],
             "publicatiestatus": PublicationStatusOptions.published,
             "publisher": str(organisation.uuid),
             "verantwoordelijke": str(organisation.uuid),
@@ -144,7 +149,8 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "acting_user": {"identifier": "id", "display_name": "username"},
             "object_data": {
                 "id": publication.pk,
-                "informatie_categorieen": [ic.id],
+                "informatie_categorieen": [ic.pk],
+                "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
                 "officiele_titel": "changed offical title",
                 "omschrijving": "changed description",
@@ -165,6 +171,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         self,
     ):
         assert not TimelineLogProxy.objects.exists()
+        topic, topic2 = TopicFactory.create_batch(2)
         ic, ic2 = InformationCategoryFactory.create_batch(2)
         organisation = OrganisationFactory.create(is_actief=True)
         with freeze_time("2024-09-27T00:14:00-00:00"):
@@ -173,6 +180,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 verantwoordelijke=organisation,
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
+                onderwerpen=[topic, topic2],
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -227,6 +235,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "object_data": {
                     "id": publication.pk,
                     "informatie_categorieen": [ic.pk, ic2.pk],
+                    "onderwerpen": [topic.pk, topic2.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -310,6 +319,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "object_data": {
                 "id": publication.id,
                 "informatie_categorieen": [ic.id],
+                "onderwerpen": [],
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": (
