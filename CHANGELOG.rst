@@ -2,6 +2,15 @@
 Release notes
 =============
 
+dev (unreleased)
+================
+
+* Added Topics to the project, this includes an admin panel page
+  and a list/detail api endpoint to retrieve the data.
+* Added Topic field (onderwerpen) to the publication admin panel and api endpoint.
+  Also added a filter field for the publication api to retrieve publications based
+  on the linked topics.
+
 1.1.0-rc.0 (2025-03-26)
 =======================
 
