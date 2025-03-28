@@ -160,7 +160,7 @@ Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het sch
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp. (DiWoo : ``officieleTitel``)
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp. (DiWoo : ``omschrijving``)
 * ``Status``. De status van het onderwerp. "Gepubliceerd" betekent dat het onderwerp online vindbaar en raadpleegbaar is. "Ingetrokken" is offline voor de buitenwereld.
-* ``Promoot``. TODO
+* ``Promoot``. Geeft aan of het onderwerp wordt gepromoot in de web applicatie. Als je gegbruik maakt van het GPP-burgerportaal, dan worden gepromote onderwerpen op de thuispagina en bovenaan op de *onderwerpen*-pagina getoond. (DiWoo : ``promoot``)
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo : ``identifier``)
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het onderwerp nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het onderwerp voor het laatst gewijzigd was.
