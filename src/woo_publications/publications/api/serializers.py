@@ -7,8 +7,12 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.service import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication
+from ..constants import (
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+    TopicStatusOptions,
+)
+from ..models import Document, Publication, Topic
 
 
 class EigenaarSerializer(serializers.Serializer):
@@ -225,6 +229,16 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         help_text=_("The information categories used for the sitemap"),
         read_only=True,
     )
+    onderwerpen = serializers.SlugRelatedField(
+        queryset=Topic.objects.all(),
+        slug_field="uuid",
+        help_text=_(
+            "The topics clarify the kind of information present in the publication."
+        ),
+        many=True,
+        allow_empty=True,
+        required=False,
+    )
     publisher = serializers.SlugRelatedField(
         queryset=Organisation.objects.filter(is_actief=True),
         slug_field="uuid",
@@ -256,6 +270,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "uuid",
             "informatie_categorieen",
             "di_woo_informatie_categorieen",
+            "onderwerpen",
             "publisher",
             "verantwoordelijke",
             "opsteller",
@@ -326,3 +341,31 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
+
+
+class TopicSerializer(serializers.ModelSerializer[Topic]):
+    publicaties = serializers.SlugRelatedField(
+        queryset=Publication.objects.all(),
+        slug_field="uuid",
+        help_text=_("The publication attached to this topic."),
+        many=True,
+        source="publication_set",
+    )
+    status = serializers.ChoiceField(
+        choices=TopicStatusOptions.choices,
+        default=TopicStatusOptions.published,
+        source="publicatiestatus",
+    )
+
+    class Meta:  # pyright: ignore
+        model = Topic
+        fields = (
+            "uuid",
+            "publicaties",
+            "officiele_titel",
+            "omschrijving",
+            "status",
+            "promoot",
+            "registratiedatum",
+            "laatst_gewijzigd_datum",
+        )
