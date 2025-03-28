@@ -531,7 +531,10 @@ class Topic(models.Model):
     promoot = models.BooleanField(
         _("promote"),
         default=False,
-        help_text=_("TODO"),
+        help_text=_(
+            "Marker to indicate that this topic will be promoted within the "
+            "frontend application."
+        ),
     )
     registratiedatum = models.DateTimeField(
         _("created on"),

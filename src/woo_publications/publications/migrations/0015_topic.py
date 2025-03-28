@@ -55,7 +55,9 @@ class Migration(migrations.Migration):
                 (
                     "promoot",
                     models.BooleanField(
-                        default=False, help_text="TODO", verbose_name="promote"
+                        default=False,
+                        help_text="Marker to indicate that this topic will be promoted within the frontend application.",
+                        verbose_name="promote",
                     ),
                 ),
                 (
