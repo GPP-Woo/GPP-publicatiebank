@@ -78,7 +78,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
         data = response.json()
         self.assertEqual(data["count"], 2)
 
-        with self.subTest("first_item_in_response_with_expected_data"):
+        with self.subTest("first item in response with expected_data"):
             expected_first_item_data = {
                 "uuid": str(information_category.uuid),
                 "identifier": "https://www.example.com/waardenlijsten/1",
@@ -90,7 +90,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             }
             self.assertEqual(data["results"][0], expected_first_item_data)
 
-        with self.subTest("second_item_in_response_with_expected_data"):
+        with self.subTest("second item in response with expected_data"):
             expected_second_item_data = {
                 "uuid": str(information_category2.uuid),
                 "identifier": "https://www.example.com/waardenlijsten/2",
@@ -132,7 +132,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             "oorsprong": InformationCategoryOrigins.value_list,
         }
 
-        with self.subTest("test_with_exact_match"):
+        with self.subTest("test with exact match"):
             response = self.client.get(
                 list_url,
                 {"identifier": "https://www.example.com/waardenlijsten/1"},
@@ -144,7 +144,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             self.assertEqual(data["count"], 1)
             self.assertEqual(data["results"][0], expected_first_item_data)
 
-        with self.subTest("with_none_existing_identifier"):
+        with self.subTest("with none existing identifier"):
             response = self.client.get(
                 list_url,
                 {"identifier": "https://www.example.com/waardenlijsten/999"},
@@ -194,7 +194,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             "oorsprong": InformationCategoryOrigins.custom_entry,
         }
 
-        with self.subTest("test_with_exact_match"):
+        with self.subTest("test with exact match"):
             response = self.client.get(
                 list_url, {"naam": "item two"}, headers=AUDIT_HEADERS
             )
@@ -204,7 +204,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             self.assertEqual(data["count"], 1)
             self.assertEqual(data["results"][0], expected_item_two_data)
 
-        with self.subTest("test_with_incomplete_match"):
+        with self.subTest("test with incomplete match"):
             response = self.client.get(
                 list_url, {"naam": "item"}, headers=AUDIT_HEADERS
             )
@@ -215,7 +215,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             self.assertEqual(data["results"][0], expected_item_one_data)
             self.assertEqual(data["results"][1], expected_item_two_data)
 
-        with self.subTest("with_none_existing_identifier"):
+        with self.subTest("with none existing identifier"):
             response = self.client.get(
                 list_url, {"naam": "item three"}, headers=AUDIT_HEADERS
             )

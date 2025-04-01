@@ -7,7 +7,7 @@ from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
 
-from ..constants import TopicStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Topic
 from .factories import PublicationFactory, TopicFactory
 
@@ -75,13 +75,13 @@ class TestTopicAdmin(WebTest):
 
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
-                publicatiestatus=TopicStatusOptions.published,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 promoot=True,
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             topic2 = TopicFactory.create(
-                publicatiestatus=TopicStatusOptions.revoked,
+                publicatiestatus=PublicationStatusOptions.revoked,
                 officiele_titel="title two",
                 promoot=False,
             )
@@ -108,7 +108,7 @@ class TestTopicAdmin(WebTest):
 
         with self.subTest("filter on publicatiestatus"):
             search_response = response.click(
-                description=str(TopicStatusOptions.published.label)
+                description=str(PublicationStatusOptions.published.label)
             )
 
             self.assertEqual(search_response.status_code, 200)
@@ -139,7 +139,7 @@ class TestTopicAdmin(WebTest):
         form["omschrijving"] = (
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         )
-        form["publicatiestatus"] = TopicStatusOptions.published
+        form["publicatiestatus"] = PublicationStatusOptions.published
         form["promoot"] = False
         form.submit(name="_save")
 
@@ -150,7 +150,9 @@ class TestTopicAdmin(WebTest):
             added_item.omschrijving,
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
-        self.assertEqual(added_item.publicatiestatus, TopicStatusOptions.published)
+        self.assertEqual(
+            added_item.publicatiestatus, PublicationStatusOptions.published
+        )
         self.assertFalse(added_item.promoot)
         self.assertEqual(str(added_item.registratiedatum), "2024-09-25 00:14:00+00:00")
         self.assertEqual(
@@ -160,7 +162,7 @@ class TestTopicAdmin(WebTest):
     def test_topic_admin_update(self):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
-                publicatiestatus=TopicStatusOptions.published,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
             )
 
@@ -175,7 +177,7 @@ class TestTopicAdmin(WebTest):
         form = response.forms["topic_form"]
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
-        form["publicatiestatus"] = TopicStatusOptions.revoked
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
         form["promoot"] = True
 
         with freeze_time("2024-09-27T12:00:00-00:00"):
@@ -185,14 +187,14 @@ class TestTopicAdmin(WebTest):
         topic.refresh_from_db()
         self.assertEqual(topic.officiele_titel, "changed official title")
         self.assertEqual(topic.omschrijving, "changed description")
-        self.assertEqual(topic.publicatiestatus, TopicStatusOptions.revoked)
+        self.assertEqual(topic.publicatiestatus, PublicationStatusOptions.revoked)
         self.assertTrue(topic.promoot)
         self.assertEqual(str(topic.registratiedatum), "2024-09-24 12:00:00+00:00")
         self.assertEqual(str(topic.laatst_gewijzigd_datum), "2024-09-27 12:00:00+00:00")
 
     def test_topic_admin_delete(self):
         topic = TopicFactory.create(
-            publicatiestatus=TopicStatusOptions.published,
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
         )
         reverse_url = reverse(

@@ -150,7 +150,7 @@ class TestDocumentAdmin(WebTest):
 
         self.assertEqual(response.status_code, 200)
 
-        with self.subTest("filter_on_registratiedatum"):
+        with self.subTest("filter on registratiedatum"):
             search_response = response.click(description=_("Today"), index=0)
 
             self.assertEqual(search_response.status_code, 200)
@@ -161,7 +161,7 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, document2.identifier, 1)
 
-        with self.subTest("filter_on_creatiedatum"):
+        with self.subTest("filter on creatiedatum"):
             search_response = response.click(description=_("Today"), index=1)
 
             self.assertEqual(search_response.status_code, 200)
@@ -172,7 +172,7 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, document2.identifier, 1)
 
-        with self.subTest("filter_on_publicatiestatus"):
+        with self.subTest("filter on publicatiestatus"):
             search_response = response.click(
                 description=str(PublicationStatusOptions.concept.label)
             )

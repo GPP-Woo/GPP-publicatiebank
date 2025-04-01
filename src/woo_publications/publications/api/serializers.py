@@ -338,3 +338,26 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
+
+
+class TopicSerializer(serializers.ModelSerializer[Topic]):
+    publicaties = serializers.SlugRelatedField(
+        queryset=Publication.objects.all(),
+        slug_field="uuid",
+        help_text=_("The publication attached to this topic."),
+        many=True,
+        source="publication_set",
+    )
+
+    class Meta:  # pyright: ignore
+        model = Topic
+        fields = (
+            "uuid",
+            "publicaties",
+            "officiele_titel",
+            "omschrijving",
+            "publicatiestatus",
+            "promoot",
+            "registratiedatum",
+            "laatst_gewijzigd_datum",
+        )

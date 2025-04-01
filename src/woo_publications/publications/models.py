@@ -30,11 +30,7 @@ from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
 
-from .constants import (
-    DocumentActionTypeOptions,
-    PublicationStatusOptions,
-    TopicStatusOptions,
-)
+from .constants import DocumentActionTypeOptions, PublicationStatusOptions
 from .typing import DocumentActions
 
 # when the document isn't specified both the service and uuid needs to be unset
@@ -59,8 +55,8 @@ class Topic(models.Model):
     publicatiestatus = models.CharField(
         _("status"),
         max_length=12,
-        choices=TopicStatusOptions.choices,
-        default=TopicStatusOptions.published,
+        choices=PublicationStatusOptions.choices,
+        default=PublicationStatusOptions.published,
     )
     promoot = models.BooleanField(
         _("promote"),

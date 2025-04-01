@@ -15,11 +15,7 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ..constants import (
-    DocumentActionTypeOptions,
-    PublicationStatusOptions,
-    TopicStatusOptions,
-)
+from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
@@ -890,7 +886,7 @@ class TestTopicAdminAuditLogging(WebTest):
         form["omschrijving"] = (
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         )
-        form["publicatiestatus"] = TopicStatusOptions.published
+        form["publicatiestatus"] = PublicationStatusOptions.published
         form["promoot"] = False
 
         with freeze_time("2024-09-24T12:00:00-00:00"):
@@ -910,7 +906,7 @@ class TestTopicAdminAuditLogging(WebTest):
                 "uuid": str(added_item.uuid),
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "publicatiestatus": TopicStatusOptions.published,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "promoot": False,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
@@ -923,7 +919,7 @@ class TestTopicAdminAuditLogging(WebTest):
     def test_topic_admin_log_update(self):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
-                publicatiestatus=TopicStatusOptions.published,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
             )
 
@@ -938,7 +934,7 @@ class TestTopicAdminAuditLogging(WebTest):
         form = response.forms["topic_form"]
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
-        form["publicatiestatus"] = TopicStatusOptions.revoked
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
         form["promoot"] = True
 
         with freeze_time("2024-09-27T12:00:00-00:00"):
@@ -975,7 +971,7 @@ class TestTopicAdminAuditLogging(WebTest):
                     "uuid": str(topic.uuid),
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
-                    "publicatiestatus": TopicStatusOptions.revoked,
+                    "publicatiestatus": PublicationStatusOptions.revoked,
                     "promoot": True,
                     "registratiedatum": "2024-09-24T12:00:00Z",
                     "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
@@ -990,7 +986,7 @@ class TestTopicAdminAuditLogging(WebTest):
             topic = TopicFactory.create(
                 officiele_titel="Lorem Ipsum",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                publicatiestatus=TopicStatusOptions.published,
+                publicatiestatus=PublicationStatusOptions.published,
                 promoot=True,
             )
 
@@ -1021,7 +1017,7 @@ class TestTopicAdminAuditLogging(WebTest):
                 "uuid": str(topic.uuid),
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "publicatiestatus": TopicStatusOptions.published,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "promoot": True,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",

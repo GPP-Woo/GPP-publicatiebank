@@ -713,6 +713,138 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
+  /api/v1/onderwerpen:
+    get:
+      operationId: onderwerpenList
+      description: Returns a paginated result list of existing topics.
+      summary: All available topics.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management infrastructure.
+          With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: publicaties
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: |-
+          Filter topics that belong to a publication. When you specify multiple publications, topics belonging to any publication are returned.
+
+          Filter values should be the UUID of the publications.
+        explode: true
+        style: form
+      - in: query
+        name: publicatiestatus
+        schema:
+          type: string
+          title: Status
+          enum:
+          - concept
+          - gepubliceerd
+          - ingetrokken
+        description: |-
+          Filter topics based on the publication status.
+
+          * `gepubliceerd` - Gepubliceerd
+          * `concept` - Concept
+          * `ingetrokken` - Ingetrokken
+      tags:
+      - Onderwerpen
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTopicList'
+          description: ''
+  /api/v1/onderwerpen/{uuid}:
+    get:
+      operationId: onderwerpenRetrieve
+      description: Retrieve a specific topic.
+      summary: Retrieve a specific topic.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management infrastructure.
+          With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Onderwerpen
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+          description: ''
   /api/v1/organisaties:
     get:
       operationId: organisatiesList
@@ -2119,6 +2251,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Theme'
+    PaginatedTopicList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
     PatchedDocumentUpdate:
       type: object
       properties:
@@ -2472,6 +2627,54 @@ components:
       - identifier
       - naam
       - subThemes
+    Topic:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        publicaties:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: The publication attached to this topic.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        omschrijving:
+          type: string
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          title: Status
+        promoot:
+          type: boolean
+          title: Promote
+          description: Marker to indicate that this topic will be promoted within
+            the frontend application.
+        registratiedatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Geregistreerd op
+          description: System timestamp reflecting when the topic was registered in
+            the database.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: System timestamp reflecting when the topic was last modified
+            in the database.
+      required:
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publicaties
+      - registratiedatum
+      - uuid
     VertrouwelijkheidaanduidingEnum:
       enum:
       - openbaar

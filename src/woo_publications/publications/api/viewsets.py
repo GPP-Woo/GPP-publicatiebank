@@ -30,21 +30,23 @@ from woo_publications.logging.service import (
     extract_audit_parameters,
 )
 
+from ...logging.api_tools import AuditTrailRetrieveMixin
 from ..constants import PublicationStatusOptions
-from ..models import Document, Publication
+from ..models import Document, Publication, Topic
 from ..tasks import (
     index_document,
     index_publication,
     remove_document_from_index,
     remove_publication_from_index,
 )
-from .filters import DocumentFilterSet, PublicationFilterSet
+from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentSerializer,
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
     FilePartSerializer,
     PublicationSerializer,
+    TopicSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -384,3 +386,24 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
                 )
             case _:  # pragma: no cover
                 pass
+
+
+@extend_schema(tags=["Onderwerpen"])
+@extend_schema_view(
+    list=extend_schema(
+        summary=_("All available topics."),
+        description=_("Returns a paginated result list of existing topics."),
+    ),
+    retrieve=extend_schema(
+        summary=_("Retrieve a specific topic."),
+        description=_("Retrieve a specific topic."),
+    ),
+)
+class TopicViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
+    queryset = Topic.objects.prefetch_related("publication_set").order_by(
+        "-registratiedatum"
+    )
+    serializer_class = TopicSerializer
+    filterset_class = TopicFilterSet
+    lookup_field = "uuid"
+    lookup_value_converter = "uuid"

@@ -226,3 +226,22 @@ class PublicationFilterSet(FilterSet):
         return queryset.filter(
             Q(officiele_titel__icontains=value) | Q(verkorte_titel__icontains=value)
         )
+
+
+class TopicFilterSet(FilterSet):
+    publicaties = filters.ModelMultipleChoiceFilter(
+        help_text=_(
+            "Filter topics that belong to a publication. "
+            "When you specify multiple publications, topics belonging to any "
+            "publication are returned.\n\n"
+            "Filter values should be the UUID of the publications."
+        ),
+        field_name="publication__uuid",
+        to_field_name="uuid",
+        queryset=Publication.objects.all(),
+        widget=CSVWidget(),
+    )
+    publicatiestatus = filters.ChoiceFilter(
+        help_text=_("Filter topics based on the publication status."),
+        choices=PublicationStatusOptions.choices,
+    )
