@@ -8,11 +8,6 @@ class PublicationStatusOptions(models.TextChoices):
     revoked = "ingetrokken", _("Revoked")
 
 
-class TopicStatusOptions(models.TextChoices):
-    published = "gepubliceerd", _("Published")
-    revoked = "ingetrokken", _("Revoked")
-
-
 class DocumentActionTypeOptions(models.TextChoices):
     signed = "ondertekening", _("Signed")
     received = "ontvangst", _("Received")

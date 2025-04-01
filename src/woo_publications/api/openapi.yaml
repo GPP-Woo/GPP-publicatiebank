@@ -2587,14 +2587,6 @@ components:
         * `ondertekening` - Ondertekend
         * `ontvangst` - Ontvangen
         * `vaststelling` - Vastgesteld
-    StatusEnum:
-      enum:
-      - gepubliceerd
-      - ingetrokken
-      type: string
-      description: |-
-        * `gepubliceerd` - Gepubliceerd
-        * `ingetrokken` - Ingetrokken
     Theme:
       type: object
       properties:
@@ -2639,10 +2631,10 @@ components:
           maxLength: 255
         omschrijving:
           type: string
-        status:
+        publicatiestatus:
           allOf:
-          - $ref: '#/components/schemas/StatusEnum'
-          default: gepubliceerd
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          title: Status
         promoot:
           type: boolean
           title: Promote

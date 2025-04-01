@@ -14,7 +14,7 @@ from woo_publications.api.tests.mixins import (
     TokenAuthMixin,
 )
 
-from ..constants import PublicationStatusOptions, TopicStatusOptions
+from ..constants import PublicationStatusOptions
 from .factories import PublicationFactory, TopicFactory
 
 AUDIT_HEADERS = {
@@ -60,14 +60,14 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             topic = TopicFactory.create(
                 officiele_titel="title one",
                 omschrijving="bla bla bla",
-                publicatiestatus=TopicStatusOptions.published,
+                publicatiestatus=PublicationStatusOptions.published,
                 promoot=True,
             )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic2 = TopicFactory.create(
                 officiele_titel="title two",
                 omschrijving="description",
-                publicatiestatus=TopicStatusOptions.revoked,
+                publicatiestatus=PublicationStatusOptions.revoked,
                 promoot=False,
             )
 
@@ -86,7 +86,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publicaties": [str(publication.uuid)],
                 "officieleTitel": "title one",
                 "omschrijving": "bla bla bla",
-                "status": PublicationStatusOptions.published,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "promoot": True,
                 "registratiedatum": "2024-09-25T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:00:00+02:00",
@@ -100,7 +100,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publicaties": [str(publication2.uuid)],
                 "officieleTitel": "title two",
                 "omschrijving": "description",
-                "status": PublicationStatusOptions.revoked,
+                "publicatiestatus": PublicationStatusOptions.revoked,
                 "promoot": False,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
