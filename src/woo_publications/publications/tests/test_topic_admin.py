@@ -77,11 +77,13 @@ class TestTopicAdmin(WebTest):
             topic = TopicFactory.create(
                 publicatiestatus=TopicStatusOptions.published,
                 officiele_titel="title one",
+                promoot=True,
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             topic2 = TopicFactory.create(
                 publicatiestatus=TopicStatusOptions.revoked,
                 officiele_titel="title two",
+                promoot=False,
             )
         reverse_url = reverse("admin:publications_topic_changelist")
 
@@ -90,7 +92,7 @@ class TestTopicAdmin(WebTest):
 
         self.assertEqual(response.status_code, 200)
 
-        with self.subTest("filter_on_registratiedatum"):
+        with self.subTest("filter on registratiedatum"):
             search_response = response.click(description=_("Today"), index=0)
 
             self.assertEqual(search_response.status_code, 200)
@@ -104,10 +106,19 @@ class TestTopicAdmin(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(topic2.uuid), 1)
 
-        with self.subTest("filter_on_publicatiestatus"):
+        with self.subTest("filter on publicatiestatus"):
             search_response = response.click(
                 description=str(TopicStatusOptions.published.label)
             )
+
+            self.assertEqual(search_response.status_code, 200)
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(topic.uuid), 1)
+
+        with self.subTest("filter on promoot"):
+            search_response = response.click(description=_("Yes"), index=0)
 
             self.assertEqual(search_response.status_code, 200)
 
