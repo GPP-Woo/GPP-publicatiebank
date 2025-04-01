@@ -15,13 +15,13 @@ Documenten
 
 Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *document* hoort altijd bij een publicatie.
 
-In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in het "WOO Publicaties"-component.
+In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in het publicatiebank-component.
 Op dit scherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **document toevoegen** waarmee een registratie toegevoegd kan worden.
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment worden de acties **Geselecteerde documenten verwijderen**, **Verstuur de geselecteerde documenten naar de zoekindex** en **Verwijder de geselecteerde documenten uit de zoekindex** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *document*-regsitraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment worden de acties **Geselecteerde documenten verwijderen**, **Verstuur de geselecteerde documenten naar de zoekindex** en **Verwijder de geselecteerde documenten uit de zoekindex** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *document*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *document*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, creatiedatum en/of publicatiestatus**.
 * Bij een *document*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -36,23 +36,23 @@ Hierop zien we:
 * Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
 
-Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
 **Algemene velden**
 
 * ``Publicatie``. Het *document* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*
-* ``Identificatie``. Het unieke kenmerk dat intern aan het *document* is toegekend, bijvoorbeeld door het zaaksysteem of het DMS. (DiWoo : ``identifier``)
-* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het document. (DiWoo : ``officieleTitel``)
-* ``Verkorte titel``. De verkorte titel / citeertitel van het document. (DiWoo : ``verkorteTitel``)
-* ``Omschrijving``. Een beknopte omschrijving / samenvatting van de inhoud van het document. (DiWoo : ``omschrijving``)
-* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo : ``creatiedatum``)
-* ``Bestandsformaat``. *In ontwikkeling* (DiWoo : ``format``)
+* ``Identificatie``. Het unieke kenmerk dat intern aan het *document* is toegekend, bijvoorbeeld door het zaaksysteem of het DMS. (DiWoo: ``identifier``)
+* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het document. (DiWoo: ``officieleTitel``)
+* ``Verkorte titel``. De verkorte titel / citeertitel van het document. (DiWoo: ``verkorteTitel``)
+* ``Omschrijving``. Een beknopte omschrijving / samenvatting van de inhoud van het document. (DiWoo: ``omschrijving``)
+* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo: ``creatiedatum``)
+* ``Bestandsformaat``. *In ontwikkeling* (DiWoo: ``format``)
 * ``Bestandsnaam``. Naam van het bestand zoals deze op de harde schijf opgeslagen wordt.
 * ``Bestandsomvang`` Bestandsgrootte, in aantal bytes.
 * ``Status``. De publicatiestatus van het document. "Gepubliceerd" betekent dat het document online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het document voor het laatst gewijzigd is.
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo : ``identifier``)
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 
 **Documenthandelingen**
 
@@ -88,13 +88,13 @@ Een *publicatie* bestaat uit een aantal gegevens met doorgaans een of meerdere *
 
     In het veld ``Omschrijving`` kan de mededeling opgenomen worden.
 
-In het beheerscherm van de *publicaties* wordt een lijst getoond van alle *publicatie*-registraties, die zijn opgeslagen in het "WOO Publicaties"-component.
+In het beheerscherm van de *publicaties* wordt een lijst getoond van alle *publicatie*-registraties, die zijn opgeslagen in het publicatiebank-component.
 Op dit scherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **publicatie toevoegen** waarmee een registratie toegevoegd kan worden.
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex** en **Verwijder de geselecteerde publicaties uit de zoekindex** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-regsitraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex** en **Verwijder de geselecteerde publicaties uit de zoekindex** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *publicatie*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
 * Bij een *publicatie*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -112,18 +112,18 @@ Hierop zien we:
 * Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
 
-Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-* ``Informatiecategorieën`` De informatiecategorieën die het soort informatie verduidelijken binnen de publicatie (DiWoo : ``informatieCategorieen``)
-* ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo : ``publisher``)
-* ``Verantwoordelijke`` De organisatie die de verantwoordelijk is voor de publicatie. (DiWoo : ``verantwoordelijke``)
-* ``Opsteller`` De organisatie die de publicatie opgesteld heeft. (DiWoo : ``opsteller``)
-* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van de publicatie. (DiWoo : ``officieleTitel``)
-* ``Verkorte titel``. De verkorte titel / citeertitel van de publicatie. (DiWoo : ``verkorteTitel``)
-* ``Omschrijving``. Een beknopte omschrijving / samenvatting van de publicatie. (DiWoo : ``omschrijving``)
+* ``Informatiecategorieën`` De informatiecategorieën die het soort informatie verduidelijken binnen de publicatie (DiWoo: ``informatieCategorieen``)
+* ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo: ``publisher``)
+* ``Verantwoordelijke`` De organisatie die de verantwoordelijk is voor de publicatie. (DiWoo: ``verantwoordelijke``)
+* ``Opsteller`` De organisatie die de publicatie opgesteld heeft. (DiWoo: ``opsteller``)
+* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van de publicatie. (DiWoo: ``officieleTitel``)
+* ``Verkorte titel``. De verkorte titel / citeertitel van de publicatie. (DiWoo: ``verkorteTitel``)
+* ``Omschrijving``. Een beknopte omschrijving / samenvatting van de publicatie. (DiWoo: ``omschrijving``)
 * ``Status``. De status van de publicatie. "Gepubliceerd" betekent dat de publicatie online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
   Let op, als je een publicatie intrekt, dan worden de documenten met de huidige status "Gepubliceerd" automatisch ook ingetrokken!
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo : ``identifier``)
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop de publicatie nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
 
@@ -134,13 +134,13 @@ Onderwerpen
 
 Een *onderwerp* bestaat uit een aantal gegevens en kan gekoppeld zijn aan een of meerdere *publicaties* (TODO) (zie hierboven).
 
-In het beheerscherm van de *onderwerp* wordt een lijst getoond van alle *onderwerp*-registraties, die zijn opgeslagen in het "WOO Publicaties"-component.
+In het beheerscherm van het *onderwerp* wordt een lijst getoond van alle *onderwerp*-registraties die zijn opgeslagen in de publicatiebank.
 Op dit scherm zijn de volgende acties mogelijk:
 
 * Rechtsboven zit een knop **onderwerp toevoegen** waarmee een registratie toegevoegd kan worden.
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-regsitraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *onderwerp*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
 * Bij een *onderwerp*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -155,12 +155,12 @@ Hierop zien we:
 * Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
 
-Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp. (DiWoo : ``officieleTitel``)
-* ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp. (DiWoo : ``omschrijving``)
+* ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp.
+* ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp.
 * ``Status``. De status van het onderwerp. "Gepubliceerd" betekent dat het onderwerp online vindbaar en raadpleegbaar is. "Ingetrokken" is offline voor de buitenwereld.
 * ``Promoot``. TODO
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo : ``identifier``)
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het onderwerp nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het onderwerp voor het laatst gewijzigd was.

@@ -27,14 +27,14 @@ Overigens gelden op de plicht tot openbaarmaking ook een aantal uitzonderingen (
 
 Voor de aansluiting op de landelijke `Woo-index`_ wordt ten zeerste geadviseerd om documenten te voorzien van metadata conform de `DiWoo`_-standaard. Deze standaard vereist onder meer dat in de metadata wordt vastgelegd op grond van welke *informatiecategorie(ën)* het document actief openbaar is gemaakt.
 
-De 17 *informatiecategorieën* zijn opgenomen in de landelijke waardelijst `Woo informatiecategorieën`_. Deze lijst is al standaard opgenomen in het "Woo Publicaties"-component. Daarnaast bestaat de mogelijkheid, zoals we hieronder zullen beschrijven, om in het kader van de *inspanningsverplichting* hier voor de eigen organisatie *extra informatiecategorieën* aan toe te voegen.
+De 17 *informatiecategorieën* zijn opgenomen in de landelijke waardelijst `Woo informatiecategorieën`_. Deze lijst is al standaard opgenomen in het publicatiebank-component. Daarnaast bestaat de mogelijkheid, zoals we hieronder zullen beschrijven, om in het kader van de *inspanningsverplichting* hier voor de eigen organisatie *extra informatiecategorieën* aan toe te voegen.
 
-In het "WOO Publicaties"-component leggen we de *informatiecategorieën* vast op de *publicatie* (in ontwikkeling). Dezelfde *informatiecategorieën* gelden voor de daaraan gekoppelde *documenten*.
+In het publicatiebank-component leggen we de *informatiecategorieën* vast op de *publicatie* (in ontwikkeling). Dezelfde *informatiecategorieën* gelden voor de daaraan gekoppelde *documenten*.
 
 Beheerscherm
 ~~~~~~~~~~~~
 
-In het beheerscherm van de *informatiecategorieën* wordt een lijst getoond van alle *informatiecategorieën* die zijn opgeslagen in het "WOO Publicaties"-component.
+In het beheerscherm van de *informatiecategorieën* wordt een lijst getoond van alle *informatiecategorieën* die zijn opgeslagen in het publicatiebank-component.
 
 Standaard staan de landelijke 17 verplichte *informatiecategorieën* hier al in. Zij zijn te herkennen aan de waarde "Waardelijst" in de kolom `Oorsprong` van de lijst. Zij kunnen niet gewijzigd worden.
 Daarnaast bestaat er de mogelijkheid om voor de eigen organisatie *extra informatiecategorieën* toe te voegen. Deze zijn te herkennen aan de waarde "Zelf-toegevoegd item" in de kolom `Oorsprong` van de lijst. Deze kunnen indien nodig gewijzigd worden.
@@ -42,9 +42,9 @@ Daarnaast bestaat er de mogelijkheid om voor de eigen organisatie *extra informa
 Op het beheerscherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **informatiecategorie toevoegen** waarmee een *informatiecategorie* toegevoegd kan worden.
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee naar *informatiecategorieën* gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee naar *informatiecategorieën* gezocht kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere informatiecategorieën**. Op dit moment wordt alleen de actie **Geselecteerde informatiecategorieën verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *informatiecategorieën* aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden. 
+* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong**.
 * Bij een *informatiecategorie* kan op de `naam` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
 * Bij een *informatiecategorie* kan op **Toon logs** (op één na rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
@@ -59,7 +59,7 @@ Hierop zien we:
 * Als de *informatiecatgeorie* door de organisatie zelf is toegevoegd, linksonder de mogelijkheid om **wijzigingen op te slaan** (indien van toepassing). Er kan voor gekozen worden om na het opslaan direct een nieuwe *informatiecategorie* aan te maken of om direct de huidige *informatiecategorie* nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de *informatiecategorie* te **verwijderen**.
 
-Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
 * ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant".
 * ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten".
@@ -106,7 +106,7 @@ Beheerscherm
 ~~~~~~~~~~~~
 
 In het beheerscherm van de *organisaties* wordt een lijst getoond van alle
-*organisaties* die zijn opgeslagen in het "WOO Publicaties"-component.
+*organisaties* die zijn opgeslagen in het publicatiebank-component.
 
 Standaard staan organisaties uit drie officiële waardelijsten hier al in (zie toelichting
 hierboven).
@@ -121,9 +121,9 @@ toe te voegen. Deze zijn de herkennen aan de waarde "Zelf-toegevoegd item" in de
 Op het beheerscherm zijn de volgende acties mogelijk:
 
 * Rechtsboven zit een knop **organisatie toevoegen** waarmee een *organisatie* toegevoegd kan worden.
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee naar *organisaties* gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee naar *organisaties* gezocht kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere organisaties**.
-  Op dit moment wordt alleen de actie **Geselecteerde organisaties verwijderen** ondersteund. 
+  Op dit moment wordt alleen de actie **Geselecteerde organisaties verwijderen** ondersteund.
   Merk op dat het mogelijk is om in de lijst één of meerdere *organisaties* aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *organisaties*. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong en/ofof status**.
@@ -138,9 +138,9 @@ Wanneer bij een *organisatie* op de *naam* wordt geklikt, dan opent een scherm m
 * Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe *organisatie* aan te maken of om direct de huidige *organisatie* nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de *organisatie* te **verwijderen**.
 
-Op een organisatie zijn de volgende gegevens beschikbaar. Op het scherm wordt verplichte velden **dikgedrukt** weergegeven.
+Op een organisatie zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-* ``Is actief``. Een selectievakje die aangeeft of de organisatie geactiveerd is of niet. 
+* ``Is actief``. Een selectievakje die aangeeft of de organisatie geactiveerd is of niet.
   Om een organisatie te activeren klik je het vinkje aan, om een organisatie te deactiveren schakel je het vinkje uit, en sla de wijzigingen op.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding die aangeeft uit welke landelijke waardelijst de organisatie komt, of dat deze zelf toegevoegd is door een beheerder.
@@ -169,7 +169,7 @@ Om de vindbaarheid van openbare documenten te bevorderen ondersteunt de `DiWoo`_
 
 De landelijke thema-lijst is ook standaard ingelezen in en wordt ontsloten met het "Woo-publicaties"-component, zodat deze gebruikt kan worden bij het registreren en vindbaar maken van openbare documenten.
 
-In het "WOO Publicaties"-component leggen we de *thema's* vast op de *publicatie* (in ontwikkeling). Dezelfde *thema's* gelden voor de daaraan gekoppelde *documenten*.
+In het publicatiebank-component leggen we de *thema's* vast op de *publicatie* (in ontwikkeling). Dezelfde *thema's* gelden voor de daaraan gekoppelde *documenten*.
 
 De `DiWoo`_-standaard ondersteunt alleen het gebruik van de landelijke waardelijst `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Ook op de `Woo-index`_ kan alleen op deze *thema's*  gezocht worden naar openbare documenten.
 
@@ -180,7 +180,7 @@ In het beheerscherm van de *thema's* wordt een lijst getoond van alle thema's di
 
 Op het beheerscherm zijn de volgende acties mogelijk:
 
-* Bovenaan zit een zoekveld met en knop **Zoeken** waarmee naar *thema's* gezocht kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee naar *thema's* gezocht kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere informatiecategorieën**. Op dit moment wordt alleen de actie **Geselecteerde thema's verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *thema's* aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *thema's*.
 * Bij een *thema* kan op de `naam` geklikt worden om **de details in te zien**.
