@@ -7,7 +7,11 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.service import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import (
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+    TopicStatusOptions,
+)
 from ..models import Document, Publication, Topic
 
 
@@ -338,3 +342,31 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
+
+
+class TopicSerializer(serializers.ModelSerializer[Topic]):
+    publicaties = serializers.SlugRelatedField(
+        queryset=Publication.objects.all(),
+        slug_field="uuid",
+        help_text=_("The publication attached to this topic."),
+        many=True,
+        source="publication_set",
+    )
+    status = serializers.ChoiceField(
+        choices=TopicStatusOptions.choices,
+        default=TopicStatusOptions.published,
+        source="publicatiestatus",
+    )
+
+    class Meta:  # pyright: ignore
+        model = Topic
+        fields = (
+            "uuid",
+            "publicaties",
+            "officiele_titel",
+            "omschrijving",
+            "status",
+            "promoot",
+            "registratiedatum",
+            "laatst_gewijzigd_datum",
+        )

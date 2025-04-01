@@ -12,6 +12,7 @@ from woo_publications.metadata.api.viewsets import (
 from woo_publications.publications.api.viewsets import (
     DocumentViewSet,
     PublicationViewSet,
+    TopicViewSet,
 )
 
 app_name = "api"
@@ -24,6 +25,7 @@ router.register("informatiecategorieen", InformationCategoryViewSet)
 router.register("organisaties", OrganisationViewSet)
 router.register("publicaties", PublicationViewSet)
 router.register("themas", ThemeViewSet)
+router.register("onderwerpen", TopicViewSet)
 
 urlpatterns = [
     path("docs/", RedirectView.as_view(pattern_name="api:api-docs")),
