@@ -46,7 +46,7 @@ class TestInformationCategoryAdmin(WebTest):
 
         form = response.forms["changelist-search"]
 
-        with self.subTest("filter_on_naam"):
+        with self.subTest("filter on naam"):
             form["q"] = "first item"
 
             search_response = form.submit()
@@ -57,7 +57,7 @@ class TestInformationCategoryAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, theme.identifier, 1)
 
-        with self.subTest("filter_on_identifier"):
+        with self.subTest("filter on identifier"):
             form["q"] = theme2.identifier
 
             search_response = form.submit()

@@ -136,7 +136,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         data = response.json()
         self.assertEqual(data["count"], 2)
 
-        with self.subTest("first_item_in_response_with_expected_data"):
+        with self.subTest("first item in response with expected data"):
             expected_first_item_data = {
                 "uuid": str(publication.uuid),
                 "informatieCategorieen": [str(ic.uuid)],
@@ -156,7 +156,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(data["results"][0], expected_first_item_data)
 
-        with self.subTest("second_item_in_response_with_expected_data"):
+        with self.subTest("second item in response with expected_data"):
             expected_second_item_data = {
                 "uuid": str(publication2.uuid),
                 "informatieCategorieen": [str(ic2.uuid)],
@@ -228,7 +228,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         }
 
         # registratiedatum
-        with self.subTest("registratiedatum_ascending"):
+        with self.subTest("registratiedatum ascending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "registratiedatum"},
@@ -242,7 +242,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][0], expected_first_item_data)
             self.assertEqual(data["results"][1], expected_second_item_data)
 
-        with self.subTest("registratiedatum_descending"):
+        with self.subTest("registratiedatum descending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "-registratiedatum"},
@@ -257,7 +257,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][1], expected_first_item_data)
 
         # Officiele titel
-        with self.subTest("officiele_title_ascending"):
+        with self.subTest("officiele title ascending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "officiele_titel"},
@@ -271,7 +271,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][0], expected_first_item_data)
             self.assertEqual(data["results"][1], expected_second_item_data)
 
-        with self.subTest("officiele_title_descending"):
+        with self.subTest("officiele title descending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "-officiele_titel"},
@@ -286,7 +286,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][1], expected_first_item_data)
 
         # short titel
-        with self.subTest("verkorte_titel_ascending"):
+        with self.subTest("verkorte titel ascending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "verkorte_titel"},
@@ -300,7 +300,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][0], expected_first_item_data)
             self.assertEqual(data["results"][1], expected_second_item_data)
 
-        with self.subTest("verkorte_titel_descending"):
+        with self.subTest("verkorte titel descending"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"sorteer": "-verkorte_titel"},
@@ -737,7 +737,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         }
 
         with (
-            self.subTest("filter_with_existing_eigenaar"),
+            self.subTest("filter with existing eigenaar"),
             freeze_time("2024-10-01T00:00:00-00:00"),
         ):
             response = self.client.get(
@@ -753,7 +753,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["count"], 1)
             self.assertEqual(data["results"][0], expected_first_item_data)
 
-        with self.subTest("filter_with_none_existing_eigenaar"):
+        with self.subTest("filter with none existing eigenaar"):
             response = self.client.get(
                 reverse("api:publication-list"),
                 {"eigenaar": "39834594397543"},
@@ -767,7 +767,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["count"], 0)
 
         with (
-            self.subTest("filter_with_no_input"),
+            self.subTest("filter with no input"),
             freeze_time("2024-10-01T00:00:00-00:00"),
         ):
             response = self.client.get(

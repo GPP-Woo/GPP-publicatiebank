@@ -57,7 +57,7 @@ class TestInformationCategoryAdmin(WebTest):
 
         form = response.forms["changelist-search"]
 
-        with self.subTest("filter_on_naam"):
+        with self.subTest("filter on naam"):
             form["q"] = "first item"
             search_response = form.submit()
 
@@ -67,7 +67,7 @@ class TestInformationCategoryAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, information_category.identifier, 1)
 
-        with self.subTest("filter_on_identifier"):
+        with self.subTest("filter on identifier"):
             form["q"] = information_category2.identifier
             search_response = form.submit()
 
@@ -94,7 +94,7 @@ class TestInformationCategoryAdmin(WebTest):
 
         response = self.app.get(url)
 
-        with self.subTest("filter_on_oorsprong"):
+        with self.subTest("filter on oorsprong"):
             search_response = response.click(description=_("Value list"))
 
             self.assertEqual(search_response.status_code, 200)

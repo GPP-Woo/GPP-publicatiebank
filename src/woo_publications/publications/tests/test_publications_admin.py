@@ -114,7 +114,7 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 200)
 
-        with self.subTest("filter_on_registratiedatum"):
+        with self.subTest("filter on registratiedatum"):
             search_response = response.click(description=_("Today"), index=0)
 
             self.assertEqual(search_response.status_code, 200)
@@ -128,7 +128,7 @@ class TestPublicationsAdmin(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(publication2.uuid), 1)
 
-        with self.subTest("filter_on_publicatiestatus"):
+        with self.subTest("filter on publicatiestatus"):
             search_response = response.click(
                 description=str(PublicationStatusOptions.concept.label)
             )

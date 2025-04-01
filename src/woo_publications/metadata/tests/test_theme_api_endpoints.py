@@ -83,7 +83,7 @@ class ThemeTests(TokenAuthMixin, APITestCase):
             ],
         }
 
-        with self.subTest("first_item_in_response_with_expected_data"):
+        with self.subTest("first item in response with expected_data"):
             self.assertEqual(data["results"][0], expected_first_item_data)
 
     def test_detail_theme(self):
