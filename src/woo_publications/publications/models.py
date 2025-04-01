@@ -92,6 +92,15 @@ class Topic(models.Model):
     def __str__(self):
         return self.officiele_titel
 
+    def clean(self):
+        super().clean()
+        if not self.pk and self.publicatiestatus == PublicationStatusOptions.revoked:
+            raise ValidationError(
+                _("You cannot create a {revoked} topic.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                )
+            )
+
 
 class Publication(ModelOwnerMixin, models.Model):
     id: int  # implicitly provided by django

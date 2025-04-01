@@ -135,29 +135,47 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
-        form["officiele_titel"] = "Lorem Ipsum"
-        form["omschrijving"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-        )
-        form["publicatiestatus"] = PublicationStatusOptions.published
-        form["promoot"] = False
-        form.submit(name="_save")
 
-        added_item = Topic.objects.order_by("-pk").first()
-        assert added_item is not None
-        self.assertEqual(added_item.officiele_titel, "Lorem Ipsum")
-        self.assertEqual(
-            added_item.omschrijving,
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        )
-        self.assertEqual(
-            added_item.publicatiestatus, PublicationStatusOptions.published
-        )
-        self.assertFalse(added_item.promoot)
-        self.assertEqual(str(added_item.registratiedatum), "2024-09-25 00:14:00+00:00")
-        self.assertEqual(
-            str(added_item.laatst_gewijzigd_datum), "2024-09-25 00:14:00+00:00"
-        )
+        with self.subTest("Cannot create a revoked topic"):
+            form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
+
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 200)
+            self.assertFormError(
+                submit_response.context["adminform"],
+                None,
+                _("You cannot create a {revoked} topic.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                ),
+            )
+
+        with self.subTest("complete data creates topic"):
+            form["officiele_titel"] = "Lorem Ipsum"
+            form["omschrijving"] = (
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            )
+            form["publicatiestatus"] = PublicationStatusOptions.published
+            form["promoot"] = False
+            form.submit(name="_save")
+
+            added_item = Topic.objects.order_by("-pk").first()
+            assert added_item is not None
+            self.assertEqual(added_item.officiele_titel, "Lorem Ipsum")
+            self.assertEqual(
+                added_item.omschrijving,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            )
+            self.assertEqual(
+                added_item.publicatiestatus, PublicationStatusOptions.published
+            )
+            self.assertFalse(added_item.promoot)
+            self.assertEqual(
+                str(added_item.registratiedatum), "2024-09-25 00:14:00+00:00"
+            )
+            self.assertEqual(
+                str(added_item.laatst_gewijzigd_datum), "2024-09-25 00:14:00+00:00"
+            )
 
     def test_topic_admin_update(self):
         with freeze_time("2024-09-24T12:00:00-00:00"):
