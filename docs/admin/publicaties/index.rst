@@ -115,7 +115,7 @@ Hierop zien we:
 Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
 * ``Informatiecategorieën`` De informatiecategorieën die het soort informatie verduidelijken binnen de publicatie (DiWoo: ``informatieCategorieen``)
-* ``Onderwerpen`` De onderwerpen die het soort informative verduidelijken binnen de publiatie
+* ``Onderwerpen`` Onderwerpen omvatten maatschappelijk relevante kwesties waar meerdere publicaties aan gekoppeld zijn. Onderwerpen kunnen tientallen jaren relevant blijven.
 * ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo: ``publisher``)
 * ``Verantwoordelijke`` De organisatie die de verantwoordelijk is voor de publicatie. (DiWoo: ``verantwoordelijke``)
 * ``Opsteller`` De organisatie die de publicatie opgesteld heeft. (DiWoo: ``opsteller``)
