@@ -2268,7 +2268,9 @@ components:
           items:
             type: string
             format: uuid
-          description: The topics clarify the kind of information present in the publication.
+          description: Topics capture socially relevant information that spans multiple
+            publications. They can remain relevant for tens of years and exceed the
+            life span of a single publication.
         publisher:
           type: string
           format: uuid
@@ -2364,7 +2366,9 @@ components:
           items:
             type: string
             format: uuid
-          description: The topics clarify the kind of information present in the publication.
+          description: Topics capture socially relevant information that spans multiple
+            publications. They can remain relevant for tens of years and exceed the
+            life span of a single publication.
         publisher:
           type: string
           format: uuid

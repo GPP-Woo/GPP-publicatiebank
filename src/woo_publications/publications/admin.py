@@ -21,7 +21,7 @@ from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
-from .formset import DocumentAuditLogInlineformset, ThroughModelInlineFormset
+from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication, Topic
 from .tasks import (
     index_document,
@@ -404,7 +404,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
 
 class PublicationInline(admin.StackedInline):
-    formset = ThroughModelInlineFormset
     model = Publication.onderwerpen.through
     autocomplete_fields = ("publication",)
     extra = 0

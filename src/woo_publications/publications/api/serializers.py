@@ -229,7 +229,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         queryset=Topic.objects.all(),
         slug_field="uuid",
         help_text=_(
-            "The topics clarify the kind of information present in the publication."
+            "Topics capture socially relevant information that spans multiple publications. "
+            "They can remain relevant for tens of years and exceed the life span of a single publication."
         ),
         many=True,
         allow_empty=True,

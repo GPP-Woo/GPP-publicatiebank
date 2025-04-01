@@ -101,7 +101,9 @@ class AdminAuditLogMixin:
                 request, obj, inline, prefix
             )
         )
-        kwargs["_django_user"] = request.user
+        if issubclass(inline.formset, AuditLogInlineformset):
+            kwargs["_django_user"] = request.user
+
         return kwargs
 
 
