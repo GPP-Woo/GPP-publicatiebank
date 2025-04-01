@@ -1204,6 +1204,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["onderwerpen"], [str(topic.uuid)])
+            self.assertTrue(publication.onderwerpen.filter(uuid=topic.uuid).exists())
 
         with self.subTest("update onderwerpen with empty list"):
             data = {
@@ -1222,6 +1223,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["onderwerpen"], [])
+            self.assertFalse(publication.onderwerpen.filter(uuid=topic.uuid).exists())
 
     def test_update_revoked_publication_cannot_be_modified(self):
         ic = InformationCategoryFactory.create(
