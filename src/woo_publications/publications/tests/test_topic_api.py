@@ -54,7 +54,7 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
         self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url)
 
 
-class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
+class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     def test_list_topics(self):
         with freeze_time("2024-09-25T12:00:00-00:00"):
             topic = TopicFactory.create(
@@ -163,3 +163,53 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             ) % {"value": str(fake_publication)}
 
             self.assertEqual(data["publicaties"], [error_message])
+
+    def test_list_topic_filter_publicatiestatus(self):
+        published = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        concept = TopicFactory.create(publicatiestatus=PublicationStatusOptions.concept)
+        revoked = TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        list_url = reverse("api:topic-list")
+
+        with self.subTest("filter on published topics"):
+            response = self.client.get(
+                list_url,
+                {"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(published.uuid))
+
+        with self.subTest("filter on concept topics"):
+            response = self.client.get(
+                list_url,
+                {"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(concept.uuid))
+
+        with self.subTest("filter on revoked topics"):
+            response = self.client.get(
+                list_url,
+                {"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(revoked.uuid))

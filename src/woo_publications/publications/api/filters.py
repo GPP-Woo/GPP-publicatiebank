@@ -241,3 +241,7 @@ class TopicFilterSet(FilterSet):
         queryset=Publication.objects.all(),
         widget=CSVWidget(),
     )
+    publicatiestatus = filters.ChoiceFilter(
+        help_text=_("Filter topics based on the publication status."),
+        choices=PublicationStatusOptions.choices,
+    )

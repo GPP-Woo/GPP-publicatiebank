@@ -770,6 +770,21 @@ paths:
           Filter values should be the UUID of the publications.
         explode: true
         style: form
+      - in: query
+        name: publicatiestatus
+        schema:
+          type: string
+          title: Status
+          enum:
+          - concept
+          - gepubliceerd
+          - ingetrokken
+        description: |-
+          Filter topics based on the publication status.
+
+          * `gepubliceerd` - Gepubliceerd
+          * `concept` - Concept
+          * `ingetrokken` - Ingetrokken
       tags:
       - Onderwerpen
       security:
