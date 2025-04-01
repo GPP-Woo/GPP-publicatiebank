@@ -406,6 +406,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "officiele_titel",
         "publicatiestatus",
         "registratiedatum",
+        "promoot",
         "uuid",
         "show_actions",
     )
@@ -421,13 +422,14 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_filter = (
         "registratiedatum",
         "publicatiestatus",
+        "promoot",
     )
     date_hierarchy = "registratiedatum"
     # TODO: uncomment actions when we offer the data to GPP-zoeken
     # actions = [sync_to_index, remove_from_index]
 
     @admin.display(description=_("actions"))
-    def show_actions(self, obj: Document) -> str:
+    def show_actions(self, obj: Topic) -> str:
         actions = [
             get_logs_link(obj),
         ]
