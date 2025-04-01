@@ -47,6 +47,8 @@ class TestTopicAdmin(WebTest):
                 officiele_titel="title two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
             )
+        PublicationFactory.create(onderwerpen=[topic])
+        publication2 = PublicationFactory.create(onderwerpen=[topic2])
         reverse_url = reverse("admin:publications_topic_changelist")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -55,20 +57,28 @@ class TestTopicAdmin(WebTest):
 
         form = response.forms["changelist-search"]
 
-        with self.subTest("filter_on_officiele_title"):
+        with self.subTest("filter on uuid"):
+            form["q"] = str(topic2.uuid)
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+
+        with self.subTest("filter on publication uuid"):
+            form["q"] = str(publication2.uuid)
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(topic2.uuid), 1)
+
+        with self.subTest("filter on officiele title"):
             form["q"] = "title one"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(topic.uuid), 1)
-
-        with self.subTest("filter_on_uuid"):
-            form["q"] = str(topic2.uuid)
-            search_response = form.submit()
-
-            self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-uuid", 1)
 
     def test_topic_admin_list_filter(self):
         self.app.set_user(user=self.user)
