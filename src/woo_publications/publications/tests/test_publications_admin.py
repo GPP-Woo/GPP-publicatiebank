@@ -66,7 +66,15 @@ class TestPublicationsAdmin(WebTest):
 
         form = response.forms["changelist-search"]
 
-        with self.subTest("filter_on_officiele_title"):
+        with self.subTest("filter on uuid"):
+            form["q"] = str(publication2.uuid)
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-officiele_titel", 1)
+            self.assertContains(search_response, "title two", 1)
+
+        with self.subTest("filter on officiele_title"):
             form["q"] = "title one"
             search_response = form.submit()
 
@@ -74,21 +82,13 @@ class TestPublicationsAdmin(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(publication.uuid), 1)
 
-        with self.subTest("filter_on_verkorte_titel"):
-            form["q"] = "two"
+        with self.subTest("filter on verkorte_titel"):
+            form["q"] = "one"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-uuid", 1)
-            self.assertContains(search_response, str(publication2.uuid), 1)
-
-        with self.subTest("filter_on_verkorte_titel"):
-            form["q"] = str(publication.uuid)
-            search_response = form.submit()
-
-            self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-uuid", 1)
-            self.assertContains(search_response, "title one", 1)
+            self.assertContains(search_response, str(publication.uuid), 1)
 
     def test_publication_list_filter(self):
         self.app.set_user(user=self.user)

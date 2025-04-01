@@ -22,7 +22,7 @@ from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
-from .models import Document, Publication
+from .models import Document, Publication, Topic
 from .tasks import (
     index_document,
     index_publication,
@@ -32,6 +32,7 @@ from .tasks import (
 )
 
 
+# TODO: extend this func to work with `Topic`
 @admin.action(
     description=_("Send the selected %(verbose_name_plural)s to the search index")
 )
@@ -83,6 +84,7 @@ def sync_to_index(
     )
 
 
+# TODO: extend this func to work with `Topic`
 @admin.action(
     description=_("Remove the selected %(verbose_name_plural)s from the search index")
 )
@@ -324,6 +326,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "was_assciated_with",
     )
     search_fields = (
+        "uuid",
         "identifier",
         "officiele_titel",
         "verkorte_titel",
@@ -395,3 +398,43 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     @admin.display(description=_("was associated with"))
     def was_assciated_with(self, obj: Document) -> Organisation | None:
         return obj.publicatie.verantwoordelijke
+
+
+@admin.register(Topic)
+class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    list_display = (
+        "officiele_titel",
+        "publicatiestatus",
+        "registratiedatum",
+        "promoot",
+        "uuid",
+        "show_actions",
+    )
+    readonly_fields = (
+        "uuid",
+        "registratiedatum",
+        "laatst_gewijzigd_datum",
+    )
+    search_fields = (
+        "uuid",
+        "officiele_titel",
+    )
+    list_filter = (
+        "registratiedatum",
+        "publicatiestatus",
+        "promoot",
+    )
+    date_hierarchy = "registratiedatum"
+    # TODO: uncomment actions when we offer the data to GPP-zoeken
+    # actions = [sync_to_index, remove_from_index]
+
+    @admin.display(description=_("actions"))
+    def show_actions(self, obj: Topic) -> str:
+        actions = [
+            get_logs_link(obj),
+        ]
+        return format_html_join(
+            " | ",
+            '<a href="{}">{}</a>',
+            actions,
+        )

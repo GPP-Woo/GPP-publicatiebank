@@ -15,9 +15,13 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication
-from .factories import DocumentFactory, PublicationFactory
+from ..constants import (
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+    TopicStatusOptions,
+)
+from ..models import Document, Publication, Topic
+from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
@@ -849,6 +853,167 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "soort_handeling": DocumentActionTypeOptions.declared,
             },
             "_cached_object_repr": "title one",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+
+@disable_admin_mfa()
+class TestSubjectAdminAuditLogging(WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+
+    def test_topic_admin_log_create(self):
+        reverse_url = reverse("admin:publications_topic_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "Lorem Ipsum"
+        form["omschrijving"] = (
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        )
+        form["publicatiestatus"] = TopicStatusOptions.published
+        form["promoot"] = False
+
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            form.submit(name="_save")
+
+        added_item = Topic.objects.get()
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.create,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": added_item.pk,
+                "uuid": str(added_item.uuid),
+                "officiele_titel": "Lorem Ipsum",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "publicatiestatus": TopicStatusOptions.published,
+                "promoot": False,
+                "registratiedatum": "2024-09-24T12:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_topic_admin_log_update(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            topic = TopicFactory.create(
+                publicatiestatus=TopicStatusOptions.published,
+                officiele_titel="title one",
+            )
+
+        reverse_url = reverse(
+            "admin:publications_topic_change",
+            kwargs={"object_id": topic.pk},
+        )
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "changed official title"
+        form["omschrijving"] = "changed description"
+        form["publicatiestatus"] = TopicStatusOptions.revoked
+        form["promoot"] = True
+
+        with freeze_time("2024-09-27T12:00:00-00:00"):
+            response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(TimelineLogProxy.objects.count(), 2)
+
+        topic.refresh_from_db()
+
+        read_log, update_log = TimelineLogProxy.objects.order_by("pk")
+
+        with self.subTest("read audit logging"):
+            expected_data = {
+                "event": Events.read,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "_cached_object_repr": "title one",
+            }
+
+            self.assertEqual(read_log.extra_data, expected_data)
+
+        with self.subTest("update audit logging"):
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": topic.pk,
+                    "uuid": str(topic.uuid),
+                    "officiele_titel": "changed official title",
+                    "omschrijving": "changed description",
+                    "publicatiestatus": TopicStatusOptions.revoked,
+                    "promoot": True,
+                    "registratiedatum": "2024-09-24T12:00:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
+                },
+                "_cached_object_repr": "changed official title",
+            }
+
+            self.assertEqual(update_log.extra_data, expected_data)
+
+    def test_topic_admin_log_delete(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            topic = TopicFactory.create(
+                officiele_titel="Lorem Ipsum",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                publicatiestatus=TopicStatusOptions.published,
+                promoot=True,
+            )
+
+        reverse_url = reverse(
+            "admin:publications_topic_delete",
+            kwargs={"object_id": topic.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms[1]
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.delete,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": topic.pk,
+                "uuid": str(topic.uuid),
+                "officiele_titel": "Lorem Ipsum",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "publicatiestatus": TopicStatusOptions.published,
+                "promoot": True,
+                "registratiedatum": "2024-09-24T12:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
+            },
+            "_cached_object_repr": "Lorem Ipsum",
         }
 
         self.assertEqual(log.extra_data, expected_data)

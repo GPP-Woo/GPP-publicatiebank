@@ -30,7 +30,11 @@ from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
 
-from .constants import DocumentActionTypeOptions, PublicationStatusOptions
+from .constants import (
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+    TopicStatusOptions,
+)
 from .typing import DocumentActions
 
 # when the document isn't specified both the service and uuid needs to be unset
@@ -503,3 +507,54 @@ class Document(ModelOwnerMixin, models.Model):
                 self.save(update_fields=("lock", "upload_complete"))
 
         return completed
+
+
+class Topic(models.Model):
+    id: int  # implicitly provided by django
+    uuid = models.UUIDField(
+        _("UUID"),
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    officiele_titel = models.CharField(
+        _("official title"),
+        max_length=255,
+    )
+    omschrijving = models.TextField(_("description"), blank=True)
+    publicatiestatus = models.CharField(
+        _("status"),
+        max_length=12,
+        choices=TopicStatusOptions.choices,
+        default=TopicStatusOptions.published,
+    )
+    promoot = models.BooleanField(
+        _("promote"),
+        default=False,
+        help_text=_("TODO"),
+    )
+    registratiedatum = models.DateTimeField(
+        _("created on"),
+        auto_now_add=True,
+        editable=False,
+        help_text=_(
+            "System timestamp reflecting when the topic was registered in the "
+            "database."
+        ),
+    )
+    laatst_gewijzigd_datum = models.DateTimeField(
+        _("last modified"),
+        auto_now=True,
+        editable=False,
+        help_text=_(
+            "System timestamp reflecting when the topic was last modified in the "
+            "database."
+        ),
+    )
+
+    class Meta:  # pyright: ignore
+        verbose_name = _("topic")
+        verbose_name_plural = _("topics")
+
+    def __str__(self):
+        return self.officiele_titel

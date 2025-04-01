@@ -67,7 +67,7 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms["changelist-search"]
 
-        with self.subTest("filter_on_identifier"):
+        with self.subTest("filter on identifier"):
             form["q"] = publication.identifier
 
             search_response = form.submit()
@@ -78,7 +78,7 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, publication.identifier)
             self.assertNotContains(search_response, publication2.identifier)
 
-        with self.subTest("filter_on_officiele_title"):
+        with self.subTest("filter on officiele_title"):
             form["q"] = "title one"
             search_response = form.submit()
 
@@ -86,21 +86,21 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, publication.identifier, 1)
 
-        with self.subTest("filter_on_verkorte_titel"):
+        with self.subTest("filter on uuid"):
+            form["q"] = str(publication.uuid)
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-identifier", 1)
+            self.assertContains(search_response, publication.identifier, 1)
+
+        with self.subTest("filter on verkorte_titel"):
             form["q"] = "two"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, publication2.identifier, 1)
-
-        with self.subTest("filter_on_verkorte_titel"):
-            form["q"] = str(publication.identifier)
-            search_response = form.submit()
-
-            self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, "title one", 1)
+            self.assertContains(search_response, "title two", 1)
 
     def test_document_admin_list_filters(self):
         self.app.set_user(user=self.user)
