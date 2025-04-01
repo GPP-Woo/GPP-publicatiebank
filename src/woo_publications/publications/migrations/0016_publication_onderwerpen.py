@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="onderwerpen",
             field=models.ManyToManyField(
                 blank=True,
-                help_text="The topics clarify the kind of information present in the publication.",
+                help_text="Topics capture socially relevant information that spans multiple publications. They can remain relevant for tens of years and exceed the life span of a single publication.",
                 to="publications.topic",
                 verbose_name="topics",
             ),
