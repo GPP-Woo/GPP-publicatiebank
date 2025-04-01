@@ -10,7 +10,7 @@ from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 
 from ..constants import PublicationStatusOptions
-from ..models import Document, Publication
+from ..models import Document, Publication, Topic
 
 
 def _filter_informatie_categorieen(
@@ -186,6 +186,18 @@ class PublicationFilterSet(FilterSet):
         widget=CSVWidget(),
         method=_filter_informatie_categorieen,
     )
+    onderwerpen = filters.ModelMultipleChoiceFilter(
+        help_text=_(
+            "Filter publications that belong to a particular topic. "
+            "When you specify multiple topics, publications belonging to any "
+            "topic are returned.\n\n"
+            "Filter values should be the UUID of the topics."
+        ),
+        field_name="onderwerpen__uuid",
+        to_field_name="uuid",
+        queryset=Topic.objects.all(),
+        widget=CSVWidget(),
+    )
 
     sorteer = filters.OrderingFilter(
         help_text=_("Order on."),
@@ -203,6 +215,7 @@ class PublicationFilterSet(FilterSet):
             "eigenaar",
             "publicatiestatus",
             "informatie_categorieen",
+            "onderwerpen",
             "registratiedatum_vanaf",
             "registratiedatum_tot",
             "registratiedatum_tot_en_met",

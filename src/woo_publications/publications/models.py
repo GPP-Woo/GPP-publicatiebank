@@ -43,6 +43,60 @@ _DOCUMENT_NOT_SET = models.Q(document_service=None, document_uuid=None)
 _DOCUMENT_SET = ~models.Q(document_service=None) & ~models.Q(document_uuid=None)
 
 
+class Topic(models.Model):
+    id: int  # implicitly provided by django
+    uuid = models.UUIDField(
+        _("UUID"),
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    officiele_titel = models.CharField(
+        _("official title"),
+        max_length=255,
+    )
+    omschrijving = models.TextField(_("description"), blank=True)
+    publicatiestatus = models.CharField(
+        _("status"),
+        max_length=12,
+        choices=TopicStatusOptions.choices,
+        default=TopicStatusOptions.published,
+    )
+    promoot = models.BooleanField(
+        _("promote"),
+        default=False,
+        help_text=_(
+            "Marker to indicate that this topic will be promoted within the "
+            "frontend application."
+        ),
+    )
+    registratiedatum = models.DateTimeField(
+        _("created on"),
+        auto_now_add=True,
+        editable=False,
+        help_text=_(
+            "System timestamp reflecting when the topic was registered in the "
+            "database."
+        ),
+    )
+    laatst_gewijzigd_datum = models.DateTimeField(
+        _("last modified"),
+        auto_now=True,
+        editable=False,
+        help_text=_(
+            "System timestamp reflecting when the topic was last modified in the "
+            "database."
+        ),
+    )
+
+    class Meta:  # pyright: ignore
+        verbose_name = _("topic")
+        verbose_name_plural = _("topics")
+
+    def __str__(self):
+        return self.officiele_titel
+
+
 class Publication(ModelOwnerMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
@@ -57,6 +111,15 @@ class Publication(ModelOwnerMixin, models.Model):
         help_text=_(
             "The information categories clarify the kind of information present in the publication."
         ),
+    )
+    onderwerpen = models.ManyToManyField(
+        Topic,
+        verbose_name=_("topics"),
+        help_text=_(
+            "Topics capture socially relevant information that spans multiple publications. "
+            "They can remain relevant for tens of years and exceed the life span of a single publication."
+        ),
+        blank=True,
     )
     publisher = models.ForeignKey(
         "metadata.organisation",
@@ -507,57 +570,3 @@ class Document(ModelOwnerMixin, models.Model):
                 self.save(update_fields=("lock", "upload_complete"))
 
         return completed
-
-
-class Topic(models.Model):
-    id: int  # implicitly provided by django
-    uuid = models.UUIDField(
-        _("UUID"),
-        unique=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    officiele_titel = models.CharField(
-        _("official title"),
-        max_length=255,
-    )
-    omschrijving = models.TextField(_("description"), blank=True)
-    publicatiestatus = models.CharField(
-        _("status"),
-        max_length=12,
-        choices=TopicStatusOptions.choices,
-        default=TopicStatusOptions.published,
-    )
-    promoot = models.BooleanField(
-        _("promote"),
-        default=False,
-        help_text=_(
-            "Marker to indicate that this topic will be promoted within the "
-            "frontend application."
-        ),
-    )
-    registratiedatum = models.DateTimeField(
-        _("created on"),
-        auto_now_add=True,
-        editable=False,
-        help_text=_(
-            "System timestamp reflecting when the topic was registered in the "
-            "database."
-        ),
-    )
-    laatst_gewijzigd_datum = models.DateTimeField(
-        _("last modified"),
-        auto_now=True,
-        editable=False,
-        help_text=_(
-            "System timestamp reflecting when the topic was last modified in the "
-            "database."
-        ),
-    )
-
-    class Meta:  # pyright: ignore
-        verbose_name = _("topic")
-        verbose_name_plural = _("topics")
-
-    def __str__(self):
-        return self.officiele_titel

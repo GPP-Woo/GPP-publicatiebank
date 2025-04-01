@@ -1063,6 +1063,19 @@ paths:
           De filterwaarden zijn UUIDs van de categorieën. Gebruik komma's om meerdere waarden van elkaar te scheiden.
         explode: true
         style: form
+      - in: query
+        name: onderwerpen
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+        description: |-
+          Filter publications that belong to a particular topic. When you specify multiple topics, publications belonging to any topic are returned.
+
+          Filter values should be the UUID of the topics.
+        explode: true
+        style: form
       - name: page
         required: false
         in: query
@@ -2250,6 +2263,14 @@ components:
             format: uuid
           readOnly: true
           description: De informatiecategorieën voor in de sitemap.
+        onderwerpen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Topics capture socially relevant information that spans multiple
+            publications. They can remain relevant for tens of years and exceed the
+            life span of a single publication.
         publisher:
           type: string
           format: uuid
@@ -2340,6 +2361,14 @@ components:
             format: uuid
           readOnly: true
           description: De informatiecategorieën voor in de sitemap.
+        onderwerpen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Topics capture socially relevant information that spans multiple
+            publications. They can remain relevant for tens of years and exceed the
+            life span of a single publication.
         publisher:
           type: string
           format: uuid
