@@ -19,7 +19,7 @@ Informatiecategorieën
 Toelichting
 ~~~~~~~~~~~
 
-De `Wet open overheid`_ beschrijft 17 *informatiecategorieën*. Documenten die onder minstens één van deze categorieën vallen, moeten *actief* openbaar gemaakt worden. Dat wil zeggen dat een bestuursorgaan deze online moet publiceren, ook wanneer daar niet door een burger expliciet om gevraagd is in een *Woo-verzoek*. 
+De `Wet open overheid`_ beschrijft 17 *informatiecategorieën*. Documenten die onder minstens één van deze categorieën vallen, moeten *actief* openbaar gemaakt worden. Dat wil zeggen dat een bestuursorgaan deze online moet publiceren, ook wanneer daar niet door een burger expliciet om gevraagd is in een *Woo-verzoek*.
 
 Daarnaast vraagt de wet om ook documenten openbaar te maken die buiten deze *informatiecategorieën* vallen. Hiervoor geldt geen "harde" plicht, maar wel een *inspanningsverplichting*.
 
@@ -56,16 +56,26 @@ Hierop zien we:
 * Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *informatiecategorie*.
 * Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de beheerinterface zijn uitgevoerd op de *informatiecategorie*.
 * Als de *informatiecategorie* tot de landelijke lijst behoort, linksonder een knop om het scherm te **sluiten** en terug te keren naar de lijst.
-* Als de *informatiecatgeorie* door de organisatie zelf is toegevoegd, linksonder de mogelijkheid om **wijzigingen op te slaan** (indien van toepassing). Er kan voor gekozen worden om na het opslaan direct een nieuwe *informatiecategorie* aan te maken of om direct de huidige *informatiecategorie* nogmaals te wijzigen.
+* Als de *informatiecategorie* door de organisatie zelf is toegevoegd, linksonder de mogelijkheid om **wijzigingen op te slaan** (indien van toepassing). Er kan voor gekozen worden om na het opslaan direct een nieuwe *informatiecategorie* aan te maken of om direct de huidige *informatiecategorie* nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de *informatiecategorie* te **verwijderen**.
 
 Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
+
+**Algemene velden**
 
 * ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant".
 * ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten".
 * ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding van op welke wijze de *informatiecategorie* is toegevoegd; via de landelijke waardelijst of zelf toegevoegd.
+
+**Bewaartermijn**
+
+* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
+* ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
+* ``Archiefnominatie``. Een selectievakje die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
+* ``Bewaartermijn``. Het aantal jaar hoe lang de *publicaties* intact blijven tot actie genomen moet worden.
+* ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
 
 Organisaties
 ------------
