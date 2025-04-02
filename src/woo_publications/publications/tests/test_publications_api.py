@@ -839,6 +839,23 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["count"], 1)
             self.assertEqual(data["results"][0]["uuid"], str(revoked.uuid))
 
+        with self.subTest("filter on multiple status choices"):
+            response = self.client.get(
+                list_url,
+                {
+                    "publicatiestatus": f"{PublicationStatusOptions.published},{PublicationStatusOptions.revoked}"
+                },
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(data["results"], "uuid", str(published.uuid))
+            self.assertItemInResults(data["results"], "uuid", str(revoked.uuid))
+
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_detail_publication(self):
         ic = InformationCategoryFactory.create(
