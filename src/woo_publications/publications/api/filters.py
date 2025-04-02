@@ -93,9 +93,10 @@ class DocumentFilterSet(FilterSet):
     eigenaar = OwnerFilter(
         help_text=_("Filter documents based on the owner identifier of the object."),
     )
-    publicatiestatus = filters.ChoiceFilter(
+    publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter documents based on the publication status."),
         choices=PublicationStatusOptions.choices,
+        widget=CSVWidget(),
     )
     identifier = filters.CharFilter(
         help_text="Search the document based on the identifier field.",
@@ -150,9 +151,10 @@ class PublicationFilterSet(FilterSet):
     eigenaar = OwnerFilter(
         help_text=_("Filter publications based on the owner identifier of the object."),
     )
-    publicatiestatus = filters.ChoiceFilter(
+    publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter publications based on the publication status."),
         choices=PublicationStatusOptions.choices,
+        widget=CSVWidget(),
     )
     registratiedatum_vanaf = filters.DateTimeFilter(
         help_text=_(
@@ -241,7 +243,8 @@ class TopicFilterSet(FilterSet):
         queryset=Publication.objects.all(),
         widget=CSVWidget(),
     )
-    publicatiestatus = filters.ChoiceFilter(
+    publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter topics based on the publication status."),
         choices=PublicationStatusOptions.choices,
+        widget=CSVWidget(),
     )
