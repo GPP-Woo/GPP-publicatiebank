@@ -448,6 +448,12 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     # TODO: uncomment actions when we offer the data to GPP-zoeken
     # actions = [sync_to_index, remove_from_index]
 
+    def get_queryset(self, request: HttpRequest):
+        qs = super().get_queryset(request)
+        if request.path == reverse("admin:autocomplete"):
+            qs = qs.order_by("officiele_titel")
+        return qs
+
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Topic) -> str:
         actions = [
