@@ -11,6 +11,8 @@ from zgw_consumers.client import build_client
 from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
 
+from woo_publications.utils.multipart_encoder import MultipartEncoder
+
 from .typing import EIOCreateBody, EIOCreateResponseBody, EIORetrieveBody
 
 __all__ = ["get_client"]
@@ -122,10 +124,18 @@ class DocumentenClient(NLXClient):
         issues, we can consider httpx, aiohttp or an entirely different solution to
         optimize.
         """
+        # Verified manually that the underlying urllib3 uses 16MB chunks, see
+        # urllib3.connection.HTTPConnection.blocksize
+        encoder = MultipartEncoder(
+            fields={
+                "lock": lock,
+                "inhoud": ("part.bin", file, "application/octet-stream"),
+            }
+        )
         response = self.put(
             f"bestandsdelen/{file_part_uuid}",
-            data={"lock": lock},
-            files={"inhoud": file},
+            data=encoder,
+            headers={"Content-Type": encoder.content_type},
         )
         response.raise_for_status()
 
