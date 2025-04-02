@@ -23,11 +23,49 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
         "naam",
         "identifier",
         "oorsprong",
+        "archiefnominatie",
+        "bewaartermijn",
         "show_actions",
         "move_up_down_links",
     )
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "naam",
+                    "naam_meervoud",
+                    "definitie",
+                    "oorsprong",
+                    "identifier",
+                    "uuid",
+                )
+            },
+        ),
+        (
+            _("Archiving"),
+            {
+                "fields": (
+                    "bron_bewaartermijn",
+                    "selectiecategorie",
+                    "archiefnominatie",
+                    "bewaartermijn",
+                    "toelichting_bewaartermijn",
+                )
+            },
+        ),
+    )
+    _value_list_readonly_fields = (
+        "uuid",
+        "identifier",
+        "naam",
+        "naam_meervoud",
+        "definitie",
+        "oorsprong",
+    )
     readonly_fields = (
         "uuid",
+        "identifier",
         "oorsprong",
     )
     search_fields = (
@@ -36,10 +74,11 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
     )
     list_filter = ("oorsprong",)
 
-    def has_change_permission(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None):
         if obj and obj.oorsprong == InformationCategoryOrigins.value_list:
-            return False
-        return super().has_change_permission(request, obj)
+            return self._value_list_readonly_fields
+
+        return super().get_readonly_fields(request, obj)
 
     def get_urls(self):
         default_urls = super().get_urls()
