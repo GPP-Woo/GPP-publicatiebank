@@ -1448,7 +1448,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Publication'
+              $ref: '#/components/schemas/PublicationUpdate'
         required: true
       security:
       - tokenAuth: []
@@ -1457,7 +1457,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Publication'
+                $ref: '#/components/schemas/PublicationUpdate'
           description: ''
     patch:
       operationId: publicatiesPartialUpdate
@@ -1502,7 +1502,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedPublication'
+              $ref: '#/components/schemas/PatchedPublicationUpdate'
       security:
       - tokenAuth: []
       responses:
@@ -1510,7 +1510,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Publication'
+                $ref: '#/components/schemas/PublicationUpdate'
           description: ''
     delete:
       operationId: publicatiesDestroy
@@ -1690,6 +1690,14 @@ paths:
           description: ''
 components:
   schemas:
+    ArchiefnominatieEnum:
+      enum:
+      - blijvend_bewaren
+      - vernietigen
+      type: string
+      description: |-
+        * `blijvend_bewaren` - Retain
+        * `vernietigen` - Destroy
     CatalogiAPIDocumentType:
       type: object
       properties:
@@ -2409,7 +2417,7 @@ components:
           type: boolean
           title: Actief
           description: Geeft de actief-status van de organisatie aan.
-    PatchedPublication:
+    PatchedPublicationUpdate:
       type: object
       properties:
         uuid:
@@ -2473,15 +2481,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
-          description: |2-
-
-            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
-
-            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
         registratiedatum:
           type: string
           format: date-time
@@ -2497,6 +2496,35 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        bronBewaartermijn:
+          type: string
+          title: Retention policy source
+          description: 'The source of the retention policy (example: Selectielijst
+            gemeenten 2020).'
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          title: Selection category
+          description: 'The category as specified in the provided retention policy
+            source (example: 20.1.2).'
+          maxLength: 255
+        archiefnominatie:
+          allOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          title: Archive action
+          description: |-
+            Determines if the archived data will be retained or destroyed.
+
+            * `blijvend_bewaren` - Retain
+            * `vernietigen` - Destroy
+        archiefactiedatum:
+          type: string
+          format: date
+          title: Archive action date
+          description: Date when the publication will be archived or destroyed.
+        toelichtingBewaartermijn:
+          type: string
+          title: Retention policy explanation
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
@@ -2595,6 +2623,154 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        bronBewaartermijn:
+          type: string
+          title: Retention policy source
+          description: 'The source of the retention policy (example: Selectielijst
+            gemeenten 2020).'
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          title: Selection category
+          description: 'The category as specified in the provided retention policy
+            source (example: 20.1.2).'
+          maxLength: 255
+        archiefnominatie:
+          allOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          title: Archive action
+          description: |-
+            Determines if the archived data will be retained or destroyed.
+
+            * `blijvend_bewaren` - Retain
+            * `vernietigen` - Destroy
+        archiefactiedatum:
+          type: string
+          format: date
+          title: Archive action date
+          description: Date when the publication will be archived or destroyed.
+        toelichtingBewaartermijn:
+          type: string
+          title: Retention policy explanation
+      required:
+      - archiefactiedatum
+      - bronBewaartermijn
+      - diWooInformatieCategorieen
+      - eigenaar
+      - informatieCategorieen
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publisher
+      - registratiedatum
+      - uuid
+    PublicationUpdate:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        informatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: De informatiecategorie verduidelijkt de soort informatie die
+            in de publicatie voorkomt.
+        diWooInformatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+          description: De informatiecategorieën voor in de sitemap.
+        onderwerpen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Topics capture socially relevant information that spans multiple
+            publications. They can remain relevant for tens of years and exceed the
+            life span of a single publication.
+        publisher:
+          type: string
+          format: uuid
+          description: De organisatie die de publicatie publiceert.
+        verantwoordelijke:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die verantwoordelijk is voor de publicatie en
+            haar inhoud.
+        opsteller:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          readOnly: true
+          nullable: true
+          description: De persoon die de publicatie aangemaakt heeft, afgeleid uit
+            de auditlogs.
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          title: Status
+        registratiedatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Geregistreerd op
+          description: Systeemdatum en -tijd wanneer de publicatie in de databank
+            opgeslagen is. Niet te verwarren met de creatiedatum van de publicatie,
+            die typisch *voor* de registratiedatum valt.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
+            is in de database.
+        bronBewaartermijn:
+          type: string
+          title: Retention policy source
+          description: 'The source of the retention policy (example: Selectielijst
+            gemeenten 2020).'
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          title: Selection category
+          description: 'The category as specified in the provided retention policy
+            source (example: 20.1.2).'
+          maxLength: 255
+        archiefnominatie:
+          allOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          title: Archive action
+          description: |-
+            Determines if the archived data will be retained or destroyed.
+
+            * `blijvend_bewaren` - Retain
+            * `vernietigen` - Destroy
+        archiefactiedatum:
+          type: string
+          format: date
+          title: Archive action date
+          description: Date when the publication will be archived or destroyed.
+        toelichtingBewaartermijn:
+          type: string
+          title: Retention policy explanation
       required:
       - diWooInformatieCategorieen
       - eigenaar

@@ -142,8 +142,43 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "verkorte_titel",
         "publicatiestatus",
         "registratiedatum",
+        "archiefnominatie",
+        "archiefactiedatum",
         "uuid",
         "show_actions",
+    )
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "informatie_categorieen",
+                    "onderwerpen",
+                    "publisher",
+                    "verantwoordelijke",
+                    "opsteller",
+                    "officiele_titel",
+                    "verkorte_titel",
+                    "omschrijving",
+                    "publicatiestatus",
+                    "registratiedatum",
+                    "laatst_gewijzigd_datum",
+                    "uuid",
+                )
+            },
+        ),
+        (
+            _("Archiving"),
+            {
+                "fields": (
+                    "bron_bewaartermijn",
+                    "selectiecategorie",
+                    "archiefnominatie",
+                    "archiefactiedatum",
+                    "toelichting_bewaartermijn",
+                )
+            },
+        ),
     )
     autocomplete_fields = (
         "informatie_categorieen",

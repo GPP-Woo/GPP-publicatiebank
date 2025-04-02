@@ -46,6 +46,7 @@ from .serializers import (
     DocumentUpdateSerializer,
     FilePartSerializer,
     PublicationSerializer,
+    PublicationUpdateSerializer,
     TopicSerializer,
 )
 
@@ -347,6 +348,12 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
+
+    def get_serializer_class(self):
+        action = getattr(self, "action", None)
+        if action in ["update", "partial_update"]:
+            return PublicationUpdateSerializer
+        return super().get_serializer_class()
 
     @transaction.atomic()
     def perform_create(self, serializer):
