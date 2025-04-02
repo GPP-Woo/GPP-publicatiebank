@@ -174,18 +174,22 @@ paths:
       - in: query
         name: publicatiestatus
         schema:
-          type: string
-          title: Status
-          enum:
-          - concept
-          - gepubliceerd
-          - ingetrokken
+          type: array
+          items:
+            type: string
+            title: Status
+            enum:
+            - concept
+            - gepubliceerd
+            - ingetrokken
         description: |-
           Filter documenten op publicatiestatus.
 
           * `gepubliceerd` - Gepubliceerd
           * `concept` - Concept
           * `ingetrokken` - Ingetrokken
+        explode: true
+        style: form
       - in: query
         name: registratiedatumTot
         schema:
@@ -773,18 +777,22 @@ paths:
       - in: query
         name: publicatiestatus
         schema:
-          type: string
-          title: Status
-          enum:
-          - concept
-          - gepubliceerd
-          - ingetrokken
+          type: array
+          items:
+            type: string
+            title: Status
+            enum:
+            - concept
+            - gepubliceerd
+            - ingetrokken
         description: |-
           Filter topics based on the publication status.
 
           * `gepubliceerd` - Gepubliceerd
           * `concept` - Concept
           * `ingetrokken` - Ingetrokken
+        explode: true
+        style: form
       tags:
       - Onderwerpen
       security:
@@ -1223,18 +1231,22 @@ paths:
       - in: query
         name: publicatiestatus
         schema:
-          type: string
-          title: Status
-          enum:
-          - concept
-          - gepubliceerd
-          - ingetrokken
+          type: array
+          items:
+            type: string
+            title: Status
+            enum:
+            - concept
+            - gepubliceerd
+            - ingetrokken
         description: |-
           Filter publicaties op publicatiestatus.
 
           * `gepubliceerd` - Gepubliceerd
           * `concept` - Concept
           * `ingetrokken` - Ingetrokken
+        explode: true
+        style: form
       - in: query
         name: registratiedatumTot
         schema:
