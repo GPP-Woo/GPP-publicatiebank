@@ -4,10 +4,10 @@ from django_webtest import WebTest
 from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.constants import Events
 from woo_publications.logging.models import TimelineLogProxy
 
-from ...constants import ArchiveNominationChoices
 from ..constants import InformationCategoryOrigins, OrganisationOrigins
 from ..models import InformationCategory, Organisation
 from .factories import InformationCategoryFactory, OrganisationFactory
