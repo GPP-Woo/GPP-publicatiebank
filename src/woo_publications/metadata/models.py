@@ -1,10 +1,13 @@
 import uuid
 
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ordered_model.models import OrderedModel
 from treebeard.mp_tree import MP_Node
+
+from woo_publications.constants import ArchiveNominationChoices
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
 from .managers import InformationCategoryManager, OrganisationManager, ThemeManager
@@ -57,6 +60,43 @@ class InformationCategory(OrderedModel):
         blank=False,
         max_length=15,
         default=InformationCategoryOrigins.custom_entry,
+    )
+    # Retention fields:
+    bron_bewaartermijn = models.CharField(
+        _("retention policy source"),
+        help_text=_(
+            "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+        ),
+        max_length=255,
+        blank=False,
+        default="",
+    )
+    selectiecategorie = models.CharField(
+        _("selection category"),
+        help_text=_(
+            "The category as specified in the provided retention policy source (example: 20.1.2)."
+        ),
+        max_length=255,
+        blank=True,
+    )
+    archiefnominatie = models.CharField(
+        _("archive action"),
+        help_text=_("Determines if the archived data will be retained or destroyed."),
+        choices=ArchiveNominationChoices.choices,
+        max_length=50,
+        blank=False,
+        default=ArchiveNominationChoices.retain,
+    )
+    bewaartermijn = models.PositiveIntegerField(
+        _("retention period"),
+        help_text=_("The retention period in years."),
+        validators=[MaxValueValidator(999)],
+        default=10,
+        blank=False,
+    )
+    toelichting_bewaartermijn = models.TextField(
+        _("retention policy explanation"),
+        blank=True,
     )
 
     objects = InformationCategoryManager()
