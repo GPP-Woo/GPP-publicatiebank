@@ -19,6 +19,7 @@ from .typing import (
     IndexPublicationBody,
     IndexPublicationResponse,
     PublicationInformatieCategorie,
+    PublicationTopic,
     RemoveDocumentFromIndexResponse,
     RemovePublicationFromIndexResponse,
 )
@@ -39,6 +40,16 @@ def get_publication_information_categories(
     return [{"naam": item["naam"], "uuid": str(item["uuid"])} for item in qs]
 
 
+def get_publication_onderwerpen(
+    publication: Publication,
+) -> list[PublicationTopic]:
+    qs = publication.onderwerpen.values("uuid", "officiele_titel")
+    return [
+        {"officieleTitel": item["officiele_titel"], "uuid": str(item["uuid"])}
+        for item in qs
+    ]
+
+
 class GPPSearchClient(NLXClient):
     def index_document(self, document: Document, download_url: str = "") -> str:
         """
@@ -54,6 +65,7 @@ class GPPSearchClient(NLXClient):
                 "uuid": str(document.publicatie.publisher.uuid),
                 "naam": document.publicatie.publisher.naam,
             },
+            "onderwerpen": get_publication_onderwerpen(document.publicatie),
             "informatieCategorieen": get_publication_information_categories(
                 document.publicatie
             ),
@@ -98,6 +110,7 @@ class GPPSearchClient(NLXClient):
                 "uuid": str(publication.publisher.uuid),
                 "naam": publication.publisher.naam,
             },
+            "onderwerpen": get_publication_onderwerpen(publication),
             "informatieCategorieen": get_publication_information_categories(
                 publication
             ),
