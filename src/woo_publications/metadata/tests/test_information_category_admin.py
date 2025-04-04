@@ -6,6 +6,7 @@ from furl import furl
 from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.constants import ArchiveNominationChoices
 
 from ..constants import InformationCategoryOrigins
 from ..models import CUSTOM_CATEGORY_IDENTIFIER_URL_PREFIX, InformationCategory
@@ -120,7 +121,16 @@ class TestInformationCategoryAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["informationcategory_form"]
+        # zelf_toegevoegd specific editable fields:
         self.assertNotIn("naam", form.fields)
+        self.assertNotIn("naam_meervoud", form.fields)
+        self.assertNotIn("definitie", form.fields)
+        # always accessible fields:
+        self.assertIn("bron_bewaartermijn", form.fields)
+        self.assertIn("selectiecategorie", form.fields)
+        self.assertIn("archiefnominatie", form.fields)
+        self.assertIn("bewaartermijn", form.fields)
+        self.assertIn("toelichting_bewaartermijn", form.fields)
 
     def test_information_category_admin_can_update_item_with_oorsprong_zelf_toegevoegd(
         self,
@@ -147,6 +157,10 @@ class TestInformationCategoryAdmin(WebTest):
         form["naam"] = "changed"
         form["naam_meervoud"] = "changed"
         form["definitie"] = "changed"
+        form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+        form["bewaartermijn"] = 10
+
         response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
@@ -155,6 +169,13 @@ class TestInformationCategoryAdmin(WebTest):
         self.assertEqual(information_category.naam, "changed")
         self.assertEqual(information_category.naam_meervoud, "changed")
         self.assertEqual(information_category.definitie, "changed")
+        self.assertEqual(
+            information_category.bron_bewaartermijn, "Selectielijst gemeenten 2020"
+        )
+        self.assertEqual(
+            information_category.archiefnominatie, ArchiveNominationChoices.retain
+        )
+        self.assertEqual(information_category.bewaartermijn, 10)
 
     def test_information_category_admin_create_item(self):
         response = self.app.get(
@@ -162,27 +183,76 @@ class TestInformationCategoryAdmin(WebTest):
         )
         form = response.forms["informationcategory_form"]
 
-        form["naam"] = "new item"
-        form["naam_meervoud"] = "new items"
-        form["definitie"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+        with self.subTest("bewaartermijn exeeds max length of 3"):
+            expected_error = _(
+                "Ensure this value is less than or equal to %(limit_value)s."
+            ) % {"limit_value": "999"}
+
+            form["bewaartermijn"] = 1000
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 200)
+            self.assertFormError(
+                submit_response.context["adminform"], "bewaartermijn", expected_error
+            )
+
+        with self.subTest("happy flow"):
+            form["naam"] = "new item"
+            form["naam_meervoud"] = "new items"
+            form["definitie"] = (
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
+                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            )
+            form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+            form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+            form["bewaartermijn"] = 10
+
+            form.submit(name="_save")
+
+            added_item = InformationCategory.objects.order_by("-pk").first()
+            assert added_item is not None
+            self.assertEqual(added_item.naam, "new item")
+            self.assertTrue(
+                added_item.identifier.startswith(CUSTOM_CATEGORY_IDENTIFIER_URL_PREFIX)
+            )
+            self.assertEqual(added_item.order, 0)
+            self.assertEqual(added_item.naam_meervoud, "new items")
+            self.assertEqual(
+                added_item.definitie,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
+                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+            )
+            self.assertEqual(
+                added_item.bron_bewaartermijn, "Selectielijst gemeenten 2020"
+            )
+            self.assertEqual(
+                added_item.archiefnominatie, ArchiveNominationChoices.retain
+            )
+            self.assertEqual(added_item.bewaartermijn, 10)
+
+    def test_information_category_admin_delete_item(self):
+        information_category = InformationCategoryFactory.create(
+            identifier="https://www.example.com/waardenlijsten/2",
+            naam="second item",
+            oorsprong=InformationCategoryOrigins.value_list,
+        )
+        url = reverse(
+            "admin:metadata_informationcategory_delete",
+            kwargs={"object_id": information_category.id},
         )
 
-        form.submit(name="_save")
+        response = self.app.get(url, user=self.user)
 
-        added_item = InformationCategory.objects.order_by("-pk").first()
-        assert added_item is not None
-        self.assertEqual(added_item.naam, "new item")
-        self.assertTrue(
-            added_item.identifier.startswith(CUSTOM_CATEGORY_IDENTIFIER_URL_PREFIX)
-        )
-        self.assertEqual(added_item.order, 0)
-        self.assertEqual(added_item.naam_meervoud, "new items")
-        self.assertEqual(
-            added_item.definitie,
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms[1]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            InformationCategory.objects.filter(uuid=information_category.uuid).exists()
         )
 
 

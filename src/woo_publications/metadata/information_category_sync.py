@@ -70,6 +70,15 @@ def update_information_category(file_path: Path):
         value_list_information_categories,
         indent=4,
         use_natural_primary_keys=True,
+        fields=(
+            "order",
+            "uuid",
+            "identifier",
+            "naam",
+            "naam_meervoud",
+            "definitie",
+            "oorsprong",
+        ),
     )
 
     with open(file_path, "w") as outfile:
