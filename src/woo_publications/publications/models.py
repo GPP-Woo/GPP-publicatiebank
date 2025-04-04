@@ -15,6 +15,7 @@ from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import User
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
     get_client,
@@ -189,6 +190,41 @@ class Publication(ModelOwnerMixin, models.Model):
             "System timestamp reflecting when the publication was last modified in the "
             "database."
         ),
+    )
+
+    # Retention fields:
+    bron_bewaartermijn = models.CharField(
+        _("retention policy source"),
+        help_text=_(
+            "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+        ),
+        max_length=255,
+        blank=False,
+        default="",
+    )
+    selectiecategorie = models.CharField(
+        _("selection category"),
+        help_text=_(
+            "The category as specified in the provided retention policy source (example: 20.1.2)."
+        ),
+        max_length=255,
+        blank=True,
+    )
+    archiefnominatie = models.CharField(
+        _("archive action"),
+        help_text=_("Determines if the archived data will be retained or destroyed."),
+        choices=ArchiveNominationChoices.choices,
+        max_length=50,
+        blank=False,
+        default=ArchiveNominationChoices.retain,
+    )
+    archiefactiedatum = models.DateField(
+        _("archive action date"),
+        help_text=_("Date when the publication will be archived or destroyed."),
+    )
+    toelichting_bewaartermijn = models.TextField(
+        _("retention policy explanation"),
+        blank=True,
     )
 
     class Meta:  # pyright: ignore

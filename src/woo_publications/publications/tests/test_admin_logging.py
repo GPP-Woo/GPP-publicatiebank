@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.constants import Events
 from woo_publications.logging.models import TimelineLogProxy
 from woo_publications.metadata.tests.factories import (
@@ -64,6 +65,11 @@ class TestPublicationAdminAuditLogging(WebTest):
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
             "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
         )
+        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
+        form["selectiecategorie"] = ("20.1.2",)
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+        form["archiefactiedatum"] = ("2025-01-01",)
+        form["toelichting_bewaartermijn"] = ("extra data",)
 
         with freeze_time("2024-09-25T00:14:00-00:00"):
             form.submit(name="_save")
@@ -91,6 +97,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "uuid": str(added_item.uuid),
                 "verantwoordelijke": organisation.pk,
                 "verkorte_titel": "The title",
+                "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "20.1.2",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichting_bewaartermijn": "extra data",
             },
             "_cached_object_repr": "The official title of this publication",
         }
@@ -134,6 +145,11 @@ class TestPublicationAdminAuditLogging(WebTest):
         form["officiele_titel"] = "changed official title"
         form["verkorte_titel"] = "changed short title"
         form["omschrijving"] = "changed description"
+        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
+        form["selectiecategorie"] = ("20.1.2",)
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+        form["archiefactiedatum"] = ("2025-01-01",)
+        form["toelichting_bewaartermijn"] = ("extra data",)
 
         with freeze_time("2024-09-28T00:14:00-00:00"):
             form.submit(name="_save")
@@ -176,6 +192,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "uuid": str(publication.uuid),
                     "verantwoordelijke": organisation2.pk,
                     "verkorte_titel": "changed short title",
+                    "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                    "selectiecategorie": "20.1.2",
+                    "archiefnominatie": ArchiveNominationChoices.retain,
+                    "archiefactiedatum": "2025-01-01",
+                    "toelichting_bewaartermijn": "extra data",
                 },
                 "_cached_object_repr": "changed official title",
             }
@@ -197,6 +218,9 @@ class TestPublicationAdminAuditLogging(WebTest):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
             published_document = DocumentFactory.create(
                 publicatie=publication,
@@ -280,10 +304,16 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "uuid": str(publication.uuid),
                     "verantwoordelijke": organisation.pk,
                     "verkorte_titel": "one",
+                    "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                    "selectiecategorie": "",
+                    "archiefnominatie": ArchiveNominationChoices.retain,
+                    "archiefactiedatum": "2025-01-01",
+                    "toelichting_bewaartermijn": "",
                 },
                 "_cached_object_repr": "title one",
             }
 
+            self.maxDiff = None
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
         with self.subTest("update document audit logging"):
@@ -339,6 +369,9 @@ class TestPublicationAdminAuditLogging(WebTest):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
         reverse_url = reverse(
             "admin:publications_publication_delete",
@@ -376,6 +409,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "uuid": str(publication.uuid),
                 "verantwoordelijke": organisation.pk,
                 "verkorte_titel": "one",
+                "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichting_bewaartermijn": "",
             },
             "_cached_object_repr": "title one",
         }

@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
     OrganisationFactory,
@@ -212,6 +213,11 @@ class TestPublicationsAdmin(WebTest):
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
                 "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
             )
+            form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
+            form["selectiecategorie"] = ("20.1.2",)
+            form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+            form["archiefactiedatum"] = ("2025-01-01",)
+            form["toelichting_bewaartermijn"] = ("extra data",)
 
             form.submit(name="_save")
 
@@ -238,6 +244,15 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(
                 str(added_item.laatst_gewijzigd_datum), "2024-09-25 00:14:00+00:00"
             )
+            self.assertEqual(
+                added_item.bron_bewaartermijn, "Selectielijst gemeenten 2020"
+            )
+            self.assertEqual(added_item.selectiecategorie, "20.1.2")
+            self.assertEqual(
+                added_item.archiefnominatie, ArchiveNominationChoices.retain
+            )
+            self.assertEqual(str(added_item.archiefactiedatum), "2025-01-01")
+            self.assertEqual(added_item.toelichting_bewaartermijn, "extra data")
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
@@ -263,6 +278,11 @@ class TestPublicationsAdmin(WebTest):
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
             "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
         )
+        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
+        form["selectiecategorie"] = ("20.1.2",)
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+        form["archiefactiedatum"] = ("2025-01-01",)
+        form["toelichting_bewaartermijn"] = ("extra data",)
 
         with self.captureOnCommitCallbacks(execute=True):
             add_response = form.submit(name="_save")
@@ -362,6 +382,11 @@ class TestPublicationsAdmin(WebTest):
             form["officiele_titel"] = "changed official title"
             form["verkorte_titel"] = "changed short title"
             form["omschrijving"] = "changed description"
+            form["bron_bewaartermijn"] = ("changed bron bewaartermijn",)
+            form["selectiecategorie"] = ("changed selectiecategory",)
+            form["archiefnominatie"].select(text=ArchiveNominationChoices.destroy.label)
+            form["archiefactiedatum"] = ("2025-01-01",)
+            form["toelichting_bewaartermijn"] = ("changed toelichting bewaartermijn",)
 
             with freeze_time("2024-09-27T00:14:00-00:00"):
                 response = form.submit(name="_save")
@@ -384,6 +409,18 @@ class TestPublicationsAdmin(WebTest):
             )
             self.assertEqual(
                 str(publication.laatst_gewijzigd_datum), "2024-09-27 00:14:00+00:00"
+            )
+            self.assertEqual(
+                publication.bron_bewaartermijn, "changed bron bewaartermijn"
+            )
+            self.assertEqual(publication.selectiecategorie, "changed selectiecategory")
+            self.assertEqual(
+                publication.archiefnominatie, ArchiveNominationChoices.destroy
+            )
+            self.assertEqual(str(publication.archiefactiedatum), "2025-01-01")
+            self.assertEqual(
+                publication.toelichting_bewaartermijn,
+                "changed toelichting bewaartermijn",
             )
 
     @patch("woo_publications.publications.admin.index_publication.delay")

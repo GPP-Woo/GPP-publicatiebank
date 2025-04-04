@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import patch
 
 from django.urls import reverse
@@ -7,6 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from woo_publications.api.tests.mixins import TokenAuthMixin
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.constants import Events
 from woo_publications.logging.models import TimelineLogProxy
 from woo_publications.metadata.tests.factories import (
@@ -74,6 +76,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "officieleTitel": "title one",
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "22.1.1",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "extra data",
         }
 
         with freeze_time("2024-09-24T12:00:00-00:00"):
@@ -100,6 +107,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "uuid": response.json()["uuid"],
                 "verantwoordelijke": organisation.pk,
                 "verkorte_titel": "one",
+                "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "22.1.1",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichting_bewaartermijn": "extra data",
             },
             "_cached_object_repr": "title one",
         }
@@ -136,6 +148,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "officieleTitel": "changed offical title",
             "verkorteTitel": "changed short title",
             "omschrijving": "changed description",
+            "bronBewaartermijn": "changed",
+            "selectiecategorie": "changed",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "changed",
         }
 
         with freeze_time("2024-09-27T12:00:00-00:00"):
@@ -161,6 +178,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "uuid": response.json()["uuid"],
                 "verantwoordelijke": organisation.pk,
                 "verkorte_titel": "changed short title",
+                "bron_bewaartermijn": "changed",
+                "selectiecategorie": "changed",
+                "archiefnominatie": ArchiveNominationChoices.destroy,
+                "archiefactiedatum": "2025-01-01",
+                "toelichting_bewaartermijn": "changed",
             },
             "_cached_object_repr": "changed offical title",
         }
@@ -184,6 +206,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                selectiecategorie="22.1.1",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum=date(2025, 1, 1),
+                toelichting_bewaartermijn="extra data",
             )
             published_document = DocumentFactory.create(
                 publicatie=publication,
@@ -246,6 +273,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "uuid": str(publication.uuid),
                     "verantwoordelijke": organisation.pk,
                     "verkorte_titel": "one",
+                    "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                    "selectiecategorie": "22.1.1",
+                    "archiefnominatie": ArchiveNominationChoices.retain,
+                    "archiefactiedatum": "2025-01-01",
+                    "toelichting_bewaartermijn": "extra data",
                 },
                 "_cached_object_repr": "title one",
             }
@@ -301,6 +333,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                selectiecategorie="22.1.1",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum=date(2025, 1, 1),
+                toelichting_bewaartermijn="extra data",
             )
         detail_url = reverse(
             "api:publication-detail",
@@ -332,6 +369,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "uuid": str(publication.uuid),
                 "verantwoordelijke": organisation.pk,
                 "verkorte_titel": "one",
+                "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "22.1.1",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichting_bewaartermijn": "extra data",
             },
             "_cached_object_repr": "title one",
         }

@@ -114,6 +114,8 @@ Hierop zien we:
 
 Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
+**Algemene velden**
+
 * ``Informatiecategorieën`` De informatiecategorieën die het soort informatie verduidelijken binnen de publicatie (DiWoo: ``informatieCategorieen``)
 * ``Onderwerpen`` Onderwerpen omvatten maatschappelijk relevante kwesties waar meerdere publicaties aan gekoppeld zijn. Onderwerpen kunnen tientallen jaren relevant blijven.
 * ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo: ``publisher``)
@@ -127,6 +129,14 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop de publicatie nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
+
+**Bewaartermijn**
+
+* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
+* ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
+* ``Archiefnominatie``. Een selectievakje die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
+* ``Archiefactiedatum``. De datum wanneer er actie genomen moet worden voor de *publicaties*.
+* ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
 

@@ -1,6 +1,8 @@
+from datetime import date
 from typing import Sequence
 
 import factory
+from dateutil.relativedelta import relativedelta
 
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
@@ -12,6 +14,8 @@ from ..models import Document, Publication, Topic
 class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
     publisher = factory.SubFactory(OrganisationFactory, is_actief=True)
     officiele_titel = factory.Faker("word")
+    bron_bewaartermijn = factory.Faker("word")
+    archiefactiedatum = date.today() + relativedelta(years=10)
 
     class Meta:  # pyright: ignore
         model = Publication
