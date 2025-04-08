@@ -134,7 +134,7 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 
 * ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
-* ``Archiefnominatie``. Een selectievakje die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
+* ``Archiefnominatie``. Een radioknop die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden. Standaard is dit veld niet ingevuld.
 * ``Archiefactiedatum``. De datum wanneer er actie genomen moet worden voor de *publicaties*.
 * ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
 
