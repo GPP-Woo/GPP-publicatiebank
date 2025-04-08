@@ -1403,7 +1403,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": publication.bron_bewaartermijn,
             "selectiecategorie": "",
-            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefnominatie": "",
             "archiefactiedatum": str(publication.archiefactiedatum),
             "toelichtingBewaartermijn": "",
         }

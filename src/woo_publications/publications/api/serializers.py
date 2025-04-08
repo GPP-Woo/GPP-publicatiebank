@@ -294,7 +294,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "laatst_gewijzigd_datum": {
                 "read_only": True,
             },
-            "bron_bewaartermijn": {"required": True},
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} publication."
@@ -344,20 +343,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
-
-
-class PublicationUpdateSerializer(PublicationSerializer):
-    class Meta(PublicationSerializer.Meta):
-        fields = PublicationSerializer.Meta.fields
-
-        extra_kwargs = {
-            "bron_bewaartermijn": {
-                "required": False,
-            },
-            "archiefactiedatum": {
-                "required": False,
-            },
-        }
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
