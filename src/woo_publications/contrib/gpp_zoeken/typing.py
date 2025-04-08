@@ -6,6 +6,11 @@ class PublicationInformatieCategorie(TypedDict):
     naam: str
 
 
+class PublicationTopic(TypedDict):
+    uuid: str
+    officieleTitel: str
+
+
 class PublicationPublisher(TypedDict):
     uuid: str
     naam: str
@@ -15,6 +20,7 @@ class IndexDocumentBody(TypedDict):
     uuid: str
     publicatie: str
     publisher: PublicationPublisher
+    onderwerpen: List[PublicationTopic]
     informatieCategorieen: List[PublicationInformatieCategorie]
     identifier: str
     officieleTitel: str
@@ -30,6 +36,7 @@ class IndexDocumentBody(TypedDict):
 class IndexPublicationBody(TypedDict):
     uuid: str
     publisher: PublicationPublisher
+    onderwerpen: List[PublicationTopic]
     informatieCategorieen: List[PublicationInformatieCategorie]
     officieleTitel: str
     verkorteTitel: str
