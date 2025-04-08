@@ -57,6 +57,19 @@ class RemoveDocumentFromIndexTaskTests(VCRMixin, TestCase):
         self.assertIsInstance(remote_task_id, str)
         self.assertNotEqual(remote_task_id, "")
 
+    def test_remove_published_document_forced(self):
+        doc = DocumentFactory.create(
+            uuid="1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b",
+            publicatiestatus=PublicationStatusOptions.published,
+            upload_complete=True,
+        )
+
+        remote_task_id = remove_document_from_index(document_id=doc.pk, force=True)
+
+        self.assertIsNotNone(remote_task_id)
+        self.assertIsInstance(remote_task_id, str)
+        self.assertNotEqual(remote_task_id, "")
+
     def test_remove_by_uuid(self):
         remote_task_id = remove_from_index_by_uuid(
             model_name="Document",
