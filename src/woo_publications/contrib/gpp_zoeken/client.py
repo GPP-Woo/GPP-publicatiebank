@@ -74,8 +74,13 @@ class GPPSearchClient(NLXClient):
         response_data: IndexDocumentResponse = response.json()
         return response_data["taskId"]
 
-    def remove_document_from_index(self, document: Document) -> str:
-        if document.publicatiestatus == PublicationStatusOptions.published:
+    def remove_document_from_index(
+        self, document: Document, force: bool = False
+    ) -> str:
+        if (
+            not force
+            and document.publicatiestatus == PublicationStatusOptions.published
+        ):
             raise ValueError("The document has 'published' status!")
 
         response = self.delete(f"documenten/{document.uuid}")
@@ -114,8 +119,13 @@ class GPPSearchClient(NLXClient):
         response_data: IndexPublicationResponse = response.json()
         return response_data["taskId"]
 
-    def remove_publication_from_index(self, publication: Publication) -> str:
-        if publication.publicatiestatus == PublicationStatusOptions.published:
+    def remove_publication_from_index(
+        self, publication: Publication, force: bool = False
+    ) -> str:
+        if (
+            not force
+            and publication.publicatiestatus == PublicationStatusOptions.published
+        ):
             raise ValueError("The publication has 'published' status!")
 
         response = self.delete(f"publicaties/{publication.uuid}")
