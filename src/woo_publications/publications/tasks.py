@@ -87,7 +87,7 @@ def remove_document_from_index(*, document_id: int, force: bool = False) -> str 
         return
 
     with get_client(service) as client:
-        return client.remove_document_from_index(document)
+        return client.remove_document_from_index(document, force)
 
 
 @app.task
@@ -148,7 +148,7 @@ def remove_publication_from_index(
         return
 
     with get_client(service) as client:
-        return client.remove_publication_from_index(publication)
+        return client.remove_publication_from_index(publication, force)
 
 
 @app.task
@@ -156,6 +156,7 @@ def remove_from_index_by_uuid(
     *,
     model_name: Literal["Document", "Publication"],
     uuid: str | UUID,
+    force: bool = False,
 ) -> str | None:
     """
     Force removal from the index for records that are deleted from the databse.
@@ -176,11 +177,11 @@ def remove_from_index_by_uuid(
                 document = Document(
                     uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
                 )
-                return client.remove_document_from_index(document)
+                return client.remove_document_from_index(document, force)
             case "Publication":
                 publication = Publication(
                     uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
                 )
-                return client.remove_publication_from_index(publication)
+                return client.remove_publication_from_index(publication, force)
             case _:  # pragma: no cover
                 assert_never(model_name)

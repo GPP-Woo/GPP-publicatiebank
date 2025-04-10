@@ -66,10 +66,9 @@
 },
 {
     "model": "zgw_consumers.service",
-    "pk": 1,
     "fields": {
         "label": "VNG Selectielijst",
-        "slug": "vng-selectielijst",
+        "slug": "",
         "oas": "https://selectielijst.openzaak.nl/api/v1/schema/openapi.yaml",
         "oas_file": "",
         "uuid": "fd46ec3f-db03-4915-b406-b874a706a1b4",
@@ -84,12 +83,12 @@
         "user_id": "",
         "user_representation": "",
         "client_certificate": null,
-        "server_certificate": null
+        "server_certificate": null,
+        "timeout": 10
     }
 },
 {
     "model": "zgw_consumers.service",
-    "pk": 2,
     "fields": {
         "label": "Woo Publications (docker)",
         "slug": "gpp-publicatiebank-docker",
@@ -107,12 +106,12 @@
         "user_id": "",
         "user_representation": "",
         "client_certificate": null,
-        "server_certificate": null
+        "server_certificate": null,
+        "timeout": 10
     }
 },
 {
     "model": "zgw_consumers.service",
-    "pk": 3,
     "fields": {
         "label": "Woo Publications (automated tests)",
         "slug": "gpp-publicatiebank-automated-tests",
@@ -130,7 +129,8 @@
         "user_id": "",
         "user_representation": "",
         "client_certificate": null,
-        "server_certificate": null
+        "server_certificate": null,
+        "timeout": 10
     }
 },
 {

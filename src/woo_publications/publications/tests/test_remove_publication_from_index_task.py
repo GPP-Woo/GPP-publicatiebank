@@ -58,6 +58,20 @@ class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
         self.assertIsInstance(remote_task_id, str)
         self.assertNotEqual(remote_task_id, "")
 
+    def test_remove_published_publication_forced(self):
+        publication = PublicationFactory.create(
+            uuid="1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b",
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+
+        remote_task_id = remove_publication_from_index(
+            publication_id=publication.pk, force=True
+        )
+
+        self.assertIsNotNone(remote_task_id)
+        self.assertIsInstance(remote_task_id, str)
+        self.assertNotEqual(remote_task_id, "")
+
     def test_remove_by_uuid(self):
         remote_task_id = remove_from_index_by_uuid(
             model_name="Publication",

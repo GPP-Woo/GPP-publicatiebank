@@ -15,10 +15,10 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: DELETE
-    uri: http://localhost:8002/api/v1/documenten/1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b
+    uri: http://localhost:8002/api/v1/publicaties/1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b
   response:
     body:
-      string: '{"taskId":"f2fb2cb4-b5a2-47f6-bfd7-ae285dfcbf4f"}'
+      string: '{"taskId":"9b31ec63-2223-467c-a9ff-16ef7e81c17c"}'
     headers:
       Allow:
       - DELETE, OPTIONS
