@@ -1690,6 +1690,17 @@ paths:
           description: ''
 components:
   schemas:
+    ArchiefnominatieEnum:
+      enum:
+      - blijvend_bewaren
+      - vernietigen
+      type: string
+      description: |-
+        * `blijvend_bewaren` - Retain
+        * `vernietigen` - Destroy
+    BlankEnum:
+      enum:
+      - ''
     CatalogiAPIDocumentType:
       type: object
       properties:
@@ -2497,6 +2508,37 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        bronBewaartermijn:
+          type: string
+          title: Retention policy source
+          description: 'The source of the retention policy (example: Selectielijst
+            gemeenten 2020).'
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          title: Selection category
+          description: 'The category as specified in the provided retention policy
+            source (example: 20.1.2).'
+          maxLength: 255
+        archiefnominatie:
+          title: Archive action
+          description: |-
+            Determines if the archived data will be retained or destroyed.
+
+            * `blijvend_bewaren` - Retain
+            * `vernietigen` - Destroy
+          oneOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        archiefactiedatum:
+          type: string
+          format: date
+          nullable: true
+          title: Archive action date
+          description: Date when the publication will be archived or destroyed.
+        toelichtingBewaartermijn:
+          type: string
+          title: Retention policy explanation
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
@@ -2595,6 +2637,37 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        bronBewaartermijn:
+          type: string
+          title: Retention policy source
+          description: 'The source of the retention policy (example: Selectielijst
+            gemeenten 2020).'
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          title: Selection category
+          description: 'The category as specified in the provided retention policy
+            source (example: 20.1.2).'
+          maxLength: 255
+        archiefnominatie:
+          title: Archive action
+          description: |-
+            Determines if the archived data will be retained or destroyed.
+
+            * `blijvend_bewaren` - Retain
+            * `vernietigen` - Destroy
+          oneOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        archiefactiedatum:
+          type: string
+          format: date
+          nullable: true
+          title: Archive action date
+          description: Date when the publication will be archived or destroyed.
+        toelichtingBewaartermijn:
+          type: string
+          title: Retention policy explanation
       required:
       - diWooInformatieCategorieen
       - eigenaar

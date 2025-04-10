@@ -73,7 +73,7 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 
 * ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
-* ``Archiefnominatie``. Een selectievakje die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
+* ``Archiefnominatie``. Een radioknop die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
 * ``Bewaartermijn``. Het aantal jaar hoe lang de *publicaties* intact blijven tot actie genomen moet worden.
 * ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
 

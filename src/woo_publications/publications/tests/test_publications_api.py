@@ -16,6 +16,7 @@ from woo_publications.api.tests.mixins import (
     APITestCaseMixin,
     TokenAuthMixin,
 )
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.logevent import audit_api_create
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.metadata.constants import InformationCategoryOrigins
@@ -118,6 +119,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication2 = PublicationFactory.create(
@@ -126,6 +130,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
 
         response = self.client.get(
@@ -152,6 +159,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": None,
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
+                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichtingBewaartermijn": "",
             }
 
             self.assertEqual(data["results"][0], expected_first_item_data)
@@ -172,6 +184,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichtingBewaartermijn": "",
             }
 
             self.assertEqual(data["results"][1], expected_second_item_data)
@@ -186,6 +203,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
@@ -193,6 +213,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
         expected_first_item_data = {
             "uuid": str(publication.uuid),
@@ -209,6 +232,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
@@ -225,6 +253,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": None,
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
 
         # registratiedatum
@@ -678,6 +711,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
             # mimicking creating log though api
             audit_api_create(
@@ -693,6 +729,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
             )
             # mimicking creating log though api
             audit_api_create(
@@ -718,6 +757,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": {"weergaveNaam": "buurman", "identifier": "123"},
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
@@ -734,6 +778,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": {"weergaveNaam": "buurman", "identifier": "456"},
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
 
         with (
@@ -869,6 +918,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            archiefactiedatum="2025-01-01",
         )
         detail_url = reverse(
             "api:publication-detail",
@@ -895,6 +947,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
 
         self.assertEqual(data, expected_first_item_data)
@@ -1077,6 +1134,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
             }
 
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
@@ -1100,6 +1160,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": {"weergaveNaam": "username", "identifier": "id"},
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "selectiecategorie": "",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "2025-01-01",
+                "toelichtingBewaartermijn": "",
             }
 
             # diWooInformatieCategorieen ordering is done on the UUID field to make sure there are no duplicated data.
@@ -1125,6 +1190,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            archiefactiedatum="2035-01-01",
         )
         detail_url = reverse(
             "api:publication-detail",
@@ -1157,6 +1224,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "changed offical title",
                 "verkorteTitel": "changed short title",
                 "omschrijving": "changed description",
+                "bronBewaartermijn": "changed",
+                "selectiecategorie": "changed",
+                "archiefnominatie": ArchiveNominationChoices.destroy,
+                "archiefactiedatum": "2025-01-01",
+                "toelichtingBewaartermijn": "changed",
             }
 
             response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
@@ -1181,6 +1253,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+                "bronBewaartermijn": "changed",
+                "selectiecategorie": "changed",
+                "archiefnominatie": ArchiveNominationChoices.destroy,
+                "archiefactiedatum": "2025-01-01",
+                "toelichtingBewaartermijn": "changed",
             }
 
             self.assertEqual(response_data, expected_data)
@@ -1294,6 +1371,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            archiefactiedatum="2034-09-24",
         )
         detail_url = reverse(
             "api:publication-detail",
@@ -1324,6 +1402,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "eigenaar": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+            "bronBewaartermijn": publication.bron_bewaartermijn,
+            "selectiecategorie": "",
+            "archiefnominatie": "",
+            "archiefactiedatum": "2034-09-24",
+            "toelichtingBewaartermijn": "",
         }
 
         # test that only officiele_titel got changed
@@ -1440,6 +1523,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "officieleTitel": "title one",
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "bronBewaartermijn": "Selectielijst gemeenten 2020",
+            "selectiecategorie": "",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2025-01-01",
+            "toelichtingBewaartermijn": "",
         }
 
         with self.captureOnCommitCallbacks(execute=True):

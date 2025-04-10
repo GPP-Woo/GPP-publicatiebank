@@ -278,6 +278,11 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "publicatiestatus",
             "registratiedatum",
             "laatst_gewijzigd_datum",
+            "bron_bewaartermijn",
+            "selectiecategorie",
+            "archiefnominatie",
+            "archiefactiedatum",
+            "toelichting_bewaartermijn",
         )
         extra_kwargs = {
             "uuid": {
