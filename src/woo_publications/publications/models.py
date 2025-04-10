@@ -199,8 +199,7 @@ class Publication(ModelOwnerMixin, models.Model):
             "The source of the retention policy (example: Selectielijst gemeenten 2020)."
         ),
         max_length=255,
-        blank=False,
-        default="",
+        blank=True,
     )
     selectiecategorie = models.CharField(
         _("selection category"),
@@ -221,6 +220,7 @@ class Publication(ModelOwnerMixin, models.Model):
         _("archive action date"),
         help_text=_("Date when the publication will be archived or destroyed."),
         null=True,
+        blank=True,
     )
     toelichting_bewaartermijn = models.TextField(
         _("retention policy explanation"),
