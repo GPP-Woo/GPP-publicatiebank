@@ -1,9 +1,10 @@
 interactions:
 - request:
-    body: '{"uuid": "75bb9879-64b9-4d63-b7f8-3579a5800172", "publisher": {"uuid":
-      "e302e9f3-53de-4f3a-a544-265758911ae8", "naam": "fire"}, "informatieCategorieen":
-      [], "officieleTitel": "summer", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
-      "2025-02-25T20:58:49.065485+00:00", "laatstGewijzigdDatum": "2025-02-25T20:58:49.066048+00:00"}'
+    body: '{"uuid": "c006b6c9-bf0a-46fa-bab6-a9f7ec7eb7b4", "publisher": {"uuid":
+      "c9a0eb78-7abc-4b76-bfe9-de880788eee5", "naam": "street"}, "onderwerpen": [],
+      "informatieCategorieen": [], "officieleTitel": "fast", "verkorteTitel": "",
+      "omschrijving": "", "registratiedatum": "2025-04-10T09:28:45.447401+00:00",
+      "laatstGewijzigdDatum": "2025-04-10T09:28:45.447933+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -14,7 +15,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '341'
+      - '360'
       Content-Type:
       - application/json
       User-Agent:
@@ -23,50 +24,7 @@ interactions:
     uri: http://localhost:8002/api/v1/publicaties
   response:
     body:
-      string: '{"taskId":"7763c07b-3e92-4c6b-9c92-6d98fb8086bd"}'
-    headers:
-      Allow:
-      - POST, OPTIONS
-      Content-Length:
-      - '49'
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Referrer-Policy:
-      - same-origin
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: '{"uuid": "92358a72-df80-4e4e-b769-6800550c86e6", "publisher": {"uuid":
-      "48262845-cbdd-42f8-b77e-a7ff4c09f790", "naam": "glass"}, "informatieCategorieen":
-      [], "officieleTitel": "whatever", "verkorteTitel": "", "omschrijving": "", "registratiedatum":
-      "2025-02-25T21:04:32.594845+00:00", "laatstGewijzigdDatum": "2025-02-25T21:04:32.595541+00:00"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '344'
-      Content-Type:
-      - application/json
-      User-Agent:
-      - python-requests/2.32.3
-    method: POST
-    uri: http://localhost:8002/api/v1/publicaties
-  response:
-    body:
-      string: '{"taskId":"bba66741-00ac-408e-a49c-b82722a2f124"}'
+      string: '{"taskId":"e21a3d23-03f3-4d39-b8b0-63eae0fb162f"}'
     headers:
       Allow:
       - POST, OPTIONS

@@ -18,7 +18,7 @@ interactions:
     uri: http://localhost:8002/api/v1/publicaties/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"ccc8ec68-c394-46ed-8921-785b49755f7d"}'
+      string: '{"taskId":"bf833d1e-e22c-4251-afcd-c68bf1333e9c"}'
     headers:
       Allow:
       - DELETE, OPTIONS
@@ -56,83 +56,7 @@ interactions:
     uri: http://localhost:8002/api/v1/publicaties/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"84294752-c7f3-4a38-99c9-57060fe24559"}'
-    headers:
-      Allow:
-      - DELETE, OPTIONS
-      Content-Length:
-      - '49'
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Referrer-Policy:
-      - same-origin
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - python-requests/2.32.3
-    method: DELETE
-    uri: http://localhost:8002/api/v1/publicaties/5e033c6c-6430-46c1-9efd-05899ec63382
-  response:
-    body:
-      string: '{"taskId":"c22b499e-a97e-4a4c-8b3f-2662f5b4083b"}'
-    headers:
-      Allow:
-      - DELETE, OPTIONS
-      Content-Length:
-      - '49'
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Referrer-Policy:
-      - same-origin
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - python-requests/2.32.3
-    method: DELETE
-    uri: http://localhost:8002/api/v1/publicaties/5e033c6c-6430-46c1-9efd-05899ec63382
-  response:
-    body:
-      string: '{"taskId":"f23210be-75ec-43fe-bdb0-877c55e35dee"}'
+      string: '{"taskId":"4223af20-7252-470f-b54f-ce4f402823b1"}'
     headers:
       Allow:
       - DELETE, OPTIONS

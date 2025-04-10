@@ -18,7 +18,7 @@ interactions:
     uri: http://localhost:8002/api/v1/documenten/fc8fc2db-829e-48d5-83b2-0a9364bfe717
   response:
     body:
-      string: '{"taskId":"28725ec7-5942-4705-ada9-909b17ebced8"}'
+      string: '{"taskId":"84ce665e-5b1b-4728-9170-ae790f2e34c0"}'
     headers:
       Allow:
       - DELETE, OPTIONS
