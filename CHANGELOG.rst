@@ -2,6 +2,13 @@
 Release notes
 =============
 
+1.1.0-rc.1 (2025-04-10)
+=======================
+
+Second 1.1 release candidate.
+
+* [#244] Fixed bulk delete not triggering index removal in GPP-zoeken.
+
 1.1.0-rc.0 (2025-03-26)
 =======================
 
