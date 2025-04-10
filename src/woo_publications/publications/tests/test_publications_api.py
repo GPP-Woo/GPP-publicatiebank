@@ -1371,6 +1371,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            archiefactiedatum="2034-09-24",
         )
         detail_url = reverse(
             "api:publication-detail",
@@ -1404,7 +1405,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "bronBewaartermijn": publication.bron_bewaartermijn,
             "selectiecategorie": "",
             "archiefnominatie": "",
-            "archiefactiedatum": str(publication.archiefactiedatum),
+            "archiefactiedatum": "2034-09-24",
             "toelichtingBewaartermijn": "",
         }
 
