@@ -580,3 +580,37 @@ class TestDocumentAdmin(WebTest):
             mock_remove_document_from_index_delay.assert_any_call(
                 document_id=doc_id, force=True
             )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_bulk_removal_action(self, remove_from_index_by_uuid_delay: MagicMock):
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "delete_selected"
+
+        response = form.submit()
+
+        with self.captureOnCommitCallbacks(execute=True):
+            confirmation_form = response.forms[1]
+            confirmation_form.submit()
+
+        for doc_uuid in Document.objects.values_list("uuid", flat=True):
+            remove_from_index_by_uuid_delay.assert_any_call(
+                model_name="Document", uuid=doc_uuid, force=True
+            )
