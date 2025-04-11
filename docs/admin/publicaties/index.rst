@@ -7,6 +7,7 @@ Onder het menu-item "Publicaties" en op het dashboard onder het kopje "Publicati
 
 * Documenten
 * Publicaties
+* Onderwerpen
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
