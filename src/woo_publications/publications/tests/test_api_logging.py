@@ -62,7 +62,13 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
 
     def test_create_logging(self):
         assert not TimelineLogProxy.objects.exists()
-        ic = InformationCategoryFactory.create()
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            selectiecategorie="22.1.1",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="extra data",
+        )
         topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         url = reverse("api:publication-list")
@@ -76,11 +82,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "officieleTitel": "title one",
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            "bronBewaartermijn": "Selectielijst gemeenten 2020",
-            "selectiecategorie": "22.1.1",
-            "archiefnominatie": ArchiveNominationChoices.retain,
-            "archiefactiedatum": "2025-01-01",
-            "toelichtingBewaartermijn": "extra data",
         }
 
         with freeze_time("2024-09-24T12:00:00-00:00"):
@@ -110,7 +111,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "bron_bewaartermijn": "Selectielijst gemeenten 2020",
                 "selectiecategorie": "22.1.1",
                 "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2034-09-24",
                 "toelichting_bewaartermijn": "extra data",
             },
             "_cached_object_repr": "title one",
