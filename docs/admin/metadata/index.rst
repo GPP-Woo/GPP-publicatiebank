@@ -71,11 +71,13 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 
 **Bewaartermijn**
 
-* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
+* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn. Doorgaans zal dit een selectielijst c.q. selectiebesluit zijn, welke conform de vigerende Archiefwet is vastgesteld.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
-* ``Archiefnominatie``. Een radioknop die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden.
-* ``Bewaartermijn``. Het aantal jaar hoe lang de *publicaties* intact blijven tot actie genomen moet worden.
-* ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
+* ``Archiefnominatie``. Een radioknop die aangeeft of de *publicaties* op termijn vernietigd of permanent bewaard moet worden. Permanent te bewaren *publicaties* moeten conform de vigerende Archiefwet op termijn overgebracht worden naar een archiefbewaarplaats c.q. plusdepot / e-depot.
+* ``Bewaartermijn``. Het aantal jaar hoe lang de *publicaties* binnen de GPP-publicatiebank (of diens vervanger) bewaard moeten blijven tot actie (vernietiging dan wel overbrenging) genomen moet worden.
+* ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
+
+.. Tip:: Wanneer de ``Archiefnominatie`` permanent te bewaren is, dan dient de ``Bewaartermijn`` 10 of 20 jaar te zijn, conform van de **vigerende** Archiefwet.
 
 Organisaties
 ------------
@@ -108,9 +110,9 @@ Standaard staan organisaties uit de volgende drie officiële waardelijsten al in
 * `Overige overheidsorganisaties <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_overige_overheidsorganisaties_compleet>`_
 
 .. warning:: Let op! In de admin-interface bestaat de mogelijkheid om *extra organisaties*
-   toe te voegen. Mogelijk kunnen hieraan gekoppelde publicaties niet gevonden worden
+   toe te voegen. Hieraan gekoppelde publicaties zullen niet gevonden worden
    via de landelijke `Woo-index`_! Zij kunnen wel gevonden worden via het burgerportaal
-   (in ontwikkeling) van het GPP-Woo.
+   van het GPP-Woo.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -171,6 +173,8 @@ dient de gewenste organisaties te activeren om ze in gebruik te nemen.
 
 Thema's
 -------
+
+.. warning:: Thema's kunnen nog niet gelinkt worden aan publicaties. Deze wens staat nog op de backlog / roadmap.
 
 Toelichting
 ~~~~~~~~~~~
