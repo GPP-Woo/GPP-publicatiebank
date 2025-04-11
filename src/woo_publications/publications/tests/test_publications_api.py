@@ -1027,7 +1027,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_create_publication(self):
         ic, ic2 = InformationCategoryFactory.create_batch(
-            2, oorsprong=InformationCategoryOrigins.value_list
+            2,
+            oorsprong=InformationCategoryOrigins.value_list,
+            bron_bewaartermijn="bewaartermijn",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
         )
         topic = TopicFactory.create()
         organisation, organisation2, organisation3 = OrganisationFactory.create_batch(
@@ -1134,9 +1138,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "bronBewaartermijn": "Selectielijst gemeenten 2020",
-                "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
             }
 
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
@@ -1160,10 +1161,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": {"weergaveNaam": "username", "identifier": "id"},
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
-                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "bronBewaartermijn": "bewaartermijn",
                 "selectiecategorie": "",
                 "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2029-09-24",
                 "toelichtingBewaartermijn": "",
             }
 
@@ -1173,6 +1174,138 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertIn(str(ic2.uuid), response_data["diWooInformatieCategorieen"])
             del response_data["diWooInformatieCategorieen"]
             self.assertEqual(response_data, expected_data)
+
+    def test_create_publication_retention_fields(self):
+        ic1 = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn 1",
+            selectiecategorie="1.0.1",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="first bewaartermijn",
+        )
+        ic2 = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn 2",
+            selectiecategorie="1.0.2",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=8,
+            toelichting_bewaartermijn="second bewaartermijn",
+        )
+        ic3 = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn 3",
+            selectiecategorie="1.0.1",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="third bewaartermijn",
+        )
+        ic4 = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn 2",
+            selectiecategorie="1.0.3",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="second bewaartermijn",
+        )
+        ic5 = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn 4",
+            selectiecategorie="1.1.0",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=20,
+            toelichting_bewaartermijn="forth bewaartermijn",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        url = reverse("api:publication-list")
+
+        with self.subTest(
+            "with both ArchiveNomination choices presented the IC used to copy the data has retain and lowest bewaartermijn"
+        ):
+            data = {
+                "informatieCategorieen": [
+                    str(ic1.uuid),
+                    str(ic2.uuid),
+                    str(ic3.uuid),
+                    str(ic4.uuid),
+                    str(ic5.uuid),
+                ],
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "publisher": str(organisation.uuid),
+                "officieleTitel": "bla bla bla",
+            }
+
+            with freeze_time("2024-09-24T12:00:00-00:00"):
+                response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+            response_data = response.json()
+            self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn 1")
+            self.assertEqual(response_data["selectiecategorie"], "1.0.1")
+            self.assertEqual(
+                response_data["archiefnominatie"], ArchiveNominationChoices.retain
+            )
+            self.assertEqual(
+                response_data["archiefactiedatum"], "2029-09-24"
+            )  # 2024-09-24 + 5 years
+            self.assertEqual(
+                response_data["toelichtingBewaartermijn"], "first bewaartermijn"
+            )
+
+        with self.subTest(
+            "IC's with only archiefnominatie option dispose copy the highest bewaartermijn"
+        ):
+            data = {
+                "informatieCategorieen": [str(ic4.uuid), str(ic5.uuid)],
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "publisher": str(organisation.uuid),
+                "officieleTitel": "bla bla bla",
+            }
+
+            with freeze_time("2024-09-24T12:00:00-00:00"):
+                response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+            response_data = response.json()
+            self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn 4")
+            self.assertEqual(response_data["selectiecategorie"], "1.1.0")
+            self.assertEqual(
+                response_data["archiefnominatie"], ArchiveNominationChoices.destroy
+            )
+            self.assertEqual(
+                response_data["archiefactiedatum"], "2044-09-24"
+            )  # 2024-09-24 + 20 years
+            self.assertEqual(
+                response_data["toelichtingBewaartermijn"], "forth bewaartermijn"
+            )
+
+        with self.subTest("user input will be overwritten by the ic's value"):
+            data = {
+                "informatieCategorieen": [str(ic5.uuid)],
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "publisher": str(organisation.uuid),
+                "officieleTitel": "bla bla bla",
+                "bronBewaartermijn": "THIS VALUE WON'T BE USED",
+                "selectiecategorie": "THIS VALUE WON'T BE USED",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "3000-01-01",
+                "toelichtingBewaartermijn": "THIS VALUE WON'T BE USED",
+            }
+
+            with freeze_time("2024-09-24T12:00:00-00:00"):
+                response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+            response_data = response.json()
+            self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn 4")
+            self.assertEqual(response_data["selectiecategorie"], "1.1.0")
+            self.assertEqual(
+                response_data["archiefnominatie"], ArchiveNominationChoices.destroy
+            )
+            self.assertEqual(
+                response_data["archiefactiedatum"], "2044-09-24"
+            )  # 2024-09-24 + 20 years
+            self.assertEqual(
+                response_data["toelichtingBewaartermijn"], "forth bewaartermijn"
+            )
 
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_update_publication(self):

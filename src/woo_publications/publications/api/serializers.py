@@ -1,6 +1,9 @@
+from datetime import date
+
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
+from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 
 from woo_publications.contrib.documents_api.client import FilePart
@@ -9,6 +12,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
+from ..utils import get_retention_informatie_category
 
 
 class EigenaarSerializer(serializers.Serializer):
@@ -302,6 +306,35 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     revoked=PublicationStatusOptions.revoked.label.lower(),
                 )
             },
+            "bron_bewaartermijn": {
+                "help_text": _(
+                    "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "selectiecategorie": {
+                "help_text": _(
+                    "The category as specified in the provided retention policy source (example: 20.1.2)."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "archiefnominatie": {
+                "help_text": _(
+                    "Determines if the archived data will be retained or destroyed."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "archiefactiedatum": {
+                "help_text": _(
+                    "Date when the publication will be archived or destroyed."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "toelichting_bewaartermijn": {
+                "help_text": _(
+                    "**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
         }
 
     def validate_publicatiestatus(
@@ -343,6 +376,26 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ic_queryset = InformationCategory.objects.filter(
+            id__in=[ic.pk for ic in validated_data["informatie_categorieen"]]
+        )
+        retention_ic = get_retention_informatie_category(ic_queryset)
+
+        if retention_ic:
+            validated_data["bron_bewaartermijn"] = retention_ic.bron_bewaartermijn
+            validated_data["selectiecategorie"] = retention_ic.selectiecategorie
+            validated_data["archiefnominatie"] = retention_ic.archiefnominatie
+            validated_data["archiefactiedatum"] = date.today() + relativedelta(
+                years=retention_ic.bewaartermijn
+            )
+            validated_data["toelichting_bewaartermijn"] = (
+                retention_ic.toelichting_bewaartermijn
+            )
+
+        return super().create(validated_data)
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
