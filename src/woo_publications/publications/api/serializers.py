@@ -306,6 +306,35 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     revoked=PublicationStatusOptions.revoked.label.lower(),
                 )
             },
+            "bron_bewaartermijn": {
+                "help_text": _(
+                    "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "selectiecategorie": {
+                "help_text": _(
+                    "The category as specified in the provided retention policy source (example: 20.1.2)."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "archiefnominatie": {
+                "help_text": _(
+                    "Determines if the archived data will be retained or destroyed."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "archiefactiedatum": {
+                "help_text": _(
+                    "Date when the publication will be archived or destroyed."
+                    "\n\n**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
+            "toelichting_bewaartermijn": {
+                "help_text": _(
+                    "**Disclaimer** during creation the input will be overwritten by the linked information category."
+                )
+            },
         }
 
     def validate_publicatiestatus(
