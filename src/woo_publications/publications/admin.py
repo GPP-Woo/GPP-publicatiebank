@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from functools import partial
 from typing import Any
+from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
@@ -266,6 +267,42 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     )
                 )
 
+    def delete_queryset(
+        self, request: HttpRequest, queryset: models.QuerySet[Publication]
+    ):
+        publication_document_deletion_mapping: dict[UUID, list[UUID]] = {}
+        for publication in queryset:
+            publication_document_deletion_mapping[publication.uuid] = list(
+                Document.objects.filter(
+                    publicatiestatus=PublicationStatusOptions.published,
+                    publicatie=publication,
+                ).values_list("uuid", flat=True)
+            )
+
+        super().delete_queryset(request, queryset)
+
+        for (
+            publication_uuid,
+            document_uuids,
+        ) in publication_document_deletion_mapping.items():
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Publication",
+                    uuid=str(publication_uuid),
+                    force=True,
+                )
+            )
+            for document_uuid in document_uuids:
+                transaction.on_commit(
+                    partial(
+                        remove_from_index_by_uuid.delay,
+                        model_name="Document",
+                        uuid=str(document_uuid),
+                        force=True,
+                    )
+                )
+
     def get_formset_kwargs(
         self,
         request: HttpRequest,
@@ -411,6 +448,23 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     remove_from_index_by_uuid.delay,
                     model_name="Document",
                     uuid=str(obj.uuid),
+                )
+            )
+
+    def delete_queryset(
+        self, request: HttpRequest, queryset: models.QuerySet[Document]
+    ):
+        document_uuids: list[UUID] = [document.uuid for document in queryset]
+
+        super().delete_queryset(request, queryset)
+
+        for document_uuid in document_uuids:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Document",
+                    uuid=str(document_uuid),
+                    force=True,
                 )
             )
 
