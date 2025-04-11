@@ -1,6 +1,9 @@
+from datetime import date
+
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
+from dateutil.relativedelta import relativedelta
 from rest_framework import serializers
 
 from woo_publications.contrib.documents_api.client import FilePart
@@ -9,6 +12,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
+from ..utils import get_retention_informatie_category
 
 
 class EigenaarSerializer(serializers.Serializer):
@@ -343,6 +347,26 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return publication
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ic_queryset = InformationCategory.objects.filter(
+            id__in=[ic.pk for ic in validated_data["informatie_categorieen"]]
+        )
+        retention_ic = get_retention_informatie_category(ic_queryset)
+
+        if retention_ic:
+            validated_data["bron_bewaartermijn"] = retention_ic.bron_bewaartermijn
+            validated_data["selectiecategorie"] = retention_ic.selectiecategorie
+            validated_data["archiefnominatie"] = retention_ic.archiefnominatie
+            validated_data["archiefactiedatum"] = date.today() + relativedelta(
+                years=retention_ic.bewaartermijn
+            )
+            validated_data["toelichting_bewaartermijn"] = (
+                retention_ic.toelichting_bewaartermijn
+            )
+
+        return super().create(validated_data)
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
