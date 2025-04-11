@@ -77,7 +77,7 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 * ``Bewaartermijn``. Het aantal jaar hoe lang de *publicaties* binnen de GPP-publicatiebank (of diens vervanger) bewaard moeten blijven tot actie (vernietiging dan wel overbrenging) genomen moet worden.
 * ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
 
-.. Tip:: Wanneer de ``Archiefnominatie`` permanent te bewaren is, dan dient de ``Bewaartermijn`` 10 of 20 jaar te zijn, conform van de **vigerende** Archiefwet.
+.. Tip:: Wanneer de ``Archiefnominatie`` permanent te bewaren is, dan dient de ``Bewaartermijn`` 10 of 20 jaar te zijn, conform de **vigerende** Archiefwet.
 
 Organisaties
 ------------
