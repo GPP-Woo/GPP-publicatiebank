@@ -138,6 +138,9 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``Archiefactiedatum``. De datum wanneer er actie genomen moet worden voor de *publicaties*.
 * ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
 
+Let op, tijdens het aanmaken van een nieuwe publicatie de Bewaartermijn velden worden overgenomen van de gelinkte Informatie Categorie.
+Dus als je deze velden probeert in te vullen worden ze overschreven.
+
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
 
 Onderwerpen
