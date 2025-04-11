@@ -81,7 +81,7 @@ class InformationCategory(OrderedModel):
     )
     archiefnominatie = models.CharField(
         _("archive action"),
-        help_text=_("Determines if the archived data will be retained or destroyed."),
+        help_text=_("Determines if the archived data will be retained or disposed."),
         choices=ArchiveNominationChoices.choices,
         max_length=50,
         blank=False,

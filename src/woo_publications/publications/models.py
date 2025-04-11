@@ -211,14 +211,14 @@ class Publication(ModelOwnerMixin, models.Model):
     )
     archiefnominatie = models.CharField(
         _("archive action"),
-        help_text=_("Determines if the archived data will be retained or destroyed."),
+        help_text=_("Determines if the archived data will be retained or disposed."),
         choices=ArchiveNominationChoices.choices,
         max_length=50,
         blank=True,
     )
     archiefactiedatum = models.DateField(
         _("archive action date"),
-        help_text=_("Date when the publication will be archived or destroyed."),
+        help_text=_("Date when the publication will be archived or disposed."),
         null=True,
         blank=True,
     )
