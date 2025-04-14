@@ -2,6 +2,13 @@
 Release notes
 =============
 
+1.1.0-rc.2 (2025-04-14)
+=======================
+
+Third 1.1 release candidate.
+
+* [#244] Fixed incomplete bulk delete fix.
+
 1.1.0-rc.1 (2025-04-10)
 =======================
 
