@@ -1697,7 +1697,7 @@ components:
       type: string
       description: |-
         * `blijvend_bewaren` - Retain
-        * `vernietigen` - Destroy
+        * `vernietigen` - Dispose
     BlankEnum:
       enum:
       - ''
@@ -2523,10 +2523,10 @@ components:
         archiefnominatie:
           title: Archive action
           description: |-
-            Determines if the archived data will be retained or destroyed.
+            Determines if the archived data will be retained or disposed.
 
             * `blijvend_bewaren` - Retain
-            * `vernietigen` - Destroy
+            * `vernietigen` - Dispose
           oneOf:
           - $ref: '#/components/schemas/ArchiefnominatieEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -2535,7 +2535,7 @@ components:
           format: date
           nullable: true
           title: Archive action date
-          description: Date when the publication will be archived or destroyed.
+          description: Date when the publication will be archived or disposed.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
@@ -2652,10 +2652,10 @@ components:
         archiefnominatie:
           title: Archive action
           description: |-
-            Determines if the archived data will be retained or destroyed.
+            Determines if the archived data will be retained or disposed.
 
             * `blijvend_bewaren` - Retain
-            * `vernietigen` - Destroy
+            * `vernietigen` - Dispose
           oneOf:
           - $ref: '#/components/schemas/ArchiefnominatieEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -2664,7 +2664,7 @@ components:
           format: date
           nullable: true
           title: Archive action date
-          description: Date when the publication will be archived or destroyed.
+          description: Date when the publication will be archived or disposed.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
