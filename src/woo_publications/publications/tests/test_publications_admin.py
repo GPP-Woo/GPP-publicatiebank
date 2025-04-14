@@ -955,7 +955,54 @@ class TestPublicationsAdmin(WebTest):
         with self.captureOnCommitCallbacks(execute=True):
             form.submit()
 
-        for doc_id in Publication.objects.values_list("pk", flat=True):
+        for pub_id in Publication.objects.values_list("pk", flat=True):
             mock_remove_publication_from_index_delay.assert_any_call(
-                publication_id=doc_id, force=True
+                publication_id=pub_id, force=True
+            )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_bulk_removal_action(self, remove_from_index_by_uuid_delay: MagicMock):
+        pub1 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        pub2 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        pub3 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        DocumentFactory.create(
+            publicatie=pub1, publicatiestatus=PublicationStatusOptions.published
+        )
+        DocumentFactory.create(
+            publicatie=pub2, publicatiestatus=PublicationStatusOptions.concept
+        )
+        DocumentFactory.create(
+            publicatie=pub3, publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Publication.objects.all()]
+        form["action"] = "delete_selected"
+
+        response = form.submit()
+
+        with self.captureOnCommitCallbacks(execute=True):
+            confirmation_form = response.forms[1]
+            confirmation_form.submit()
+
+        for pub_uuid in Publication.objects.values_list("uuid", flat=True):
+            remove_from_index_by_uuid_delay.assert_any_call(
+                model_name="Document", uuid=str(pub_uuid), force=True
+            )
+
+        for doc_uuid in Document.objects.values_list("uuid", flat=True):
+            remove_from_index_by_uuid_delay.assert_any_call(
+                model_name="Document", uuid=doc_uuid, force=True
             )
