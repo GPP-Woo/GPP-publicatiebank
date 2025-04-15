@@ -9,7 +9,7 @@ from woo_publications.accounts.tests.factories import UserFactory
 
 from ..constants import PublicationStatusOptions
 from ..models import Topic
-from .factories import PublicationFactory, TopicFactory
+from .factories import TEST_IMG_PATH, PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
@@ -161,6 +161,7 @@ class TestTopicAdmin(WebTest):
             )
 
         with self.subTest("complete data creates topic"):
+            form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
             form["officiele_titel"] = "Lorem Ipsum"
             form["omschrijving"] = (
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -171,6 +172,7 @@ class TestTopicAdmin(WebTest):
 
             added_item = Topic.objects.order_by("-pk").first()
             assert added_item is not None
+            self.assertTrue(added_item.afbeelding)
             self.assertEqual(added_item.officiele_titel, "Lorem Ipsum")
             self.assertEqual(
                 added_item.omschrijving,
@@ -203,6 +205,7 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
+        form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
         form["publicatiestatus"] = PublicationStatusOptions.revoked
@@ -213,6 +216,7 @@ class TestTopicAdmin(WebTest):
 
         self.assertEqual(response.status_code, 302)
         topic.refresh_from_db()
+        self.assertTrue(topic.afbeelding)
         self.assertEqual(topic.officiele_titel, "changed official title")
         self.assertEqual(topic.omschrijving, "changed description")
         self.assertEqual(topic.publicatiestatus, PublicationStatusOptions.revoked)

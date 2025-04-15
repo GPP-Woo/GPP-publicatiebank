@@ -83,6 +83,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("first_item_in_response_with_expected_data"):
             expected_first_topic_data = {
                 "uuid": str(topic.uuid),
+                "afbeelding": f"http://testserver/media/{topic.afbeelding.name}",
                 "publicaties": [str(publication.uuid)],
                 "officieleTitel": "title one",
                 "omschrijving": "bla bla bla",
@@ -97,6 +98,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("second_item_in_response_with_expected_data"):
             expected_second_topic_data = {
                 "uuid": str(topic2.uuid),
+                "afbeelding": f"http://testserver/media/{topic2.afbeelding.name}",
                 "publicaties": [str(publication2.uuid)],
                 "officieleTitel": "title two",
                 "omschrijving": "description",
@@ -105,7 +107,6 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             }
-
             self.assertEqual(data["results"][1], expected_second_topic_data)
 
     def test_list_topic_filter_publications(self):

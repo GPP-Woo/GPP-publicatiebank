@@ -1,3 +1,4 @@
+import base64
 import uuid
 
 from django.urls import reverse
@@ -18,7 +19,7 @@ from woo_publications.utils.tests.webtest import add_dynamic_field
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
-from .factories import DocumentFactory, PublicationFactory, TopicFactory
+from .factories import TEST_IMG_PATH, DocumentFactory, PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
@@ -923,6 +924,7 @@ class TestTopicAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
+        form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
         form["officiele_titel"] = "Lorem Ipsum"
         form["omschrijving"] = (
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -945,6 +947,9 @@ class TestTopicAdminAuditLogging(WebTest):
             "object_data": {
                 "id": added_item.pk,
                 "uuid": str(added_item.uuid),
+                "afbeelding": base64.b64encode(
+                    added_item.afbeelding.file.read()
+                ).decode("ascii"),
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
@@ -973,6 +978,7 @@ class TestTopicAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
+        form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
         form["publicatiestatus"] = PublicationStatusOptions.revoked
@@ -1010,6 +1016,9 @@ class TestTopicAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": topic.pk,
                     "uuid": str(topic.uuid),
+                    "afbeelding": base64.b64encode(topic.afbeelding.file.read()).decode(
+                        "ascii"
+                    ),
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
                     "publicatiestatus": PublicationStatusOptions.revoked,
@@ -1056,6 +1065,9 @@ class TestTopicAdminAuditLogging(WebTest):
             "object_data": {
                 "id": topic.pk,
                 "uuid": str(topic.uuid),
+                "afbeelding": base64.b64encode(topic.afbeelding.file.read()).decode(
+                    "ascii"
+                ),
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
@@ -1065,5 +1077,4 @@ class TestTopicAdminAuditLogging(WebTest):
             },
             "_cached_object_repr": "Lorem Ipsum",
         }
-
         self.assertEqual(log.extra_data, expected_data)
