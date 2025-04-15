@@ -8,11 +8,12 @@ def get_retention_informatie_category(
     informatie_categorieen: QuerySet[InformationCategory],
 ) -> InformationCategory | None:
     """
-    A function to get the information category needed to get the retention fields.
+    Determine the most appropriate information category for archiving parameter derivation.
+
     The following logic is applied:
-    - Information categories with archiefnominatie `retain` will always be used if present.
-    - When the archiefnominatie is `retain` then return the Information Category with the lowest `bewaartermijn`
-    - When the archiefnominatie is `dispose` then return the Information Category with the highest `bewaartermijn`
+    - Information categories with :arg:`archiefnominatie` ``retain`` will always be used if present.
+    - When the archiefnominatie is ``retain``, then return the Information Category with the lowest ``bewaartermijn``
+    - When the archiefnominatie is ``dispose``, then return the Information Category with the highest ``bewaartermijn``
 
     * we use the order of the Information Category as the leading factor when multiple information categories
     have the same bewaartermijn.

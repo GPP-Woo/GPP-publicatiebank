@@ -8,8 +8,10 @@ from django.core.files import File
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.utils import timezone
+from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _
 
+from dateutil.relativedelta import relativedelta
 from rest_framework.reverse import reverse
 from zgw_consumers.constants import APITypes
 
@@ -31,6 +33,7 @@ from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
 
+from .archiving import get_retention_informatie_category
 from .constants import DocumentActionTypeOptions, PublicationStatusOptions
 from .typing import DocumentActions
 
@@ -285,6 +288,23 @@ class Publication(ModelOwnerMixin, models.Model):
                 object_data=serialize_instance(document),
                 **log_extra_kwargs,  # pyright: ignore[reportArgumentType]
             )
+
+    def apply_retention_policy(self):
+        information_category = get_retention_informatie_category(
+            self.informatie_categorieen.all()
+        )
+        assert (
+            information_category is not None
+        ), "A publication must have at least one information category"
+        self.bron_bewaartermijn = information_category.bron_bewaartermijn
+        self.selectiecategorie = information_category.selectiecategorie
+        self.archiefnominatie = information_category.archiefnominatie
+        self.archiefactiedatum = localdate(
+            self.registratiedatum
+            + relativedelta(years=information_category.bewaartermijn)
+        )
+        self.toelichting_bewaartermijn = information_category.toelichting_bewaartermijn
+        self.save()
 
     @property
     def get_diwoo_informatie_categorieen_uuids(

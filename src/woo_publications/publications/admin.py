@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from functools import partial
 from typing import Any
 from uuid import UUID
@@ -15,7 +15,6 @@ from django.urls import reverse
 from django.utils.html import format_html_join
 from django.utils.translation import gettext_lazy as _, ngettext
 
-from dateutil.relativedelta import relativedelta
 from furl import furl
 
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
@@ -32,7 +31,6 @@ from .tasks import (
     remove_from_index_by_uuid,
     remove_publication_from_index,
 )
-from .utils import get_retention_informatie_category
 
 
 # TODO: extend this func to work with `Topic`
@@ -226,20 +224,6 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         is_published = new_status == PublicationStatusOptions.published
         is_revoked = new_status == PublicationStatusOptions.revoked
 
-        if not change:
-            retention_ic = get_retention_informatie_category(
-                form.cleaned_data["informatie_categorieen"]
-            )
-
-            if retention_ic:
-                obj.bron_bewaartermijn = retention_ic.bron_bewaartermijn
-                obj.selectiecategorie = retention_ic.selectiecategorie
-                obj.archiefnominatie = retention_ic.archiefnominatie
-                obj.archiefactiedatum = date.today() + relativedelta(
-                    years=retention_ic.bewaartermijn
-                )
-                obj.toelichting_bewaartermijn = retention_ic.toelichting_bewaartermijn
-
         if is_revoked and is_status_change:
             obj.revoke_own_published_documents(request.user)
 
@@ -318,6 +302,17 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                         force=True,
                     )
                 )
+
+    def save_related(
+        self,
+        request: HttpRequest,
+        form: forms.Form,
+        formsets: forms.BaseModelFormSet,
+        change: bool,
+    ):
+        super().save_related(request, form, formsets, change)
+        if not change:
+            form.instance.apply_retention_policy()
 
     def get_formset_kwargs(
         self,
