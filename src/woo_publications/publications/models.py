@@ -32,6 +32,11 @@ from woo_publications.logging.typing import ActingUser
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
+from woo_publications.utils.validators import (
+    image_extension_validator,
+    max_file_size_validator,
+    max_file_width_and_height_validator,
+)
 
 from .archiving import get_retention_informatie_category
 from .constants import DocumentActionTypeOptions, PublicationStatusOptions
@@ -50,6 +55,15 @@ class Topic(models.Model):
         unique=True,
         default=uuid.uuid4,
         editable=False,
+    )
+    afbeelding = models.ImageField(
+        _("Afbeelding"),
+        upload_to="topics/",
+        validators=[
+            image_extension_validator,
+            max_file_size_validator,
+            max_file_width_and_height_validator,
+        ],
     )
     officiele_titel = models.CharField(
         _("official title"),

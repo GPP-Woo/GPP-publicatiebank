@@ -1,3 +1,4 @@
+from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
 from open_api_framework.conf.base import *  # noqa
@@ -79,6 +80,25 @@ REQUESTS_DEFAULT_TIMEOUT = (10, 30)
 INSPANNINGSVERPLICHTING_IDENTIFIER = (
     "https://identifier.overheid.nl/tooi/def/thes/kern/c_816e508d"
 )
+
+# Image field validator settings
+ALLOWED_IMG_EXTENSIONS = config(
+    "ALLOWED_IMG_EXTENSIONS",
+    default=[
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+    ],
+)
+assert set(ALLOWED_IMG_EXTENSIONS) <= set(
+    validators.get_available_image_extensions()
+), "img file type not supported"
+
+MAX_FILE_SIZE = config("MAX_FILE_SIZE", default=1_000_000)
+MAX_FILE_HEIGHT = config("MAX_FILE_HEIGHT", default=300)
+MAX_FILE_WIDTH = config("MAX_FILE_WIDTH", default=300)
 
 ##############################
 #                            #
