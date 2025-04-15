@@ -7,6 +7,7 @@ Onder het menu-item "Publicaties" en op het dashboard onder het kopje "Publicati
 
 * Documenten
 * Publicaties
+* Onderwerpen
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -132,11 +133,22 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 
 **Bewaartermijn**
 
-* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn.
+* ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn. Doorgaans zal dit een selectielijst c.q. selectiebesluit zijn, welke conform de vigerende Archiefwet is vastgesteld.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
-* ``Archiefnominatie``. Een radioknop die aangeeft of de *publicaties* vernietigd of gearchiveerd moet worden. Standaard is dit veld niet ingevuld.
-* ``Archiefactiedatum``. De datum wanneer er actie genomen moet worden voor de *publicaties*.
-* ``Toelichting bewaartermijn``. Extra informatie die de gebruiker kan aangeven.
+* ``Archiefnominatie``. Een radioknop die aangeeft of de publicaties op termijn vernietigd of permanent bewaard moet worden. Permanent te bewaren publicaties moeten conform de vigerende Archiefwet op termijn overgebracht worden naar een archiefbewaarplaats c.q. plusdepot / e-depot.
+* ``Archiefactiedatum``. De datum wanneer er actie (vernietiging dan wel overbrenging) genomen moet worden op de *publicatie*.
+* ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
+
+Bovenstaande metadata rondom de *bewaartermijn* worden één op één overgenomen van de gekoppelde informatiecategorie, met uitzondering van de ``Archiefactiedatum``. 
+Deze wordt namelijk berekend door het aantal jaren dat bij de *informatiecategorie* ingevuld is bij ``Bwaartermijn`` op te tellen bij de datum die op de *publicatie* is ingevuld bij ``Geregistreerd op``. 
+
+Wanneer meerdere *informatiecategorieën* zijn gekoppeld, dan geldt de langste bewaartermijn; de ``Archiefnominatie`` "bewaren" heeft prioriteit boven "vernietigen" en vervolgens wordt de langste / hoogste ``Bewaartermijn`` gekozen.
+
+Indien gewenst, kunnen de automatisch ingevulde waarden handmatig dan wel via de API overschreven worden.
+
+Te zijner tijd zal de vernietiging dan wel overbrenging geëffectueerd moeten worden. 
+Onderzocht wordt of hiervoor op termijn aangesloten kan worden op het `Archiefbeheercomponent <https://github.com/maykinmedia/archiefbeheercomponent>`_. 
+Voorbereidiende gesprekken hierover lopen nog.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
 
