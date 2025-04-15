@@ -376,6 +376,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 user={"identifier": user_id, "display_name": user_repr}, remarks=remarks
             )
 
+        if validated_data.get("informatie_categorieen"):
+            publication.apply_retention_policy()
+
         return publication
 
     @transaction.atomic
