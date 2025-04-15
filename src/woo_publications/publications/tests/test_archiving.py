@@ -4,7 +4,7 @@ from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import InformationCategoryFactory
 
-from ..utils import get_retention_informatie_category
+from ..archiving import get_retention_informatie_category
 
 
 class GetRetentionInformationCategoryTest(TestCase):
