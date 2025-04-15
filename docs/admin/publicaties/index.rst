@@ -150,8 +150,7 @@ Te zijner tijd zal de vernietiging dan wel overbrenging geëffectueerd moeten wo
 Onderzocht wordt of hiervoor op termijn aangesloten kan worden op het `Archiefbeheercomponent <https://github.com/maykinmedia/archiefbeheercomponent>`_. 
 Voorbereidiende gesprekken hierover lopen nog.
 
-Let op, tijdens het aanmaken van een nieuwe publicatie de Bewaartermijn velden worden overgenomen van de gelinkte Informatie Categorie.
-Dus als je deze velden probeert in te vullen worden ze overschreven.
+.. warning:: De bewaartermijn van de gekoppelde informatiecategorieën wordt toegepast bij het aanmaken van een registratie. Eventuele manuele aanpassingen op de archiefnominatie, archiefactiedatum en/of overige archiveringsvelden worden hierdoor automatisch overschreven.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
 

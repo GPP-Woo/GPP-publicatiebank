@@ -312,7 +312,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     ):
         super().save_related(request, form, formsets, change)
         if not change:
-            form.instance.apply_retention_policy()
+            form.instance.apply_retention_policy()  # pyright: ignore[reportAttributeAccessIssue]
 
     def get_formset_kwargs(
         self,
