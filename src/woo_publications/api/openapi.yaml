@@ -1696,7 +1696,7 @@ components:
       - vernietigen
       type: string
       description: |-
-        **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+        **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
 
         * `blijvend_bewaren` - Retain
         * `vernietigen` - Dispose
@@ -2516,7 +2516,7 @@ components:
           description: |-
             The source of the retention policy (example: Selectielijst gemeenten 2020).
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         selectiecategorie:
           type: string
@@ -2524,14 +2524,14 @@ components:
           description: |-
             The category as specified in the provided retention policy source (example: 20.1.2).
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         archiefnominatie:
           title: Archive action
           description: |-
             Determines if the archived data will be retained or destroyed.
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
 
             * `blijvend_bewaren` - Retain
             * `vernietigen` - Dispose
@@ -2546,13 +2546,13 @@ components:
           description: |-
             Date when the publication will be archived or destroyed.
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
-          description: '**Note** on create, manually provided values are ignored and
-            overwritten by the automatically derived parameters from the related information
-            categories.'
+          description: '**Note** on create or when updating the information categories,
+            manually provided values are ignored and overwritten by the automatically
+            derived parameters from the related information categories.'
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
@@ -2657,7 +2657,7 @@ components:
           description: |-
             The source of the retention policy (example: Selectielijst gemeenten 2020).
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         selectiecategorie:
           type: string
@@ -2665,14 +2665,14 @@ components:
           description: |-
             The category as specified in the provided retention policy source (example: 20.1.2).
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         archiefnominatie:
           title: Archive action
           description: |-
             Determines if the archived data will be retained or destroyed.
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
 
             * `blijvend_bewaren` - Retain
             * `vernietigen` - Dispose
@@ -2687,13 +2687,13 @@ components:
           description: |-
             Date when the publication will be archived or destroyed.
 
-            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
-          description: '**Note** on create, manually provided values are ignored and
-            overwritten by the automatically derived parameters from the related information
-            categories.'
+          description: '**Note** on create or when updating the information categories,
+            manually provided values are ignored and overwritten by the automatically
+            derived parameters from the related information categories.'
       required:
       - diWooInformatieCategorieen
       - eigenaar
