@@ -112,7 +112,14 @@ class TestPublicationAdminAuditLogging(WebTest):
 
     def test_admin_update(self):
         assert not TimelineLogProxy.objects.exists()
-        ic, ic2 = InformationCategoryFactory.create_batch(2)
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            selectiecategorie="20.1.2",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="extra data",
+        )
         topic, topic2 = TopicFactory.create_batch(2)
         organisation, organisation2 = OrganisationFactory.create_batch(
             2, is_actief=True
@@ -147,11 +154,6 @@ class TestPublicationAdminAuditLogging(WebTest):
         form["officiele_titel"] = "changed official title"
         form["verkorte_titel"] = "changed short title"
         form["omschrijving"] = "changed description"
-        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
-        form["selectiecategorie"] = ("20.1.2",)
-        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
-        form["archiefactiedatum"] = ("2025-01-01",)
-        form["toelichting_bewaartermijn"] = ("extra data",)
 
         with freeze_time("2024-09-28T00:14:00-00:00"):
             form.submit(name="_save")
@@ -197,12 +199,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "bron_bewaartermijn": "Selectielijst gemeenten 2020",
                     "selectiecategorie": "20.1.2",
                     "archiefnominatie": ArchiveNominationChoices.retain,
-                    "archiefactiedatum": "2025-01-01",
+                    "archiefactiedatum": "2034-09-27",
                     "toelichting_bewaartermijn": "extra data",
                 },
                 "_cached_object_repr": "changed official title",
             }
-
             self.assertEqual(update_log.extra_data, expected_data)
 
     def test_admin_update_revoke_published_documents_when_revoking_publication(self):

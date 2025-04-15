@@ -464,7 +464,14 @@ class TestPublicationsAdmin(WebTest):
         )
 
     def test_publications_admin_update(self):
-        ic, ic2 = InformationCategoryFactory.create_batch(2)
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=1,
+            toelichting_bewaartermijn="changed",
+        )
         organisation, organisation2 = OrganisationFactory.create_batch(
             2, is_actief=True
         )
@@ -547,11 +554,12 @@ class TestPublicationsAdmin(WebTest):
             form["officiele_titel"] = "changed official title"
             form["verkorte_titel"] = "changed short title"
             form["omschrijving"] = "changed description"
-            form["bron_bewaartermijn"] = ("changed bron bewaartermijn",)
-            form["selectiecategorie"] = ("changed selectiecategory",)
+            # Values will be overwritten because ic got changed
+            form["bron_bewaartermijn"] = "changed bron bewaartermijn"
+            form["selectiecategorie"] = "changed selectiecategory"
             form["archiefnominatie"].select(text=ArchiveNominationChoices.destroy.label)
-            form["archiefactiedatum"] = ("2025-01-01",)
-            form["toelichting_bewaartermijn"] = ("changed toelichting bewaartermijn",)
+            form["archiefactiedatum"] = "2025-01-01"
+            form["toelichting_bewaartermijn"] = "changed toelichting bewaartermijn"
 
             with freeze_time("2024-09-27T00:14:00-00:00"):
                 response = form.submit(name="_save")
@@ -575,18 +583,60 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(
                 str(publication.laatst_gewijzigd_datum), "2024-09-27 00:14:00+00:00"
             )
-            self.assertEqual(
-                publication.bron_bewaartermijn, "changed bron bewaartermijn"
-            )
-            self.assertEqual(publication.selectiecategorie, "changed selectiecategory")
+            self.assertEqual(publication.bron_bewaartermijn, "changed")
+            self.assertEqual(publication.selectiecategorie, "changed")
             self.assertEqual(
                 publication.archiefnominatie, ArchiveNominationChoices.destroy
             )
-            self.assertEqual(str(publication.archiefactiedatum), "2025-01-01")
+            self.assertEqual(str(publication.archiefactiedatum), "2025-09-25")
             self.assertEqual(
                 publication.toelichting_bewaartermijn,
-                "changed toelichting bewaartermijn",
+                "changed",
             )
+
+    def test_publications_admin_update_unchanged_ic_ignores_retention_fields(self):
+        ic = InformationCategoryFactory.create()
+        organisation = OrganisationFactory.create(is_actief=True)
+        with freeze_time("2024-09-25T00:14:00-00:00"):
+            publication = PublicationFactory.create(
+                publisher=organisation,
+                verantwoordelijke=organisation,
+                opsteller=organisation,
+                informatie_categorieen=[ic],
+                officiele_titel="title one",
+                verkorte_titel="one",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            )
+
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["bron_bewaartermijn"] = "changed bron bewaartermijn"
+        form["selectiecategorie"] = "changed selectiecategory"
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.destroy.label)
+        form["archiefactiedatum"] = "2025-01-01"
+        form["toelichting_bewaartermijn"] = "changed toelichting bewaartermijn"
+
+        with freeze_time("2024-09-27T00:14:00-00:00"):
+            response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+
+        publication.refresh_from_db()
+        self.assertEqual(publication.bron_bewaartermijn, "changed bron bewaartermijn")
+        self.assertEqual(publication.selectiecategorie, "changed selectiecategory")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
+        self.assertEqual(str(publication.archiefactiedatum), "2025-01-01")
+        self.assertEqual(
+            publication.toelichting_bewaartermijn, "changed toelichting bewaartermijn"
+        )
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_update_schedules_index_task(
