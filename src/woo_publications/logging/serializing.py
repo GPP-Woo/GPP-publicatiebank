@@ -1,3 +1,4 @@
+import base64
 from itertools import chain
 
 from django.db import models
@@ -17,6 +18,8 @@ def model_to_dict(instance):
         match f:
             case models.ManyToManyField():
                 value = [obj.pk for obj in value]
+            case models.ImageField():
+                value = base64.b64encode(value.file.read()).decode("ascii")
             case _:
                 pass
         data[f.name] = value
