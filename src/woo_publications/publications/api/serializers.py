@@ -305,35 +305,35 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "bron_bewaartermijn": {
                 "help_text": _(
                     "The source of the retention policy (example: Selectielijst gemeenten 2020)."
-                    "\n\n**Note** on create, manually provided values are ignored and overwritten by the "
-                    "automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
+                    "and overwritten by the automatically derived parameters from the related information categories."
                 )
             },
             "selectiecategorie": {
                 "help_text": _(
                     "The category as specified in the provided retention policy source (example: 20.1.2)."
-                    "\n\n**Note** on create, manually provided values are ignored and overwritten by the "
-                    "automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
+                    "and overwritten by the automatically derived parameters from the related information categories."
                 )
             },
             "archiefnominatie": {
                 "help_text": _(
                     "Determines if the archived data will be retained or destroyed."
-                    "\n\n**Note** on create, manually provided values are ignored and overwritten by the "
-                    "automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
+                    "and overwritten by the automatically derived parameters from the related information categories."
                 )
             },
             "archiefactiedatum": {
                 "help_text": _(
                     "Date when the publication will be archived or destroyed."
-                    "\n\n**Note** on create, manually provided values are ignored and overwritten by the "
-                    "automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
+                    "and overwritten by the automatically derived parameters from the related information categories."
                 )
             },
             "toelichting_bewaartermijn": {
                 "help_text": _(
-                    "**Note** on create, manually provided values are ignored and overwritten by the "
-                    "automatically derived parameters from the related information categories."
+                    "**Note** on create or when updating the information categories, manually provided values are ignored "
+                    "and overwritten by the automatically derived parameters from the related information categories."
                 )
             },
         }
@@ -365,6 +365,17 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     @transaction.atomic
     def update(self, instance, validated_data):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
+        apply_retention = False
+
+        if informatie_categorieen := validated_data.get("informatie_categorieen"):
+            old_informatie_categorieen_set = {
+                ic.uuid for ic in instance.informatie_categorieen.all()
+            }
+            new_informatie_categorieen_set = {ic.uuid for ic in informatie_categorieen}
+
+            if old_informatie_categorieen_set != new_informatie_categorieen_set:
+                apply_retention = True
+
         publication = super().update(instance, validated_data)
 
         if validated_data.get("publicatiestatus") == PublicationStatusOptions.revoked:
@@ -375,6 +386,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             publication.revoke_own_published_documents(
                 user={"identifier": user_id, "display_name": user_repr}, remarks=remarks
             )
+
+        if apply_retention:
+            publication.apply_retention_policy()
 
         return publication
 

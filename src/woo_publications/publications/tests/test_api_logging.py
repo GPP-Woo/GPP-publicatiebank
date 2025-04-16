@@ -122,11 +122,18 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
     def test_update_publication(self):
         assert not TimelineLogProxy.objects.exists()
         organisation = OrganisationFactory.create(is_actief=True)
-        ic = InformationCategoryFactory.create()
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="changed",
+        )
         topic = TopicFactory.create()
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
-                informatie_categorieen=[ic],
+                informatie_categorieen=[ic2],
                 publicatiestatus=PublicationStatusOptions.concept,
                 publisher=organisation,
                 verantwoordelijke=organisation,
@@ -149,11 +156,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             "officieleTitel": "changed offical title",
             "verkorteTitel": "changed short title",
             "omschrijving": "changed description",
-            "bronBewaartermijn": "changed",
-            "selectiecategorie": "changed",
-            "archiefnominatie": ArchiveNominationChoices.destroy,
-            "archiefactiedatum": "2025-01-01",
-            "toelichtingBewaartermijn": "changed",
         }
 
         with freeze_time("2024-09-27T12:00:00-00:00"):
@@ -182,12 +184,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "bron_bewaartermijn": "changed",
                 "selectiecategorie": "changed",
                 "archiefnominatie": ArchiveNominationChoices.destroy,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2034-09-24",
                 "toelichting_bewaartermijn": "changed",
             },
             "_cached_object_repr": "changed offical title",
         }
-
         self.assertEqual(log.extra_data, expected_data)
 
     def test_partial_update_publication_status_to_revoked_also_revokes_published_documents(

@@ -1185,7 +1185,13 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     def test_update_publication(self):
         topic = TopicFactory.create()
         ic, ic2 = InformationCategoryFactory.create_batch(
-            2, oorsprong=InformationCategoryOrigins.value_list
+            2,
+            oorsprong=InformationCategoryOrigins.value_list,
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=1,
+            toelichting_bewaartermijn="changed",
         )
         organisation, organisation2, organisation3 = OrganisationFactory.create_batch(
             3, is_actief=True
@@ -1231,11 +1237,12 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "changed offical title",
                 "verkorteTitel": "changed short title",
                 "omschrijving": "changed description",
-                "bronBewaartermijn": "changed",
-                "selectiecategorie": "changed",
-                "archiefnominatie": ArchiveNominationChoices.destroy,
-                "archiefactiedatum": "2025-01-01",
-                "toelichtingBewaartermijn": "changed",
+                # retention fields will be overwritten by the altering of the ic's
+                "bronBewaartermijn": "IGNORED",
+                "selectiecategorie": "IGNORED",
+                "archiefnominatie": ArchiveNominationChoices.retain,
+                "archiefactiedatum": "3000-01-01",
+                "toelichtingBewaartermijn": "IGNORED",
             }
 
             response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
@@ -1263,11 +1270,57 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bronBewaartermijn": "changed",
                 "selectiecategorie": "changed",
                 "archiefnominatie": ArchiveNominationChoices.destroy,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2025-09-24",
                 "toelichtingBewaartermijn": "changed",
             }
 
             self.assertEqual(response_data, expected_data)
+
+    def test_update_publication_with_no_nieuw_ic_does_not_overwrite_retention_fields(
+        self,
+    ):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list,
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=1,
+            toelichting_bewaartermijn="changed",
+        )
+        publication = PublicationFactory.create(informatie_categorieen=[ic])
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            #
+            "informatieCategorieen": [str(ic.uuid)],
+            "publisher": str(publication.publisher.uuid),
+            "officieleTitel": "changed offical title",
+            # Bewaartermijn Fields
+            "bronBewaartermijn": "selectie lijst 2030",
+            "selectiecategorie": "1.2.3",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2030-01-01",
+            "toelichtingBewaartermijn": "test if the data is editable",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "selectie lijst 2030")
+        self.assertEqual(response_data["selectiecategorie"], "1.2.3")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.retain
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(
+            response_data["toelichtingBewaartermijn"],
+            "test if the data is editable",
+        )
 
     def test_update_publication_onderwerpen_field(self):
         topic = TopicFactory.create()
@@ -1384,6 +1437,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "api:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
+
         data = {
             "officieleTitel": "changed offical title",
         }

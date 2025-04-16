@@ -139,18 +139,18 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``Archiefactiedatum``. De datum wanneer er actie (vernietiging dan wel overbrenging) genomen moet worden op de *publicatie*.
 * ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
 
-Bovenstaande metadata rondom de *bewaartermijn* worden één op één overgenomen van de gekoppelde informatiecategorie, met uitzondering van de ``Archiefactiedatum``. 
-Deze wordt namelijk berekend door het aantal jaren dat bij de *informatiecategorie* ingevuld is bij ``Bwaartermijn`` op te tellen bij de datum die op de *publicatie* is ingevuld bij ``Geregistreerd op``. 
+Bovenstaande metadata rondom de *bewaartermijn* worden één op één overgenomen van de gekoppelde informatiecategorie, met uitzondering van de ``Archiefactiedatum``.
+Deze wordt namelijk berekend door het aantal jaren dat bij de *informatiecategorie* ingevuld is bij ``Bwaartermijn`` op te tellen bij de datum die op de *publicatie* is ingevuld bij ``Geregistreerd op``.
 
 Wanneer meerdere *informatiecategorieën* zijn gekoppeld, dan geldt de langste bewaartermijn; de ``Archiefnominatie`` "bewaren" heeft prioriteit boven "vernietigen" en vervolgens wordt de langste / hoogste ``Bewaartermijn`` gekozen.
 
 Indien gewenst, kunnen de automatisch ingevulde waarden handmatig dan wel via de API overschreven worden.
 
-Te zijner tijd zal de vernietiging dan wel overbrenging geëffectueerd moeten worden. 
-Onderzocht wordt of hiervoor op termijn aangesloten kan worden op het `Archiefbeheercomponent <https://github.com/maykinmedia/archiefbeheercomponent>`_. 
+Te zijner tijd zal de vernietiging dan wel overbrenging geëffectueerd moeten worden.
+Onderzocht wordt of hiervoor op termijn aangesloten kan worden op het `Archiefbeheercomponent <https://github.com/maykinmedia/archiefbeheercomponent>`_.
 Voorbereidiende gesprekken hierover lopen nog.
 
-.. warning:: De bewaartermijn van de gekoppelde informatiecategorieën wordt toegepast bij het aanmaken van een registratie. Eventuele manuele aanpassingen op de archiefnominatie, archiefactiedatum en/of overige archiveringsvelden worden hierdoor automatisch overschreven.
+.. warning:: De bewaartermijn van de gekoppelde informatiecategorieën wordt toegepast bij het aanmaken van een registratie en bij het toevoegen/verwijderen van een koppeling voor de informatiecategorieën. Eventuele manuele aanpassingen op de archiefnominatie, archiefactiedatum en/of overige archiveringsvelden worden hierdoor automatisch overschreven.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
 
