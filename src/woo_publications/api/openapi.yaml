@@ -1696,6 +1696,8 @@ components:
       - vernietigen
       type: string
       description: |-
+        **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+
         * `blijvend_bewaren` - Retain
         * `vernietigen` - Dispose
     BlankEnum:
@@ -2511,19 +2513,25 @@ components:
         bronBewaartermijn:
           type: string
           title: Retention policy source
-          description: 'The source of the retention policy (example: Selectielijst
-            gemeenten 2020).'
+          description: |-
+            The source of the retention policy (example: Selectielijst gemeenten 2020).
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         selectiecategorie:
           type: string
           title: Selection category
-          description: 'The category as specified in the provided retention policy
-            source (example: 20.1.2).'
+          description: |-
+            The category as specified in the provided retention policy source (example: 20.1.2).
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         archiefnominatie:
           title: Archive action
           description: |-
-            Determines if the archived data will be retained or disposed.
+            Determines if the archived data will be retained or destroyed.
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
 
             * `blijvend_bewaren` - Retain
             * `vernietigen` - Dispose
@@ -2535,10 +2543,16 @@ components:
           format: date
           nullable: true
           title: Archive action date
-          description: Date when the publication will be archived or disposed.
+          description: |-
+            Date when the publication will be archived or destroyed.
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
+          description: '**Note** on create, manually provided values are ignored and
+            overwritten by the automatically derived parameters from the related information
+            categories.'
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
@@ -2640,19 +2654,25 @@ components:
         bronBewaartermijn:
           type: string
           title: Retention policy source
-          description: 'The source of the retention policy (example: Selectielijst
-            gemeenten 2020).'
+          description: |-
+            The source of the retention policy (example: Selectielijst gemeenten 2020).
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         selectiecategorie:
           type: string
           title: Selection category
-          description: 'The category as specified in the provided retention policy
-            source (example: 20.1.2).'
+          description: |-
+            The category as specified in the provided retention policy source (example: 20.1.2).
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
           maxLength: 255
         archiefnominatie:
           title: Archive action
           description: |-
-            Determines if the archived data will be retained or disposed.
+            Determines if the archived data will be retained or destroyed.
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
 
             * `blijvend_bewaren` - Retain
             * `vernietigen` - Dispose
@@ -2664,10 +2684,16 @@ components:
           format: date
           nullable: true
           title: Archive action date
-          description: Date when the publication will be archived or disposed.
+          description: |-
+            Date when the publication will be archived or destroyed.
+
+            **Note** on create, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
         toelichtingBewaartermijn:
           type: string
           title: Retention policy explanation
+          description: '**Note** on create, manually provided values are ignored and
+            overwritten by the automatically derived parameters from the related information
+            categories.'
       required:
       - diWooInformatieCategorieen
       - eigenaar

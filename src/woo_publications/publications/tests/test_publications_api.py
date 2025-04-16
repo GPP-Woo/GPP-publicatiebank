@@ -1027,7 +1027,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_create_publication(self):
         ic, ic2 = InformationCategoryFactory.create_batch(
-            2, oorsprong=InformationCategoryOrigins.value_list
+            2,
+            oorsprong=InformationCategoryOrigins.value_list,
+            bron_bewaartermijn="bewaartermijn",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
         )
         topic = TopicFactory.create()
         organisation, organisation2, organisation3 = OrganisationFactory.create_batch(
@@ -1134,9 +1138,12 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "bronBewaartermijn": "Selectielijst gemeenten 2020",
-                "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
+                # These values will be overwritten
+                "bronBewaartermijn": "THIS VALUE WON'T BE USED",
+                "selectiecategorie": "THIS VALUE WON'T BE USED",
+                "archiefnominatie": ArchiveNominationChoices.destroy,
+                "archiefactiedatum": "3000-01-01",
+                "toelichtingBewaartermijn": "THIS VALUE WON'T BE USED",
             }
 
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
@@ -1160,10 +1167,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "eigenaar": {"weergaveNaam": "username", "identifier": "id"},
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
-                "bronBewaartermijn": "Selectielijst gemeenten 2020",
+                "bronBewaartermijn": "bewaartermijn",
                 "selectiecategorie": "",
                 "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2029-09-24",
                 "toelichtingBewaartermijn": "",
             }
 

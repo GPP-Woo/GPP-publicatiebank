@@ -303,6 +303,17 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     )
                 )
 
+    def save_related(
+        self,
+        request: HttpRequest,
+        form: forms.Form,
+        formsets: forms.BaseModelFormSet,
+        change: bool,
+    ):
+        super().save_related(request, form, formsets, change)
+        if not change:
+            form.instance.apply_retention_policy()  # pyright: ignore[reportAttributeAccessIssue]
+
     def get_formset_kwargs(
         self,
         request: HttpRequest,

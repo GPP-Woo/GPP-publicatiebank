@@ -40,7 +40,14 @@ class TestPublicationAdminAuditLogging(WebTest):
 
     def test_admin_create(self):
         assert not TimelineLogProxy.objects.exists()
-        ic, ic2 = InformationCategoryFactory.create_batch(2)
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            selectiecategorie="20.1.2",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn="2",
+            toelichting_bewaartermijn="extra data",
+        )
         topic = TopicFactory.create()
         organisation, organisation2 = OrganisationFactory.create_batch(
             2, is_actief=True
@@ -65,11 +72,6 @@ class TestPublicationAdminAuditLogging(WebTest):
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
             "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
         )
-        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
-        form["selectiecategorie"] = ("20.1.2",)
-        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
-        form["archiefactiedatum"] = ("2025-01-01",)
-        form["toelichting_bewaartermijn"] = ("extra data",)
 
         with freeze_time("2024-09-25T00:14:00-00:00"):
             form.submit(name="_save")
@@ -100,7 +102,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "bron_bewaartermijn": "Selectielijst gemeenten 2020",
                 "selectiecategorie": "20.1.2",
                 "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2025-01-01",
+                "archiefactiedatum": "2026-09-25",
                 "toelichting_bewaartermijn": "extra data",
             },
             "_cached_object_repr": "The official title of this publication",

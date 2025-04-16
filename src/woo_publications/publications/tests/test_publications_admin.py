@@ -142,7 +142,14 @@ class TestPublicationsAdmin(WebTest):
 
     @freeze_time("2024-09-25T00:14:00-00:00")
     def test_publications_admin_create(self):
-        ic, ic2, ic3 = InformationCategoryFactory.create_batch(3)
+        ic, ic2, ic3 = InformationCategoryFactory.create_batch(
+            3,
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
         organisation = OrganisationFactory(is_actief=True)
         deactivated_organisation = OrganisationFactory(is_actief=False)
         reverse_url = reverse("admin:publications_publication_add")
@@ -244,15 +251,14 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(
                 str(added_item.laatst_gewijzigd_datum), "2024-09-25 00:14:00+00:00"
             )
-            self.assertEqual(
-                added_item.bron_bewaartermijn, "Selectielijst gemeenten 2020"
-            )
-            self.assertEqual(added_item.selectiecategorie, "20.1.2")
+            # Test if the fields get overwritten from the input by the IC
+            self.assertEqual(added_item.bron_bewaartermijn, "bewaartermijn")
+            self.assertEqual(added_item.selectiecategorie, "selectiecategorie")
             self.assertEqual(
                 added_item.archiefnominatie, ArchiveNominationChoices.retain
             )
-            self.assertEqual(str(added_item.archiefactiedatum), "2025-01-01")
-            self.assertEqual(added_item.toelichting_bewaartermijn, "extra data")
+            self.assertEqual(str(added_item.archiefactiedatum), "2029-09-25")
+            self.assertEqual(added_item.toelichting_bewaartermijn, "toelichting")
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
@@ -278,11 +284,11 @@ class TestPublicationsAdmin(WebTest):
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
             "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
         )
-        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
-        form["selectiecategorie"] = ("20.1.2",)
+        form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+        form["selectiecategorie"] = "20.1.2"
         form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
-        form["archiefactiedatum"] = ("2025-01-01",)
-        form["toelichting_bewaartermijn"] = ("extra data",)
+        form["archiefactiedatum"] = "2025-01-01"
+        form["toelichting_bewaartermijn"] = "extra data"
 
         with self.captureOnCommitCallbacks(execute=True):
             add_response = form.submit(name="_save")
