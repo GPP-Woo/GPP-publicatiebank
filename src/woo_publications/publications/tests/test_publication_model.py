@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -53,20 +55,21 @@ class TestPublicationModel(TestCase):
             )
 
         # sanity check that the fields were empty
-        self.assertEqual(publication.bron_bewaartermijn, "")
-        self.assertEqual(publication.selectiecategorie, "")
-        self.assertEqual(publication.archiefnominatie, "")
-        self.assertIsNone(publication.archiefactiedatum)
-        self.assertEqual(publication.toelichting_bewaartermijn, "")
+        assert publication.bron_bewaartermijn == ""
+        assert publication.selectiecategorie == ""
+        assert publication.archiefnominatie == ""
+        assert publication.archiefactiedatum is None
+        assert publication.toelichting_bewaartermijn == ""
 
         publication.apply_retention_policy()
 
         publication.refresh_from_db()
+        # Uses the IC with the lowest
         self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn 1")
         self.assertEqual(publication.selectiecategorie, "1.0.1")
         self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.retain)
         self.assertEqual(
-            str(publication.archiefactiedatum), "2029-09-24"
+            publication.archiefactiedatum, date(2029, 9, 24)
         )  # 2024-09-24 + 5 years
         self.assertEqual(publication.toelichting_bewaartermijn, "first bewaartermijn")
 
@@ -91,19 +94,20 @@ class TestPublicationModel(TestCase):
             publication = PublicationFactory.create(informatie_categorieen=[ic1, ic2])
 
         # sanity check that the fields were empty
-        self.assertEqual(publication.bron_bewaartermijn, "")
-        self.assertEqual(publication.selectiecategorie, "")
-        self.assertEqual(publication.archiefnominatie, "")
-        self.assertIsNone(publication.archiefactiedatum)
-        self.assertEqual(publication.toelichting_bewaartermijn, "")
+        assert publication.bron_bewaartermijn == ""
+        assert publication.selectiecategorie == ""
+        assert publication.archiefnominatie == ""
+        assert publication.archiefactiedatum is None
+        assert publication.toelichting_bewaartermijn == ""
 
         publication.apply_retention_policy()
 
         publication.refresh_from_db()
+        # uses the IC with the highest year
         self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn 4")
         self.assertEqual(publication.selectiecategorie, "1.1.0")
         self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
         self.assertEqual(
-            str(publication.archiefactiedatum), "2044-09-24"
-        )  # 2024-09-24 + 5 years
+            publication.archiefactiedatum, date(2044, 9, 24)
+        )  # 2024-09-24 + 20 years
         self.assertEqual(publication.toelichting_bewaartermijn, "forth bewaartermijn")
