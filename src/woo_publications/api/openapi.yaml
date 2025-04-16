@@ -2745,6 +2745,9 @@ components:
           type: string
           format: uuid
           readOnly: true
+        afbeelding:
+          type: string
+          format: uri
         publicaties:
           type: array
           items:
@@ -2781,6 +2784,7 @@ components:
           description: System timestamp reflecting when the topic was last modified
             in the database.
       required:
+      - afbeelding
       - laatstGewijzigdDatum
       - officieleTitel
       - publicaties
