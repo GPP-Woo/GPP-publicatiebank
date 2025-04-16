@@ -10,6 +10,15 @@ your own umbrella chart.
 
 The remainder of the documentation assumes you're deploying the full stack.
 
+Requirements
+------------
+
+**Persistent storage**
+
+GPP-publicatiebank instances require persistent storage. The Helm charts by default
+enable persistence, creating a PVC if none is specified. The PVC must be
+``ReadWriteMany`` if you're deploying multiple replicas.
+
 Add the repositories
 --------------------
 
