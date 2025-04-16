@@ -1391,7 +1391,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "api:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
-        with self.subTest("changing single field only updates dat field"):
+        with self.subTest("changing single field only updates that field"):
             data = {
                 "officieleTitel": "changed offical title",
             }
