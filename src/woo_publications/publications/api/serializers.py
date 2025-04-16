@@ -365,6 +365,17 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     @transaction.atomic
     def update(self, instance, validated_data):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
+        apply_retention = False
+
+        if informatie_categorieen := validated_data.get("informatie_categorieen"):
+            old_informatie_categorieen_set = {
+                ic.uuid for ic in instance.informatie_categorieen.all()
+            }
+            new_informatie_categorieen_set = {ic.uuid for ic in informatie_categorieen}
+
+            if old_informatie_categorieen_set != new_informatie_categorieen_set:
+                apply_retention = True
+
         publication = super().update(instance, validated_data)
 
         if validated_data.get("publicatiestatus") == PublicationStatusOptions.revoked:
@@ -376,7 +387,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 user={"identifier": user_id, "display_name": user_repr}, remarks=remarks
             )
 
-        if validated_data.get("informatie_categorieen"):
+        if apply_retention:
             publication.apply_retention_policy()
 
         return publication

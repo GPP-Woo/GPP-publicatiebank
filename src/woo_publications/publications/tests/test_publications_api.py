@@ -1276,6 +1276,52 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response_data, expected_data)
 
+    def test_update_publication_with_no_nieuw_ic_does_not_overwrite_retention_fields(
+        self,
+    ):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list,
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=1,
+            toelichting_bewaartermijn="changed",
+        )
+        publication = PublicationFactory.create(informatie_categorieen=[ic])
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            #
+            "informatieCategorieen": [str(ic.uuid)],
+            "publisher": str(publication.publisher.uuid),
+            "officieleTitel": "changed offical title",
+            # Bewaartermijn Fields
+            "bronBewaartermijn": "selectie lijst 2030",
+            "selectiecategorie": "1.2.3",
+            "archiefnominatie": ArchiveNominationChoices.retain,
+            "archiefactiedatum": "2030-01-01",
+            "toelichtingBewaartermijn": "test if the data is editable",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "selectie lijst 2030")
+        self.assertEqual(response_data["selectiecategorie"], "1.2.3")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.retain
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(
+            response_data["toelichtingBewaartermijn"],
+            "test if the data is editable",
+        )
+
     def test_update_publication_onderwerpen_field(self):
         topic = TopicFactory.create()
         ic = InformationCategoryFactory.create(
@@ -1391,68 +1437,41 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "api:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
-        with self.subTest("changing single field only updates that field"):
-            data = {
-                "officieleTitel": "changed offical title",
-            }
 
-            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            "officieleTitel": "changed offical title",
+        }
 
-            response_data = response.json()
-            expected_data = {
-                "uuid": response_data[
-                    "uuid"
-                ],  # uuid gets generated so we are just testing that its there
-                "informatieCategorieen": [str(ic.uuid)],
-                "diWooInformatieCategorieen": [str(ic.uuid)],
-                "onderwerpen": [str(topic.uuid)],
-                "publisher": str(organisation.uuid),
-                "verantwoordelijke": None,
-                "opsteller": None,
-                "officieleTitel": "changed offical title",
-                "verkorteTitel": "one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "publicatiestatus": PublicationStatusOptions.published,
-                "eigenaar": None,
-                "registratiedatum": "2024-09-24T14:00:00+02:00",
-                "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
-                "bronBewaartermijn": publication.bron_bewaartermijn,
-                "selectiecategorie": "",
-                "archiefnominatie": "",
-                "archiefactiedatum": "2034-09-24",
-                "toelichtingBewaartermijn": "",
-            }
+        response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-            # test that only officiele_titel got changed
-            self.assertEqual(response_data, expected_data)
+        response_data = response.json()
+        expected_data = {
+            "uuid": response_data[
+                "uuid"
+            ],  # uuid gets generated so we are just testing that its there
+            "informatieCategorieen": [str(ic.uuid)],
+            "diWooInformatieCategorieen": [str(ic.uuid)],
+            "onderwerpen": [str(topic.uuid)],
+            "publisher": str(organisation.uuid),
+            "verantwoordelijke": None,
+            "opsteller": None,
+            "officieleTitel": "changed offical title",
+            "verkorteTitel": "one",
+            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "publicatiestatus": PublicationStatusOptions.published,
+            "eigenaar": None,
+            "registratiedatum": "2024-09-24T14:00:00+02:00",
+            "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+            "bronBewaartermijn": publication.bron_bewaartermijn,
+            "selectiecategorie": "",
+            "archiefnominatie": "",
+            "archiefactiedatum": "2034-09-24",
+            "toelichtingBewaartermijn": "",
+        }
 
-        with self.subTest(
-            "without updating the information category the retention fields won't be overwritten"
-        ):
-            data = {
-                "bronBewaartermijn": "selectie lijst 2030",
-                "selectiecategorie": "1.2.3",
-                "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2030-01-01",
-                "toelichtingBewaartermijn": "test if the data is editable",
-            }
-
-            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-            response_data = response.json()
-            self.assertEqual(response_data["bronBewaartermijn"], "selectie lijst 2030")
-            self.assertEqual(response_data["selectiecategorie"], "1.2.3")
-            self.assertEqual(
-                response_data["archiefnominatie"], ArchiveNominationChoices.retain
-            )
-            self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
-            self.assertEqual(
-                response_data["toelichtingBewaartermijn"],
-                "test if the data is editable",
-            )
+        # test that only officiele_titel got changed
+        self.assertEqual(response_data, expected_data)
 
     def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(
         self,

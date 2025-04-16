@@ -122,7 +122,8 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
     def test_update_publication(self):
         assert not TimelineLogProxy.objects.exists()
         organisation = OrganisationFactory.create(is_actief=True)
-        ic = InformationCategoryFactory.create(
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
             bron_bewaartermijn="changed",
             selectiecategorie="changed",
             archiefnominatie=ArchiveNominationChoices.destroy,
@@ -132,7 +133,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         topic = TopicFactory.create()
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
-                informatie_categorieen=[ic],
+                informatie_categorieen=[ic2],
                 publicatiestatus=PublicationStatusOptions.concept,
                 publisher=organisation,
                 verantwoordelijke=organisation,
