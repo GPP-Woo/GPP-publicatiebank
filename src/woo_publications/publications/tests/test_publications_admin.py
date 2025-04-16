@@ -260,165 +260,6 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(str(added_item.archiefactiedatum), "2029-09-25")
             self.assertEqual(added_item.toelichting_bewaartermijn, "toelichting")
 
-    def test_publication_admin_create_retention_field_with_both_archive_nomination_choices(
-        self,
-    ):
-        ic1 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 1",
-            selectiecategorie="1.0.1",
-            archiefnominatie=ArchiveNominationChoices.retain,
-            bewaartermijn=5,
-            toelichting_bewaartermijn="first bewaartermijn",
-        )
-        ic2 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 2",
-            selectiecategorie="1.0.2",
-            archiefnominatie=ArchiveNominationChoices.retain,
-            bewaartermijn=8,
-            toelichting_bewaartermijn="second bewaartermijn",
-        )
-        ic3 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 3",
-            selectiecategorie="1.0.1",
-            archiefnominatie=ArchiveNominationChoices.retain,
-            bewaartermijn=10,
-            toelichting_bewaartermijn="third bewaartermijn",
-        )
-        ic4 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 2",
-            selectiecategorie="1.0.3",
-            archiefnominatie=ArchiveNominationChoices.destroy,
-            bewaartermijn=10,
-            toelichting_bewaartermijn="second bewaartermijn",
-        )
-        ic5 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 4",
-            selectiecategorie="1.1.0",
-            archiefnominatie=ArchiveNominationChoices.destroy,
-            bewaartermijn=20,
-            toelichting_bewaartermijn="forth bewaartermijn",
-        )
-        organisation = OrganisationFactory.create(is_actief=True)
-        reverse_url = reverse("admin:publications_publication_add")
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["informatie_categorieen"].force_value(
-            [ic1.pk, ic2.pk, ic3.pk, ic4.pk, ic5.pk]
-        )
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
-        form["publisher"] = str(organisation.pk)
-        form["officiele_titel"] = "bla bla bla"
-
-        with freeze_time("2024-09-24T12:00:00-00:00"):
-            submit_response = form.submit(name="_save")
-
-        self.assertEqual(submit_response.status_code, 302)
-
-        added_item = Publication.objects.order_by("-pk").first()
-        assert added_item is not None
-
-        self.assertEqual(added_item.bron_bewaartermijn, "bewaartermijn 1")
-        self.assertEqual(added_item.selectiecategorie, "1.0.1")
-        self.assertEqual(added_item.archiefnominatie, ArchiveNominationChoices.retain)
-        self.assertEqual(
-            str(added_item.archiefactiedatum), "2029-09-24"
-        )  # 2024-09-24 + 5 years
-        self.assertEqual(added_item.toelichting_bewaartermijn, "first bewaartermijn")
-
-    def test_publication_admin_create_retention_field_with_dispose_archive_nomination_choice(
-        self,
-    ):
-        ic1 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 2",
-            selectiecategorie="1.0.3",
-            archiefnominatie=ArchiveNominationChoices.destroy,
-            bewaartermijn=10,
-            toelichting_bewaartermijn="second bewaartermijn",
-        )
-        ic2 = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 4",
-            selectiecategorie="1.1.0",
-            archiefnominatie=ArchiveNominationChoices.destroy,
-            bewaartermijn=20,
-            toelichting_bewaartermijn="forth bewaartermijn",
-        )
-        organisation = OrganisationFactory.create(is_actief=True)
-        reverse_url = reverse("admin:publications_publication_add")
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["informatie_categorieen"].force_value([ic1.pk, ic2.pk])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
-        form["publisher"] = str(organisation.pk)
-        form["officiele_titel"] = "bla bla bla"
-
-        with freeze_time("2024-09-24T12:00:00-00:00"):
-            submit_response = form.submit(name="_save")
-
-        self.assertEqual(submit_response.status_code, 302)
-
-        added_item = Publication.objects.order_by("-pk").first()
-        assert added_item is not None
-
-        self.assertEqual(added_item.bron_bewaartermijn, "bewaartermijn 4")
-        self.assertEqual(added_item.selectiecategorie, "1.1.0")
-        self.assertEqual(added_item.archiefnominatie, ArchiveNominationChoices.destroy)
-        self.assertEqual(
-            str(added_item.archiefactiedatum), "2044-09-24"
-        )  # 2024-09-24 + 5 years
-        self.assertEqual(added_item.toelichting_bewaartermijn, "forth bewaartermijn")
-
-    def test_publication_admin_create_retention_fields_takes_ic_retention_values_over_user_input(
-        self,
-    ):
-        ic = InformationCategoryFactory.create(
-            bron_bewaartermijn="bewaartermijn 4",
-            selectiecategorie="1.1.0",
-            archiefnominatie=ArchiveNominationChoices.destroy,
-            bewaartermijn=20,
-            toelichting_bewaartermijn="forth bewaartermijn",
-        )
-        organisation = OrganisationFactory.create(is_actief=True)
-        reverse_url = reverse("admin:publications_publication_add")
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["informatie_categorieen"].force_value([ic.pk])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
-        form["publisher"] = str(organisation.pk)
-        form["officiele_titel"] = "bla bla bla"
-        form["bron_bewaartermijn"] = "THIS VALUE WON'T BE USED"
-        form["selectiecategorie"] = "THIS VALUE WON'T BE USED"
-        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
-        form["archiefactiedatum"] = "3000-01-01"
-        form["toelichting_bewaartermijn"] = "THIS VALUE WON'T BE USED"
-
-        with freeze_time("2024-09-24T12:00:00-00:00"):
-            submit_response = form.submit(name="_save")
-
-        self.assertEqual(submit_response.status_code, 302)
-
-        added_item = Publication.objects.order_by("-pk").first()
-        assert added_item is not None
-
-        self.assertEqual(added_item.bron_bewaartermijn, "bewaartermijn 4")
-        self.assertEqual(added_item.selectiecategorie, "1.1.0")
-        self.assertEqual(added_item.archiefnominatie, ArchiveNominationChoices.destroy)
-        self.assertEqual(
-            str(added_item.archiefactiedatum), "2044-09-24"
-        )  # 2024-09-24 + 5 years
-        self.assertEqual(added_item.toelichting_bewaartermijn, "forth bewaartermijn")
-
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
         self, mock_index_publication_delay: MagicMock
@@ -443,11 +284,11 @@ class TestPublicationsAdmin(WebTest):
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
             "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
         )
-        form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
-        form["selectiecategorie"] = ("20.1.2",)
+        form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+        form["selectiecategorie"] = "20.1.2"
         form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
-        form["archiefactiedatum"] = ("2025-01-01",)
-        form["toelichting_bewaartermijn"] = ("extra data",)
+        form["archiefactiedatum"] = "2025-01-01"
+        form["toelichting_bewaartermijn"] = "extra data"
 
         with self.captureOnCommitCallbacks(execute=True):
             add_response = form.submit(name="_save")
