@@ -2,6 +2,28 @@
 Release notes
 =============
 
+1.1.0 (2025-04-16)
+==================
+
+Feature release to integrate with GPP-zoeken.
+
+GPP-zoeken manages the search index for the citizen portal. While it's technically an
+optional component for GPP-publicatiebank, we recommend making use of it in all cases
+for the best user experience for your users.
+
+Features
+--------
+
+* GPP-publicatiebank now dispatches publication status changes to GPP-zoeken to make
+  publications and/or documents available to the search index (or revoke them).
+* Added bulk index/index-removal actions in the admin for publications and documents.
+* The document upload status to the backing Documenten API is now tracked.
+
+Project maintenance
+-------------------
+
+* Updated documentation for GPP-zoeken integration.
+
 1.1.0-rc.2 (2025-04-14)
 =======================
 

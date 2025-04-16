@@ -1,7 +1,7 @@
 {
     "name": "woo-publications",
     "private": true,
-    "version": "1.1.0-rc.2",
+    "version": "1.1.0",
     "description": "woo_publications project",
     "main": "src/static/woo_publications/js/woo_publications.js",
     "scripts": {
