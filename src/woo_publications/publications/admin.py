@@ -72,13 +72,12 @@ def sync_to_index(
     modeladmin.message_user(
         request,
         ngettext(
-            "{count} {verbose_name} scheduled for background processing.",
-            "{count} {verbose_name_plural} scheduled for background processing.",
+            "{count} {verbose_name} object scheduled for background processing.",
+            "{count} {verbose_name} objects scheduled for background processing.",
             num_objects,
         ).format(
             count=num_objects,
             verbose_name=model._meta.verbose_name,
-            verbose_name_plural=model._meta.verbose_name_plural,
         ),
         messages.SUCCESS,
     )
@@ -112,13 +111,12 @@ def remove_from_index(
     modeladmin.message_user(
         request,
         ngettext(
-            "{count} {verbose_name} scheduled for background processing.",
-            "{count} {verbose_name_plural} scheduled for background processing.",
+            "{count} {verbose_name} object scheduled for background processing.",
+            "{count} {verbose_name} objects scheduled for background processing.",
             num_objects,
         ).format(
             count=num_objects,
             verbose_name=model._meta.verbose_name,
-            verbose_name_plural=model._meta.verbose_name_plural,
         ),
         messages.SUCCESS,
     )

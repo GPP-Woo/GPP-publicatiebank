@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.1.0-rc.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 11:52+0100\n"
-"PO-Revision-Date: 2025-03-12 12:36+0100\n"
-"Last-Translator:   <bart.burgman@maykinmedia.nl>\n"
+"POT-Creation-Date: 2025-04-16 11:28+0200\n"
+"PO-Revision-Date: 2025-04-16 11:29+0200\n"
+"Last-Translator:   <sergei.maertens@maykinmedia.nl>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -22,8 +22,8 @@ msgstr ""
 #: woo_publications/accounts/admin.py:51 woo_publications/metadata/admin.py:55
 #: woo_publications/metadata/admin.py:105
 #: woo_publications/metadata/admin.py:144
-#: woo_publications/publications/admin.py:245
-#: woo_publications/publications/admin.py:380
+#: woo_publications/publications/admin.py:280
+#: woo_publications/publications/admin.py:432
 msgid "actions"
 msgstr "acties"
 
@@ -90,7 +90,8 @@ msgstr ""
 msgid ""
 "You cannot create or update a user with more permissions than yourself."
 msgstr ""
-"Je kunt geen gebruiker aanmaken of updaten die meer rechten dan jezelf heeft."
+"Je kunt geen gebruiker aanmaken of updaten die meer rechten dan jezelf "
+"heeft."
 
 #: woo_publications/api/authorization.py:14
 msgid "Invalid token."
@@ -556,47 +557,50 @@ msgstr "Voorpagina"
 msgid "resource URI"
 msgstr "resource-URI"
 
-#: woo_publications/publications/admin.py:36
+#: woo_publications/publications/admin.py:37
 #, python-format
 msgid "Send the selected %(verbose_name_plural)s to the search index"
 msgstr "Verstuur de geselecteerde %(verbose_name_plural)s naar de zoekindex"
 
-#: woo_publications/publications/admin.py:74
+#: woo_publications/publications/admin.py:75
 #: woo_publications/publications/admin.py:114
 #, python-brace-format
-msgid "{count} {verbose_name} scheduled for background processing."
+#| msgid "{count} {verbose_name} scheduled for background processing."
+#| msgid_plural ""
+#| "{count} {verbose_name_plural} scheduled for background processing."
+msgid "{count} {verbose_name} object scheduled for background processing."
 msgid_plural ""
-"{count} {verbose_name_plural} scheduled for background processing."
-msgstr[0] "{count} {verbose_name} wordt op de achtergrond verwerkt."
-msgstr[1] "{count} {verbose_name_plural} worden op de achtergrond verwerkt."
+"{count} {verbose_name} objects scheduled for background processing."
+msgstr[0] "{count} {verbose_name}-object wordt op de achtergrond verwerkt."
+msgstr[1] "{count} {verbose_name}-objecten worden op de achtergrond verwerkt."
 
 #: woo_publications/publications/admin.py:87
 #, python-format
 msgid "Remove the selected %(verbose_name_plural)s from the search index"
 msgstr "Verwijder de geselecteerde %(verbose_name_plural)s uit de zoekindex"
 
-#: woo_publications/publications/admin.py:252
+#: woo_publications/publications/admin.py:287
 msgid "Show documents"
 msgstr "Toon documenten"
 
-#: woo_publications/publications/admin.py:298
+#: woo_publications/publications/admin.py:333
 msgid "Document actions"
 msgstr "Documenthandelingen"
 
-#: woo_publications/publications/admin.py:308
+#: woo_publications/publications/admin.py:343
 msgid "Documents API integration"
 msgstr "Documenten-API-koppeling"
 
-#: woo_publications/publications/admin.py:376
+#: woo_publications/publications/admin.py:428
 #: woo_publications/publications/models.py:258
 msgid "file size"
 msgstr "bestandsomvang"
 
-#: woo_publications/publications/admin.py:391
+#: woo_publications/publications/admin.py:443
 msgid "at time"
 msgstr "op moment"
 
-#: woo_publications/publications/admin.py:395
+#: woo_publications/publications/admin.py:447
 msgid "was associated with"
 msgstr "was geassocieerd met"
 
@@ -621,7 +625,8 @@ msgstr "Filter documenten op registratiedatum voor de opgegeven datumtijd."
 
 #: woo_publications/publications/api/filters.py:54
 msgid "Filter documents that were registered before or on the given value."
-msgstr "Filter documenten op registratiedatum op of voor de opgegeven datumtijd."
+msgstr ""
+"Filter documenten op registratiedatum op of voor de opgegeven datumtijd."
 
 #: woo_publications/publications/api/filters.py:60
 msgid "Filter documents that were created after or on the given value."
@@ -649,7 +654,8 @@ msgstr ""
 #: woo_publications/publications/api/filters.py:88
 msgid "Filter documents that were last modified before or on the given value."
 msgstr ""
-"Filter documenten op laastste wijzigingsdatum op of voor de opgegeven datumtijd."
+"Filter documenten op laastste wijzigingsdatum op of voor de opgegeven "
+"datumtijd."
 
 #: woo_publications/publications/api/filters.py:94
 msgid "Filter documents based on the owner identifier of the object."
@@ -699,7 +705,8 @@ msgstr "Filter publicaties op registratiedatum voor de opgegeven datumtijd."
 
 #: woo_publications/publications/api/filters.py:171
 msgid "Filter publications that were registered before or on the given value."
-msgstr "Filter publicaties op registratiedatum op of voor de opgegeven datumtijd."
+msgstr ""
+"Filter publicaties op registratiedatum op of voor de opgegeven datumtijd."
 
 #: woo_publications/publications/api/filters.py:178
 msgid ""
