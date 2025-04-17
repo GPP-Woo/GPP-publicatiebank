@@ -29,13 +29,12 @@ class MaxFileSizeValidatorsTestCase(TestCase):
             image_file.file, format="PNG"
         )
 
-        with self.assertRaisesMessage(
-            ValidationError,
-            _("File size exceeds max size of {max_img_size}.").format(
-                max_img_size=filesizeformat(10)
-            ),
-        ):
+        expected_error = _("File size exceeds max size of {max_img_size}.").format(
+            max_img_size=filesizeformat(10)
+        )
+        with self.assertRaises(ValidationError) as exc_cm:
             max_img_size_validator(image_file)
+        self.assertEqual(exc_cm.exception.message, expected_error)
 
 
 class MaxFileWidthAndHeightValidatorsTestCase(TestCase):

@@ -43,6 +43,7 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
 
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_api_key_result_in_401_with_wrong_credentials(self):
         topic = TopicFactory.create()
         list_url = reverse("api:topic-list")
