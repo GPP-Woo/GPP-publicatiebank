@@ -2748,6 +2748,7 @@ components:
         afbeelding:
           type: string
           format: uri
+          pattern: (?:jpg|jpeg|png|gif|webp)$
         publicaties:
           type: array
           items:
