@@ -92,6 +92,7 @@ ALLOWED_IMG_EXTENSIONS = config(
         "webp",
     ],
     help_text=_("The allowed image extensions that we support."),
+    group="Image upload settings",
 )
 assert set(ALLOWED_IMG_EXTENSIONS) <= set(
     validators.get_available_image_extensions()
@@ -101,16 +102,19 @@ MAX_IMG_SIZE = config(
     "MAX_IMG_SIZE",
     default=1_000_000,
     help_text=_("The maximum size of images in bytes."),
+    group="Image upload settings",
 )
 MAX_IMG_HEIGHT = config(
     "MAX_IMG_HEIGHT",
     default=600,
     help_text=_("The maximum image height of images in pixels."),
+    group="Image upload settings",
 )
 MAX_IMG_WIDTH = config(
     "MAX_IMG_WIDTH",
     default=600,
     help_text=_("The maximum image width of images in pixels."),
+    group="Image upload settings",
 )
 
 ##############################
