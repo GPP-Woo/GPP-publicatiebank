@@ -27,20 +27,21 @@ from .models import Document, Publication, Topic
 from .tasks import (
     index_document,
     index_publication,
+    index_topic,
     remove_document_from_index,
     remove_from_index_by_uuid,
     remove_publication_from_index,
+    remove_topic_from_index,
 )
 
 
-# TODO: extend this func to work with `Topic`
 @admin.action(
     description=_("Send the selected %(verbose_name_plural)s to the search index")
 )
 def sync_to_index(
-    modeladmin: PublicationAdmin | DocumentAdmin,
+    modeladmin: PublicationAdmin | DocumentAdmin | TopicAdmin,
     request: HttpRequest,
-    queryset: models.QuerySet[Publication | Document],
+    queryset: models.QuerySet[Publication | Document | Topic],
 ):
     model = queryset.model
     filtered_qs = queryset.filter(publicatiestatus=PublicationStatusOptions.published)
@@ -51,7 +52,7 @@ def sync_to_index(
 
     num_objects = filtered_qs.count()
 
-    if model not in [Publication, Document]:  # pragma: no cover
+    if model not in [Publication, Document, Topic]:  # pragma: no cover
         raise ValueError("Unknown model: %r", model)
 
     for obj in filtered_qs.iterator():
@@ -67,6 +68,8 @@ def sync_to_index(
                     index_document.delay, document_id=obj.pk, download_url=document_url
                 )
             )
+        elif model is Topic:
+            transaction.on_commit(partial(index_topic.delay, topic_id=obj.pk))
         else:  # pragma: no cover
             assert False, "unreachable"
 
@@ -84,14 +87,13 @@ def sync_to_index(
     )
 
 
-# TODO: extend this func to work with `Topic`
 @admin.action(
     description=_("Remove the selected %(verbose_name_plural)s from the search index")
 )
 def remove_from_index(
-    modeladmin: PublicationAdmin | DocumentAdmin,
+    modeladmin: PublicationAdmin | DocumentAdmin | TopicAdmin,
     request: HttpRequest,
-    queryset: models.QuerySet[Publication | Document],
+    queryset: models.QuerySet[Publication | Document | Topic],
 ):
     model = queryset.model
     num_objects = queryset.count()
@@ -102,6 +104,9 @@ def remove_from_index(
     elif model is Document:
         task_fn = remove_document_from_index
         kwarg_name = "document_id"
+    elif model is Topic:
+        task_fn = remove_topic_from_index
+        kwarg_name = "topic_id"
     else:  # pragma: no cover
         raise ValueError("Unsupported model: %r", model)
 
@@ -544,14 +549,63 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     inlines = (PublicationInline,)
     date_hierarchy = "registratiedatum"
-    # TODO: uncomment actions when we offer the data to GPP-zoeken
-    # actions = [sync_to_index, remove_from_index]
+    actions = [sync_to_index, remove_from_index]
+
+    def save_model(
+        self, request: HttpRequest, obj: Topic, form: forms.Form, change: bool
+    ):
+        super().save_model(request, obj, form, change)
+
+        new_status = obj.publicatiestatus
+        is_published = new_status == PublicationStatusOptions.published
+
+        if change:
+            original_status = form.initial["publicatiestatus"]
+            if new_status != original_status and not is_published:
+                transaction.on_commit(
+                    partial(remove_topic_from_index.delay, topic_id=obj.pk)
+                )
+
+        if is_published:
+            transaction.on_commit(
+                partial(
+                    index_topic.delay,
+                    topic_id=obj.pk,
+                )
+            )
+
+    def delete_model(self, request: HttpRequest, obj: Document):
+        super().delete_model(request, obj)
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Topic",
+                    uuid=str(obj.uuid),
+                )
+            )
 
     def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
         if request.path == reverse("admin:autocomplete"):
             qs = qs.order_by("officiele_titel")
         return qs
+
+    def delete_queryset(self, request: HttpRequest, queryset: models.QuerySet[Topic]):
+        topic_uuids: list[UUID] = [topic.uuid for topic in queryset]
+
+        super().delete_queryset(request, queryset)
+
+        for topic_uuid in topic_uuids:
+            transaction.on_commit(
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Topic",
+                    uuid=str(topic_uuid),
+                    force=True,
+                )
+            )
 
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Topic) -> str:
