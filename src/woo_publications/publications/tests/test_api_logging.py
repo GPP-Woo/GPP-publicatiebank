@@ -1,6 +1,8 @@
+import tempfile
 from datetime import date
 from unittest.mock import patch
 
+from django.test import override_settings
 from django.urls import reverse
 
 from freezegun import freeze_time
@@ -27,6 +29,7 @@ AUDIT_HEADERS = {
 }
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PublicationLoggingTests(TokenAuthMixin, APITestCase):
 
     def test_detail_logging(self):

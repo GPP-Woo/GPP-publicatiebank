@@ -1,18 +1,23 @@
+import tempfile
+
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
+from webtest import Upload
 
 from woo_publications.accounts.tests.factories import UserFactory
 
 from ..constants import PublicationStatusOptions
 from ..models import Topic
-from .factories import PublicationFactory, TopicFactory
+from .factories import TEST_IMG_PATH, PublicationFactory, TopicFactory
 
 
 @disable_admin_mfa()
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class TestTopicAdmin(WebTest):
     @classmethod
     def setUpTestData(cls):
@@ -138,6 +143,9 @@ class TestTopicAdmin(WebTest):
 
     @freeze_time("2024-09-25T00:14:00-00:00")
     def test_topic_admin_create(self):
+        with open(TEST_IMG_PATH, "rb") as infile:
+            upload = Upload("test.jpeg", infile.read(), "image/jpeg")
+
         reverse_url = reverse("admin:publications_topic_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -161,6 +169,7 @@ class TestTopicAdmin(WebTest):
             )
 
         with self.subTest("complete data creates topic"):
+            form["afbeelding"] = upload
             form["officiele_titel"] = "Lorem Ipsum"
             form["omschrijving"] = (
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -171,6 +180,7 @@ class TestTopicAdmin(WebTest):
 
             added_item = Topic.objects.order_by("-pk").first()
             assert added_item is not None
+            self.assertTrue(added_item.afbeelding)
             self.assertEqual(added_item.officiele_titel, "Lorem Ipsum")
             self.assertEqual(
                 added_item.omschrijving,
@@ -188,6 +198,9 @@ class TestTopicAdmin(WebTest):
             )
 
     def test_topic_admin_update(self):
+        with open(TEST_IMG_PATH, "rb") as infile:
+            upload = Upload("test.jpeg", infile.read(), "image/jpeg")
+
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
                 publicatiestatus=PublicationStatusOptions.published,
@@ -203,6 +216,7 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
+        form["afbeelding"] = upload
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
         form["publicatiestatus"] = PublicationStatusOptions.revoked
@@ -213,6 +227,7 @@ class TestTopicAdmin(WebTest):
 
         self.assertEqual(response.status_code, 302)
         topic.refresh_from_db()
+        self.assertTrue(topic.afbeelding)
         self.assertEqual(topic.officiele_titel, "changed official title")
         self.assertEqual(topic.omschrijving, "changed description")
         self.assertEqual(topic.publicatiestatus, PublicationStatusOptions.revoked)

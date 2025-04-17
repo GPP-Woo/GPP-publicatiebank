@@ -282,6 +282,8 @@ packaging==24.1
     # via drf-yasg
 phonenumberslite==8.13.45
     # via django-two-factor-auth
+pillow==11.2.1
+    # via -r requirements/base.in
 polib==1.2.0
     # via django-rosetta
 prometheus-client==0.20.0

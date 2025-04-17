@@ -412,6 +412,7 @@ class TopicSerializer(serializers.ModelSerializer[Topic]):
         model = Topic
         fields = (
             "uuid",
+            "afbeelding",
             "publicaties",
             "officiele_titel",
             "omschrijving",

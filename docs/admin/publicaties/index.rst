@@ -182,6 +182,7 @@ Hierop zien we:
 
 Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
+* ``Afbeelding``. De afbeelding van het onderwerp die getoond kan worden in de GPP-burgerportaal.
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp.
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp.
 * ``Status``. De status van het onderwerp. "Gepubliceerd" betekent dat het onderwerp online vindbaar en raadpleegbaar is. "Ingetrokken" is offline voor de buitenwereld.

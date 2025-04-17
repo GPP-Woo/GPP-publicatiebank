@@ -1,3 +1,4 @@
+from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
 from open_api_framework.conf.base import *  # noqa
@@ -78,6 +79,42 @@ REQUESTS_DEFAULT_TIMEOUT = (10, 30)
 # The Identifier of `inspanningsverplichting` from the gov origins list for the Information Categories.
 INSPANNINGSVERPLICHTING_IDENTIFIER = (
     "https://identifier.overheid.nl/tooi/def/thes/kern/c_816e508d"
+)
+
+# Image field validator settings
+ALLOWED_IMG_EXTENSIONS = config(
+    "ALLOWED_IMG_EXTENSIONS",
+    default=[
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+    ],
+    help_text=_("The allowed image extensions that we support."),
+    group="Image upload settings",
+)
+assert set(ALLOWED_IMG_EXTENSIONS) <= set(
+    validators.get_available_image_extensions()
+), "img file type not supported"
+
+MAX_IMG_SIZE = config(
+    "MAX_IMG_SIZE",
+    default=1_000_000,
+    help_text=_("The maximum size of images in bytes."),
+    group="Image upload settings",
+)
+MAX_IMG_HEIGHT = config(
+    "MAX_IMG_HEIGHT",
+    default=600,
+    help_text=_("The maximum image height of images in pixels."),
+    group="Image upload settings",
+)
+MAX_IMG_WIDTH = config(
+    "MAX_IMG_WIDTH",
+    default=600,
+    help_text=_("The maximum image width of images in pixels."),
+    group="Image upload settings",
 )
 
 ##############################

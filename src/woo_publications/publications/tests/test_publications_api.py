@@ -1,8 +1,10 @@
+import tempfile
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.conf import settings
 from django.core.cache import cache
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -92,6 +94,7 @@ class PublicationApiAuthorizationAndPermissionTests(
         self.assertWrongApiKeyProhibitsDeleteEndpointAccess(detail_url)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     @classmethod
     def setUpClass(cls):

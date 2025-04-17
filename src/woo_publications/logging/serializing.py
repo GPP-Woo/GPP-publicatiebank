@@ -17,6 +17,8 @@ def model_to_dict(instance):
         match f:
             case models.ManyToManyField():
                 value = [obj.pk for obj in value]
+            case models.FileField():
+                value = value.name
             case _:
                 pass
         data[f.name] = value

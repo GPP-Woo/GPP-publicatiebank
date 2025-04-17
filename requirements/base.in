@@ -1,6 +1,7 @@
 # Pure python dependencies
 celery
 furl
+Pillow
 
 # Django packages
 django-axes[ipware]

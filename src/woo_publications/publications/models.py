@@ -3,8 +3,10 @@ from functools import partial
 from typing import Callable
 from uuid import UUID
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.validators import FileExtensionValidator
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.utils import timezone
@@ -32,6 +34,10 @@ from woo_publications.logging.typing import ActingUser
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
+from woo_publications.utils.validators import (
+    max_img_size_validator,
+    max_img_width_and_height_validator,
+)
 
 from .archiving import get_retention_informatie_category
 from .constants import DocumentActionTypeOptions, PublicationStatusOptions
@@ -50,6 +56,15 @@ class Topic(models.Model):
         unique=True,
         default=uuid.uuid4,
         editable=False,
+    )
+    afbeelding = models.ImageField(
+        _("Afbeelding"),
+        upload_to="topics/",
+        validators=[
+            FileExtensionValidator(allowed_extensions=settings.ALLOWED_IMG_EXTENSIONS),
+            max_img_size_validator,
+            max_img_width_and_height_validator,
+        ],
     )
     officiele_titel = models.CharField(
         _("official title"),

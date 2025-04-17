@@ -1,4 +1,7 @@
+from pathlib import Path
 from typing import Sequence
+
+from django.conf import settings
 
 import factory
 
@@ -7,6 +10,14 @@ from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
 from ..models import Document, Publication, Topic
+
+TEST_IMG_PATH = (
+    Path(settings.DJANGO_PROJECT_DIR)
+    / "publications"
+    / "tests"
+    / "files"
+    / "maykin_media_logo.jpeg"
+)
 
 
 class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
@@ -64,6 +75,7 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
 
 
 class TopicFactory(factory.django.DjangoModelFactory[Topic]):
+    afbeelding = factory.django.ImageField(width=10, height=10, image_format="jpg")
     officiele_titel = factory.Faker("word")
 
     class Meta:  # pyright: ignore
