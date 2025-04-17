@@ -1,5 +1,7 @@
+import tempfile
 from uuid import uuid4
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -42,11 +44,11 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_key_result_in_401_with_wrong_credentials(self):
-        publication = PublicationFactory.create()
+        topic = TopicFactory.create()
         list_url = reverse("api:topic-list")
         detail_url = reverse(
             "api:topic-detail",
-            kwargs={"uuid": str(publication.uuid)},
+            kwargs={"uuid": str(topic.uuid)},
         )
 
         # read
@@ -54,6 +56,7 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
         self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     def test_list_topics(self):
         with freeze_time("2024-09-25T12:00:00-00:00"):
@@ -83,7 +86,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("first_item_in_response_with_expected_data"):
             expected_first_topic_data = {
                 "uuid": str(topic.uuid),
-                "afbeelding": f"http://testserver/media/{topic.afbeelding.name}",
+                "afbeelding": f"http://testserver{topic.afbeelding.url}",
                 "publicaties": [str(publication.uuid)],
                 "officieleTitel": "title one",
                 "omschrijving": "bla bla bla",
@@ -98,7 +101,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("second_item_in_response_with_expected_data"):
             expected_second_topic_data = {
                 "uuid": str(topic2.uuid),
-                "afbeelding": f"http://testserver/media/{topic2.afbeelding.name}",
+                "afbeelding": f"http://testserver{topic2.afbeelding.url}",
                 "publicaties": [str(publication2.uuid)],
                 "officieleTitel": "title two",
                 "omschrijving": "description",

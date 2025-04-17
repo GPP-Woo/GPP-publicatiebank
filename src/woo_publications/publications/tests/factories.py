@@ -75,7 +75,7 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
 
 
 class TopicFactory(factory.django.DjangoModelFactory[Topic]):
-    afbeelding = factory.django.ImageField(width=250, height=250, image_format="jpg")
+    afbeelding = factory.django.ImageField(width=10, height=10, image_format="jpg")
     officiele_titel = factory.Faker("word")
 
     class Meta:  # pyright: ignore

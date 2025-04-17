@@ -1,69 +1,81 @@
+from io import BytesIO
+
 from django.core.exceptions import ValidationError
+from django.core.files.images import ImageFile
+from django.template.defaultfilters import filesizeformat
 from django.test import TestCase, override_settings
-from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
-from woo_publications.publications.tests.factories import TopicFactory
+from PIL import Image
 
-from ..validators import (
-    image_extension_validator,
-    max_file_size_validator,
-    max_file_width_and_height_validator,
-)
-
-
-class ImageExtensionValidatorsTestCase(TestCase):
-    def test_happy_flow(self):
-        topic = TopicFactory.create()
-        image_extension_validator(topic.afbeelding)
-
-    @override_settings(ALLOWED_IMG_EXTENSIONS=["gif"])
-    def test_assert_file_extension_not_in_allowed_image_extensions(self):
-        topic = TopicFactory.create()
-        with self.assertRaisesMessage(
-            ValidationError,
-            gettext("unsupported image extension."),
-        ):
-            image_extension_validator(topic.afbeelding)
+from ..validators import max_img_size_validator, max_img_width_and_height_validator
 
 
 class MaxFileSizeValidatorsTestCase(TestCase):
     def test_happy_flow(self):
-        topic = TopicFactory.create()
-        max_file_size_validator(topic.afbeelding)
+        image_file = ImageFile(BytesIO(), name="example.png")
+        assert isinstance(image_file.file, BytesIO)
+        Image.new("RGBA", (16, 16), (255, 0, 0, 255)).save(
+            image_file.file, format="PNG"
+        )
 
-    @override_settings(MAX_FILE_SIZE=10)
+        max_img_size_validator(image_file)
+
+    @override_settings(MAX_IMG_SIZE=10)
     def test_size_larger_then_max(self):
-        topic = TopicFactory.create()
+        image_file = ImageFile(BytesIO(), name="example.png")
+        assert isinstance(image_file.file, BytesIO)
+        Image.new("RGBA", (16, 16), (255, 0, 0, 255)).save(
+            image_file.file, format="PNG"
+        )
+
         with self.assertRaisesMessage(
             ValidationError,
-            gettext("File size exceeds max size of {max_file_size}.").format(
-                max_file_size=10
+            _("File size exceeds max size of {max_img_size}.").format(
+                max_img_size=filesizeformat(10)
             ),
         ):
-            max_file_size_validator(topic.afbeelding)
+            max_img_size_validator(image_file)
 
 
 class MaxFileWidthAndHeightValidatorsTestCase(TestCase):
     def test_happy_flow(self):
-        topic = TopicFactory.create()
-        max_file_width_and_height_validator(topic.afbeelding)
+        image_file = ImageFile(BytesIO(), name="example.png")
+        assert isinstance(image_file.file, BytesIO)
+        Image.new("RGBA", (16, 16), (255, 0, 0, 255)).save(
+            image_file.file, format="PNG"
+        )
 
-    @override_settings(MAX_FILE_WIDTH=10)
+        max_img_width_and_height_validator(image_file)
+
+    @override_settings(MAX_IMG_WIDTH=10)
     def test_width_larger_then_max(self):
-        topic = TopicFactory.create()
-        with self.assertRaisesMessage(
-            ValidationError,
-            gettext("File width limit of {max_width} exceeded.").format(max_width=10),
-        ):
-            max_file_width_and_height_validator(topic.afbeelding)
+        image_file = ImageFile(BytesIO(), name="example.png")
+        assert isinstance(image_file.file, BytesIO)
+        Image.new("RGBA", (16, 16), (255, 0, 0, 255)).save(
+            image_file.file, format="PNG"
+        )
 
-    @override_settings(MAX_FILE_HEIGHT=10)
-    def test_height_larger_then_max(self):
-        topic = TopicFactory.create()
         with self.assertRaisesMessage(
             ValidationError,
-            gettext("File height limit of {max_height} exceeded.").format(
-                max_height=10
-            ),
+            _(
+                "The image dimensions exceed the maximum dimensions of {max_width}x{max_height}."
+            ).format(max_width=10, max_height=600),
         ):
-            max_file_width_and_height_validator(topic.afbeelding)
+            max_img_width_and_height_validator(image_file)
+
+    @override_settings(MAX_IMG_HEIGHT=10)
+    def test_height_larger_then_max(self):
+        image_file = ImageFile(BytesIO(), name="example.png")
+        assert isinstance(image_file.file, BytesIO)
+        Image.new("RGBA", (16, 16), (255, 0, 0, 255)).save(
+            image_file.file, format="PNG"
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            _(
+                "The image dimensions exceed the maximum dimensions of {max_width}x{max_height}."
+            ).format(max_width=600, max_height=10),
+        ):
+            max_img_width_and_height_validator(image_file)

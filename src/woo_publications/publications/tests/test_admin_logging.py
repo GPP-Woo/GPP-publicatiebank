@@ -1,11 +1,13 @@
-import base64
+import tempfile
 import uuid
 
+from django.test import override_settings
 from django.urls import reverse
 
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
+from webtest import Upload
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.constants import ArchiveNominationChoices
@@ -23,6 +25,7 @@ from .factories import TEST_IMG_PATH, DocumentFactory, PublicationFactory, Topic
 
 
 @disable_admin_mfa()
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class TestPublicationAdminAuditLogging(WebTest):
     """
     Test that CRUD actions on publications are audit-logged.
@@ -910,6 +913,7 @@ class TestDocumentAdminAuditLogging(WebTest):
 
 
 @disable_admin_mfa()
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class TestTopicAdminAuditLogging(WebTest):
     @classmethod
     def setUpTestData(cls):
@@ -917,6 +921,9 @@ class TestTopicAdminAuditLogging(WebTest):
         cls.user = UserFactory.create(superuser=True)
 
     def test_topic_admin_log_create(self):
+        with open(TEST_IMG_PATH, "rb") as infile:
+            upload = Upload("test.jpeg", infile.read(), "image/jpeg")
+
         reverse_url = reverse("admin:publications_topic_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -924,7 +931,7 @@ class TestTopicAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
-        form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
+        form["afbeelding"] = upload
         form["officiele_titel"] = "Lorem Ipsum"
         form["omschrijving"] = (
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
@@ -947,9 +954,7 @@ class TestTopicAdminAuditLogging(WebTest):
             "object_data": {
                 "id": added_item.pk,
                 "uuid": str(added_item.uuid),
-                "afbeelding": base64.b64encode(
-                    added_item.afbeelding.file.read()
-                ).decode("ascii"),
+                "afbeelding": added_item.afbeelding.name,
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
@@ -963,6 +968,9 @@ class TestTopicAdminAuditLogging(WebTest):
         self.assertEqual(log.extra_data, expected_data)
 
     def test_topic_admin_log_update(self):
+        with open(TEST_IMG_PATH, "rb") as infile:
+            upload = Upload("test.jpeg", infile.read(), "image/jpeg")
+
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
                 publicatiestatus=PublicationStatusOptions.published,
@@ -978,7 +986,7 @@ class TestTopicAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["topic_form"]
-        form["afbeelding"] = ("test.jpeg", open(TEST_IMG_PATH, "rb").read())
+        form["afbeelding"] = upload
         form["officiele_titel"] = "changed official title"
         form["omschrijving"] = "changed description"
         form["publicatiestatus"] = PublicationStatusOptions.revoked
@@ -1016,9 +1024,7 @@ class TestTopicAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": topic.pk,
                     "uuid": str(topic.uuid),
-                    "afbeelding": base64.b64encode(topic.afbeelding.file.read()).decode(
-                        "ascii"
-                    ),
+                    "afbeelding": topic.afbeelding.name,
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
                     "publicatiestatus": PublicationStatusOptions.revoked,
@@ -1065,9 +1071,7 @@ class TestTopicAdminAuditLogging(WebTest):
             "object_data": {
                 "id": topic.pk,
                 "uuid": str(topic.uuid),
-                "afbeelding": base64.b64encode(topic.afbeelding.file.read()).decode(
-                    "ascii"
-                ),
+                "afbeelding": topic.afbeelding.name,
                 "officiele_titel": "Lorem Ipsum",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
