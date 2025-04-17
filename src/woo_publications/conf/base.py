@@ -91,14 +91,27 @@ ALLOWED_IMG_EXTENSIONS = config(
         "gif",
         "webp",
     ],
+    help_text=_("The allowed image extensions that we support."),
 )
 assert set(ALLOWED_IMG_EXTENSIONS) <= set(
     validators.get_available_image_extensions()
 ), "img file type not supported"
 
-MAX_FILE_SIZE = config("MAX_FILE_SIZE", default=1_000_000)
-MAX_FILE_HEIGHT = config("MAX_FILE_HEIGHT", default=300)
-MAX_FILE_WIDTH = config("MAX_FILE_WIDTH", default=300)
+MAX_IMG_SIZE = config(
+    "MAX_IMG_SIZE",
+    default=1_000_000,
+    help_text=_("The maximum size of images in bytes."),
+)
+MAX_IMG_HEIGHT = config(
+    "MAX_IMG_HEIGHT",
+    default=600,
+    help_text=_("The maximum image height of images in pixels."),
+)
+MAX_IMG_WIDTH = config(
+    "MAX_IMG_WIDTH",
+    default=600,
+    help_text=_("The maximum image width of images in pixels."),
+)
 
 ##############################
 #                            #
