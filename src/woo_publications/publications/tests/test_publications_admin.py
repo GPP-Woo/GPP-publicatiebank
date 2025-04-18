@@ -100,6 +100,8 @@ class TestPublicationsAdmin(WebTest):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum="2024-09-24",
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
@@ -107,6 +109,8 @@ class TestPublicationsAdmin(WebTest):
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2024-09-25",
             )
         reverse_url = reverse("admin:publications_publication_changelist")
 
@@ -135,6 +139,31 @@ class TestPublicationsAdmin(WebTest):
             )
 
             self.assertEqual(search_response.status_code, 200)
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(publication2.uuid), 1)
+
+        with self.subTest("filter on archiefnominatie"):
+            search_response = response.click(
+                description=str(ArchiveNominationChoices.retain.label)
+            )
+
+            self.assertEqual(search_response.status_code, 200)
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(publication2.uuid), 1)
+
+        with self.subTest("filter on archiefactiedatum"):
+            search_response = response.click(description=_("Today"), index=1)
+
+            self.assertEqual(search_response.status_code, 200)
+
+            # Sanity check that we indeed filtered on archiefactiedatum
+            self.assertIn(
+                "archiefactiedatum", search_response.request.environ["QUERY_STRING"]
+            )
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-uuid", 1)
