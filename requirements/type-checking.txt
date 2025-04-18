@@ -512,11 +512,6 @@ inflection==0.5.1
     #   -r requirements/ci.txt
     #   drf-spectacular
     #   drf-yasg
-iniconfig==2.0.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   pytest
 iso-639==0.4.5
     # via
     #   -c requirements/ci.txt
@@ -634,7 +629,6 @@ packaging==24.1
     #   -r requirements/ci.txt
     #   black
     #   drf-yasg
-    #   pytest
     #   sphinx
 pathspec==0.12.1
     # via
@@ -655,11 +649,6 @@ platformdirs==4.3.2
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   black
-pluggy==1.5.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   pytest
 polib==1.2.0
     # via
     #   -c requirements/ci.txt
@@ -726,10 +715,6 @@ pyquery==2.0.1
     #   -r requirements/ci.txt
 pyright==1.1.381
     # via -r requirements/type-checking.in
-pytest==8.3.3
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 python-creole==1.4.10
     # via
     #   -c requirements/ci.txt
