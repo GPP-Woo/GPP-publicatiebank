@@ -167,7 +167,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *onderwerp*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
-* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
+* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, publicatiestatus, archiefnominatie en/of archiefdatum**.
 * Bij een *onderwerp*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
 * Bij een *onderwerp*-registratie kan op **Toon logs** (rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
 
