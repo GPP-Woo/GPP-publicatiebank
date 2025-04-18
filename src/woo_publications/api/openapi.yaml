@@ -1187,6 +1187,44 @@ paths:
           The display name of the user performing the action, to make them recognizable.
         required: true
       - in: query
+        name: archiefactiedatumTot
+        schema:
+          type: string
+          format: date-time
+        description: Filter publications that are gonna be archived/disposed before
+          the given value.
+      - in: query
+        name: archiefactiedatumTotEnMet
+        schema:
+          type: string
+          format: date-time
+        description: Filter publications that are gonna be archived/disposed before
+          or on the given value.
+      - in: query
+        name: archiefactiedatumVanaf
+        schema:
+          type: string
+          format: date-time
+        description: Filter publications that are gonna be archived/disposed after
+          or on the given value.
+      - in: query
+        name: archiefnominatie
+        schema:
+          type: array
+          items:
+            type: string
+            title: Archive action
+            enum:
+            - blijvend_bewaren
+            - vernietigen
+        description: |-
+          Filter publications based on the archiefnominatie.
+
+          * `blijvend_bewaren` - Retain
+          * `vernietigen` - Dispose
+        explode: true
+        style: form
+      - in: query
         name: eigenaar
         schema:
           type: string
