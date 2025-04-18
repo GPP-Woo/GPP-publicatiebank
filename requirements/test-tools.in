@@ -15,6 +15,3 @@ zgw-consumers[testutils]
 black
 isort[colors]
 flake8
-
-# Docs
-pytest
