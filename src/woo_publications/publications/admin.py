@@ -201,6 +201,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_filter = (
         "registratiedatum",
         "publicatiestatus",
+        "archiefnominatie",
+        "archiefactiedatum",
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
