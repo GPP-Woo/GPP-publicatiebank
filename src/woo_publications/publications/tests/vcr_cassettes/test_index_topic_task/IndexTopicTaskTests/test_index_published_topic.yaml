@@ -1,0 +1,44 @@
+interactions:
+- request:
+    body: '{"uuid": "cc60b5d3-4377-461b-ab80-af252ef5a774", "officieleTitel": "partner",
+      "omschrijving": "", "registratiedatum": "2025-04-18T09:14:32.458184+00:00",
+      "laatstGewijzigdDatum": "2025-04-18T09:14:32.458194+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '213'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/onderwerpen
+  response:
+    body:
+      string: '{"taskId":"4a931628-ac93-4e0b-b898-810c2d536cc4"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+version: 1

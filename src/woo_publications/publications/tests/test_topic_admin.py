@@ -1,4 +1,5 @@
 import tempfile
+from unittest.mock import MagicMock, patch
 
 from django.test import override_settings
 from django.urls import reverse
@@ -197,6 +198,32 @@ class TestTopicAdmin(WebTest):
                 str(added_item.laatst_gewijzigd_datum), "2024-09-25 00:14:00+00:00"
             )
 
+    @patch("woo_publications.publications.admin.index_topic.delay")
+    def test_topic_create_scheduels_index_task(self, mock_index_topic_delay: MagicMock):
+        with open(TEST_IMG_PATH, "rb") as infile:
+            upload = Upload("test.jpeg", infile.read(), "image/jpeg")
+
+        reverse_url = reverse("admin:publications_topic_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["afbeelding"] = upload
+        form["officiele_titel"] = "Lorem Ipsum"
+
+        with self.captureOnCommitCallbacks(execute=True):
+            add_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            add_response, reverse("admin:publications_topic_changelist")
+        )
+
+        added_item = Topic.objects.order_by("-pk").first()
+        assert added_item is not None
+        mock_index_topic_delay.assert_called_once_with(topic_id=added_item.pk)
+
     def test_topic_admin_update(self):
         with open(TEST_IMG_PATH, "rb") as infile:
             upload = Upload("test.jpeg", infile.read(), "image/jpeg")
@@ -235,7 +262,68 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(str(topic.registratiedatum), "2024-09-24 12:00:00+00:00")
         self.assertEqual(str(topic.laatst_gewijzigd_datum), "2024-09-27 12:00:00+00:00")
 
-    def test_topic_admin_delete(self):
+    @patch("woo_publications.publications.admin.index_topic.delay")
+    def test_topic_admin_update_schedules_index_task(
+        self, mock_index_topic_delay: MagicMock
+    ):
+        topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            officiele_titel="title one",
+        )
+
+        reverse_url = reverse(
+            "admin:publications_topic_change",
+            kwargs={"object_id": topic.pk},
+        )
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "changed official title"
+        form["publicatiestatus"] = PublicationStatusOptions.published
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response, reverse("admin:publications_topic_changelist")
+        )
+
+        mock_index_topic_delay.assert_called_once_with(topic_id=topic.pk)
+
+    @patch("woo_publications.publications.admin.remove_topic_from_index.delay")
+    def test_topic_admin_update_schedules_remove_from_index_task(
+        self, mock_remove_topic_from_index_delay
+    ):
+        topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            officiele_titel="title one",
+        )
+
+        reverse_url = reverse(
+            "admin:publications_topic_change",
+            kwargs={"object_id": topic.pk},
+        )
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["topic_form"]
+        form["officiele_titel"] = "changed official title"
+        form["publicatiestatus"] = PublicationStatusOptions.revoked
+
+        with self.captureOnCommitCallbacks(execute=True):
+            update_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            update_response, reverse("admin:publications_topic_changelist")
+        )
+
+        mock_remove_topic_from_index_delay.assert_called_once_with(topic_id=topic.pk)
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_topic_admin_delete(self, mock_remove_from_index_by_uuid_delay: MagicMock):
         topic = TopicFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
@@ -250,9 +338,45 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms[1]
-        response = form.submit()
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit()
+
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Topic.objects.filter(uuid=topic.uuid).exists())
+        mock_remove_from_index_by_uuid_delay.assert_called_once_with(
+            model_name="Topic",
+            uuid=str(topic.uuid),
+        )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_topic_admin_delete_unpublished(
+        self, mock_remove_from_index_by_uuid_delay: MagicMock
+    ):
+        revoked_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+        concept_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+
+        for topic in [revoked_topic, concept_topic]:
+            with self.subTest(publicatiestatus=topic.publicatiestatus):
+                reverse_url = reverse(
+                    "admin:publications_topic_delete",
+                    kwargs={"object_id": topic.pk},
+                )
+                response = self.app.get(reverse_url, user=self.user)
+
+                self.assertEqual(response.status_code, 200)
+
+                form = response.forms[1]
+
+                response = form.submit()
+
+                self.assertEqual(response.status_code, 302)
+                self.assertFalse(Topic.objects.filter(uuid=topic.uuid).exists())
+                mock_remove_from_index_by_uuid_delay.assert_not_called()
 
     def test_topic_inline_publications_show(self):
         topic = TopicFactory.create()
@@ -273,3 +397,72 @@ class TestTopicAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "title one", 0)
         self.assertContains(response, "title two", 1)
+
+    @patch("woo_publications.publications.admin.index_topic.delay")
+    def test_index_bulk_action(self, mock_index_topic_delay: MagicMock):
+        published_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.concept)
+        changelist = self.app.get(
+            reverse("admin:publications_topic_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [pub.pk for pub in Topic.objects.all()]
+        form["action"] = "sync_to_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        mock_index_topic_delay.assert_called_once_with(topic_id=published_topic.pk)
+
+    @patch("woo_publications.publications.admin.remove_topic_from_index.delay")
+    def test_remove_from_index_bulk_action(
+        self, mock_remove_topic_from_index_delay: MagicMock
+    ):
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.concept)
+        changelist = self.app.get(
+            reverse("admin:publications_topic_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Topic.objects.all()]
+        form["action"] = "remove_from_index"
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        for topic_pk in Topic.objects.values_list("pk", flat=True):
+            mock_remove_topic_from_index_delay.assert_any_call(
+                topic_id=topic_pk, force=True
+            )
+
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_bulk_removal_action(self, remove_from_index_by_uuid_delay: MagicMock):
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+
+        changelist = self.app.get(
+            reverse("admin:publications_topic_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Topic.objects.all()]
+        form["action"] = "delete_selected"
+
+        response = form.submit()
+
+        with self.captureOnCommitCallbacks(execute=True):
+            confirmation_form = response.forms[1]
+            confirmation_form.submit()
+
+        for topic_uuid in Topic.objects.values_list("uuid", flat=True):
+            remove_from_index_by_uuid_delay.assert_any_call(
+                model_name="Document", uuid=str(topic_uuid), force=True
+            )

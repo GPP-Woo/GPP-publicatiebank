@@ -45,6 +45,14 @@ class IndexPublicationBody(TypedDict):
     laatstGewijzigdDatum: str  # ISO-8601 datetime
 
 
+class IndexTopicBody(TypedDict):
+    uuid: str
+    officieleTitel: str
+    omschrijving: str
+    registratiedatum: str  # ISO-8601 datetime
+    laatstGewijzigdDatum: str  # ISO-8601 datetime
+
+
 class IndexDocumentResponse(TypedDict):
     taskId: str
 
@@ -58,4 +66,12 @@ class IndexPublicationResponse(TypedDict):
 
 
 class RemovePublicationFromIndexResponse(TypedDict):
+    taskId: str
+
+
+class IndexTopicResponse(TypedDict):
+    taskId: str
+
+
+class RemoveTopicFromIndexResponse(TypedDict):
     taskId: str

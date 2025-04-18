@@ -1055,7 +1055,7 @@ class TestPublicationsAdmin(WebTest):
 
         for pub_uuid in Publication.objects.values_list("uuid", flat=True):
             remove_from_index_by_uuid_delay.assert_any_call(
-                model_name="Document", uuid=str(pub_uuid), force=True
+                model_name="Publication", uuid=str(pub_uuid), force=True
             )
 
         for doc_uuid in Document.objects.values_list("uuid", flat=True):

@@ -7,7 +7,7 @@ from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.gpp_zoeken.client import get_client
 from woo_publications.publications.constants import PublicationStatusOptions
 
-from .models import Document, Publication
+from .models import Document, Publication, Topic
 
 logger = logging.getLogger(__name__)
 
@@ -152,14 +152,71 @@ def remove_publication_from_index(
 
 
 @app.task
+def index_topic(*, topic_id: int) -> str | None:
+    """
+    Offer the topic data to the gpp-zoeken service for indexing.
+
+    If no service is configured or the topic publication status is not suitable
+    for public indexing, then the index operation is skipped.
+
+    :returns: The remote task ID or None if the indexing was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info("No GPP search service configured, skipping the indexing task.")
+        return
+
+    topic = Topic.objects.get(pk=topic_id)
+    if (current_status := topic.publicatiestatus) != PublicationStatusOptions.published:
+        logger.info("Topic has publication status %s, skipping.", current_status)
+        return
+
+    with get_client(service) as client:
+        return client.index_topic(topic=topic)
+
+
+@app.task
+def remove_topic_from_index(*, topic_id: int, force: bool = False) -> str | None:
+    """
+    Remove the topic from the GPP-zoeken index, if the status requires it.
+
+    If no service is configured or the topic status is published, then
+    the remove-from-index-operation is skipped.
+
+    :returns: The remote task ID or None if the index removal was skipped.
+    """
+    config = GlobalConfiguration.get_solo()
+    if (service := config.gpp_search_service) is None:
+        logger.info(
+            "No GPP search service configured, skipping the index removal task."
+        )
+        return
+
+    topic = Topic.objects.get(pk=topic_id)
+    if (
+        not force
+        and (current_status := topic.publicatiestatus)
+        == PublicationStatusOptions.published
+    ):
+        logger.info(
+            "topic has publication status %s, skipping index removal.",
+            current_status,
+        )
+        return
+
+    with get_client(service) as client:
+        return client.remove_topic_from_index(topic, force)
+
+
+@app.task
 def remove_from_index_by_uuid(
     *,
-    model_name: Literal["Document", "Publication"],
+    model_name: Literal["Document", "Publication", "Topic"],
     uuid: str | UUID,
     force: bool = False,
 ) -> str | None:
     """
-    Force removal from the index for records that are deleted from the databse.
+    Force removal from the index for records that are deleted from the database.
 
     We must create instances on the fly because the DB records have been deleted on
     successful database transaction commit.
@@ -183,5 +240,10 @@ def remove_from_index_by_uuid(
                     uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
                 )
                 return client.remove_publication_from_index(publication, force)
+            case "Topic":
+                topic = Topic(
+                    uuid=uuid, publicatiestatus=PublicationStatusOptions.revoked
+                )
+                return client.remove_topic_from_index(topic, force)
             case _:  # pragma: no cover
                 assert_never(model_name)

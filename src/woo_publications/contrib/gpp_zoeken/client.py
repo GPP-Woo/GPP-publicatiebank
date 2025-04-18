@@ -11,17 +11,20 @@ from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
 
 from woo_publications.publications.constants import PublicationStatusOptions
-from woo_publications.publications.models import Document, Publication
+from woo_publications.publications.models import Document, Publication, Topic
 
 from .typing import (
     IndexDocumentBody,
     IndexDocumentResponse,
     IndexPublicationBody,
     IndexPublicationResponse,
+    IndexTopicBody,
+    IndexTopicResponse,
     PublicationInformatieCategorie,
     PublicationTopic,
     RemoveDocumentFromIndexResponse,
     RemovePublicationFromIndexResponse,
+    RemoveTopicFromIndexResponse,
 )
 
 __all__ = ["get_client"]
@@ -145,4 +148,36 @@ class GPPSearchClient(NLXClient):
         response.raise_for_status()
 
         response_data: RemovePublicationFromIndexResponse = response.json()
+        return response_data["taskId"]
+
+    def index_topic(self, topic: Topic):
+        """
+        Synchronize a topic to the search index.
+        """
+
+        if topic.publicatiestatus != PublicationStatusOptions.published:
+            raise ValueError("The topic does not have 'published' status!")
+
+        body: IndexTopicBody = {
+            "uuid": str(topic.uuid),
+            "officieleTitel": topic.officiele_titel,
+            "omschrijving": topic.omschrijving,
+            "registratiedatum": topic.registratiedatum.isoformat(),
+            "laatstGewijzigdDatum": topic.laatst_gewijzigd_datum.isoformat(),
+        }
+
+        response = self.post("onderwerpen", json=body)
+        response.raise_for_status()
+
+        response_data: IndexTopicResponse = response.json()
+        return response_data["taskId"]
+
+    def remove_topic_from_index(self, topic: Topic, force: bool = False) -> str:
+        if not force and topic.publicatiestatus == PublicationStatusOptions.published:
+            raise ValueError("The topic has 'published' status!")
+
+        response = self.delete(f"onderwerpen/{topic.uuid}")
+        response.raise_for_status()
+
+        response_data: RemoveTopicFromIndexResponse = response.json()
         return response_data["taskId"]

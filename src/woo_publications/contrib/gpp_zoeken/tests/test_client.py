@@ -5,6 +5,7 @@ from woo_publications.publications.constants import PublicationStatusOptions
 from woo_publications.publications.tests.factories import (
     DocumentFactory,
     PublicationFactory,
+    TopicFactory,
 )
 from woo_publications.utils.tests.vcr import VCRMixin
 
@@ -133,3 +134,60 @@ class SearchClientTests(VCRMixin, TestCase):
             self.assertRaises(ValueError),
         ):
             client.remove_publication_from_index(doc)
+
+    def test_index_unpublished_topic(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+        client = get_client(service)
+
+        for publication_status in PublicationStatusOptions:
+            if publication_status == PublicationStatusOptions.published:
+                continue
+
+            topic = TopicFactory.create(publicatiestatus=publication_status)
+            with (
+                self.subTest(publication_status=publication_status),
+                client,
+                self.assertRaises(ValueError),
+            ):
+                client.index_topic(topic)
+
+    def test_index_published_topic(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+        topic = TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+
+        with get_client(service) as client:
+            task_id = client.index_topic(topic)
+
+        self.assertIsNotNone(task_id)
+        self.assertIsInstance(task_id, str)
+        self.assertNotEqual(task_id, "")
+
+    def test_remove_unpublished_topic_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        for publication_status in PublicationStatusOptions:
+            if publication_status == PublicationStatusOptions.published:
+                continue
+
+            topic = TopicFactory.build(
+                publicatiestatus=publication_status,
+                uuid="632d1653-023b-4ada-9eb0-6d1c6f279274",
+            )
+
+            with self.subTest(publication_status), get_client(service) as client:
+                task_id = client.remove_topic_from_index(topic)
+
+                self.assertIsNotNone(task_id)
+                self.assertIsInstance(task_id, str)
+                self.assertNotEqual(task_id, "")
+
+    def test_remove_published_topic_from_index(self):
+        service = ServiceFactory.build(for_gpp_search_docker_compose=True)
+
+        topic = TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+
+        with (
+            get_client(service) as client,
+            self.assertRaises(ValueError),
+        ):
+            client.remove_topic_from_index(topic)

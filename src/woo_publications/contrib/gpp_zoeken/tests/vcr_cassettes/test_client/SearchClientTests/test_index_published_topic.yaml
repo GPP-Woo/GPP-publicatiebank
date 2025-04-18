@@ -1,0 +1,44 @@
+interactions:
+- request:
+    body: '{"uuid": "db047b50-6290-469f-9d91-57c28ba97701", "officieleTitel": "radio",
+      "omschrijving": "", "registratiedatum": "2025-04-18T09:46:14.564342+00:00",
+      "laatstGewijzigdDatum": "2025-04-18T09:46:14.564348+00:00"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: http://localhost:8002/api/v1/onderwerpen
+  response:
+    body:
+      string: '{"taskId":"692da0af-7bdb-4f2b-8fee-4188a6cf3ef4"}'
+    headers:
+      Allow:
+      - POST, OPTIONS
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 202
+      message: Accepted
+version: 1
