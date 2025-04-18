@@ -560,25 +560,20 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     data["results"], "uuid", str(publication.uuid), 1
                 )
 
-        with self.subTest("date is not exact"):
-            with self.subTest("filter on lte date is exact match"):
-                response = self.client.get(
-                    reverse("api:publication-list"),
-                    {"registratiedatumTotEnMet": "2024-09-25T12:00:00-00:00"},
-                    headers=AUDIT_HEADERS,
-                )
+        with self.subTest("filter on lte date is exact match"):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {"registratiedatumTotEnMet": "2024-09-25T12:00:00-00:00"},
+                headers=AUDIT_HEADERS,
+            )
 
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-                data = response.json()
+            data = response.json()
 
-                self.assertEqual(data["count"], 2)
-                self.assertItemInResults(
-                    data["results"], "uuid", str(publication.uuid), 1
-                )
-                self.assertItemInResults(
-                    data["results"], "uuid", str(publication2.uuid), 1
-                )
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(data["results"], "uuid", str(publication.uuid), 1)
+            self.assertItemInResults(data["results"], "uuid", str(publication2.uuid), 1)
 
         with self.subTest(
             "filter both lt and gte to find publication between two dates"
@@ -607,6 +602,134 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 {
                     "registratiedatumVanaf": "2024-09-25T12:00:00-00:00",
                     "registratiedatumTotEnMet": "2024-09-25T12:00:00-00:00",
+                },
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(data["results"], "uuid", str(publication2.uuid), 1)
+
+    def test_list_publications_filter_archiefactiedatum(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic], archiefactiedatum="2024-09-23"
+        )
+        publication2 = PublicationFactory.create(
+            informatie_categorieen=[ic], archiefactiedatum="2024-09-25"
+        )
+        publication3 = PublicationFactory.create(
+            informatie_categorieen=[ic], archiefactiedatum="2024-09-27"
+        )
+
+        with self.subTest("gte specific tests"):
+            with self.subTest("filter on gte date is exact match"):
+                response = self.client.get(
+                    reverse("api:publication-list"),
+                    {"archiefactiedatumVanaf": "2024-09-27"},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+                data = response.json()
+
+                self.assertEqual(data["count"], 1)
+                self.assertEqual(data["results"][0]["uuid"], str(publication3.uuid))
+
+            with self.subTest("filter on gte date is greater then publication"):
+                response = self.client.get(
+                    reverse("api:publication-list"),
+                    {"archiefactiedatumVanaf": "2024-09-26"},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+                data = response.json()
+
+                self.assertEqual(data["count"], 1)
+                self.assertEqual(data["results"][0]["uuid"], str(publication3.uuid))
+
+        with self.subTest("lt specific tests"):
+            with self.subTest("filter on lt date is lesser then publication"):
+                response = self.client.get(
+                    reverse("api:publication-list"),
+                    {"archiefactiedatumTot": "2024-09-24"},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+                data = response.json()
+
+                self.assertEqual(data["count"], 1)
+                self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
+
+        with self.subTest("lte specific tests"):
+            with self.subTest("filter on lt date is exact match"):
+                response = self.client.get(
+                    reverse("api:publication-list"),
+                    {"archiefactiedatumTotEnMet": "2024-09-23"},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+                data = response.json()
+
+                self.assertEqual(data["count"], 1)
+                self.assertItemInResults(
+                    data["results"], "uuid", str(publication.uuid), 1
+                )
+
+        with self.subTest("filter on lte date is exact match"):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {"archiefactiedatumTotEnMet": "2024-09-25"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(data["results"], "uuid", str(publication.uuid), 1)
+            self.assertItemInResults(data["results"], "uuid", str(publication2.uuid), 1)
+
+        with self.subTest(
+            "filter both lt and gte to find publication between two dates"
+        ):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {
+                    "archiefactiedatumVanaf": "2024-09-24",
+                    "archiefactiedatumTot": "2024-09-26",
+                },
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
+
+        with self.subTest(
+            "filter both lte and gte on exact date to find publication 'between' two dates"
+        ):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {
+                    "archiefactiedatumVanaf": "2024-09-25",
+                    "archiefactiedatumTotEnMet": "2024-09-25",
                 },
                 headers=AUDIT_HEADERS,
             )
@@ -703,6 +826,32 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["count"], 2)
             self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
             self.assertEqual(data["results"][1]["uuid"], str(publication.uuid))
+
+    def test_list_publication_filter_archiefnominatie(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            archiefnominatie=ArchiveNominationChoices.retain,
+        )
+        PublicationFactory.create(
+            informatie_categorieen=[ic],
+            archiefnominatie=ArchiveNominationChoices.destroy,
+        )
+
+        response = self.client.get(
+            reverse("api:publication-list"),
+            {"archiefnominatie": ArchiveNominationChoices.retain},
+            headers=AUDIT_HEADERS,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
 
     def test_list_publications_filter_owner(self):
         ic, ic2 = InformationCategoryFactory.create_batch(

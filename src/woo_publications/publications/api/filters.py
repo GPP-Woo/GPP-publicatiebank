@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import FilterSet, filters
 from django_filters.widgets import CSVWidget
 
+from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.service import OwnerFilter
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
@@ -156,6 +157,10 @@ class PublicationFilterSet(FilterSet):
         choices=PublicationStatusOptions.choices,
         widget=CSVWidget(),
     )
+    archiefnominatie = filters.MultipleChoiceFilter(
+        help_text=_("Filter publications based on the archiefnominatie."),
+        choices=ArchiveNominationChoices.choices,
+    )
     registratiedatum_vanaf = filters.DateTimeFilter(
         help_text=_(
             "Filter publications that were registered after or on the given value."
@@ -173,6 +178,27 @@ class PublicationFilterSet(FilterSet):
             "Filter publications that were registered before or on the given value."
         ),
         field_name="registratiedatum",
+        lookup_expr="lte",
+    )
+    archiefactiedatum_vanaf = filters.DateTimeFilter(
+        help_text=_(
+            "Filter publications where the archive action date is after or on the given value."
+        ),
+        field_name="archiefactiedatum",
+        lookup_expr="gte",
+    )
+    archiefactiedatum_tot = filters.DateTimeFilter(
+        help_text=_(
+            "Filter publications where the archive action date is before the given value."
+        ),
+        field_name="archiefactiedatum",
+        lookup_expr="lt",
+    )
+    archiefactiedatum_tot_en_met = filters.DateTimeFilter(
+        help_text=_(
+            "Filter publications where the archive action date is before or on the given value."
+        ),
+        field_name="archiefactiedatum",
         lookup_expr="lte",
     )
     informatie_categorieen = filters.ModelMultipleChoiceFilter(
@@ -218,9 +244,13 @@ class PublicationFilterSet(FilterSet):
             "publicatiestatus",
             "informatie_categorieen",
             "onderwerpen",
+            "archiefnominatie",
             "registratiedatum_vanaf",
             "registratiedatum_tot",
             "registratiedatum_tot_en_met",
+            "archiefactiedatum_vanaf",
+            "archiefactiedatum_tot",
+            "archiefactiedatum_tot_en_met",
             "sorteer",
         )
 
