@@ -182,21 +182,21 @@ class PublicationFilterSet(FilterSet):
     )
     archiefactiedatum_vanaf = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications that are gonna be archived/disposed after or on the given value."
+            "Filter publications where the archive action date is after or on the given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="gte",
     )
     archiefactiedatum_tot = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications that are gonna be archived/disposed before the given value."
+            "Filter publications where the archive action date is before the given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="lt",
     )
     archiefactiedatum_tot_en_met = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications that are gonna be archived/disposed before or on the given value."
+            "Filter publications where the archive action date is before or on the given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="lte",

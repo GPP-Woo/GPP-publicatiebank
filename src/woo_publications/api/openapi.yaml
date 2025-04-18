@@ -1191,22 +1191,22 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Filter publications that are gonna be archived/disposed before
-          the given value.
+        description: Filter publications where the archive action date is before the
+          given value.
       - in: query
         name: archiefactiedatumTotEnMet
         schema:
           type: string
           format: date-time
-        description: Filter publications that are gonna be archived/disposed before
-          or on the given value.
+        description: Filter publications where the archive action date is before or
+          on the given value.
       - in: query
         name: archiefactiedatumVanaf
         schema:
           type: string
           format: date-time
-        description: Filter publications that are gonna be archived/disposed after
-          or on the given value.
+        description: Filter publications where the archive action date is after or
+          on the given value.
       - in: query
         name: archiefnominatie
         schema:
