@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
@@ -1091,3 +1092,54 @@ class TestPublicationsAdmin(WebTest):
             remove_from_index_by_uuid_delay.assert_any_call(
                 model_name="Document", uuid=doc_uuid, force=True
             )
+
+    def test_bulk_retention_field_update_action(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            selectiecategorie="20.1.2",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="extra data",
+        )
+        with freeze_time("2025-01-01T00:00:00-00:00"):
+            PublicationFactory.create(
+                informatie_categorieen=[ic],
+                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2009",
+                selectiecategorie="1",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum="2030-01-01",
+                toelichting_bewaartermijn="bla bla bla",
+            )
+            PublicationFactory.create(
+                informatie_categorieen=[ic],
+                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2020",
+                selectiecategorie="2",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum="2025-01-01",
+                toelichting_bewaartermijn="bla bla bla",
+            )
+            PublicationFactory.create(
+                informatie_categorieen=[ic],
+                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2014",
+                selectiecategorie="1",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum="2020-01-01",
+                toelichting_bewaartermijn="bla bla bla",
+            )
+
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
+        form["action"] = "recalibrate_retention_values"
+        form.submit()
+
+        for pub in Publication.objects.all():
+            self.assertEqual(pub.bron_bewaartermijn, "Selectielijst gemeenten 2020")
+            self.assertEqual(pub.selectiecategorie, "20.1.2")
+            self.assertEqual(pub.archiefnominatie, ArchiveNominationChoices.retain)
+            self.assertEqual(pub.archiefactiedatum, date(2035, 1, 1))
+            self.assertEqual(pub.toelichting_bewaartermijn, "extra data")
