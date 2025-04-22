@@ -20,6 +20,7 @@ from furl import furl
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
+from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
@@ -234,7 +235,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "registratiedatum",
         "publicatiestatus",
         "archiefnominatie",
-        "archiefactiedatum",
+        ("archiefactiedatum", PastAndFutureDateFieldFilter),
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
