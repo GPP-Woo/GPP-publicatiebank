@@ -1134,7 +1134,7 @@ class TestPublicationsAdmin(WebTest):
         form = changelist.forms["changelist-form"]
 
         form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
-        form["action"] = "recalibrate_retention_values"
+        form["action"] = "reassess_retention_policy"
         form.submit()
 
         for pub in Publication.objects.all():

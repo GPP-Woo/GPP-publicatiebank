@@ -131,10 +131,10 @@ def remove_from_index(
 
 @admin.action(
     description=_(
-        "Recalibrate the selected %(verbose_name_plural)s retention field values"
+        "Reassess the retention policy of the selected %(verbose_name_plural)s."
     )
 )
-def recalibrate_retention_values(
+def reassess_retention_policy(
     modeladmin: PublicationAdmin,
     request: HttpRequest,
     queryset: models.QuerySet[Publication],
@@ -145,8 +145,8 @@ def recalibrate_retention_values(
     modeladmin.message_user(
         request,
         ngettext(
-            "{count} {verbose_name} object recalibrated the retention field values.",
-            "{count} {verbose_name} objects recalibrated the retention field values.",
+            "Applied the reassessed retention policy to {count} {verbose_name} object.",
+            "Applied the reassessed retention policy to {count} {verbose_name} objects.",
             queryset.count(),
         ).format(
             count=queryset.count(),
@@ -238,7 +238,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
-    actions = [sync_to_index, remove_from_index, recalibrate_retention_values]
+    actions = [sync_to_index, remove_from_index, reassess_retention_policy]
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:

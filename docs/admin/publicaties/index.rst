@@ -95,7 +95,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtboven zit een knop **publicatie toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex** en **Her kalibreer de geselecteerde publicaties bewaartermijn velden** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex** en **Geselecteerde publicaties herwaarderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *publicatie*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
 * Bij een *publicatie*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
