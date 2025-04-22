@@ -129,6 +129,33 @@ def remove_from_index(
     )
 
 
+@admin.action(
+    description=_(
+        "Reassess the retention policy of the selected %(verbose_name_plural)s."
+    )
+)
+def reassess_retention_policy(
+    modeladmin: PublicationAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication],
+):
+    for obj in queryset.iterator():
+        obj.apply_retention_policy()
+
+    modeladmin.message_user(
+        request,
+        ngettext(
+            "Applied the reassessed retention policy to {count} {verbose_name} object.",
+            "Applied the reassessed retention policy to {count} {verbose_name} objects.",
+            queryset.count(),
+        ).format(
+            count=queryset.count(),
+            verbose_name=modeladmin.model._meta.verbose_name,
+        ),
+        messages.SUCCESS,
+    )
+
+
 class DocumentInlineAdmin(admin.StackedInline):
     formset = DocumentAuditLogInlineformset
     model = Document
@@ -211,7 +238,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
-    actions = [sync_to_index, remove_from_index]
+    actions = [sync_to_index, remove_from_index, reassess_retention_policy]
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
