@@ -170,6 +170,31 @@ class TestPublicationsAdmin(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(publication2.uuid), 1)
 
+        with self.subTest("filter on archiefactiedatum filter on last year"):
+            publication_retention_last_year = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                officiele_titel="title three",
+                verkorte_titel="three",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum="2023-09-24",
+            )
+
+            search_response = response.click(description=_("Last year"), index=0)
+
+            self.assertEqual(search_response.status_code, 200)
+
+            # Sanity check that we indeed filtered on archiefactiedatum
+            self.assertIn(
+                "archiefactiedatum", search_response.request.environ["QUERY_STRING"]
+            )
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(
+                search_response, str(publication_retention_last_year.uuid), 1
+            )
+
     @freeze_time("2024-09-25T00:14:00-00:00")
     def test_publications_admin_create(self):
         ic, ic2, ic3 = InformationCategoryFactory.create_batch(
