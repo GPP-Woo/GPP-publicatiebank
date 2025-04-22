@@ -720,8 +720,9 @@ paths:
   /api/v1/onderwerpen:
     get:
       operationId: onderwerpenList
-      description: Returns a paginated result list of existing topics.
-      summary: All available topics.
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        onderwerpen.
+      summary: Alle beschikbare onderwerpen.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -769,9 +770,9 @@ paths:
             type: string
             format: uuid
         description: |-
-          Filter topics that belong to a publication. When you specify multiple publications, topics belonging to any publication are returned.
+          Filter onderwerpen die bij een bepaald onderwerp horen. Als je meerdere publicaties opgeeft, dan krijg je alle onderwerpen die aan één van deze publicaties gerelateerd zijn.
 
-          Filter values should be the UUID of the publications.
+          De filterwaarden zijn de UUIDs van de publicaties. Gebruik komma's om meerdere waarden van elkaar te scheiden.
         explode: true
         style: form
       - in: query
@@ -786,7 +787,7 @@ paths:
             - gepubliceerd
             - ingetrokken
         description: |-
-          Filter topics based on the publication status.
+          Filter onderwerpen op publicatiestatus.
 
           * `gepubliceerd` - Gepubliceerd
           * `concept` - Concept
@@ -807,8 +808,8 @@ paths:
   /api/v1/onderwerpen/{uuid}:
     get:
       operationId: onderwerpenRetrieve
-      description: Retrieve a specific topic.
-      summary: Retrieve a specific topic.
+      description: Haal een specifiek onderwerp op.
+      summary: Haal een specifiek onderwerp op.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1191,37 +1192,35 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Filter publications where the archive action date is before the
-          given value.
+        description: Filter publicaties op archiefactiedatum voor de opgegeven datumtijd.
       - in: query
         name: archiefactiedatumTotEnMet
         schema:
           type: string
           format: date-time
-        description: Filter publications where the archive action date is before or
-          on the given value.
+        description: Filter publicaties op archiefactiedatum op of voor de opgegeven
+          datumtijd.
       - in: query
         name: archiefactiedatumVanaf
         schema:
           type: string
           format: date-time
-        description: Filter publications where the archive action date is after or
-          on the given value.
+        description: Filter publicaties op archiefactiedatum op of na de opgegeven
+          datumtijd.
       - in: query
         name: archiefnominatie
         schema:
           type: array
           items:
             type: string
-            title: Archive action
             enum:
             - blijvend_bewaren
             - vernietigen
         description: |-
-          Filter publications based on the archiefnominatie.
+          Filter publicaties op archiefnominatie.
 
-          * `blijvend_bewaren` - Retain
-          * `vernietigen` - Dispose
+          * `blijvend_bewaren` - Blijvend bewaren
+          * `vernietigen` - Vernietigen
         explode: true
         style: form
       - in: query
@@ -1249,9 +1248,9 @@ paths:
             type: string
             format: uuid
         description: |-
-          Filter publications that belong to a particular topic. When you specify multiple topics, publications belonging to any topic are returned.
+          Filter publicaties die bij een bepaald onderwerp horen. Als je meerdere onderwerpen opgeeft, dan krijg je alle publicaties die aan één van deze onderwerpen gerelateerd zijn.
 
-          Filter values should be the UUID of the topics.
+          De filterwaarden zijn de UUIDs van de onderwerpen. Gebruik komma's om meerdere waarden van elkaar te scheiden.
         explode: true
         style: form
       - name: page
@@ -1734,10 +1733,10 @@ components:
       - vernietigen
       type: string
       description: |-
-        **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+        **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
 
-        * `blijvend_bewaren` - Retain
-        * `vernietigen` - Dispose
+        * `blijvend_bewaren` - Blijvend bewaren
+        * `vernietigen` - Vernietigen
     BlankEnum:
       enum:
       - ''
@@ -2486,9 +2485,9 @@ components:
           items:
             type: string
             format: uuid
-          description: Topics capture socially relevant information that spans multiple
-            publications. They can remain relevant for tens of years and exceed the
-            life span of a single publication.
+          description: Onderwerpen gaan over maatschappelijk relevante informatie
+            die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
+            blijven en overstijgen de typische levensduur van een enkele publicatie.
         publisher:
           type: string
           format: uuid
@@ -2550,29 +2549,26 @@ components:
             is in de database.
         bronBewaartermijn:
           type: string
-          title: Retention policy source
           description: |-
-            The source of the retention policy (example: Selectielijst gemeenten 2020).
+            De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         selectiecategorie:
           type: string
-          title: Selection category
           description: |-
-            The category as specified in the provided retention policy source (example: 20.1.2).
+            De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         archiefnominatie:
-          title: Archive action
           description: |-
-            Determines if the archived data will be retained or destroyed.
+            Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
 
-            * `blijvend_bewaren` - Retain
-            * `vernietigen` - Dispose
+            * `blijvend_bewaren` - Blijvend bewaren
+            * `vernietigen` - Vernietigen
           oneOf:
           - $ref: '#/components/schemas/ArchiefnominatieEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -2580,17 +2576,15 @@ components:
           type: string
           format: date
           nullable: true
-          title: Archive action date
           description: |-
-            Date when the publication will be archived or destroyed.
+            Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
         toelichtingBewaartermijn:
           type: string
-          title: Retention policy explanation
-          description: '**Note** on create or when updating the information categories,
-            manually provided values are ignored and overwritten by the automatically
-            derived parameters from the related information categories.'
+          description: '**Opmerking** handmatige opgegeven waarden wordt bij het aanmaken
+            (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
+            de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
@@ -2627,9 +2621,9 @@ components:
           items:
             type: string
             format: uuid
-          description: Topics capture socially relevant information that spans multiple
-            publications. They can remain relevant for tens of years and exceed the
-            life span of a single publication.
+          description: Onderwerpen gaan over maatschappelijk relevante informatie
+            die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
+            blijven en overstijgen de typische levensduur van een enkele publicatie.
         publisher:
           type: string
           format: uuid
@@ -2691,29 +2685,26 @@ components:
             is in de database.
         bronBewaartermijn:
           type: string
-          title: Retention policy source
           description: |-
-            The source of the retention policy (example: Selectielijst gemeenten 2020).
+            De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         selectiecategorie:
           type: string
-          title: Selection category
           description: |-
-            The category as specified in the provided retention policy source (example: 20.1.2).
+            De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         archiefnominatie:
-          title: Archive action
           description: |-
-            Determines if the archived data will be retained or destroyed.
+            Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
 
-            * `blijvend_bewaren` - Retain
-            * `vernietigen` - Dispose
+            * `blijvend_bewaren` - Blijvend bewaren
+            * `vernietigen` - Vernietigen
           oneOf:
           - $ref: '#/components/schemas/ArchiefnominatieEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -2721,17 +2712,15 @@ components:
           type: string
           format: date
           nullable: true
-          title: Archive action date
           description: |-
-            Date when the publication will be archived or destroyed.
+            Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën).
         toelichtingBewaartermijn:
           type: string
-          title: Retention policy explanation
-          description: '**Note** on create or when updating the information categories,
-            manually provided values are ignored and overwritten by the automatically
-            derived parameters from the related information categories.'
+          description: '**Opmerking** handmatige opgegeven waarden wordt bij het aanmaken
+            (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
+            de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
       - eigenaar
@@ -2792,7 +2781,7 @@ components:
           items:
             type: string
             format: uuid
-          description: The publication attached to this topic.
+          description: De publicatie die aan dit onderwerp gekoppeld is.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2805,23 +2794,21 @@ components:
           title: Status
         promoot:
           type: boolean
-          title: Promote
-          description: Marker to indicate that this topic will be promoted within
-            the frontend application.
+          description: Vlag die aangeeft of dit onderwerp gepromoot wordt in het burgerportaal.
         registratiedatum:
           type: string
           format: date-time
           readOnly: true
           title: Geregistreerd op
-          description: System timestamp reflecting when the topic was registered in
-            the database.
+          description: Systeemdatum en -tijd wanneer het onderwerp geregistreerd is
+            in de database.
         laatstGewijzigdDatum:
           type: string
           format: date-time
           readOnly: true
           title: Laatst gewijzigd op
-          description: System timestamp reflecting when the topic was last modified
-            in the database.
+          description: Systeemdatum en -tijd wanneer het onderwerp laatst gewijzigd
+            is in de database.
       required:
       - afbeelding
       - laatstGewijzigdDatum
