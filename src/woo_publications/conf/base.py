@@ -91,7 +91,7 @@ ALLOWED_IMG_EXTENSIONS = config(
         "gif",
         "webp",
     ],
-    help_text=_("The allowed image extensions that we support."),
+    help_text="The allowed image extensions that we support.",
     group="Image upload settings",
 )
 assert set(ALLOWED_IMG_EXTENSIONS) <= set(
@@ -101,19 +101,19 @@ assert set(ALLOWED_IMG_EXTENSIONS) <= set(
 MAX_IMG_SIZE = config(
     "MAX_IMG_SIZE",
     default=1_000_000,
-    help_text=_("The maximum size of images in bytes."),
+    help_text="The maximum size of images in bytes.",
     group="Image upload settings",
 )
 MAX_IMG_HEIGHT = config(
     "MAX_IMG_HEIGHT",
     default=600,
-    help_text=_("The maximum image height of images in pixels."),
+    help_text="The maximum image height of images in pixels.",
     group="Image upload settings",
 )
 MAX_IMG_WIDTH = config(
     "MAX_IMG_WIDTH",
     default=600,
-    help_text=_("The maximum image width of images in pixels."),
+    help_text="The maximum image width of images in pixels.",
     group="Image upload settings",
 )
 

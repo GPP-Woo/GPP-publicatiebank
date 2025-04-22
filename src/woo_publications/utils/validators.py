@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.images import ImageFile
 from django.template.defaultfilters import filesizeformat
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 
 
 def max_img_width_and_height_validator(image: ImageFile):
@@ -12,10 +12,9 @@ def max_img_width_and_height_validator(image: ImageFile):
     if (image.width > max_width) or (image.height > max_height):
         raise ValidationError(
             _(
-                "The image dimensions exceed the maximum dimensions of {max_width}x{max_height}.".format(
-                    max_width=max_width, max_height=max_height
-                )
-            )
+                "The image dimensions exceed the maximum dimensions of "
+                "{max_width}x{max_height}."
+            ).format(max_width=max_width, max_height=max_height)
         )
 
 
