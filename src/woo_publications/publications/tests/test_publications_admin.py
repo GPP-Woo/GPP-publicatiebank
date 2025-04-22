@@ -1143,3 +1143,69 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(pub.archiefnominatie, ArchiveNominationChoices.retain)
             self.assertEqual(pub.archiefactiedatum, date(2035, 1, 1))
             self.assertEqual(pub.toelichting_bewaartermijn, "extra data")
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
+    def test_publication_revoke_instance_action(
+        self,
+        mock_remove_publication_from_index_delay: MagicMock,
+        mock_remove_document_from_index_delay: MagicMock,
+    ):
+        pub1 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        pub2 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        pub3 = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        published_document = DocumentFactory.create(
+            publicatie=pub1, publicatiestatus=PublicationStatusOptions.published
+        )
+        concept_document = DocumentFactory.create(
+            publicatie=pub2, publicatiestatus=PublicationStatusOptions.concept
+        )
+        revoked_document = DocumentFactory.create(
+            publicatie=pub3, publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
+        form["action"] = "revoke_instance"
+
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        published_document.refresh_from_db()
+        concept_document.refresh_from_db()
+        revoked_document.refresh_from_db()
+
+        for pub in Publication.objects.all():
+            self.assertEqual(pub.publicatiestatus, PublicationStatusOptions.revoked)
+            mock_remove_publication_from_index_delay.assert_any_call(
+                publication_id=pub.pk, force=True
+            )
+
+        self.assertEqual(
+            published_document.publicatiestatus, PublicationStatusOptions.revoked
+        )
+
+        # document with publication status doesn't change its status
+        self.assertEqual(
+            concept_document.publicatiestatus, PublicationStatusOptions.concept
+        )
+
+        self.assertEqual(
+            revoked_document.publicatiestatus, PublicationStatusOptions.revoked
+        )
+
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=published_document.pk
+        )
