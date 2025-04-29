@@ -159,12 +159,16 @@ def reassess_retention_policy(
 
 
 @admin.action(description=_("revoke the selected %(verbose_name_plural)s"))
-def revoke_instance(
+def revoke(
     modeladmin: PublicationAdmin | DocumentAdmin | TopicAdmin,
     request: HttpRequest,
     queryset: models.QuerySet[Publication | Document | Topic],
 ):
     assert is_authenticated_request(request)
+    queryset = queryset.filter(
+        ~models.Q(publicatiestatus=PublicationStatusOptions.revoked)
+    )
+
     model = queryset.model
     num_objects = queryset.count()
 
@@ -298,7 +302,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         sync_to_index,
         remove_from_index,
         reassess_retention_policy,
-        revoke_instance,
+        revoke,
     ]
 
     def has_change_permission(self, request, obj=None):
@@ -518,7 +522,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
     )
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index, revoke_instance]
+    actions = [sync_to_index, remove_from_index, revoke]
 
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
@@ -639,7 +643,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     inlines = (PublicationInline,)
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index, revoke_instance]
+    actions = [sync_to_index, remove_from_index, revoke]
 
     def save_model(
         self, request: HttpRequest, obj: Topic, form: forms.Form, change: bool
