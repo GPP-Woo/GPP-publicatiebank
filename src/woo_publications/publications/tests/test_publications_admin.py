@@ -1146,29 +1146,32 @@ class TestPublicationsAdmin(WebTest):
 
     @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
     @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
-    def test_publication_revoke_instance_action(
+    def test_publication_revoke_action(
         self,
         mock_remove_publication_from_index_delay: MagicMock,
         mock_remove_document_from_index_delay: MagicMock,
     ):
-        pub1 = PublicationFactory.create(
+        published_publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published
         )
-        pub2 = PublicationFactory.create(
+        concept_publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept
         )
-        pub3 = PublicationFactory.create(
+        revoked_publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked
         )
 
         published_document = DocumentFactory.create(
-            publicatie=pub1, publicatiestatus=PublicationStatusOptions.published
+            publicatie=published_publication,
+            publicatiestatus=PublicationStatusOptions.published,
         )
         concept_document = DocumentFactory.create(
-            publicatie=pub2, publicatiestatus=PublicationStatusOptions.concept
+            publicatie=concept_publication,
+            publicatiestatus=PublicationStatusOptions.concept,
         )
         revoked_document = DocumentFactory.create(
-            publicatie=pub3, publicatiestatus=PublicationStatusOptions.revoked
+            publicatie=revoked_publication,
+            publicatiestatus=PublicationStatusOptions.revoked,
         )
 
         changelist = self.app.get(
@@ -1178,25 +1181,29 @@ class TestPublicationsAdmin(WebTest):
         form = changelist.forms["changelist-form"]
 
         form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
-        form["action"] = "revoke_instance"
+        form["action"] = "revoke"
 
         with self.captureOnCommitCallbacks(execute=True):
             form.submit()
 
+        published_publication.refresh_from_db()
+        concept_publication.refresh_from_db()
+        revoked_publication.refresh_from_db()
         published_document.refresh_from_db()
         concept_document.refresh_from_db()
         revoked_document.refresh_from_db()
 
-        for pub in Publication.objects.all():
+        self.assertEqual(mock_remove_publication_from_index_delay.call_count, 2)
+        self.assertEqual(
+            revoked_publication.publicatiestatus, PublicationStatusOptions.revoked
+        )
+        for pub in [published_publication, concept_publication]:
             self.assertEqual(pub.publicatiestatus, PublicationStatusOptions.revoked)
             mock_remove_publication_from_index_delay.assert_any_call(
                 publication_id=pub.pk, force=True
             )
 
-        self.assertEqual(
-            published_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-
+        self.assertEqual(mock_remove_document_from_index_delay.call_count, 1)
         # document with publication status doesn't change its status
         self.assertEqual(
             concept_document.publicatiestatus, PublicationStatusOptions.concept
@@ -1206,6 +1213,9 @@ class TestPublicationsAdmin(WebTest):
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
         )
 
+        self.assertEqual(
+            published_document.publicatiestatus, PublicationStatusOptions.revoked
+        )
         mock_remove_document_from_index_delay.assert_called_once_with(
             document_id=published_document.pk
         )

@@ -359,7 +359,7 @@ class TestPublicationAdminAuditLogging(WebTest):
 
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
-    def test_publication_revoke_instance_action_log(self):
+    def test_publication_revoke_action_log(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
         topic = TopicFactory.create()
@@ -395,7 +395,7 @@ class TestPublicationAdminAuditLogging(WebTest):
 
         form = changelist.forms["changelist-form"]
         form["_selected_action"] = [publication.pk]
-        form["action"] = "revoke_instance"
+        form["action"] = "revoke"
 
         with freeze_time("2024-09-28T00:14:00-00:00"):
             form.submit()
@@ -967,7 +967,7 @@ class TestDocumentAdminAuditLogging(WebTest):
 
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_document_revoke_instance_action_update_log(self):
+    def test_document_revoke_action_update_log(self):
         publication = PublicationFactory.create()
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
         with freeze_time("2024-09-25T14:00:00-00:00"):
@@ -988,7 +988,7 @@ class TestDocumentAdminAuditLogging(WebTest):
         form = changelist.forms["changelist-form"]
 
         form["_selected_action"] = [document.pk]
-        form["action"] = "revoke_instance"
+        form["action"] = "revoke"
 
         with freeze_time("2024-09-29T14:00:00-00:00"):
             form.submit(name="_save")
@@ -1213,7 +1213,7 @@ class TestTopicAdminAuditLogging(WebTest):
 
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_topic_revoke_instance_action_update_log(self):
+    def test_topic_revoke_action_update_log(self):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             topic = TopicFactory.create(
                 officiele_titel="Lorem Ipsum",
@@ -1229,7 +1229,7 @@ class TestTopicAdminAuditLogging(WebTest):
         form = changelist.forms["changelist-form"]
 
         form["_selected_action"] = [topic.pk]
-        form["action"] = "revoke_instance"
+        form["action"] = "revoke"
 
         with freeze_time("2024-09-29T14:00:00-00:00"):
             form.submit(name="_save")
