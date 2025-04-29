@@ -444,7 +444,7 @@ class TestTopicAdmin(WebTest):
     @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
     def test_bulk_removal_action(self, remove_from_index_by_uuid_delay: MagicMock):
         TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
-        TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        TopicFactory.create(publicatiestatus=PublicationStatusOptions.concept)
         TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
 
         changelist = self.app.get(

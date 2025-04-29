@@ -1028,7 +1028,7 @@ class TestPublicationsAdmin(WebTest):
         self, mock_remove_publication_from_index_delay: MagicMock
     ):
         PublicationFactory.create(publicatiestatus=PublicationStatusOptions.published)
-        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.concept)
         PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
         changelist = self.app.get(
             reverse("admin:publications_publication_changelist"),
@@ -1052,7 +1052,7 @@ class TestPublicationsAdmin(WebTest):
             publicatiestatus=PublicationStatusOptions.published
         )
         pub2 = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
+            publicatiestatus=PublicationStatusOptions.concept
         )
         pub3 = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked
