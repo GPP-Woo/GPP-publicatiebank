@@ -5,6 +5,22 @@ from django.utils.translation import gettext_lazy as _
 
 
 class PastAndFutureDateFieldFilter(DateFieldListFilter):
+    def _order_links(self):
+        list_order = (
+            _("Any date"),
+            _("Today"),
+            _("Past 7 days"),
+            _("This month"),
+            _("This year"),
+            _("Last year"),
+            _("No date"),
+            _("Has date"),
+        )
+
+        self.links = tuple(
+            sorted(self.links, key=lambda link: list_order.index(link[0]))
+        )
+
     def __init__(self, field, request, params, model, model_admin, field_path):
         super().__init__(field, request, params, model, model_admin, field_path)
 
@@ -26,3 +42,5 @@ class PastAndFutureDateFieldFilter(DateFieldListFilter):
                 },
             ),
         )
+
+        self._order_links()
