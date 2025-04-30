@@ -466,3 +466,45 @@ class TestTopicAdmin(WebTest):
             remove_from_index_by_uuid_delay.assert_any_call(
                 model_name="Document", uuid=str(topic_uuid), force=True
             )
+
+    @patch("woo_publications.publications.admin.remove_topic_from_index.delay")
+    def test_topic_revoke_action(
+        self,
+        mock_remove_topic_from_index_delay: MagicMock,
+    ):
+        published_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        concept_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        revoked_topic = TopicFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        changelist = self.app.get(
+            reverse("admin:publications_topic_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [topic.pk for topic in Topic.objects.all()]
+        form["action"] = "revoke"
+
+        with self.captureOnCommitCallbacks(execute=True):
+            form.submit()
+
+        published_topic.refresh_from_db()
+        concept_topic.refresh_from_db()
+        revoked_topic.refresh_from_db()
+
+        self.assertEqual(mock_remove_topic_from_index_delay.call_count, 2)
+        self.assertEqual(
+            revoked_topic.publicatiestatus, PublicationStatusOptions.revoked
+        )
+
+        for topic in [published_topic, concept_topic]:
+            self.assertEqual(topic.publicatiestatus, PublicationStatusOptions.revoked)
+            mock_remove_topic_from_index_delay.assert_any_call(
+                topic_id=topic.pk, force=True
+            )

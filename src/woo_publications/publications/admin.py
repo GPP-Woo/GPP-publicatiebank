@@ -17,6 +17,8 @@ from django.utils.translation import gettext_lazy as _, ngettext
 
 from furl import furl
 
+from woo_publications.logging.logevent import audit_admin_update
+from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
@@ -157,6 +159,64 @@ def reassess_retention_policy(
     )
 
 
+@admin.action(description=_("revoke the selected %(verbose_name_plural)s"))
+def revoke(
+    modeladmin: PublicationAdmin | DocumentAdmin | TopicAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication | Document | Topic],
+):
+    assert is_authenticated_request(request)
+    queryset = queryset.filter(
+        ~models.Q(publicatiestatus=PublicationStatusOptions.revoked)
+    )
+
+    model = queryset.model
+    num_objects = queryset.count()
+
+    if model is Publication:
+        task_fn = remove_publication_from_index
+        kwarg_name = "publication_id"
+    elif model is Document:
+        task_fn = remove_document_from_index
+        kwarg_name = "document_id"
+    elif model is Topic:
+        task_fn = remove_topic_from_index
+        kwarg_name = "topic_id"
+    else:  # pragma: no cover
+        raise ValueError("Unsupported model: %r", model)
+
+    for obj in queryset.iterator():
+        obj.publicatiestatus = PublicationStatusOptions.revoked
+        obj.save()
+
+        audit_admin_update(
+            content_object=obj,
+            object_data=serialize_instance(obj),
+            django_user=request.user,
+        )
+
+        transaction.on_commit(
+            partial(task_fn.delay, force=True, **{kwarg_name: obj.pk})
+        )
+
+        if model is Publication:
+            assert isinstance(obj, Publication)
+            obj.revoke_own_published_documents(request.user)
+
+    modeladmin.message_user(
+        request,
+        ngettext(
+            "{count} {verbose_name} object revoked.",
+            "{count} {verbose_name} objects revoked.",
+            num_objects,
+        ).format(
+            count=num_objects,
+            verbose_name=model._meta.verbose_name,
+        ),
+        messages.SUCCESS,
+    )
+
+
 class DocumentInlineAdmin(admin.StackedInline):
     formset = DocumentAuditLogInlineformset
     model = Document
@@ -239,7 +299,12 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
-    actions = [sync_to_index, remove_from_index, reassess_retention_policy]
+    actions = [
+        sync_to_index,
+        remove_from_index,
+        reassess_retention_policy,
+        revoke,
+    ]
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
@@ -458,7 +523,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
     )
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index]
+    actions = [sync_to_index, remove_from_index, revoke]
 
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
@@ -579,7 +644,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     inlines = (PublicationInline,)
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index]
+    actions = [sync_to_index, remove_from_index, revoke]
 
     def save_model(
         self, request: HttpRequest, obj: Topic, form: forms.Form, change: bool

@@ -320,7 +320,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "_cached_object_repr": "title one",
             }
 
-            self.maxDiff = None
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
         with self.subTest("update document audit logging"):
@@ -342,6 +341,124 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
                     "publicatiestatus": PublicationStatusOptions.revoked,
+                    "bestandsnaam": "unknown.bin",
+                    "creatiedatum": "2024-10-17",
+                    "omschrijving": "",
+                    "document_uuid": None,
+                    "bestandsomvang": 0,
+                    "verkorte_titel": "",
+                    "bestandsformaat": "unknown",
+                    "officiele_titel": "title",
+                    "document_service": None,
+                    "registratiedatum": "2024-09-27T00:14:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "soort_handeling": DocumentActionTypeOptions.declared,
+                },
+                "_cached_object_repr": "title",
+            }
+
+            self.assertEqual(update_publication_log.extra_data, expected_data)
+
+    def test_publication_revoke_action_log(self):
+        assert not TimelineLogProxy.objects.exists()
+        ic, ic2 = InformationCategoryFactory.create_batch(2)
+        topic = TopicFactory.create()
+        organisation = OrganisationFactory.create(is_actief=True)
+        with freeze_time("2024-09-27T00:14:00-00:00"):
+            publication = PublicationFactory.create(
+                publisher=organisation,
+                verantwoordelijke=organisation,
+                opsteller=organisation,
+                informatie_categorieen=[ic, ic2],
+                onderwerpen=[topic],
+                officiele_titel="title one",
+                verkorte_titel="one",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                bron_bewaartermijn="Selectielijst gemeenten 2020",
+                archiefnominatie=ArchiveNominationChoices.retain,
+                archiefactiedatum="2025-01-01",
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+            published_document = DocumentFactory.create(
+                publicatie=publication,
+                publicatiestatus=PublicationStatusOptions.published,
+                identifier="http://example.com/1",
+                officiele_titel="title",
+                creatiedatum="2024-10-17",
+            )
+
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+        self.assertEqual(changelist.status_code, 200)
+
+        form = changelist.forms["changelist-form"]
+        form["_selected_action"] = [publication.pk]
+        form["action"] = "revoke"
+
+        with freeze_time("2024-09-28T00:14:00-00:00"):
+            form.submit()
+
+        self.assertEqual(TimelineLogProxy.objects.count(), 2)
+
+        with self.subTest("update publication audit logging"):
+            update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
+                publication
+            ).get(
+                extra_data__event=Events.update
+            )
+
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": publication.pk,
+                    "informatie_categorieen": [ic.pk, ic2.pk],
+                    "onderwerpen": [topic.pk],
+                    "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "officiele_titel": "title one",
+                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "opsteller": organisation.pk,
+                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated to revoked
+                    "publisher": organisation.pk,
+                    "registratiedatum": "2024-09-27T00:14:00Z",
+                    "uuid": str(publication.uuid),
+                    "verantwoordelijke": organisation.pk,
+                    "verkorte_titel": "one",
+                    "bron_bewaartermijn": "Selectielijst gemeenten 2020",
+                    "selectiecategorie": "",
+                    "archiefnominatie": ArchiveNominationChoices.retain,
+                    "archiefactiedatum": "2025-01-01",
+                    "toelichting_bewaartermijn": "",
+                },
+                "_cached_object_repr": "title one",
+            }
+
+            self.assertEqual(update_publication_log.extra_data, expected_data)
+
+        with self.subTest("update document audit logging"):
+            update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
+                published_document
+            ).get()
+
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": published_document.pk,
+                    "lock": "",
+                    "upload_complete": False,
+                    "uuid": str(published_document.uuid),
+                    "identifier": "http://example.com/1",
+                    "publicatie": publication.id,
+                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated to revoked
                     "bestandsnaam": "unknown.bin",
                     "creatiedatum": "2024-10-17",
                     "omschrijving": "",
@@ -850,6 +967,65 @@ class TestDocumentAdminAuditLogging(WebTest):
 
             self.assertEqual(update_log.extra_data, expected_data)
 
+    def test_document_revoke_action_update_log(self):
+        publication = PublicationFactory.create()
+        identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
+        with freeze_time("2024-09-25T14:00:00-00:00"):
+            document = DocumentFactory.create(
+                publicatie=publication,
+                identifier=identifier,
+                publicatiestatus=PublicationStatusOptions.published,
+                officiele_titel="title one",
+                verkorte_titel="one",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                creatiedatum="2024-11-11",
+            )
+
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [document.pk]
+        form["action"] = "revoke"
+
+        with freeze_time("2024-09-29T14:00:00-00:00"):
+            form.submit(name="_save")
+
+        with self.subTest("update audit logging"):
+            update_log = TimelineLogProxy.objects.get()
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": document.pk,
+                    "lock": "",
+                    "upload_complete": False,
+                    "uuid": str(document.uuid),
+                    "identifier": identifier,
+                    "publicatie": publication.pk,
+                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated
+                    "bestandsnaam": "unknown.bin",
+                    "creatiedatum": "2024-11-11",
+                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "document_uuid": None,
+                    "bestandsomvang": 0,
+                    "verkorte_titel": "one",
+                    "bestandsformaat": "unknown",
+                    "officiele_titel": "title one",
+                    "document_service": None,
+                    "registratiedatum": "2024-09-25T14:00:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
+                    "soort_handeling": DocumentActionTypeOptions.declared,
+                },
+                "_cached_object_repr": "title one",
+            }
+            self.assertEqual(update_log.extra_data, expected_data)
+
     def test_document_admin_delete(self):
         publication = PublicationFactory.create()
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
@@ -1033,6 +1209,51 @@ class TestTopicAdminAuditLogging(WebTest):
                     "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
                 },
                 "_cached_object_repr": "changed official title",
+            }
+
+            self.assertEqual(update_log.extra_data, expected_data)
+
+    def test_topic_revoke_action_update_log(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            topic = TopicFactory.create(
+                officiele_titel="Lorem Ipsum",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                publicatiestatus=PublicationStatusOptions.published,
+                promoot=True,
+            )
+
+        changelist = self.app.get(
+            reverse("admin:publications_topic_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [topic.pk]
+        form["action"] = "revoke"
+
+        with freeze_time("2024-09-29T14:00:00-00:00"):
+            form.submit(name="_save")
+
+        with self.subTest("update audit logging"):
+            update_log = TimelineLogProxy.objects.get()
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": topic.pk,
+                    "uuid": str(topic.uuid),
+                    "afbeelding": topic.afbeelding.name,
+                    "officiele_titel": "Lorem Ipsum",
+                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated
+                    "promoot": True,
+                    "registratiedatum": "2024-09-24T12:00:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
+                },
+                "_cached_object_repr": "Lorem Ipsum",
             }
 
             self.assertEqual(update_log.extra_data, expected_data)

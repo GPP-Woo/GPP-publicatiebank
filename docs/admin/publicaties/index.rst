@@ -22,7 +22,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtboven zit een knop **document toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment worden de acties **Geselecteerde documenten verwijderen**, **Verstuur de geselecteerde documenten naar de zoekindex** en **Verwijder de geselecteerde documenten uit de zoekindex** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *document*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment worden de acties **Geselecteerde documenten verwijderen**, **Verstuur de geselecteerde documenten naar de zoekindex**, **Verwijder de geselecteerde documenten uit de zoekindex** en **Trek gepubliceerde documenten in** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *document*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *document*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, creatiedatum en/of publicatiestatus**.
 * Bij een *document*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -95,7 +95,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtboven zit een knop **publicatie toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex** en **Geselecteerde publicaties herwaarderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex**, **Trek gepubliceerde publicaties in** en **Geselecteerde publicaties herwaarderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *publicatie*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum en/of publicatiestatus**.
 * Bij een *publicatie*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -165,7 +165,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtsboven zit een knop **onderwerp toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere onderwerpen**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** en **Trek gepubliceerde onderwerpen in** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *onderwerp*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *onderwerp*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, publicatiestatus, archiefnominatie en/of archiefdatum**.
 * Bij een *onderwerp*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
