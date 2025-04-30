@@ -69,6 +69,7 @@ class DocumentActionSerializer(serializers.Serializer):
         choices=DocumentActionTypeOptions.choices,
         default=DocumentActionTypeOptions.declared,
     )
+    identifier = serializers.URLField(read_only=True)
     at_time = serializers.DateTimeField(
         read_only=True,
     )

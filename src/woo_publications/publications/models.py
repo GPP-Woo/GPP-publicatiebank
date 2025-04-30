@@ -30,7 +30,11 @@ from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
 
-from .constants import DocumentActionTypeOptions, PublicationStatusOptions
+from .constants import (
+    DOCUMENT_ACTION_TOOI_IDENTIFIERS,
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+)
 from .typing import DocumentActions
 
 # when the document isn't specified both the service and uuid needs to be unset
@@ -364,6 +368,7 @@ class Document(ModelOwnerMixin, models.Model):
         return [
             {
                 "soort_handeling": self.soort_handeling,
+                "identifier": DOCUMENT_ACTION_TOOI_IDENTIFIERS[self.soort_handeling],
                 "at_time": self.registratiedatum,
                 "was_assciated_with": (
                     self.publicatie.verantwoordelijke.uuid
