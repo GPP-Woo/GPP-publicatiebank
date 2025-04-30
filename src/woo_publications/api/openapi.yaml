@@ -1919,6 +1919,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/SoortHandelingEnum'
           default: vaststelling
+        identifier:
+          type: string
+          format: uri
+          readOnly: true
         atTime:
           type: string
           format: date-time
@@ -1930,6 +1934,7 @@ components:
           description: De unieke identificatie van de organisatie.
       required:
       - atTime
+      - identifier
       - wasAssciatedWith
     DocumentStatus:
       type: object

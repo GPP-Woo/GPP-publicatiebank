@@ -40,7 +40,11 @@ from woo_publications.utils.validators import (
 )
 
 from .archiving import get_retention_informatie_category
-from .constants import DocumentActionTypeOptions, PublicationStatusOptions
+from .constants import (
+    DOCUMENT_ACTION_TOOI_IDENTIFIERS,
+    DocumentActionTypeOptions,
+    PublicationStatusOptions,
+)
 from .typing import DocumentActions
 
 # when the document isn't specified both the service and uuid needs to be unset
@@ -507,6 +511,7 @@ class Document(ModelOwnerMixin, models.Model):
         return [
             {
                 "soort_handeling": self.soort_handeling,
+                "identifier": DOCUMENT_ACTION_TOOI_IDENTIFIERS[self.soort_handeling],
                 "at_time": self.registratiedatum,
                 "was_assciated_with": (
                     self.publicatie.verantwoordelijke.uuid
