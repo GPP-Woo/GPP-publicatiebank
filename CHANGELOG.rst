@@ -2,6 +2,14 @@
 Release notes
 =============
 
+1.1.1 (2025-05-02)
+==================
+
+Bugfix release.
+
+* [#267] Added missing "documenthandeling" TOOI identifier, required for valid sitemap
+  generation.
+
 1.1.0 (2025-04-16)
 ==================
 
