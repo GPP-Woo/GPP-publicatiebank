@@ -142,6 +142,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             documenthandelingen = [
                 {
                     "soortHandeling": DocumentActionTypeOptions.declared,
+                    "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
                     "atTime": "2024-09-24T14:00:00+02:00",
                     "wasAssciatedWith": None,
                 }
@@ -171,6 +172,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             documenthandelingen = [
                 {
                     "soortHandeling": DocumentActionTypeOptions.declared,
+                    "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
                     "atTime": "2024-09-25T14:30:00+02:00",
                     "wasAssciatedWith": str(organisation.uuid),
                 }
@@ -1013,6 +1015,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         documenthandelingen = [
             {
                 "soortHandeling": DocumentActionTypeOptions.declared,
+                "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
                 "atTime": "2024-09-25T14:30:00+02:00",
                 "wasAssciatedWith": None,
             }
@@ -1346,6 +1349,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 [
                     {
                         "soortHandeling": DocumentActionTypeOptions.signed,
+                        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_e1ec050e",
                         "atTime": "2024-11-13T16:00:00+01:00",
                         "wasAssciatedWith": str(organisation.uuid),
                     }
@@ -1422,6 +1426,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 [
                     {
                         "soortHandeling": DocumentActionTypeOptions.declared,
+                        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
                         "atTime": data["registratiedatum"],
                         "wasAssciatedWith": str(organisation.uuid),
                     }

@@ -7,6 +7,7 @@ from .constants import DocumentActionTypeOptions
 
 class DocumentAction(TypedDict):
     soort_handeling: DocumentActionTypeOptions
+    identifier: str
     at_time: datetime
     was_assciated_with: UUID | None
 
