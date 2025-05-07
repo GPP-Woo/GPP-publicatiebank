@@ -10,7 +10,10 @@ from maykin_2fa.test import disable_admin_mfa
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test.factories import ServiceFactory
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document
@@ -23,14 +26,20 @@ class TestDocumentAdmin(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
 
     def test_document_admin_shows_items(self):
         DocumentFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
         DocumentFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title two",
             verkorte_titel="two",
             omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -51,6 +60,7 @@ class TestDocumentAdmin(WebTest):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -60,6 +70,7 @@ class TestDocumentAdmin(WebTest):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document2 = DocumentFactory.create(
                 publicatie=publication2,
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -128,10 +139,14 @@ class TestDocumentAdmin(WebTest):
 
     def test_document_admin_list_filters(self):
         self.app.set_user(user=self.user)
-
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
-            DocumentFactory.create(
+            document1 = DocumentFactory.create(
                 publicatiestatus=PublicationStatusOptions.published,
+                eigenaar=org_member_1,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -141,6 +156,7 @@ class TestDocumentAdmin(WebTest):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document2 = DocumentFactory.create(
                 publicatiestatus=PublicationStatusOptions.concept,
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -187,6 +203,13 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, document2.identifier, 1)
+
+        with self.subTest("filter on eigenaar"):
+            search_response = response.click(description=str(org_member_1))
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(document1.uuid), 1)
 
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_document_admin_create(self):
@@ -238,9 +261,11 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 str(added_item.soort_handeling), DocumentActionTypeOptions.declared
             )
+            self.assertEqual(added_item.eigenaar, self.organisation_member)
 
         with self.subTest("complete data"):
             form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+            form["eigenaar"].select(text=str(self.organisation_member))
             form["publicatie"] = publication.id
             form["identifier"] = identifier
             form["officiele_titel"] = "The official title of this document"
@@ -266,6 +291,7 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 added_item.publicatiestatus, PublicationStatusOptions.concept
             )
+            self.assertEqual(added_item.eigenaar, self.organisation_member)
             self.assertEqual(added_item.publicatie, publication)
             self.assertEqual(added_item.identifier, identifier)
             self.assertEqual(
@@ -331,6 +357,10 @@ class TestDocumentAdmin(WebTest):
         )
 
     def test_document_admin_update(self):
+        org_member_1 = OrganisationMemberFactory(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
                 officiele_titel="title one",
@@ -350,6 +380,7 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms["document_form"]
         form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["eigenaar"].select(text=str(org_member_1))
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "changed official title"
@@ -364,6 +395,7 @@ class TestDocumentAdmin(WebTest):
 
         document.refresh_from_db()
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.concept)
+        self.assertEqual(document.eigenaar, org_member_1)
         self.assertEqual(document.publicatie, publication)
         self.assertEqual(document.identifier, identifier)
         self.assertEqual(document.officiele_titel, "changed official title")

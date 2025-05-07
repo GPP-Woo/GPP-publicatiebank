@@ -1,7 +1,6 @@
 from functools import partial
 
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpRequest
 
 from woo_publications.accounts.models import OrganisationMember, User
@@ -24,8 +23,8 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
         user = self.request.user
         assert isinstance(user, User)
         form = super().empty_form
-        owner = OrganisationMember.objects.get(
-            Q(identifier=user.pk), Q(naam=user.get_full_name()) | Q(naam=user.username)
+        owner = OrganisationMember.objects.get_or_create(
+            identifier=user.pk, naam=user.get_full_name() or user.username
         )
         form.fields["eigenaar"].initial = owner
         return form

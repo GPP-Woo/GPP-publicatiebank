@@ -8,14 +8,17 @@ from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
     OrganisationFactory,
 )
+from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ...utils.tests.webtest import add_dynamic_field
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication
 from .factories import DocumentFactory, PublicationFactory
@@ -27,14 +30,20 @@ class TestPublicationsAdmin(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
 
     def test_publications_admin_shows_items(self):
         PublicationFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
         PublicationFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title two",
             verkorte_titel="two",
             omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -51,12 +60,14 @@ class TestPublicationsAdmin(WebTest):
     def test_publications_admin_search(self):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -98,9 +109,13 @@ class TestPublicationsAdmin(WebTest):
 
     def test_publication_list_filter(self):
         self.app.set_user(user=self.user)
-
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             PublicationFactory.create(
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -110,6 +125,7 @@ class TestPublicationsAdmin(WebTest):
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
+                eigenaar=org_member_1,
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
@@ -170,6 +186,13 @@ class TestPublicationsAdmin(WebTest):
             self.assertIn(
                 "archiefactiedatum", search_response.request.environ["QUERY_STRING"]
             )
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(publication2.uuid), 1)
+
+        with self.subTest("filter on eigenaar"):
+            search_response = response.click(description=str(org_member_1))
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-uuid", 1)
@@ -321,6 +344,8 @@ class TestPublicationsAdmin(WebTest):
             )
             self.assertEqual(str(added_item.archiefactiedatum), "2029-09-25")
             self.assertEqual(added_item.toelichting_bewaartermijn, "toelichting")
+            # Test if eigenaar field gets automatically set
+            self.assertEqual(added_item.eigenaar, self.organisation_member)
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
@@ -368,6 +393,10 @@ class TestPublicationsAdmin(WebTest):
         )
 
     def test_publications_admin_update(self):
+        org_member_1 = OrganisationMemberFactory(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         ic, ic2 = InformationCategoryFactory.create_batch(
             2,
             bron_bewaartermijn="changed",
@@ -382,6 +411,7 @@ class TestPublicationsAdmin(WebTest):
         deactivated_organisation = OrganisationFactory.create(is_actief=False)
         with freeze_time("2024-09-25T00:14:00-00:00"):
             publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
                 publisher=organisation,
                 verantwoordelijke=organisation,
                 opsteller=organisation,
@@ -452,6 +482,7 @@ class TestPublicationsAdmin(WebTest):
         with self.subTest("complete data updates publication"):
             form["informatie_categorieen"].select_multiple(texts=[ic.naam])
             form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+            form["eigenaar"].select(text=str(org_member_1))
             form["publisher"] = str(organisation2.pk)
             form["verantwoordelijke"] = str(organisation2.pk)
             form["opsteller"] = str(organisation2.pk)
@@ -475,6 +506,7 @@ class TestPublicationsAdmin(WebTest):
                 publication.publicatiestatus, PublicationStatusOptions.concept
             )
             self.assertQuerySetEqual(publication.informatie_categorieen.all(), [ic])
+            self.assertEqual(publication.eigenaar, org_member_1)
             self.assertFalse(
                 publication.informatie_categorieen.filter(pk=ic2.pk).exists()
             )
@@ -777,6 +809,7 @@ class TestPublicationsAdmin(WebTest):
         add_dynamic_field(
             form, "document_set-0-publicatiestatus", PublicationStatusOptions.published
         )
+        add_dynamic_field(form, "document_set-0-eigenaar", self.organisation_member.pk)
         add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
         add_dynamic_field(form, "document_set-0-officiele_titel", "title")
         add_dynamic_field(form, "document_set-0-creatiedatum", "17-10-2024")
@@ -829,6 +862,7 @@ class TestPublicationsAdmin(WebTest):
         add_dynamic_field(
             form, "document_set-0-publicatiestatus", PublicationStatusOptions.concept
         )
+        add_dynamic_field(form, "document_set-0-eigenaar", self.organisation_member.pk)
         add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
         add_dynamic_field(form, "document_set-0-officiele_titel", "title")
         add_dynamic_field(form, "document_set-0-creatiedatum", "17-10-2024")
@@ -858,10 +892,13 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
         document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.published
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.published,
+            eigenaar=self.organisation_member,
         )
         reverse_url = reverse(
             "admin:publications_publication_change",
@@ -898,9 +935,13 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
-        document = DocumentFactory.create(publicatie=publication)
+        document = DocumentFactory.create(
+            publicatie=publication,
+            eigenaar=self.organisation_member,
+        )
         reverse_url = reverse(
             "admin:publications_publication_change",
             kwargs={"object_id": publication.id},
@@ -931,9 +972,13 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
-        document = DocumentFactory.create(publicatie=publication)
+        document = DocumentFactory.create(
+            publicatie=publication,
+            eigenaar=self.organisation_member,
+        )
         reverse_url = reverse(
             "admin:publications_publication_change",
             kwargs={"object_id": publication.id},
@@ -964,10 +1009,12 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
         document = DocumentFactory.create(
             publicatie=publication,
+            eigenaar=self.organisation_member,
             publicatiestatus=PublicationStatusOptions.published,
         )
         reverse_url = reverse(
@@ -1000,6 +1047,7 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
         for publicationstatus in [
@@ -1009,6 +1057,7 @@ class TestPublicationsAdmin(WebTest):
             with self.subTest(publicationstatus):
                 document = DocumentFactory.create(
                     publicatie=publication,
+                    eigenaar=self.organisation_member,
                     publicatiestatus=publicationstatus,
                 )
                 reverse_url = reverse(
