@@ -1868,10 +1868,8 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: The creator of the document.
         registratiedatum:
           type: string
           format: date-time
@@ -1906,7 +1904,6 @@ components:
       required:
       - bestandsdelen
       - creatiedatum
-      - eigenaar
       - laatstGewijzigdDatum
       - officieleTitel
       - publicatie
@@ -2000,10 +1997,8 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: The creator of the document.
         registratiedatum:
           type: string
           format: date-time
@@ -2042,7 +2037,6 @@ components:
       - bestandsomvang
       - creatiedatum
       - documenthandelingen
-      - eigenaar
       - identifier
       - laatstGewijzigdDatum
       - publicatie
@@ -2051,15 +2045,13 @@ components:
     Eigenaar:
       type: object
       properties:
-        weergaveNaam:
-          type: string
-          readOnly: true
-          description: De weergavenaam van de gebruiker, zoals vastgelegd in de auditlogs.
         identifier:
           type: string
-          readOnly: true
           description: De (unieke) identificatie waarmee de gebruiker die de actie
             uitvoert achterhaald kan worden.
+        weergaveNaam:
+          type: string
+          description: De weergavenaam van de gebruiker, zoals vastgelegd in de auditlogs.
       required:
       - identifier
       - weergaveNaam
@@ -2394,10 +2386,8 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: The creator of the document.
         registratiedatum:
           type: string
           format: date-time
@@ -2520,10 +2510,8 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die de publicatie aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: The creator of the publication.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2656,10 +2644,8 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die de publicatie aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: The creator of the publication.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2728,7 +2714,6 @@ components:
             de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
-      - eigenaar
       - informatieCategorieen
       - laatstGewijzigdDatum
       - officieleTitel
