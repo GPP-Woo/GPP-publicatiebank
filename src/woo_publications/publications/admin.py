@@ -7,16 +7,20 @@ from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.options import InlineModelAdmin
+from django.contrib.admin.utils import model_ngettext
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
+from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.html import format_html_join
+from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, ngettext
 
 from furl import furl
 
+from woo_publications.accounts.models import OrganisationMember, User
 from woo_publications.logging.logevent import audit_admin_update
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
@@ -24,8 +28,8 @@ from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
-from woo_publications.accounts.models import OrganisationMember, User
 from .constants import PublicationStatusOptions
+from .forms import ChangeOwnerForm
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication, Topic
 from .tasks import (
@@ -37,6 +41,82 @@ from .tasks import (
     remove_publication_from_index,
     remove_topic_from_index,
 )
+
+
+@admin.action(
+    description="Change %(verbose_name_plural)s owner(s)", permissions=["change"]
+)
+def change_owner(
+    modeladmin: PublicationAdmin | DocumentAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication | Document],
+):
+    assert isinstance(request.user, User)
+    model_name = str(model_ngettext(queryset))
+    opts = modeladmin.model._meta
+    form = ChangeOwnerForm(request.POST if request.POST.get("post") else None)
+
+    changeable_objects = [
+        format_html(
+            '<a href="{}">{}</a>',
+            reverse(
+                "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                kwargs={"object_id": item.id},
+            ),
+            item.officiele_titel,
+        )
+        for item in queryset
+    ]
+
+    if (post := request.POST) and post.get("post"):
+        if form.is_valid():
+            if eigenaar_pk := post.get("eigenaar"):
+                owner = OrganisationMember.objects.get(pk=eigenaar_pk)
+            else:
+                owner = OrganisationMember.objects.create(
+                    identifier=post.get("identifier"), naam=post.get("naam")
+                )
+
+            for obj in queryset:
+                audit_admin_update(
+                    content_object=obj,
+                    object_data=serialize_instance(obj),
+                    django_user=request.user,
+                )
+                obj.eigenaar = owner
+
+            if (count := queryset.count()) and count >= 1:
+                modeladmin.model.objects.bulk_update(queryset, ["eigenaar"])
+                modeladmin.message_user(
+                    request,
+                    _("Successfully changed %(count)d owner(s) of %(items)s.")
+                    % {"count": count, "items": model_ngettext(modeladmin.opts, count)},
+                    messages.SUCCESS,
+                )
+
+            modeladmin.model.objects.bulk_update(queryset, ["eigenaar"])
+            return
+
+    context = {
+        **modeladmin.admin_site.each_context(request),
+        "title": _("Change owner of multiple objects"),
+        "objects_name": model_name,
+        "queryset": queryset,
+        "changeable_objects": changeable_objects,
+        "opts": opts,
+        "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+        "media": modeladmin.media,
+        "form": form,
+    }
+
+    request.current_app = modeladmin.admin_site.name
+
+    # Display the confirmation page
+    return TemplateResponse(
+        request,
+        "admin/change_owner.html",
+        context,
+    )
 
 
 @admin.action(
@@ -308,6 +388,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         remove_from_index,
         reassess_retention_policy,
         revoke,
+        change_owner,
     ]
 
     def has_change_permission(self, request, obj=None):
@@ -534,7 +615,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     list_filter = ("registratiedatum", "creatiedatum", "publicatiestatus", "eigenaar")
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index, revoke]
+    actions = [sync_to_index, remove_from_index, revoke, change_owner]
 
     def get_changeform_initial_data(self, request: HttpRequest):
         assert isinstance(request.user, User)
