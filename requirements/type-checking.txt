@@ -50,10 +50,6 @@ billiard==4.2.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   celery
-black==24.8.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 bleach==6.1.0
     # via
     #   -c requirements/ci.txt
@@ -101,7 +97,6 @@ click==8.1.7
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-    #   black
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -121,10 +116,6 @@ click-repl==0.3.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   celery
-colorama==0.4.6
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 commonground-api-common==1.13.3
     # via
     #   -c requirements/ci.txt
@@ -456,10 +447,6 @@ faker==28.4.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   factory-boy
-flake8==7.1.1
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 flower==2.0.1
     # via
     #   -c requirements/ci.txt
@@ -522,10 +509,6 @@ isodate==0.6.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   commonground-api-common
-isort==5.13.2
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 itypes==1.2.0
     # via
     #   -c requirements/ci.txt
@@ -577,11 +560,6 @@ maykin-2fa==1.0.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-mccabe==0.7.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   flake8
 mozilla-django-oidc==4.0.1
     # via
     #   -c requirements/ci.txt
@@ -597,11 +575,6 @@ multidict==6.1.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   yarl
-mypy-extensions==1.0.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   black
 nodeenv==1.9.1
     # via pyright
 notifications-api-common==0.2.2
@@ -627,14 +600,8 @@ packaging==24.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-    #   black
     #   drf-yasg
     #   sphinx
-pathspec==0.12.1
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   black
 phonenumberslite==8.13.45
     # via
     #   -c requirements/ci.txt
@@ -644,11 +611,6 @@ pillow==11.2.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-platformdirs==4.3.2
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   black
 polib==1.2.0
     # via
     #   -c requirements/ci.txt
@@ -669,21 +631,11 @@ psycopg2==2.9.9
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-pycodestyle==2.12.1
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   flake8
 pycparser==2.22
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   cffi
-pyflakes==3.2.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   flake8
 pygments==2.18.0
     # via
     #   -c requirements/ci.txt
@@ -805,6 +757,10 @@ rpds-py==0.20.0
     #   -r requirements/ci.txt
     #   jsonschema
     #   referencing
+ruff==0.11.8
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 sentry-sdk==2.14.0
     # via
     #   -c requirements/ci.txt
