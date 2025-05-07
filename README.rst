@@ -58,7 +58,7 @@ Zie: `Alle versies en wijzigingen <https://github.com/GPP-Woo/GPP-publicatiebank
 Ontwikkelaars
 =============
 
-|build-status| |coverage| |black| |docker| |python-versions|
+|build-status| |coverage| |ruff| |docker| |python-versions|
 
 Deze repository bevat de broncode voor het registratiecomponent. Om snel aan de slag
 te gaan, raden we aan om de Docker image te gebruiken. Uiteraard kan je ook
@@ -114,9 +114,9 @@ Licensed under the EUPL_
     :alt: Coverage
     :target: https://codecov.io/gh/GPP-Woo/GPP-publicatiebank
 
-.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :alt: Code style
-    :target: https://github.com/psf/black
+.. |ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    :target: https://github.com/astral-sh/ruff
+    :alt: Ruff
 
 .. |docker| image:: https://img.shields.io/docker/v/maykinmedia/woo-publications?sort=semver
     :alt: Docker image

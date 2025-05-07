@@ -19,13 +19,12 @@ other developers to give tips even before you start coding.
 
 ### Code style
 
-To keep the code clean and readable, this project uses:
+To keep the code clean and readable, this project uses [Ruff](https://docs.astral.sh/ruff/):
 
-- [`isort`](https://github.com/timothycrosley/isort) to order the imports
-- [`black`](https://github.com/psf/black) to format the code and keep diffs for 
-  pull requests small
-- [`flake8`](https://github.com/PyCQA/flake8) to clean up code (removing unused
-  imports, etc.)
+```bash
+ruff check . --fix
+ruff format .
+```
 
 Whenever a branch is pushed or a pull request is made, the code will be checked 
 in CI by the tools mentioned above, so make sure to install these tools and run 
