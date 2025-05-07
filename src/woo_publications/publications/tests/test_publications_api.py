@@ -12,15 +12,17 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 from woo_publications.api.tests.mixins import (
     APIKeyUnAuthorizedMixin,
     APITestCaseMixin,
     TokenAuthMixin,
 )
 from woo_publications.constants import ArchiveNominationChoices
-from woo_publications.logging.logevent import audit_api_create
-from woo_publications.logging.serializing import serialize_instance
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -105,6 +107,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             oorsprong=InformationCategoryOrigins.value_list,
             identifier=settings.INSPANNINGSVERPLICHTING_IDENTIFIER,
         )
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
 
         # the get_inspannings_verplichting func which is called while fetching the
         # diWooInformatieCategorieen data is cached.
@@ -120,6 +126,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
                 onderwerpen=[topic],
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -131,6 +138,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication2 = PublicationFactory.create(
                 informatie_categorieen=[ic2],
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
@@ -163,7 +171,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur "
                 "adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
-                "eigenaar": None,
+                "eigenaar": {
+                    "identifier": self.organisation_member.identifier,
+                    "weergaveNaam": self.organisation_member.naam,
+                },
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
                 "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -189,7 +200,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
                 "facilisis mollis urna.",
                 "publicatiestatus": PublicationStatusOptions.concept,
-                "eigenaar": None,
+                "eigenaar": {
+                    "identifier": self.organisation_member.identifier,
+                    "weergaveNaam": self.organisation_member.naam,
+                },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -208,6 +222,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -218,6 +233,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
                 informatie_categorieen=[ic2],
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -238,7 +254,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             "publicatiestatus": PublicationStatusOptions.published,
-            "eigenaar": None,
+            "eigenaar": {
+                "identifier": self.organisation_member.identifier,
+                "weergaveNaam": self.organisation_member.naam,
+            },
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -260,7 +279,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
             "facilisis mollis urna.",
             "publicatiestatus": PublicationStatusOptions.published,
-            "eigenaar": None,
+            "eigenaar": {
+                "identifier": self.organisation_member.identifier,
+                "weergaveNaam": self.organisation_member.naam,
+            },
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -865,9 +887,16 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         ic, ic2 = InformationCategoryFactory.create_batch(
             2, oorsprong=InformationCategoryOrigins.value_list
         )
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="123", naam="buurman"
+        )
+        org_member_2 = OrganisationMemberFactory.create(
+            identifier="456", naam="buurman"
+        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
+                eigenaar=org_member_1,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -875,17 +904,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
             )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=publication,
-                user_id="123",
-                user_display="buurman",
-                object_data=serialize_instance(publication),
-                remarks="test",
-            )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
                 informatie_categorieen=[ic2],
+                eigenaar=org_member_2,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -893,14 +915,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
-            )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=publication2,
-                user_id="456",
-                user_display="buurman",
-                object_data=serialize_instance(publication2),
-                remarks="test",
             )
 
         expected_first_item_data = {
@@ -971,11 +985,18 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 headers=AUDIT_HEADERS,
             )
 
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             data = response.json()
-
-            self.assertEqual(data["count"], 0)
+            self.assertEqual(
+                data["eigenaar"],
+                [
+                    _(
+                        "Select a valid choice. That choice is not one "
+                        "of the available choices."
+                    )
+                ],
+            )
 
         with (
             self.subTest("filter with no input"),
@@ -1081,6 +1102,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
             onderwerpen=[topic],
+            eigenaar=self.organisation_member,
             publicatiestatus=PublicationStatusOptions.concept,
             officiele_titel="title one",
             verkorte_titel="one",
@@ -1111,7 +1133,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             "publicatiestatus": PublicationStatusOptions.concept,
-            "eigenaar": None,
+            "eigenaar": {
+                "identifier": self.organisation_member.identifier,
+                "weergaveNaam": self.organisation_member.naam,
+            },
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -1335,7 +1360,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "omschrijving": "Lorem ipsum dolor sit amet, "
                 "consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.concept,
-                "eigenaar": {"weergaveNaam": "username", "identifier": "id"},
+                "eigenaar": {
+                    "identifier": self.organisation_member.identifier,
+                    "weergaveNaam": self.organisation_member.naam,
+                },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "bronBewaartermijn": "bewaartermijn",
@@ -1353,6 +1381,46 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             del response_data["diWooInformatieCategorieen"]
             self.assertEqual(response_data, expected_data)
 
+        with self.subTest("with custom eigenaar given"):
+            self.assertFalse(
+                OrganisationMember.objects.filter(
+                    identifier="test-identifier",
+                    naam="test-naam",
+                ).exists()
+            )
+
+            data = {
+                "informatieCategorieen": [str(ic.uuid)],
+                "publisher": str(organisation.uuid),
+                "publicatiestatus": PublicationStatusOptions.published,
+                "officieleTitel": "changed offical title",
+                "verkorteTitel": "changed short title",
+                "omschrijving": "changed description",
+                "eigenaar": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaar"],
+                {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            )
+            self.assertTrue(
+                OrganisationMember.objects.filter(
+                    identifier="test-identifier",
+                    naam="test-naam",
+                ).exists()
+            )
+
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_update_publication(self):
         topic = TopicFactory.create()
@@ -1368,9 +1436,14 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         organisation, organisation2, organisation3 = OrganisationFactory.create_batch(
             3, is_actief=True
         )
+        OrganisationMemberFactory.create(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         publication = PublicationFactory.create(
             informatie_categorieen=[ic, ic2],
             publisher=organisation3,
+            eigenaar=self.organisation_member,
             publicatiestatus=PublicationStatusOptions.concept,
             officiele_titel="title one",
             verkorte_titel="one",
@@ -1409,6 +1482,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "officieleTitel": "changed offical title",
                 "verkorteTitel": "changed short title",
                 "omschrijving": "changed description",
+                "eigenaar": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
                 # retention fields will be overwritten by the altering of the ic's
                 "bronBewaartermijn": "IGNORED",
                 "selectiecategorie": "IGNORED",
@@ -1436,7 +1513,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "verkorteTitel": "changed short title",
                 "publicatiestatus": PublicationStatusOptions.published,
                 "omschrijving": "changed description",
-                "eigenaar": None,
+                "eigenaar": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "bronBewaartermijn": "changed",
@@ -1447,6 +1527,14 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             }
 
             self.assertEqual(response_data, expected_data)
+            # no new organisation member got created
+            self.assertEqual(
+                OrganisationMember.objects.filter(
+                    identifier="test-identifier",
+                    naam="test-naam",
+                ).count(),
+                1,
+            )
 
     def test_update_publication_with_no_nieuw_ic_does_not_overwrite_retention_fields(
         self,
@@ -1598,6 +1686,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
             onderwerpen=[topic],
             publisher=organisation,
             officiele_titel="title one",
@@ -1632,7 +1721,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             "publicatiestatus": PublicationStatusOptions.published,
-            "eigenaar": None,
+            "eigenaar": {
+                "identifier": self.organisation_member.identifier,
+                "weergaveNaam": self.organisation_member.naam,
+            },
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": publication.bron_bewaartermijn,
@@ -1644,6 +1736,52 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         # test that only officiele_titel got changed
         self.assertEqual(response_data, expected_data)
+
+    def test_partial_publication_new_owner(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
+        )
+
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        self.assertFalse(
+            OrganisationMember.objects.filter(
+                identifier="test-identifier", naam="test-naam"
+            )
+        )
+
+        data = {
+            "eigenaar": {
+                "identifier": "test-identifier",
+                "weergaveNaam": "test-naam",
+            },
+        }
+
+        response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        self.assertEqual(
+            response_data["eigenaar"],
+            {
+                "identifier": "test-identifier",
+                "weergaveNaam": "test-naam",
+            },
+        )
+        # OrganisationMember got created
+        self.assertTrue(
+            OrganisationMember.objects.filter(
+                identifier="test-identifier", naam="test-naam"
+            )
+        )
 
     def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(  # noqa E501
         self,

@@ -14,7 +14,11 @@ from requests.exceptions import ConnectionError, HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 from woo_publications.api.tests.mixins import (
     APIKeyUnAuthorizedMixin,
     APITestCaseMixin,
@@ -23,8 +27,6 @@ from woo_publications.api.tests.mixins import (
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
-from woo_publications.logging.logevent import audit_api_create
-from woo_publications.logging.serializing import serialize_instance
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -91,6 +93,14 @@ class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITes
 
 
 class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+
     def test_list_documents(self):
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(verantwoordelijke=organisation)
@@ -98,6 +108,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
                 identifier="document-1",
                 officiele_titel="title one",
@@ -105,17 +116,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 creatiedatum="2024-01-01",
             )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=document,
-                user_id="123",
-                user_display="blauw",
-                object_data=serialize_instance(document),
-                remarks="test",
-            )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             document2 = DocumentFactory.create(
                 publicatie=publication2,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-2",
                 officiele_titel="title two",
@@ -123,14 +127,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
                 "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
-            )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=document2,
-                user_id="456",
-                user_display="groen",
-                object_data=serialize_instance(document2),
-                remarks="test",
             )
 
         response = self.client.get(reverse("api:document-list"), headers=AUDIT_HEADERS)
@@ -161,7 +157,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
-                "eigenaar": {"weergaveNaam": "groen", "identifier": "456"},
+                "eigenaar": {
+                    "identifier": self.organisation_member.identifier,
+                    "weergaveNaam": self.organisation_member.naam,
+                },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "bestandsdelen": None,
@@ -192,7 +191,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
-                "eigenaar": {"weergaveNaam": "blauw", "identifier": "123"},
+                "eigenaar": {
+                    "identifier": self.organisation_member.identifier,
+                    "weergaveNaam": self.organisation_member.naam,
+                },
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
                 "bestandsdelen": None,
@@ -205,9 +207,12 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(verantwoordelijke=organisation)
         publication2 = PublicationFactory.create(verantwoordelijke=None)
+        org_member_1 = OrganisationMemberFactory.create(identifier="123", naam="blauw")
+        org_member_2 = OrganisationMemberFactory.create(identifier="456", naam="groen")
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=org_member_1,
                 publicatiestatus=PublicationStatusOptions.concept,
                 identifier="document-1",
                 officiele_titel="title one",
@@ -215,17 +220,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 creatiedatum="2024-01-01",
             )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=document,
-                user_id="123",
-                user_display="blauw",
-                object_data=serialize_instance(document),
-                remarks="test",
-            )
         with freeze_time("2024-09-24T12:00:00-00:00"):
-            document2 = DocumentFactory.create(
+            DocumentFactory.create(
                 publicatie=publication2,
+                eigenaar=org_member_2,
                 publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-2",
                 officiele_titel="title two",
@@ -233,14 +231,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
                 "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
-            )
-            # mimicking creating log though api
-            audit_api_create(
-                content_object=document2,
-                user_id="456",
-                user_display="groen",
-                object_data=serialize_instance(document2),
-                remarks="test",
             )
 
         with self.subTest("filter with existing eigenaar"):
@@ -262,9 +252,18 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 headers=AUDIT_HEADERS,
             )
 
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
             data = response.json()
-            self.assertEqual(data["count"], 0)
+            self.assertEqual(
+                data["eigenaar"],
+                [
+                    _(
+                        "Select a valid choice. That choice is not one "
+                        "of the available choices."
+                    )
+                ],
+            )
 
         with self.subTest("filter with no input"):
             response = self.client.get(
@@ -1007,6 +1006,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 identifier="document-1",
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -1044,7 +1044,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "bestandsformaat": "unknown",
             "bestandsnaam": "unknown.bin",
             "bestandsomvang": 0,
-            "eigenaar": None,
+            "eigenaar": {
+                "identifier": self.organisation_member.identifier,
+                "weergaveNaam": self.organisation_member.naam,
+            },
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "bestandsdelen": None,
@@ -1140,6 +1143,86 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         response_data = response.json()
 
         self.assertEqual(response_data["officieleTitel"], "changed officiele_title")
+
+    def test_partial_update_document_eigenaar(self):
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="test-identifier", naam="test-naam"
+        )
+        document = DocumentFactory.create(
+            eigenaar=org_member_1,
+            publicatiestatus=PublicationStatusOptions.concept,
+            identifier="document-1",
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            creatiedatum="2024-01-01",
+        )
+        detail_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.subTest("update document with new owner"):
+            self.assertFalse(
+                OrganisationMember.objects.filter(
+                    identifier="new-owner-identifier",
+                    naam="new-owner-naam",
+                ).exists()
+            )
+            body = {
+                "eigenaar": {
+                    "identifier": "new-owner-identifier",
+                    "weergaveNaam": "new-owner-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data=body, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaar"],
+                {
+                    "identifier": "new-owner-identifier",
+                    "weergaveNaam": "new-owner-naam",
+                },
+            )
+            self.assertTrue(
+                OrganisationMember.objects.filter(
+                    identifier="new-owner-identifier",
+                    naam="new-owner-naam",
+                ).exists()
+            )
+
+        with self.subTest("update document with existing owner"):
+            body = {
+                "eigenaar": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data=body, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaar"],
+                {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            )
+            # No new OrganisationMember got created.
+            self.assertEqual(
+                OrganisationMember.objects.filter(
+                    identifier="new-owner-identifier",
+                    naam="new-owner-naam",
+                ).count(),
+                1,
+            )
 
     @patch("woo_publications.publications.api.viewsets.index_document.delay")
     def test_publish_document_schedules_index_task(
