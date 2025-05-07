@@ -24,6 +24,7 @@ from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
+from woo_publications.accounts.models import OrganisationMember, User
 from .constants import PublicationStatusOptions
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication, Topic
@@ -250,6 +251,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "publisher",
                     "verantwoordelijke",
                     "opsteller",
+                    "eigenaar",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
@@ -297,6 +299,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "publicatiestatus",
         "archiefnominatie",
         ("archiefactiedatum", PastAndFutureDateFieldFilter),
+        "eigenaar",
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
@@ -311,6 +314,16 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
             return False
         return super().has_change_permission(request, obj)
+
+    def get_changeform_initial_data(self, request: HttpRequest):
+        assert isinstance(request.user, User)
+        initial_data: dict = super().get_changeform_initial_data(request)
+        owner, _ = OrganisationMember.objects.get_or_create(
+            identifier=request.user.pk,
+            naam=request.user.get_full_name() or request.user.username,
+        )
+        initial_data["eigenaar"] = owner
+        return initial_data
 
     def save_model(
         self, request: HttpRequest, obj: Publication, form: forms.Form, change: bool
@@ -467,6 +480,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 "fields": (
                     "publicatie",
                     "identifier",
+                    "eigenaar",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
@@ -518,13 +532,19 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "bestandsnaam",
         "publicatie__uuid",
     )
-    list_filter = (
-        "registratiedatum",
-        "creatiedatum",
-        "publicatiestatus",
-    )
+    list_filter = ("registratiedatum", "creatiedatum", "publicatiestatus", "eigenaar")
     date_hierarchy = "registratiedatum"
     actions = [sync_to_index, remove_from_index, revoke]
+
+    def get_changeform_initial_data(self, request: HttpRequest):
+        assert isinstance(request.user, User)
+        initial_data: dict = super().get_changeform_initial_data(request)
+        owner, _ = OrganisationMember.objects.get_or_create(
+            identifier=request.user.pk,
+            naam=request.user.get_full_name() or request.user.username,
+        )
+        initial_data["eigenaar"] = owner
+        return initial_data
 
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
