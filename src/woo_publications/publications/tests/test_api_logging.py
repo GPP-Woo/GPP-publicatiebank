@@ -31,7 +31,6 @@ AUDIT_HEADERS = {
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PublicationLoggingTests(TokenAuthMixin, APITestCase):
-
     def test_detail_logging(self):
         assert not TimelineLogProxy.objects.exists()
         ic = InformationCategoryFactory.create()
@@ -103,7 +102,8 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "opsteller": organisation.pk,
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "publisher": organisation.pk,
@@ -194,7 +194,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         }
         self.assertEqual(log.extra_data, expected_data)
 
-    def test_partial_update_publication_status_to_revoked_also_revokes_published_documents(
+    def test_partial_update_publication_status_to_revoked_also_revokes_published_documents(  # noqa: E501
         self,
     ):
         assert not TimelineLogProxy.objects.exists()
@@ -256,9 +256,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         with self.subTest("update publication audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 publication
-            ).get(
-                extra_data__event=Events.update
-            )
+            ).get(extra_data__event=Events.update)
 
             expected_data = {
                 "event": Events.update,
@@ -270,7 +268,8 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "onderwerpen": [topic.pk, topic2.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
-                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "omschrijving": "Lorem ipsum dolor sit amet, "
+                    "consectetur adipiscing elit.",
                     "opsteller": organisation.pk,
                     "publicatiestatus": PublicationStatusOptions.revoked,
                     "publisher": organisation.pk,
@@ -387,7 +386,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
 
 
 class DocumentLoggingTests(TokenAuthMixin, APITestCase):
-
     def test_detail_logging(self):
         assert not TimelineLogProxy.objects.exists()
         document = DocumentFactory.create(
@@ -475,9 +473,8 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
     def test_download_logging(self, mock_get_client):
         # mock out the actual download, we don't care about the main result, only about
         # the audit logs
-        mock_get_client.return_value.__enter__.return_value.get.return_value.status_code = (
-            200
-        )
+        mock_download = mock_get_client.return_value.__enter__.return_value.get
+        mock_download.return_value.status_code = 200
         information_category = InformationCategoryFactory.create()
         document = DocumentFactory.create(
             publicatie__informatie_categorieen=[information_category],

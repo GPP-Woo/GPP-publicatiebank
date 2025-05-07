@@ -99,13 +99,15 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # diWooInformatieCategorieen needs to have inspannings verplichting record in case of custom entries
+        # diWooInformatieCategorieen needs to have inspannings verplichting record in
+        # case of custom entries
         cls.inspannings_verplichting = InformationCategoryFactory.create(
             oorsprong=InformationCategoryOrigins.value_list,
             identifier=settings.INSPANNINGSVERPLICHTING_IDENTIFIER,
         )
 
-        # the get_inspannings_verplichting func which is called while fetching the diWooInformatieCategorieen data is cached.
+        # the get_inspannings_verplichting func which is called while fetching the
+        # diWooInformatieCategorieen data is cached.
         # so we clear the cache after each test to maintain test isolation.
         cls.addClassCleanup(cache.clear)
 
@@ -132,7 +134,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
@@ -157,7 +160,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "opsteller": None,
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur "
+                "adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
                 "eigenaar": None,
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
@@ -182,7 +186,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "opsteller": None,
                 "officieleTitel": "title two",
                 "verkorteTitel": "two",
-                "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "eigenaar": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
@@ -215,7 +220,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 informatie_categorieen=[ic2],
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
@@ -251,7 +257,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "opsteller": None,
             "officieleTitel": "title two",
             "verkorteTitel": "two",
-            "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+            "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
+            "facilisis mollis urna.",
             "publicatiestatus": PublicationStatusOptions.published,
             "eigenaar": None,
             "registratiedatum": "2024-09-25T14:30:00+02:00",
@@ -723,7 +730,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
 
         with self.subTest(
-            "filter both lte and gte on exact date to find publication 'between' two dates"
+            "filter both lte and gte on exact date to find "
+            "publication 'between' two dates"
         ):
             response = self.client.get(
                 reverse("api:publication-list"),
@@ -880,7 +888,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 informatie_categorieen=[ic2],
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
@@ -925,7 +934,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "opsteller": None,
             "officieleTitel": "title two",
             "verkorteTitel": "two",
-            "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+            "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
+            "facilisis mollis urna.",
             "publicatiestatus": PublicationStatusOptions.published,
             "eigenaar": {"weergaveNaam": "buurman", "identifier": "456"},
             "registratiedatum": "2024-09-25T14:30:00+02:00",
@@ -1044,7 +1054,12 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             response = self.client.get(
                 list_url,
                 {
-                    "publicatiestatus": f"{PublicationStatusOptions.published},{PublicationStatusOptions.revoked}"
+                    "publicatiestatus": ",".join(
+                        (
+                            PublicationStatusOptions.published,
+                            PublicationStatusOptions.revoked,
+                        )
+                    )
                 },
                 headers=AUDIT_HEADERS,
             )
@@ -1154,7 +1169,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertIn(str(value_list_ic2.uuid), data["diWooInformatieCategorieen"])
 
         with self.subTest(
-            "publication with custom ic and inspannings verplicht ic dont have duplicate insappings verplicht ic uuid"
+            "publication with custom ic and inspannings verplicht ic dont have "
+            "duplicate insappings verplicht ic uuid"
         ):
             publication = PublicationFactory.create(
                 informatie_categorieen=[
@@ -1219,7 +1235,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             response_data = response.json()
 
-            # format the same way drf does for gettext to translate the error message properly
+            # format the same way drf does for gettext to translate the error
+            # message properly
             self.assertEqual(
                 response_data["publisher"],
                 [
@@ -1289,7 +1306,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "opsteller": str(organisation3.uuid),
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 # These values will be overwritten
                 "bronBewaartermijn": "THIS VALUE WON'T BE USED",
                 "selectiecategorie": "THIS VALUE WON'T BE USED",
@@ -1314,7 +1332,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "opsteller": str(organisation3.uuid),
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "eigenaar": {"weergaveNaam": "username", "identifier": "id"},
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
@@ -1326,8 +1345,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "toelichtingBewaartermijn": "",
             }
 
-            # diWooInformatieCategorieen ordering is done on the UUID field to make sure there are no duplicated data.
-            # Which results in unpredictable ordering for testing, so I test these individually
+            # diWooInformatieCategorieen ordering is done on the UUID field to make
+            # sure there are no duplicated data, which results in unpredictable ordering
+            # for testing, so I test these individually
             self.assertIn(str(ic.uuid), response_data["diWooInformatieCategorieen"])
             self.assertIn(str(ic2.uuid), response_data["diWooInformatieCategorieen"])
             del response_data["diWooInformatieCategorieen"]
@@ -1625,7 +1645,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # test that only officiele_titel got changed
         self.assertEqual(response_data, expected_data)
 
-    def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(
+    def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(  # noqa E501
         self,
     ):
         ic = InformationCategoryFactory.create(

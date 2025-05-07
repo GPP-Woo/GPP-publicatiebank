@@ -10,7 +10,6 @@ from .factories import PublicationFactory
 
 
 class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

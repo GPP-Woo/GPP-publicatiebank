@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("metadata", "0008_informationcategory_archiefnominatie_and_more"),
     ]

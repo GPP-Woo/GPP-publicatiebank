@@ -40,8 +40,6 @@ billiard==4.2.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
-black==24.8.0
-    # via -r requirements/test-tools.in
 bleach==6.1.0
     # via
     #   -c requirements/base.txt
@@ -87,7 +85,6 @@ click==8.1.7
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
-    #   black
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -107,8 +104,6 @@ click-repl==0.3.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
-colorama==0.4.6
-    # via isort
 commonground-api-common==1.13.3
     # via
     #   -c requirements/base.txt
@@ -418,8 +413,6 @@ faker==28.4.1
     # via
     #   factory-boy
     #   zgw-consumers
-flake8==7.1.1
-    # via -r requirements/test-tools.in
 flower==2.0.1
     # via
     #   -c requirements/base.txt
@@ -467,8 +460,6 @@ inflection==0.5.1
     #   -r requirements/base.txt
     #   drf-spectacular
     #   drf-yasg
-iniconfig==2.0.0
-    # via pytest
 iso-639==0.4.5
     # via
     #   -c requirements/base.txt
@@ -479,8 +470,6 @@ isodate==0.6.1
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   commonground-api-common
-isort==5.13.2
-    # via -r requirements/test-tools.in
 itypes==1.2.0
     # via
     #   -c requirements/base.txt
@@ -529,8 +518,6 @@ maykin-2fa==1.0.1
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   open-api-framework
-mccabe==0.7.0
-    # via flake8
 mozilla-django-oidc==4.0.1
     # via
     #   -c requirements/base.txt
@@ -543,8 +530,6 @@ mozilla-django-oidc-db==0.19.0
     #   open-api-framework
 multidict==6.1.0
     # via yarl
-mypy-extensions==1.0.0
-    # via black
 notifications-api-common==0.2.2
     # via
     #   -c requirements/base.txt
@@ -568,12 +553,8 @@ packaging==24.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
-    #   black
     #   drf-yasg
-    #   pytest
     #   sphinx
-pathspec==0.12.1
-    # via black
 phonenumberslite==8.13.45
     # via
     #   -c requirements/base.txt
@@ -583,10 +564,6 @@ pillow==11.2.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
-platformdirs==4.3.2
-    # via black
-pluggy==1.5.0
-    # via pytest
 polib==1.2.0
     # via
     #   -c requirements/base.txt
@@ -607,15 +584,11 @@ psycopg2==2.9.9
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   open-api-framework
-pycodestyle==2.12.1
-    # via flake8
 pycparser==2.22
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   cffi
-pyflakes==3.2.0
-    # via flake8
 pygments==2.18.0
     # via
     #   -c requirements/base.txt
@@ -642,8 +615,6 @@ pypng==0.20220715.0
     #   -r requirements/base.txt
     #   qrcode
 pyquery==2.0.1
-    # via -r requirements/test-tools.in
-pytest==8.3.3
     # via -r requirements/test-tools.in
 python-creole==1.4.10
     # via
@@ -733,6 +704,8 @@ rpds-py==0.20.0
     #   -r requirements/base.txt
     #   jsonschema
     #   referencing
+ruff==0.11.8
+    # via -r requirements/test-tools.in
 sentry-sdk==2.14.0
     # via
     #   -c requirements/base.txt

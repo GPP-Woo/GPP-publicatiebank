@@ -1,5 +1,5 @@
 [project]
-requires-python = "3.12"
+requires-python = "== 3.12"
 
 [tool.uv.pip]
 emit-index-url = false
@@ -64,3 +64,34 @@ filename = "package.json"
 search = "    \"version\": \"{current_version}\""
 replace = "    \"version\": \"{new_version}\""
 
+[tool.ruff]
+extend-exclude = [
+    "*/migrations/*",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "UP",  # pyupgrade
+    "DJ",  # django
+    "LOG", # logging
+    "G",
+    "I",   # isort
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "PERF",# perflint
+    "B",   # flake8-bugbear
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+section-order = [
+    "future",
+    "standard-library",
+    "django",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+"django" = ["django"]

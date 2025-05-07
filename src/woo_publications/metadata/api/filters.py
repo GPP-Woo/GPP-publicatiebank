@@ -20,7 +20,8 @@ class InformationCategoryFilterSet(FilterSet):
     identifier = URLFilter(
         lookup_expr="exact",
         help_text=_(
-            "Search the information category based on the unique IRI that identifies a specific category."
+            "Search the information category based on the unique IRI that identifies "
+            "a specific category."
         ),
     )
     naam = filters.CharFilter(
@@ -42,7 +43,8 @@ class OrganisationFilterSet(FilterSet):
     identifier = URLFilter(
         lookup_expr="exact",
         help_text=_(
-            "Search the organisations by the unique IRI that identifies a specific organisation."
+            "Search the organisations by the unique IRI that identifies a "
+            "specific organisation."
         ),
     )
     naam = filters.CharFilter(
@@ -74,7 +76,7 @@ class OrganisationFilterSet(FilterSet):
     def filter_is_actief(self, queryset, name: str, value: str):
         # NOTE: this method does not get called if no filter param is used. The
         # default filtering case is implemented in the respective viewset method.
-        match (value):
+        match value:
             case OrganisationActive.inactive:
                 return queryset.filter(is_actief=False)
             case OrganisationActive.all:

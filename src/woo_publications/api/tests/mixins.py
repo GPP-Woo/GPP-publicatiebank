@@ -249,7 +249,6 @@ class APIKeyUnAuthorizedMixin:
 
 
 class APITestCaseMixin:
-
     def assertItemInResults(
         self,
         results: list[JSONObject],

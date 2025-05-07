@@ -10,7 +10,6 @@ from .factories import TopicFactory
 
 
 class IndexTopicTaskTests(VCRMixin, TestCase):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

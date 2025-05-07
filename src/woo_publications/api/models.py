@@ -21,7 +21,7 @@ PERMISSION_SCHEMA = {
 }
 
 
-class Application(models.Model):
+class Application(models.Model):  # noqa: DJ008
     token = models.CharField(_("token"), max_length=40)
     permissions = ArrayField(
         models.CharField(max_length=20, choices=PermissionOptions.choices),
@@ -35,21 +35,24 @@ class Application(models.Model):
         _("contact person"),
         max_length=200,
         help_text=_(
-            "Name of the person to contact about this application and the associated credentials."
+            "Name of the person to contact about this application and the associated "
+            "credentials."
         ),
         blank=True,
     )
     email = models.EmailField(
         _("email"),
         help_text=_(
-            "Email of the person to contact about this application and the associated credentials."
+            "Email of the person to contact about this application and the associated "
+            "credentials."
         ),
         blank=True,
     )
     phone_number = PhoneNumberField(
         _("phone number"),
         help_text=_(
-            "Phonenumber of the person contact about this application and the associated credentials."
+            "Phonenumber of the person contact about this application and the "
+            "associated credentials."
         ),
         blank=True,
     )

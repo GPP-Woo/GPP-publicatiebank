@@ -7,7 +7,10 @@ from ...theme_sync import ThemeWaardenlijstError, update_theme
 
 
 class Command(BaseCommand):
-    help = "Retrieve the themes from the value list published on overheid.nl and dump them as a fixture."
+    help = (
+        "Retrieve the themes from the value list published on overheid.nl and dump "
+        "them as a fixture."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(

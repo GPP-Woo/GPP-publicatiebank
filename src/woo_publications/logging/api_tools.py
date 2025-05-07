@@ -68,7 +68,8 @@ class AuditTrailCreateMixin:
 
 class AuditTrailRetrieveMixin(Generic[_MT_co]):
     """
-    Add support for audit trails to the :class:`rest_framework.mixins.RetrieveModelMixin`.
+    Add support for audit trails to the
+    :class:`rest_framework.mixins.RetrieveModelMixin`.
     """
 
     _cached_object: _MT_co
@@ -121,7 +122,8 @@ class AuditTrailUpdateMixin:
 
 class AuditTrailDestroyMixin:
     """
-    Add support for audit trails to the :class:`rest_framework.mixins.DestroyModelMixin`.
+    Add support for audit trails to the
+    :class:`rest_framework.mixins.DestroyModelMixin`.
     """
 
     request: Request

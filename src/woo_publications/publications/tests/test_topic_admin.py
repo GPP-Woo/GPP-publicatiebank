@@ -32,7 +32,9 @@ class TestTopicAdmin(WebTest):
         )
         TopicFactory.create(
             officiele_titel="title two",
-            omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+            omschrijving=(
+                "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna."
+            ),
         )
         response = self.app.get(
             reverse("admin:publications_topic_changelist"),
@@ -51,7 +53,10 @@ class TestTopicAdmin(WebTest):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             topic2 = TopicFactory.create(
                 officiele_titel="title two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving=(
+                    "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis "
+                    "urna."
+                ),
             )
         PublicationFactory.create(onderwerpen=[topic])
         publication2 = PublicationFactory.create(onderwerpen=[topic2])

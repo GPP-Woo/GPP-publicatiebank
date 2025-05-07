@@ -137,7 +137,8 @@ class UpdateThemeTestCase(VCRMixin, TestCase):
 
             with self.assertRaisesMessage(
                 ThemeWaardenlijstError,
-                "Got an unexpected response status code when retrieving the value list data: 400.",
+                "Got an unexpected response status code when retrieving the value list "
+                "data: 400.",
             ):
                 update_theme(file_path)
 

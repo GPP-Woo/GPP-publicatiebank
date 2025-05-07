@@ -10,8 +10,8 @@ AUDIT_USER_ID_PARAMETER = OpenApiParameter(
     description=dedent(
         """
         The system identifier that uniquely identifies the user performing the action.
-        Ideally, this is obtained from some Identity and Access Management infrastructure.
-        With OpenID Connect, this would typically be the `sub` claim.
+        Ideally, this is obtained from some Identity and Access Management
+        infrastructure. With OpenID Connect, this would typically be the `sub` claim.
         """
     ),
 )

@@ -9,7 +9,6 @@ from .factories import UserFactory
 
 @disable_admin_mfa()
 class UserAdminTests(WebTest):
-
     @tag("gh-81")
     def test_can_set_user_permissions(self):
         superuser = UserFactory.create(superuser=True)

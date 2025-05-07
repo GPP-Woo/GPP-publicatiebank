@@ -34,7 +34,8 @@ def update_theme(file_path: Path):
         response.raise_for_status()
     except requests.RequestException as err:
         raise ThemeWaardenlijstError(
-            f"Got an unexpected response status code when retrieving the value list data: {response.status_code}."
+            "Got an unexpected response status code when retrieving the value list "
+            f"data: {response.status_code}."
         ) from err
 
     data = response.json()

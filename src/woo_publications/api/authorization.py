@@ -10,7 +10,7 @@ class TokenAuthentication(_TokenAuthentication):
     def authenticate_credentials(self, key):
         try:
             token = Application.objects.get(token=key)
-        except Application.DoesNotExist:
-            raise exceptions.AuthenticationFailed(_("Invalid token."))
+        except Application.DoesNotExist as exc:
+            raise exceptions.AuthenticationFailed(_("Invalid token.")) from exc
 
         return (None, token)

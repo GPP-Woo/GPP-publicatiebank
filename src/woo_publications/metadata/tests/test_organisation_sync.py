@@ -77,7 +77,8 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
 
             with self.assertRaisesMessage(
                 OrganisatieWaardenlijstError,
-                f"Could not retrieve the value list data from url `{MUNICIPALITY_WAARDENLIJST_URL}`.",
+                "Could not retrieve the value list data from url "
+                f"`{MUNICIPALITY_WAARDENLIJST_URL}`.",
             ):
                 update_organisation(file_path)
 
@@ -91,7 +92,8 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
 
             with self.assertRaisesMessage(
                 OrganisatieWaardenlijstError,
-                f"Got an unexpected response status code when retrieving the value list data from url `{MUNICIPALITY_WAARDENLIJST_URL}`: 400.",
+                "Got an unexpected response status code when retrieving the value "
+                f"list data from url `{MUNICIPALITY_WAARDENLIJST_URL}`: 400.",
             ):
                 update_organisation(file_path)
 
@@ -105,6 +107,7 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
 
             with self.assertRaisesMessage(
                 OrganisatieWaardenlijstError,
-                f"Received empty data from value list `{MUNICIPALITY_WAARDENLIJST_URL}`.",
+                "Received empty data from value list "
+                f"`{MUNICIPALITY_WAARDENLIJST_URL}`.",
             ):
                 update_organisation(file_path)

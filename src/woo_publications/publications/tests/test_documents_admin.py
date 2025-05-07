@@ -33,7 +33,8 @@ class TestDocumentAdmin(WebTest):
         DocumentFactory.create(
             officiele_titel="title two",
             verkorte_titel="two",
-            omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+            omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+            "facilisis mollis urna.",
         )
 
         response = self.app.get(
@@ -61,7 +62,8 @@ class TestDocumentAdmin(WebTest):
                 publicatie=publication2,
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 identifier="document-2",
                 bestandsnaam="doc2.txt",
             )
@@ -139,7 +141,8 @@ class TestDocumentAdmin(WebTest):
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-09-25",
                 identifier="document-2",
             )
@@ -217,8 +220,9 @@ class TestDocumentAdmin(WebTest):
             form["verkorte_titel"] = "The title"
             form["creatiedatum"] = "2024-01-01"
             form["omschrijving"] = (
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur.",
             )
 
             add_response = form.submit(name="_save")
@@ -241,8 +245,9 @@ class TestDocumentAdmin(WebTest):
             form["verkorte_titel"] = "The title"
             form["creatiedatum"] = "2024-01-01"
             form["omschrijving"] = (
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur.",
             )
             form["soort_handeling"].select(
                 text=DocumentActionTypeOptions.received.label
@@ -267,8 +272,9 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(added_item.verkorte_titel, "The title")
             self.assertEqual(
                 added_item.omschrijving,
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur.",
             )
             self.assertEqual(
                 str(added_item.registratiedatum), "2024-09-24 12:00:00+00:00"
@@ -300,8 +306,9 @@ class TestDocumentAdmin(WebTest):
         form["verkorte_titel"] = "The title"
         form["creatiedatum"] = "2024-01-01"
         form["omschrijving"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur.",
         )
         form["soort_handeling"].select(text=DocumentActionTypeOptions.received.label)
 
@@ -512,7 +519,8 @@ class TestDocumentAdmin(WebTest):
 
         self.assertEqual(len(document_select.options), 2)
 
-        # test that default and document service are selectable but the zaak service isn't
+        # test that default and document service are selectable but the zaak service
+        # isn't
         service_option_values = [option[0] for option in document_select.options]
         self.assertEqual(service_option_values, ["", str(service.pk)])
 

@@ -60,10 +60,11 @@ def mock_oidc_db_config(**overrides):
     This context manager deliberately prevents the mocked things from being injected in
     the test method signature.
 
-    The below configured data including the secrets are can be found in the test-realm.json file.
-    This can be found within the docker directory within this project.
-    And these tests are supposed to be run while running the keycloak docker-compose configuration.
-    More information can be found within the `docker/keycloak/README.md` file.
+    The below configured data including the secrets are can be found in the
+    test-realm.json file. This can be found within the docker directory within this
+    project. These tests are supposed to be run while running the keycloak
+    docker-compose configuration. More information can be found within the
+    ``docker/keycloak/README.md`` file.
     """
     defaults = {
         "enabled": True,

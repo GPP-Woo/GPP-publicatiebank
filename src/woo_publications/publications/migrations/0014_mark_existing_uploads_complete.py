@@ -9,7 +9,6 @@ def mark_completed(apps, _):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("publications", "0013_document_upload_complete"),
     ]

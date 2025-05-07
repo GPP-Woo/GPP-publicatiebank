@@ -21,7 +21,8 @@ def config[T](option: str, default: T | Undefined = undefined, *args, **kwargs) 
         kwargs["cast"] = Csv()
         if default == []:
             default = ""  # pyright: ignore
-    return _config(option, default=default, *args, **kwargs)  # pyright: ignore
+    kwargs["default"] = default
+    return _config(option, *args, **kwargs)  # pyright: ignore
 
 
 def mute_logging(config: dict) -> None:  # pragma: no cover

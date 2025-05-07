@@ -39,7 +39,6 @@ DOCUMENT_TYPE_URL = (
 
 
 class DocumentsAPIClientTests(VCRMixin, TestCase):
-
     def test_create_document_with_file_parts_upload(self):
         service = ServiceFactory.build(for_documents_api_docker_compose=True)
 

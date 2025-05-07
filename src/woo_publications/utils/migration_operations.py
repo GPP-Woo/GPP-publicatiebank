@@ -7,7 +7,7 @@ from django.db import migrations, router
 def _get_reset_sql() -> str:
     INFILE = os.path.join(settings.BASE_DIR, "bin", "reset_sequences.sql")
 
-    with open(INFILE, "r") as infile:
+    with open(INFILE) as infile:
         SQL = infile.read()
 
     return SQL
@@ -47,7 +47,6 @@ class ResetSequences(migrations.RunSQL):
         if router.allow_migrate(
             schema_editor.connection.alias, app_label, **self.hints
         ):
-
             base_sql = _get_reset_sql()
 
             with schema_editor.connection.cursor() as cursor:

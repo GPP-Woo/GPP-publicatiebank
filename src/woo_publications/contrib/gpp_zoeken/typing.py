@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import TypedDict
 
 
 class PublicationInformatieCategorie(TypedDict):
@@ -20,8 +20,8 @@ class IndexDocumentBody(TypedDict):
     uuid: str
     publicatie: str
     publisher: PublicationPublisher
-    onderwerpen: List[PublicationTopic]
-    informatieCategorieen: List[PublicationInformatieCategorie]
+    onderwerpen: list[PublicationTopic]
+    informatieCategorieen: list[PublicationInformatieCategorie]
     identifier: str
     officieleTitel: str
     verkorteTitel: str
@@ -36,8 +36,8 @@ class IndexDocumentBody(TypedDict):
 class IndexPublicationBody(TypedDict):
     uuid: str
     publisher: PublicationPublisher
-    onderwerpen: List[PublicationTopic]
-    informatieCategorieen: List[PublicationInformatieCategorie]
+    onderwerpen: list[PublicationTopic]
+    informatieCategorieen: list[PublicationInformatieCategorie]
     officieleTitel: str
     verkorteTitel: str
     omschrijving: str

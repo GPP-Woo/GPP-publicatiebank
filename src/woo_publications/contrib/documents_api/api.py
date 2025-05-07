@@ -49,7 +49,8 @@ class CatalogiAPIDocumentTypeSerializer(serializers.Serializer):
     omschrijving = serializers.CharField(
         max_length=80,
         help_text=(
-            "Omschrijving van de aard van informatieobjecten van dit INFORMATIEOBJECTTYPE."
+            "Omschrijving van de aard van informatieobjecten van dit "
+            "INFORMATIEOBJECTTYPE."
         ),
     )
     vertrouwelijkheidaanduiding = serializers.ChoiceField(
@@ -62,8 +63,9 @@ class CatalogiAPIDocumentTypeSerializer(serializers.Serializer):
     concept = serializers.BooleanField(
         read_only=True,
         help_text=(
-            "Geeft aan of het object een concept betreft. Concepten zijn niet-definitieve "
-            "versies en zouden niet gebruikt moeten worden buiten deze API."
+            "Geeft aan of het object een concept betreft. Concepten zijn "
+            "niet-definitieve versies en zouden niet gebruikt moeten worden buiten "
+            "deze API."
         ),
     )
     besluittypen = serializers.ListField(
@@ -101,8 +103,8 @@ class CatalogiAPIDocumentTypeView(views.APIView):
                 "/catalogi/api/v1/catalogussen/-fake-"
             ),
             **FIXED_DUMMY_IOT_DATA,
-            # API spec has upper limit of 80 chars - our model is now capped to 80 chars,
-            # but this could change in the future
+            # API spec has upper limit of 80 chars - our model is now capped to 80
+            # chars but this could change in the future
             "omschrijving": information_category.naam[:80],
         }
         serializer = CatalogiAPIDocumentTypeSerializer(instance=data)

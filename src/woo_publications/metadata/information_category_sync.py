@@ -38,7 +38,8 @@ def update_information_category(file_path: Path):
         response.raise_for_status()
     except requests.RequestException as err:
         raise InformatieCategoryWaardenlijstError(
-            f"Got an unexpected response status code when retrieving the value list data: {response.status_code}."
+            "Got an unexpected response status code when retrieving the value "
+            f"list data: {response.status_code}."
         ) from err
 
     data = response.json()

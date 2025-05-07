@@ -56,7 +56,8 @@ class MaxFileWidthAndHeightValidatorsTests(SimpleTestCase):
         )
 
         expected_error = _(
-            "The image dimensions exceed the maximum dimensions of {max_width}x{max_height}."
+            "The image dimensions exceed the maximum dimensions of "
+            "{max_width}x{max_height}."
         ).format(max_width=10, max_height=600)
         with self.assertRaises(ValidationError) as exc_cm:
             max_img_width_and_height_validator(image_file)
@@ -71,7 +72,8 @@ class MaxFileWidthAndHeightValidatorsTests(SimpleTestCase):
         )
 
         expected_error = _(
-            "The image dimensions exceed the maximum dimensions of {max_width}x{max_height}."
+            "The image dimensions exceed the maximum dimensions of "
+            "{max_width}x{max_height}."
         ).format(max_width=600, max_height=10)
         with self.assertRaises(ValidationError) as exc_cm:
             max_img_width_and_height_validator(image_file)

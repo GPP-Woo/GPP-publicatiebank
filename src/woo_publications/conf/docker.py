@@ -1,3 +1,4 @@
+# ruff: noqa: F405
 import os
 
 os.environ.setdefault("DB_USER", os.getenv("DATABASE_USER", "postgres"))

@@ -2,11 +2,11 @@
 
 import django.core.validators
 from django.db import migrations, models
+
 import woo_publications.utils.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("publications", "0019_alter_publication_archiefactiedatum_and_more"),
     ]

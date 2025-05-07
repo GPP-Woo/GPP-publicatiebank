@@ -10,7 +10,6 @@ from woo_publications.publications.tests.factories import PublicationFactory
 
 
 class TestPublicationModel(TestCase):
-
     def test_apply_retention_policy_with_both_archive_nomination_choices(
         self,
     ):
