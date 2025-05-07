@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
+from ..models import OrganisationMember
+
 User = get_user_model()
 
 
@@ -20,3 +22,11 @@ class UserFactory(DjangoModelFactory):
             is_staff=True,
             is_superuser=True,
         )
+
+
+class OrganisationMemberFactory(DjangoModelFactory):
+    identifier = factory.Sequence(lambda n: f"identifier-{n}")
+    naam = factory.Faker("name")
+
+    class Meta:  # pyright: ignore
+        model = OrganisationMember
