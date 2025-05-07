@@ -3,6 +3,11 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 
+from woo_publications.accounts.models import OrganisationMember
+from woo_publications.api.drf_spectacular.headers import (
+    AUDIT_USER_ID_PARAMETER,
+    AUDIT_USER_REPRESENTATION_PARAMETER,
+)
 from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.service import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
@@ -11,19 +16,24 @@ from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
 
 
-class EigenaarSerializer(serializers.Serializer):
+class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
     weergave_naam = serializers.CharField(
-        source="display_name",
-        read_only=True,
+        source="naam",
         help_text=_("The display name of the user, as recorded in the audit trails."),
     )
     identifier = serializers.CharField(
-        read_only=True,
         help_text=_(
             "The system identifier that uniquely identifies the user performing "
             "the action."
         ),
     )
+
+    class Meta:  # pyright: ignore
+        model = OrganisationMember
+        fields = (
+            "identifier",
+            "weergave_naam",
+        )
 
 
 class FilePartSerializer(serializers.Serializer[FilePart]):
@@ -119,11 +129,10 @@ class DocumentSerializer(serializers.ModelSerializer):
         max_length=1,  # pyright: ignore[reportCallIssue]
     )
     eigenaar = EigenaarSerializer(
-        source="get_owner",
         label=_("owner"),
-        help_text=_("The creator of the document, derived from the audit logs."),
+        help_text=_("The creator of the document."),
         allow_null=True,
-        read_only=True,
+        required=False,
     )
 
     class Meta:  # pyright: ignore
@@ -171,6 +180,39 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         return value
 
+    def get_or_create_organisation_member(self, owner: EigenaarSerializer | None):
+        identifier = self.context["request"].headers[AUDIT_USER_ID_PARAMETER.name]
+        naam = self.context["request"].headers[AUDIT_USER_REPRESENTATION_PARAMETER.name]
+
+        if owner:
+            identifier = owner["identifier"]
+            naam = owner["naam"]
+
+        org_member, _ = OrganisationMember.objects.get_or_create(
+            identifier=identifier,
+            naam=naam,
+        )
+
+        return org_member
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if "eigenaar" in validated_data:
+            eigenaar = validated_data.pop("eigenaar")
+            org_member, _ = OrganisationMember.objects.get_or_create(
+                identifier=eigenaar["identifier"],
+                naam=eigenaar["naam"],
+            )
+            validated_data["eigenaar"] = org_member
+        return super().update(instance, validated_data)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        validated_data["eigenaar"] = self.get_or_create_organisation_member(
+            validated_data.get("eigenaar")
+        )
+        return super().create(validated_data)
+
 
 class DocumentUpdateSerializer(DocumentSerializer):
     publicatie = serializers.SlugRelatedField(
@@ -208,11 +250,10 @@ class DocumentUpdateSerializer(DocumentSerializer):
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
     eigenaar = EigenaarSerializer(
-        source="get_owner",
         label=_("owner"),
-        help_text=_("The creator of the publication, derived from the audit logs."),
+        help_text=_("The creator of the publication."),
         allow_null=True,
-        read_only=True,
+        required=False,
     )
     informatie_categorieen = serializers.SlugRelatedField(
         queryset=InformationCategory.objects.all(),
@@ -381,10 +422,33 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         return value
 
+    def get_or_create_organisation_member(self, owner: EigenaarSerializer | None):
+        identifier = self.context["request"].headers[AUDIT_USER_ID_PARAMETER.name]
+        naam = self.context["request"].headers[AUDIT_USER_REPRESENTATION_PARAMETER.name]
+
+        if owner:
+            identifier = owner["identifier"]
+            naam = owner["naam"]
+
+        org_member, _ = OrganisationMember.objects.get_or_create(
+            identifier=identifier,
+            naam=naam,
+        )
+
+        return org_member
+
     @transaction.atomic
     def update(self, instance, validated_data):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
         apply_retention = False
+
+        if "eigenaar" in validated_data:
+            eigenaar = validated_data.pop("eigenaar")
+            org_member, _ = OrganisationMember.objects.get_or_create(
+                identifier=eigenaar["identifier"],
+                naam=eigenaar["naam"],
+            )
+            validated_data["eigenaar"] = org_member
 
         if informatie_categorieen := validated_data.get("informatie_categorieen"):
             old_informatie_categorieen_set = {
@@ -413,6 +477,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     @transaction.atomic
     def create(self, validated_data):
+        validated_data["eigenaar"] = self.get_or_create_organisation_member(
+            validated_data.get("owner")
+        )
         publication = super().create(validated_data)
         publication.apply_retention_policy()
         return publication
