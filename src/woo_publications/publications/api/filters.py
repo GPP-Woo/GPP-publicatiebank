@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import FilterSet, filters
 from django_filters.widgets import CSVWidget
 
+from woo_publications.accounts.models import OrganisationMember
 from woo_publications.constants import ArchiveNominationChoices
-from woo_publications.logging.service import OwnerFilter
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 
@@ -92,7 +92,9 @@ class DocumentFilterSet(FilterSet):
         field_name="laatst_gewijzigd_datum",
         lookup_expr="lte",
     )
-    eigenaar = OwnerFilter(
+    eigenaar = filters.ModelChoiceFilter(
+        queryset=OrganisationMember.objects.all(),
+        to_field_name="identifier",
         help_text=_("Filter documents based on the owner identifier of the object."),
     )
     publicatiestatus = filters.MultipleChoiceFilter(
@@ -150,7 +152,9 @@ class PublicationFilterSet(FilterSet):
         help_text=_("Searches publications based on the official and short title."),
         method="search_official_and_short_title",
     )
-    eigenaar = OwnerFilter(
+    eigenaar = filters.ModelChoiceFilter(
+        queryset=OrganisationMember.objects.all(),
+        to_field_name="identifier",
         help_text=_("Filter publications based on the owner identifier of the object."),
     )
     publicatiestatus = filters.MultipleChoiceFilter(

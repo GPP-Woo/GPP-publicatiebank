@@ -478,7 +478,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     @transaction.atomic
     def create(self, validated_data):
         validated_data["eigenaar"] = self.get_or_create_organisation_member(
-            validated_data.get("owner")
+            validated_data.get("eigenaar")
         )
         publication = super().create(validated_data)
         publication.apply_retention_policy()
