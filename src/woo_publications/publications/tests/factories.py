@@ -5,6 +5,7 @@ from django.conf import settings
 
 import factory
 
+from woo_publications.accounts.tests.factories import OrganisationMemberFactory
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
@@ -22,6 +23,7 @@ TEST_IMG_PATH = (
 
 class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
     publisher = factory.SubFactory(OrganisationFactory, is_actief=True)
+    eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
 
     class Meta:  # pyright: ignore
@@ -56,6 +58,7 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
 
 class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     publicatie = factory.SubFactory(PublicationFactory)
+    eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
     creatiedatum = factory.Faker("past_date")
 
