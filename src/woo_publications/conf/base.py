@@ -3,6 +3,7 @@ from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
 from open_api_framework.conf.base import *  # noqa
+from upgrade_check import UpgradeCheck, VersionRange
 from vng_api_common.conf.api import BASE_REST_FRAMEWORK
 
 from .utils import config
@@ -23,6 +24,7 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "hijack.contrib.admin",
     "timeline_logger",
     "treebeard",
+    "upgrade_check",
     # Project applications.
     "woo_publications.accounts",
     "woo_publications.api",
@@ -321,3 +323,10 @@ CELERY_TASK_ACKS_LATE = True
 # operation, leading to idle workers and backed-up workers. The `-O fair` option
 # *should* have the same effect...
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+#
+# DJANGO-UPGRADE-CHECK
+#
+UPGRADE_CHECK_PATHS = {
+    "1.2.0": UpgradeCheck(VersionRange(minimum="1.0.0")),
+}

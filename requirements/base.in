@@ -11,6 +11,7 @@ django-rosetta
 django-solo
 django-timeline-logger
 django-treebeard
+django-upgrade-check
 
 # DRF & other API tooling
 open-api-framework
