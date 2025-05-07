@@ -69,3 +69,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         "Returns the short name for the user."
         return self.first_name
+
+
+class OrganisationMember(models.Model):
+    identifier = models.CharField(
+        _("identifier"),
+        help_text=_("The (primary) unique identifier."),
+        max_length=255,
+    )
+    naam = models.CharField(
+        _("naam"),
+        max_length=255,
+    )
+
+    class Meta:  # pyright: ignore
+        verbose_name = _("organisation member")
+        verbose_name_plural = _("organisation members")
+
+    def __str__(self):
+        return f"{self.naam} - ({self.identifier})"

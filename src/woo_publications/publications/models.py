@@ -179,6 +179,14 @@ class Publication(ModelOwnerMixin, models.Model):
         null=True,
         blank=True,
     )
+    eigenaar = models.ForeignKey(
+        "accounts.OrganisationMember",
+        verbose_name=_("owner"),
+        help_text=_(
+            "The owner of this publication from gpp-app or gpp-publicatiebank."
+        ),
+        on_delete=models.PROTECT,
+    )
     officiele_titel = models.CharField(
         _("official title"),
         max_length=255,
@@ -362,6 +370,12 @@ class Document(ModelOwnerMixin, models.Model):
             "zero or more documents."
         ),
         on_delete=models.CASCADE,
+    )
+    eigenaar = models.ForeignKey(
+        "accounts.OrganisationMember",
+        verbose_name=_("owner"),
+        help_text=_("The owner of this document from gpp-app or gpp-publicatiebank."),
+        on_delete=models.PROTECT,
     )
     identifier = models.CharField(
         _("identifier"),
