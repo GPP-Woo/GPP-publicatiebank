@@ -7,18 +7,18 @@ from woo_publications.accounts.models import OrganisationMember
 
 class ChangeOwnerForm(forms.Form):
     eigenaar = forms.ModelChoiceField(
-        label=_('Owner'),
+        label=_("Owner"),
         queryset=OrganisationMember.objects.all(),
         required=False,
     )
     identifier = forms.CharField(
-        label=_('Identifier'),
+        label=_("Identifier"),
         help_text=_("The (primary) unique identifier."),
         max_length=255,
         required=False,
     )
     naam = forms.CharField(
-        label=_('Name'),
+        label=_("Name"),
         max_length=255,
         required=False,
     )
@@ -34,9 +34,7 @@ class ChangeOwnerForm(forms.Form):
         match (bool(eigenaar), bool(identifier), bool(naam)):
             case (False, False, False):
                 raise ValidationError(
-                    _(
-                        "You need to provide a valid `owner` or `identifier` and `name`."
-                    )
+                    _("You need to provide a valid `owner` or `identifier` and `name`.")
                 )
             case (True, False, False):
                 pass

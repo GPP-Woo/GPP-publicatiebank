@@ -23,7 +23,7 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
     def empty_form(self):
         user = self.request.user
         assert isinstance(user, User)
-        form = super(DocumentAuditLogInlineformset, self).empty_form
+        form = super().empty_form
         owner = OrganisationMember.objects.get(
             Q(identifier=user.pk), Q(naam=user.get_full_name()) | Q(naam=user.username)
         )
