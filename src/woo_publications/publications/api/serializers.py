@@ -20,7 +20,8 @@ class EigenaarSerializer(serializers.Serializer):
     identifier = serializers.CharField(
         read_only=True,
         help_text=_(
-            "The system identifier that uniquely identifies the user performing the action."
+            "The system identifier that uniquely identifies the user performing "
+            "the action."
         ),
     )
 
@@ -109,7 +110,8 @@ class DocumentSerializer(serializers.ModelSerializer):
     )
     documenthandelingen = DocumentActionSerializer(
         help_text=_(
-            "The document actions of this document, currently only one action will be used per document."
+            "The document actions of this document, currently only one action will be "
+            "used per document."
         ),
         required=False,
         many=True,
@@ -178,7 +180,8 @@ class DocumentUpdateSerializer(DocumentSerializer):
     )
     documenthandelingen = DocumentActionSerializer(
         help_text=_(
-            "The document actions of this document, currently only one action will be used per document."
+            "The document actions of this document, currently only one action will be "
+            "used per document."
         ),
         read_only=True,
     )
@@ -215,7 +218,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         queryset=InformationCategory.objects.all(),
         slug_field="uuid",
         help_text=_(
-            "The information categories clarify the kind of information present in the publication."
+            "The information categories clarify the kind of information present in "
+            "the publication."
         ),
         many=True,
         allow_empty=False,
@@ -230,8 +234,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         queryset=Topic.objects.all(),
         slug_field="uuid",
         help_text=_(
-            "Topics capture socially relevant information that spans multiple publications. "
-            "They can remain relevant for tens of years and exceed the life span of a single publication."
+            "Topics capture socially relevant information that spans multiple "
+            "publications. They can remain relevant for tens of years and exceed the "
+            "life span of a single publication."
         ),
         many=True,
         allow_empty=True,
@@ -298,43 +303,56 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} publication."
-                    "\n\n**Disclaimer**: when you revoke a publication, the attached published documents also get revoked."
+                    "\n\n**Disclaimer**: when you revoke a publication, the attached "
+                    "published documents also get revoked."
                 ).format(
                     revoked=PublicationStatusOptions.revoked.label.lower(),
                 )
             },
             "bron_bewaartermijn": {
                 "help_text": _(
-                    "The source of the retention policy (example: Selectielijst gemeenten 2020)."
-                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
-                    "and overwritten by the automatically derived parameters from the related information categories."
+                    "The source of the retention policy (example: Selectielijst "
+                    "gemeenten 2020)."
+                    "\n\n**Note** on create or when updating the information "
+                    "categories, manually provided values are ignored and overwritten "
+                    "by the automatically derived parameters from the related "
+                    "information categories."
                 )
             },
             "selectiecategorie": {
                 "help_text": _(
-                    "The category as specified in the provided retention policy source (example: 20.1.2)."
-                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
-                    "and overwritten by the automatically derived parameters from the related information categories."
+                    "The category as specified in the provided retention policy source "
+                    "(example: 20.1.2)."
+                    "\n\n**Note** on create or when updating the information "
+                    "categories, manually provided values are ignored and overwritten "
+                    "by the automatically derived parameters from the related "
+                    "information categories."
                 )
             },
             "archiefnominatie": {
                 "help_text": _(
                     "Determines if the archived data will be retained or destroyed."
-                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
-                    "and overwritten by the automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information "
+                    "categories, manually provided values are ignored and overwritten "
+                    "by the automatically derived parameters from the related "
+                    "information categories."
                 )
             },
             "archiefactiedatum": {
                 "help_text": _(
                     "Date when the publication will be archived or destroyed."
-                    "\n\n**Note** on create or when updating the information categories, manually provided values are ignored "
-                    "and overwritten by the automatically derived parameters from the related information categories."
+                    "\n\n**Note** on create or when updating the information "
+                    "categories, manually provided values are ignored and overwritten "
+                    "by the automatically derived parameters from the related "
+                    "information categories."
                 )
             },
             "toelichting_bewaartermijn": {
                 "help_text": _(
-                    "**Note** on create or when updating the information categories, manually provided values are ignored "
-                    "and overwritten by the automatically derived parameters from the related information categories."
+                    "**Note** on create or when updating the information "
+                    "categories, manually provided values are ignored and overwritten "
+                    "by the automatically derived parameters from the related "
+                    "information categories."
                 )
             },
         }

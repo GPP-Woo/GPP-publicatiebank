@@ -3,7 +3,7 @@
 #
 # The code in this module was taken from requests-toolbelt:
 # https://github.com/requests/toolbelt/blob/bcd5f7be229e14089052be7e3b527ebcea0ae7b8/requests_toolbelt/multipart/encoder.py
-
+# ruff: noqa
 """
 Copyright 2014 Ian Cordasco, Cory Benfield
 
@@ -19,6 +19,7 @@ Copyright 2014 Ian Cordasco, Cory Benfield
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+
 import contextlib
 import io
 import os
@@ -32,7 +33,7 @@ class FileNotSupportedError(Exception):
     """File not supported error."""
 
 
-class MultipartEncoder(object):
+class MultipartEncoder:
     """
 
     The ``MultipartEncoder`` object is a generic interface to the engine that
@@ -99,7 +100,7 @@ class MultipartEncoder(object):
         self.boundary_value = boundary or uuid4().hex
 
         # Computed boundary
-        self.boundary = "--{}".format(self.boundary_value)
+        self.boundary = f"--{self.boundary_value}"
 
         #: Encoding of the data being passed in
         self.encoding = encoding
@@ -160,7 +161,7 @@ class MultipartEncoder(object):
         return self._len or self._calculate_length()
 
     def __repr__(self):
-        return "<MultipartEncoder: {!r}>".format(self.fields)
+        return f"<MultipartEncoder: {self.fields!r}>"
 
     def _calculate_length(self):
         """
@@ -286,7 +287,7 @@ class MultipartEncoder(object):
 
     @property
     def content_type(self):
-        return str("multipart/form-data; boundary={}".format(self.boundary_value))
+        return str(f"multipart/form-data; boundary={self.boundary_value}")
 
     def to_string(self):
         """Return the entirety of the data in the encoder.
@@ -405,7 +406,7 @@ def to_list(fields):
     return list(fields)
 
 
-class Part(object):
+class Part:
     def __init__(self, headers, body):
         self.headers = headers
         self.body = body
@@ -489,7 +490,7 @@ class CustomBytesIO(io.BytesIO):
             self.seek(0, 0)  # We want to be at the beginning
 
 
-class FileWrapper(object):
+class FileWrapper:
     def __init__(self, file_object):
         self.fd = file_object
 

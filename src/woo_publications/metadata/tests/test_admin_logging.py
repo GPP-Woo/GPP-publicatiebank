@@ -181,16 +181,18 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
         form["naam"] = "new item"
         form["naam_meervoud"] = "new items"
         form["definitie"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur."
         )
         form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
         form["selectiecategorie"] = "20.1.2"
         form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
         form["bewaartermijn"] = 10
         form["toelichting_bewaartermijn"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur."
         )
 
         form.submit(name="_save")
@@ -211,8 +213,9 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                 "naam": "new item",
                 "naam_meervoud": "new items",
                 "definitie": (
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                    "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris "
+                    "risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris "
+                    "interdum eleifend eros sed consectetur."
                 ),
                 "oorsprong": InformationCategoryOrigins.custom_entry,
                 "bron_bewaartermijn": "Selectielijst gemeenten 2020",
@@ -220,8 +223,9 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                 "archiefnominatie": ArchiveNominationChoices.retain,
                 "bewaartermijn": 10,
                 "toelichting_bewaartermijn": (
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                    "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris "
+                    "risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris "
+                    "interdum eleifend eros sed consectetur."
                 ),
                 "order": 0,
             },

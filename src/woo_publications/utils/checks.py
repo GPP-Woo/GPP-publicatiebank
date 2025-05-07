@@ -45,8 +45,8 @@ def check_modelform_exclude(app_configs, **kwargs):  # pragma: no cover
         # no `.fields` defined, so scream loud enough to prevent this
         errors.append(
             Error(
-                "ModelForm %s.%s with Meta.exclude detected, this is a bad practice"
-                % (form.__module__, form.__name__),
+                f"ModelForm {form.__module__}.{form.__name__} with Meta.exclude "
+                "detected, this is a bad practice",
                 hint="Use ModelForm.Meta.fields instead",
                 obj=form,
                 id="utils.E001",
@@ -66,7 +66,7 @@ def check_missing_init_files(app_configs, **kwargs):  # pragma: no cover
     """
     errors = []
 
-    for dirpath, dirnames, filenames in os.walk(settings.DJANGO_PROJECT_DIR):
+    for dirpath, _, filenames in os.walk(settings.DJANGO_PROJECT_DIR):
         dirname = os.path.split(dirpath)[1]
         if dirname == "__pycache__":
             continue
@@ -80,8 +80,7 @@ def check_missing_init_files(app_configs, **kwargs):  # pragma: no cover
 
         errors.append(
             Warning(
-                "Directory %s does not contain an `__init__.py` file" % dirpath
-                + dirname,
+                f"Directory {dirpath} does not contain an `__init__.py` file",
                 hint="Consider adding this module to make sure tests are picked up",
                 id="utils.W001",
             )
@@ -147,8 +146,10 @@ def check_model_admin_includes_logging_mixin(app_configs, **kwargs):  # pragma: 
             Error(
                 "AdminAuditLogMixin is missing on the admin class. This mixin is "
                 "required to enable audit logging.",
-                hint="Add AdminAuditLogMixin to the '%s' class in '%s'."
-                % (admin_cls.__qualname__, admin_cls.__module__),
+                hint=(
+                    "Add AdminAuditLogMixin to the '{admin_cls.__qualname__}' class "
+                    "in '{admin_cls.__module__}'."
+                ),
                 obj=admin_cls,
             )
         )

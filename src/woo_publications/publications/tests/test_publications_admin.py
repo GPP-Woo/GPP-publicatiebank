@@ -37,7 +37,8 @@ class TestPublicationsAdmin(WebTest):
         PublicationFactory.create(
             officiele_titel="title two",
             verkorte_titel="two",
-            omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+            omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+            "facilisis mollis urna.",
         )
         response = self.app.get(
             reverse("admin:publications_publication_changelist"),
@@ -58,7 +59,8 @@ class TestPublicationsAdmin(WebTest):
             publication2 = PublicationFactory.create(
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
             )
         reverse_url = reverse("admin:publications_publication_changelist")
 
@@ -109,7 +111,8 @@ class TestPublicationsAdmin(WebTest):
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2024-09-25",
             )
@@ -272,8 +275,9 @@ class TestPublicationsAdmin(WebTest):
             form["officiele_titel"] = "The official title of this publication"
             form["verkorte_titel"] = "The title"
             form["omschrijving"] = (
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur."
             )
             form["bron_bewaartermijn"] = ("Selectielijst gemeenten 2020",)
             form["selectiecategorie"] = ("20.1.2",)
@@ -297,8 +301,9 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(added_item.verkorte_titel, "The title")
             self.assertEqual(
                 added_item.omschrijving,
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur.",
             )
             self.assertEqual(
                 str(added_item.registratiedatum), "2024-09-25 00:14:00+00:00"
@@ -336,8 +341,9 @@ class TestPublicationsAdmin(WebTest):
         form["officiele_titel"] = "The official title of this publication"
         form["verkorte_titel"] = "The title"
         form["omschrijving"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur.",
         )
         form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
         form["selectiecategorie"] = "20.1.2"
@@ -601,7 +607,7 @@ class TestPublicationsAdmin(WebTest):
         )
 
     @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
-    def test_publications_when_revoking_publication_the_published_documents_also_get_revoked(
+    def test_publications_when_revoking_publication_the_published_documents_also_get_revoked(  # noqa: E501
         self,
         mock_remove_document_from_index_delay: MagicMock,
     ):
@@ -986,7 +992,7 @@ class TestPublicationsAdmin(WebTest):
         mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
 
     @patch("woo_publications.publications.formset.remove_document_from_index.delay")
-    def test_inline_document_delete_do_not_schedules_index_removal_task_when_not_published(
+    def test_inline_document_delete_do_not_schedules_index_removal_task_when_not_published(  # noqa: E501
         self, mock_remove_document_from_index: MagicMock
     ):
         ic = InformationCategoryFactory.create()

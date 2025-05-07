@@ -7,7 +7,10 @@ from ...organisation_sync import OrganisatieWaardenlijstError, update_organisati
 
 
 class Command(BaseCommand):
-    help = "Retrieve the organisations from the value lists published on overheid.nl and dump them as a fixture."
+    help = (
+        "Retrieve the organisations from the value lists published on overheid.nl "
+        "and dump them as a fixture."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(

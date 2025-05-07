@@ -74,7 +74,7 @@ def sync_to_index(
         elif model is Topic:
             transaction.on_commit(partial(index_topic.delay, topic_id=obj.pk))
         else:  # pragma: no cover
-            assert False, "unreachable"
+            raise AssertionError("unreachable")
 
     modeladmin.message_user(
         request,
@@ -149,7 +149,8 @@ def reassess_retention_policy(
         request,
         ngettext(
             "Applied the reassessed retention policy to {count} {verbose_name} object.",
-            "Applied the reassessed retention policy to {count} {verbose_name} objects.",
+            "Applied the reassessed retention policy to {count} {verbose_name} "
+            "objects.",
             queryset.count(),
         ).format(
             count=queryset.count(),
@@ -421,8 +422,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     ):
         kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
 
-        # add the request to the create formset instance so that we can generate absolute
-        # URLs
+        # add the request to the create formset instance so that we can generate
+        # absolute URLs
         if isinstance(inline, DocumentInlineAdmin):
             kwargs["request"] = request
 

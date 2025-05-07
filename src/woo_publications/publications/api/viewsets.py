@@ -108,7 +108,8 @@ class DocumentViewSet(
     @transaction.atomic()
     def perform_create(self, serializer):
         """
-        Register the metadata in the database and create the record in the Documents API.
+        Register the metadata in the database and create the record in the Documents
+        API.
         """
         super().perform_create(serializer)
         assert serializer.instance is not None
@@ -255,9 +256,9 @@ class DocumentViewSet(
         document = self.get_object()
         assert isinstance(document, Document)
 
-        assert (
-            document.document_service is not None
-        ), "Document must exist in upstream API"
+        assert document.document_service is not None, (
+            "Document must exist in upstream API"
+        )
 
         endpoint = f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
         with get_client(document.document_service) as client:
@@ -286,8 +287,8 @@ class DocumentViewSet(
 
             response = StreamingHttpResponse(
                 streaming_content,
-                # TODO: if we have format information, we can use it, but that's not part
-                # of BB-MVP
+                # TODO: if we have format information, we can use it, but that's not
+                # part of BB-MVP
                 content_type="application/octet-stream",
                 headers={
                     "Content-Length": upstream_response.headers.get(

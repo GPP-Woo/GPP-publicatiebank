@@ -223,7 +223,12 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             response = self.client.get(
                 list_url,
                 {
-                    "publicatiestatus": f"{PublicationStatusOptions.published},{PublicationStatusOptions.revoked}"
+                    "publicatiestatus": ",".join(
+                        (
+                            PublicationStatusOptions.published,
+                            PublicationStatusOptions.revoked,
+                        )
+                    ),
                 },
                 headers=AUDIT_HEADERS,
             )

@@ -73,8 +73,9 @@ class TestPublicationAdminAuditLogging(WebTest):
         form["officiele_titel"] = "The official title of this publication"
         form["verkorte_titel"] = "The title"
         form["omschrijving"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur."
         )
 
         with freeze_time("2024-09-25T00:14:00-00:00"):
@@ -95,7 +96,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
                 "officiele_titel": "The official title of this publication",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+                "omschrijving": (
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris "
+                    "risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris "
+                    "interdum eleifend eros sed consectetur."
+                ),
                 "opsteller": organisation2.pk,
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "publisher": organisation.pk,
@@ -287,9 +292,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         with self.subTest("update publication audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 publication
-            ).get(
-                extra_data__event=Events.update
-            )
+            ).get(extra_data__event=Events.update)
 
             expected_data = {
                 "event": Events.update,
@@ -303,7 +306,8 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "onderwerpen": [topic.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
-                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "omschrijving": "Lorem ipsum dolor sit amet, "
+                    "consectetur adipiscing elit.",
                     "opsteller": organisation.pk,
                     "publicatiestatus": PublicationStatusOptions.revoked,
                     "publisher": organisation.pk,
@@ -405,9 +409,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         with self.subTest("update publication audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 publication
-            ).get(
-                extra_data__event=Events.update
-            )
+            ).get(extra_data__event=Events.update)
 
             expected_data = {
                 "event": Events.update,
@@ -421,9 +423,11 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "onderwerpen": [topic.pk],
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
-                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "omschrijving": "Lorem ipsum dolor sit amet, "
+                    "consectetur adipiscing elit.",
                     "opsteller": organisation.pk,
-                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated to revoked
+                    # updated to revoked
+                    "publicatiestatus": PublicationStatusOptions.revoked,
                     "publisher": organisation.pk,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "uuid": str(publication.uuid),
@@ -458,7 +462,8 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "uuid": str(published_document.uuid),
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
-                    "publicatiestatus": PublicationStatusOptions.revoked,  # updated to revoked
+                    # updated to revoked
+                    "publicatiestatus": PublicationStatusOptions.revoked,
                     "bestandsnaam": "unknown.bin",
                     "creatiedatum": "2024-10-17",
                     "omschrijving": "",
@@ -525,7 +530,8 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "onderwerpen": [topic.pk],
                 "laatst_gewijzigd_datum": "2024-09-27T00:14:00Z",
                 "officiele_titel": "title one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "opsteller": organisation.pk,
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "publisher": organisation.pk,
@@ -840,8 +846,9 @@ class TestDocumentAdminAuditLogging(WebTest):
         form["verkorte_titel"] = "The title"
         form["creatiedatum"] = "2024-01-01"
         form["omschrijving"] = (
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-            "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+            "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+            "eleifend eros sed consectetur."
         )
 
         with freeze_time("2024-09-24T12:00:00-00:00"):
@@ -867,8 +874,9 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "bestandsnaam": "unknown.bin",
                 "creatiedatum": "2024-01-01",
                 "omschrijving": (
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                    "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris "
+                    "risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris "
+                    "interdum eleifend eros sed consectetur."
                 ),
                 "document_uuid": None,
                 "bestandsomvang": 0,
@@ -1011,7 +1019,8 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "publicatiestatus": PublicationStatusOptions.revoked,  # updated
                     "bestandsnaam": "unknown.bin",
                     "creatiedatum": "2024-11-11",
-                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "omschrijving": "Lorem ipsum dolor sit amet, "
+                    "consectetur adipiscing elit.",
                     "document_uuid": None,
                     "bestandsomvang": 0,
                     "verkorte_titel": "one",
@@ -1071,7 +1080,8 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "publicatiestatus": PublicationStatusOptions.published,
                 "bestandsnaam": "unknown.bin",
                 "creatiedatum": "2024-11-11",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "document_uuid": None,
                 "bestandsomvang": 0,
                 "verkorte_titel": "one",
@@ -1132,7 +1142,8 @@ class TestTopicAdminAuditLogging(WebTest):
                 "uuid": str(added_item.uuid),
                 "afbeelding": added_item.afbeelding.name,
                 "officiele_titel": "Lorem Ipsum",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
                 "promoot": False,
                 "registratiedatum": "2024-09-24T12:00:00Z",
@@ -1247,7 +1258,8 @@ class TestTopicAdminAuditLogging(WebTest):
                     "uuid": str(topic.uuid),
                     "afbeelding": topic.afbeelding.name,
                     "officiele_titel": "Lorem Ipsum",
-                    "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "omschrijving": "Lorem ipsum dolor sit amet, "
+                    "consectetur adipiscing elit.",
                     "publicatiestatus": PublicationStatusOptions.revoked,  # updated
                     "promoot": True,
                     "registratiedatum": "2024-09-24T12:00:00Z",
@@ -1294,7 +1306,8 @@ class TestTopicAdminAuditLogging(WebTest):
                 "uuid": str(topic.uuid),
                 "afbeelding": topic.afbeelding.name,
                 "officiele_titel": "Lorem Ipsum",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, "
+                "consectetur adipiscing elit.",
                 "publicatiestatus": PublicationStatusOptions.published,
                 "promoot": True,
                 "registratiedatum": "2024-09-24T12:00:00Z",

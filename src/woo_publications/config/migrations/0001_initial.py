@@ -7,7 +7,6 @@ import woo_publications.config.validators
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

@@ -1,6 +1,6 @@
 import uuid
+from collections.abc import Callable
 from functools import partial
-from typing import Callable
 from uuid import UUID
 
 from django.conf import settings
@@ -94,8 +94,7 @@ class Topic(models.Model):
         auto_now_add=True,
         editable=False,
         help_text=_(
-            "System timestamp reflecting when the topic was registered in the "
-            "database."
+            "System timestamp reflecting when the topic was registered in the database."
         ),
     )
     laatst_gewijzigd_datum = models.DateTimeField(
@@ -137,15 +136,17 @@ class Publication(ModelOwnerMixin, models.Model):
         "metadata.informationcategory",
         verbose_name=_("information categories"),
         help_text=_(
-            "The information categories clarify the kind of information present in the publication."
+            "The information categories clarify the kind of information present in "
+            "the publication."
         ),
     )
     onderwerpen = models.ManyToManyField(
         Topic,
         verbose_name=_("topics"),
         help_text=_(
-            "Topics capture socially relevant information that spans multiple publications. "
-            "They can remain relevant for tens of years and exceed the life span of a single publication."
+            "Topics capture socially relevant information that spans multiple "
+            "publications. They can remain relevant for tens of years and exceed the "
+            "life span of a single publication."
         ),
         blank=True,
     )
@@ -218,7 +219,8 @@ class Publication(ModelOwnerMixin, models.Model):
     bron_bewaartermijn = models.CharField(
         _("retention policy source"),
         help_text=_(
-            "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+            "The source of the retention policy (example: Selectielijst "
+            "gemeenten 2020)."
         ),
         max_length=255,
         blank=True,
@@ -226,7 +228,8 @@ class Publication(ModelOwnerMixin, models.Model):
     selectiecategorie = models.CharField(
         _("selection category"),
         help_text=_(
-            "The category as specified in the provided retention policy source (example: 20.1.2)."
+            "The category as specified in the provided retention policy source "
+            "(example: 20.1.2)."
         ),
         max_length=255,
         blank=True,
@@ -270,14 +273,12 @@ class Publication(ModelOwnerMixin, models.Model):
     ) -> None:
         from .tasks import remove_document_from_index
 
-        published_documents = (
-            self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
-                publicatiestatus=PublicationStatusOptions.published
-            )
+        published_documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus=PublicationStatusOptions.published
         )
 
-        # get a list of IDs of published documents, make sure to evaluate the queryset so it's not affected by
-        # the `update` query
+        # get a list of IDs of published documents, make sure to evaluate the queryset
+        # so it's not affected by the `update` query
         document_ids_to_log = list(published_documents.values_list("pk", flat=True))
         for document_id in document_ids_to_log:
             transaction.on_commit(
@@ -312,9 +313,9 @@ class Publication(ModelOwnerMixin, models.Model):
         information_category = get_retention_informatie_category(
             self.informatie_categorieen.all()
         )
-        assert (
-            information_category is not None
-        ), "A publication must have at least one information category"
+        assert information_category is not None, (
+            "A publication must have at least one information category"
+        )
         self.bron_bewaartermijn = information_category.bron_bewaartermijn
         self.selectiecategorie = information_category.selectiecategorie
         self.archiefnominatie = information_category.archiefnominatie
@@ -485,8 +486,8 @@ class Document(ModelOwnerMixin, models.Model):
                 check=(_DOCUMENT_NOT_SET | _DOCUMENT_SET),
                 name="documents_api_reference",
                 violation_error_message=_(
-                    "You must specify both the Documents API service and document UUID to identify a "
-                    "document.",
+                    "You must specify both the Documents API service and document UUID "
+                    "to identify a document.",
                 ),
             )
         ]

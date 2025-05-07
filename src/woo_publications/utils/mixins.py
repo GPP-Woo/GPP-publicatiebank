@@ -47,10 +47,9 @@ class ThrottleMixin:
         :rtype string Use as key to save the last access
         """
 
-        return "throttling_{id}_{throttle_name}_{window}".format(
-            id=self.get_throttle_identifier(),
-            throttle_name=self.throttle_name,
-            window=self.get_throttle_window(),
+        return (
+            f"throttling_{self.get_throttle_identifier()}_"
+            f"{self.throttle_name}_{self.get_throttle_window()}"
         )
 
     def get_throttle_window(self):

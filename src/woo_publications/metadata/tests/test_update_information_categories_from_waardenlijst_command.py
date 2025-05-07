@@ -44,6 +44,7 @@ class TestUpdateInformationCategoriesFromWaardenlijstCommand(VCRMixin, TestCase)
 
         with self.assertRaisesMessage(
             CommandError,
-            "Got an unexpected response status code when retrieving the value list data: 400.",
+            "Got an unexpected response status code when retrieving the value list "
+            "data: 400.",
         ):
             call_command("update_information_categories_from_waardenlijst")

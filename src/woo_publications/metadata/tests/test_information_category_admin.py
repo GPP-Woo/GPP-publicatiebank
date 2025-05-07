@@ -200,8 +200,9 @@ class TestInformationCategoryAdmin(WebTest):
             form["naam"] = "new item"
             form["naam_meervoud"] = "new items"
             form["definitie"] = (
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur."
             )
             form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
             form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
@@ -219,8 +220,9 @@ class TestInformationCategoryAdmin(WebTest):
             self.assertEqual(added_item.naam_meervoud, "new items")
             self.assertEqual(
                 added_item.definitie,
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus nibh, "
-                "iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum eleifend eros sed consectetur.",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur.",
             )
             self.assertEqual(
                 added_item.bron_bewaartermijn, "Selectielijst gemeenten 2020"
@@ -258,7 +260,6 @@ class TestInformationCategoryAdmin(WebTest):
 
 @disable_admin_mfa()
 class InformationCategoryAPIResourceListAdminTests(WebTest):
-
     def test_staff_user_required(self):
         bad_users = (
             None,

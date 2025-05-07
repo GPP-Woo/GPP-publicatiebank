@@ -120,7 +120,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
             )
             # mimicking creating log though api
@@ -153,7 +154,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publicatie": str(publication2.uuid),
                 "officieleTitel": "title two",
                 "verkorteTitel": "two",
-                "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 "publicatiestatus": PublicationStatusOptions.published,
                 "creatiedatum": "2024-02-02",
                 "bestandsformaat": "unknown",
@@ -183,7 +185,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publicatie": str(publication.uuid),
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
-                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing "
+                "elit.",
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "creatiedatum": "2024-01-01",
                 "bestandsformaat": "unknown",
@@ -227,7 +230,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
             )
             # mimicking creating log though api
@@ -290,7 +294,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
             )
 
@@ -400,7 +405,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
             )
 
@@ -434,7 +440,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
-                omschrijving="Vestibulum eros nulla, tincidunt sed est non, facilisis mollis urna.",
+                omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
+                "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
             )
 
@@ -509,7 +516,12 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             response = self.client.get(
                 list_url,
                 {
-                    "publicatiestatus": f"{PublicationStatusOptions.published},{PublicationStatusOptions.revoked}"
+                    "publicatiestatus": ",".join(
+                        (
+                            PublicationStatusOptions.published,
+                            PublicationStatusOptions.revoked,
+                        )
+                    )
                 },
                 headers=AUDIT_HEADERS,
             )
@@ -1240,8 +1252,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
     with us is saved into the Documents API, primarily to handle the file uploads
     accordingly.
 
-    The API traffic is captured and 'mocked' using VCR.py. When re-recording the cassettes
-    for these tests, make sure to bring up the docker compose in the root of the repo:
+    The API traffic is captured and 'mocked' using VCR.py. When re-recording the
+    cassettes for these tests, make sure to bring up the docker compose in the root of
+    the repo:
 
     .. code-block:: bash
 
@@ -1369,7 +1382,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertEqual(
                 file_part_url,
                 "http://host.docker.internal:8000/api/v1/documenten/"
-                f"{document.uuid}/bestandsdelen/{file_parts[0]["uuid"]}",
+                f"{document.uuid}/bestandsdelen/{file_parts[0]['uuid']}",
             )
 
         # check that we can look up the document in the Open Zaak API:
@@ -1732,8 +1745,9 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
     with us is saved into the Documents API, primarily to handle the file uploads
     accordingly.
 
-    The API traffic is captured and 'mocked' using VCR.py. When re-recording the cassettes
-    for these tests, make sure to bring up the docker compose in the root of the repo:
+    The API traffic is captured and 'mocked' using VCR.py. When re-recording the
+    cassettes for these tests, make sure to bring up the docker compose in the root of
+    the repo:
 
     .. code-block:: bash
 

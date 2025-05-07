@@ -10,7 +10,6 @@ from .factories import DocumentFactory
 
 
 class IndexDocumentTaskTests(VCRMixin, TestCase):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

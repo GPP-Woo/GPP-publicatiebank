@@ -21,5 +21,6 @@ class BeatConfigTests(SimpleTestCase):
                     import_string(task)
                 except ImportError:
                     self.fail(
-                        f"Could not import task '{task}' in settings.CELERY_BEAT_SCHEDULE"
+                        f"Could not import task '{task}' in "
+                        "settings.CELERY_BEAT_SCHEDULE"
                     )

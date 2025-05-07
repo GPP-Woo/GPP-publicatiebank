@@ -15,7 +15,6 @@ AUDIT_HEADERS = {
 
 
 class InformationCategoryLoggingTests(TokenAuthMixin, APITestCase):
-
     def test_retrieve_logging(self):
         information_category = InformationCategoryFactory.create()
         detail_url = reverse(
@@ -33,7 +32,6 @@ class InformationCategoryLoggingTests(TokenAuthMixin, APITestCase):
 
 
 class OrganisationLoggingTests(TokenAuthMixin, APITestCase):
-
     def test_retrieve_logging(self):
         organisation = OrganisationFactory.create()
         detail_url = reverse(
@@ -51,7 +49,6 @@ class OrganisationLoggingTests(TokenAuthMixin, APITestCase):
 
 
 class ThemeLoggingTests(TokenAuthMixin, APITestCase):
-
     def test_retrieve_logging(self):
         theme = ThemeFactory.create()
         detail_url = reverse(

@@ -27,7 +27,7 @@ def validate_rsin(value):
     validate_digits(value)
     if len(value) != RSIN_LENGTH:
         raise ValidationError(
-            "RSIN moet %s tekens lang zijn." % RSIN_LENGTH, code="invalid-length"
+            f"RSIN moet {RSIN_LENGTH} tekens lang zijn.", code="invalid-length"
         )
 
     # 11-proef check.

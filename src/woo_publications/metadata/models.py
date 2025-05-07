@@ -38,8 +38,9 @@ class InformationCategory(OrderedModel):
     identifier = models.URLField(
         _("identifier"),
         help_text=_(
-            "The unique IRI that identifies this category in the overheid.nl value list. "
-            "For entries that have been added manually, an identifier is generated."
+            "The unique IRI that identifies this category in the overheid.nl value "
+            "list. For entries that have been added manually, an identifier is "
+            "generated."
         ),
         max_length=255,
         unique=True,
@@ -53,8 +54,8 @@ class InformationCategory(OrderedModel):
         _("origin"),
         help_text=_(
             "Determines where the category is defined and sourced from, and how "
-            "the identifier should be interpreted. If the value list is the origin, the "
-            "category can not be modified or deleted."
+            "the identifier should be interpreted. If the value list is the origin, "
+            "the category can not be modified or deleted."
         ),
         choices=InformationCategoryOrigins.choices,
         blank=False,
@@ -65,7 +66,8 @@ class InformationCategory(OrderedModel):
     bron_bewaartermijn = models.CharField(
         _("retention policy source"),
         help_text=_(
-            "The source of the retention policy (example: Selectielijst gemeenten 2020)."
+            "The source of the retention policy (example: Selectielijst "
+            "gemeenten 2020)."
         ),
         max_length=255,
         blank=False,
@@ -74,7 +76,8 @@ class InformationCategory(OrderedModel):
     selectiecategorie = models.CharField(
         _("selection category"),
         help_text=_(
-            "The category as specified in the provided retention policy source (example: 20.1.2)."
+            "The category as specified in the provided retention policy source "
+            "(example: 20.1.2)."
         ),
         max_length=255,
         blank=True,
@@ -147,8 +150,9 @@ class Organisation(models.Model):
     identifier = models.URLField(
         _("identifier"),
         help_text=_(
-            "The unique IRI that identifies this organisation in the overheid.nl value list. "
-            "For entries that have been added manually, an identifier is generated."
+            "The unique IRI that identifies this organisation in the overheid.nl value "
+            "list. For entries that have been added manually, an identifier is "
+            "generated."
         ),
         max_length=255,
         unique=True,
@@ -160,8 +164,8 @@ class Organisation(models.Model):
         _("origin"),
         help_text=_(
             "Determines where the organisation is defined and sourced from, and how "
-            "the identifier should be interpreted. If the value list is the origin, the "
-            "organisation can not be modified or deleted."
+            "the identifier should be interpreted. If the value list is the origin, "
+            "the organisation can not be modified or deleted."
         ),
         choices=OrganisationOrigins.choices,
         blank=False,

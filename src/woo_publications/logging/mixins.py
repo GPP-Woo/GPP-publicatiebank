@@ -9,7 +9,7 @@ __all__ = [
 
 class ModelOwnerMixin:
     """
-    Adds get_owner func to retrieve the TimeLineLog initial create object to retrieve the owner of the model.
+    Provide helper to extract the owner from the audit trails.
     """
 
     def get_owner(self) -> ActingUser | None:

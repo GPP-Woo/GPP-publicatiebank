@@ -68,7 +68,8 @@ class UpdateInformatieCategoryTestCase(VCRMixin, TestCase):
 
             with self.assertRaisesMessage(
                 InformatieCategoryWaardenlijstError,
-                "Got an unexpected response status code when retrieving the value list data: 400.",
+                "Got an unexpected response status code when retrieving the value list "
+                "data: 400.",
             ):
                 update_information_category(file_path)
 

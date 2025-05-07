@@ -29,13 +29,14 @@ def _filter_informatie_categorieen(
 
 
 class DocumentFilterSet(FilterSet):
-    # TODO: change this filter to custom named filter with `@extend_schema_field(UUID)` once bug is fixed in drf-spectacular
+    # TODO: change this filter to custom named filter with `@extend_schema_field(UUID)`
     publicatie = filters.ModelChoiceFilter(
         queryset=Publication.objects.all(),
         to_field_name="uuid",
         help_text=_(
-            "Search the document based on the unique identifier (UUID) that represents a publication. "
-            "**Disclaimer**: disregard the documented type `integer` the correct type is `UUID`."
+            "Search the document based on the unique identifier (UUID) that represents "
+            "a publication. **Disclaimer**: disregard the documented type `integer` "
+            "the correct type is `UUID`."
         ),
     )
     registratiedatum_vanaf = filters.DateTimeFilter(
@@ -182,21 +183,24 @@ class PublicationFilterSet(FilterSet):
     )
     archiefactiedatum_vanaf = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications where the archive action date is after or on the given value."
+            "Filter publications where the archive action date is after or on the "
+            "given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="gte",
     )
     archiefactiedatum_tot = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications where the archive action date is before the given value."
+            "Filter publications where the archive action date is before the "
+            "given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="lt",
     )
     archiefactiedatum_tot_en_met = filters.DateTimeFilter(
         help_text=_(
-            "Filter publications where the archive action date is before or on the given value."
+            "Filter publications where the archive action date is before or on the "
+            "given value."
         ),
         field_name="archiefactiedatum",
         lookup_expr="lte",

@@ -5,7 +5,6 @@ from ..validators import validate_rsin
 
 
 class RSINValidatorTests(SimpleTestCase):
-
     def test_valid_rsin(self):
         try:
             validate_rsin("123456782")

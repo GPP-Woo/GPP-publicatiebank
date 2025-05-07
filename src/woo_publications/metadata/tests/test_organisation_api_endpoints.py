@@ -69,7 +69,6 @@ class ThemeAPIAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
 
 @override_settings(LANGUAGE_CODE="en")
 class OrganisationApiTests(TokenAuthMixin, APITestCase):
-
     def test_list_organisations(self):
         organisation = OrganisationFactory.create(
             naam="one",
@@ -407,7 +406,8 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
 
             response_data = response.json()
             expected_data = {
-                # uuid and identifier gets generated so we are just testing that its there
+                # uuid and identifier gets generated so we are just testing that its
+                # there
                 "uuid": response_data["uuid"],
                 "identifier": response_data["identifier"],
                 "naam": "object one",
@@ -428,7 +428,8 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             self.assertEqual(
                 response_data["naam"],
                 [
-                    "You cannot modify the name of organisations populated from a value list."
+                    "You cannot modify the name of organisations populated from a "
+                    "value list."
                 ],
             )
 

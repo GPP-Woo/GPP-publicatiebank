@@ -79,7 +79,8 @@ class AdminAuditLogMixin:
             if extra_context is None:
                 extra_context = {}
 
-            # extra context to render show logs button next to history button in change form
+            # extra context to render show logs button next to history button in
+            # change form
             audit_url, audit_label = get_logs_link(object)
             extra_context.update(
                 {
@@ -96,10 +97,8 @@ class AdminAuditLogMixin:
         )
 
     def get_formset_kwargs(self, request, obj, inline, prefix):
-        kwargs = (
-            super().get_formset_kwargs(  # pyright: ignore[reportAttributeAccessIssue]
-                request, obj, inline, prefix
-            )
+        kwargs = super().get_formset_kwargs(  # pyright: ignore[reportAttributeAccessIssue]
+            request, obj, inline, prefix
         )
         if issubclass(inline.formset, AuditLogInlineformset):
             kwargs["_django_user"] = request.user

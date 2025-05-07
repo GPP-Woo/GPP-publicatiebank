@@ -44,6 +44,7 @@ class TestUpdateOrganisationFromWaardenlijstenCommand(VCRMixin, TestCase):
 
         with self.assertRaisesMessage(
             CommandError,
-            f"Got an unexpected response status code when retrieving the value list data from url `{MUNICIPALITY_WAARDENLIJST_URL}`: 400.",
+            "Got an unexpected response status code when retrieving the value list "
+            f"data from url `{MUNICIPALITY_WAARDENLIJST_URL}`: 400.",
         ):
             call_command("update_organisation_from_waardenlijsten")

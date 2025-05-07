@@ -43,7 +43,8 @@ class OrganisationSerializer(serializers.ModelSerializer):
             "naam": {
                 "required": False,
                 "help_text": _(
-                    "The name of the organisation (can only be modified when `oorsprong` is `{custom_entry}`)."
+                    "The name of the organisation (can only be modified when "
+                    "`oorsprong` is `{custom_entry}`)."
                 ).format(custom_entry=OrganisationOrigins.custom_entry),
             },
             "is_actief": {

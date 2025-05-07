@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("publications", "0018_publication_archiefactiedatum_and_more"),
     ]

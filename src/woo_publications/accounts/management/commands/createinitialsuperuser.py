@@ -38,7 +38,10 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--domain",
-            help="Domain the app is deployed on. Falls back to settings.ALLOWED_HOSTS[0].",
+            help=(
+                "Domain the app is deployed on. Falls back to "
+                "settings.ALLOWED_HOSTS[0]."
+            ),
         )
 
     def handle(self, **options):
@@ -81,8 +84,12 @@ class Command(BaseCommand):
             pw_reset_link = (
                 f"https://{domain}{password_reset_path}" if domain else "unknown url"
             )
+            subject = (
+                f"Your admin user for {settings.PROJECT_NAME} "
+                f"({domain or 'unknown url'})"
+            )
             send_mail(
-                f"Your admin user for {settings.PROJECT_NAME} ({domain or 'unknown url'})",
+                subject,
                 (
                     f"Credentials for project: {settings.PROJECT_NAME}\n\n"
                     f"Username: {username}\nPassword reset link: {pw_reset_link}"
