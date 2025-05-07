@@ -112,7 +112,7 @@ paths:
       - in: query
         name: eigenaar
         schema:
-          type: string
+          type: integer
         description: Filter documenten op basis van de identificatie van de eigenaar.
       - in: query
         name: identifier
@@ -1226,7 +1226,7 @@ paths:
       - in: query
         name: eigenaar
         schema:
-          type: string
+          type: integer
         description: Filter publicaties op basis van de identificatie van de eigenaar.
       - in: query
         name: informatieCategorieen
