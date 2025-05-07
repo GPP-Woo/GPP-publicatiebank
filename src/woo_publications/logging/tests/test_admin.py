@@ -9,7 +9,9 @@ from furl import furl
 from maykin_2fa.test import disable_admin_mfa
 from timeline_logger.models import TimelineLog
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.tests.factories import (
+    UserFactory,
+)
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
     ThemeFactory,
