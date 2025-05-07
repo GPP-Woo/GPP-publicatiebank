@@ -60,7 +60,7 @@ def change_owner(
         format_html(
             '<a href="{}">{}</a>',
             reverse(
-                "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                f"admin:{opts.app_label}_{model_name}_change",
                 kwargs={"object_id": item.id},
             ),
             item.officiele_titel,
