@@ -8,6 +8,7 @@ from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
+from woo_publications.accounts.models import OrganisationMember
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
@@ -58,6 +59,10 @@ class TestPublicationsAdmin(WebTest):
         self.assertContains(response, "field-uuid", 2)
 
     def test_publications_admin_search(self):
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 eigenaar=self.organisation_member,
@@ -67,7 +72,7 @@ class TestPublicationsAdmin(WebTest):
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
-                eigenaar=self.organisation_member,
+                eigenaar=org_member_1,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -107,12 +112,16 @@ class TestPublicationsAdmin(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(publication.uuid), 1)
 
+        with self.subTest("filter on owner identifier"):
+            form["q"] = org_member_1.identifier
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-uuid", 1)
+            self.assertContains(search_response, str(publication2.uuid), 1)
+
     def test_publication_list_filter(self):
         self.app.set_user(user=self.user)
-        org_member_1 = OrganisationMemberFactory.create(
-            identifier="test-identifier",
-            naam="test-naam",
-        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             PublicationFactory.create(
                 eigenaar=self.organisation_member,
@@ -125,7 +134,7 @@ class TestPublicationsAdmin(WebTest):
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             publication2 = PublicationFactory.create(
-                eigenaar=org_member_1,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title two",
                 verkorte_titel="two",
@@ -186,13 +195,6 @@ class TestPublicationsAdmin(WebTest):
             self.assertIn(
                 "archiefactiedatum", search_response.request.environ["QUERY_STRING"]
             )
-
-            self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-uuid", 1)
-            self.assertContains(search_response, str(publication2.uuid), 1)
-
-        with self.subTest("filter on eigenaar"):
-            search_response = response.click(description=str(org_member_1))
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-uuid", 1)
@@ -1301,3 +1303,97 @@ class TestPublicationsAdmin(WebTest):
         mock_remove_document_from_index_delay.assert_called_once_with(
             document_id=published_document.pk
         )
+
+    def test_change_owner_action(self):
+        org_member_1 = OrganisationMemberFactory.create(
+            naam="test-naam", identifier="test-identifier"
+        )
+        pub1 = PublicationFactory.create(eigenaar=self.organisation_member)
+        pub2 = PublicationFactory.create(eigenaar=self.organisation_member)
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+
+        form = changelist.forms["changelist-form"]
+        form["_selected_action"] = [pub1.pk, pub2.pk]
+        form["action"] = "change_owner"
+
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 200)
+
+        with self.subTest("no data supplied"):
+            confirmation_form = response.forms[1]
+
+            error_response = confirmation_form.submit()
+            self.assertFormError(
+                error_response.context["form"],
+                None,
+                _("You need to provide a valid `owner` or `identifier` and `name`."),
+            )
+
+        with self.subTest("only identifier supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = "admin@admin.admin"
+            confirmation_form["naam"] = ""
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"], "naam", _("This field is required.")
+            )
+
+        with self.subTest("only naam supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = ""
+            confirmation_form["naam"] = "admin@admin.admin"
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"],
+                "identifier",
+                _("This field is required."),
+            )
+
+        with self.subTest("identifier and naam supplied"):
+            self.assertFalse(
+                OrganisationMember.objects.filter(
+                    identifier="admin@admin.admin", naam="admin"
+                ).exists()
+            )
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = "admin@admin.admin"
+            confirmation_form["naam"] = "admin"
+            confirmation_form.submit()
+
+            pub1.refresh_from_db()
+            pub2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+
+            org_member_2 = OrganisationMember.objects.get(
+                identifier="admin@admin.admin", naam="admin"
+            )
+
+            self.assertEqual(pub1.eigenaar, org_member_2)
+            self.assertEqual(pub2.eigenaar, org_member_2)
+
+        with self.subTest("eigenaar supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].select(text=str(org_member_1))
+            confirmation_form["identifier"] = ""
+            confirmation_form["naam"] = ""
+
+            confirmation_form.submit()
+
+            pub1.refresh_from_db()
+            pub2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(pub1.eigenaar, org_member_1)
+            self.assertEqual(pub2.eigenaar, org_member_1)

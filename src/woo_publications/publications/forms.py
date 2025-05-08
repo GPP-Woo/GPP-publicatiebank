@@ -27,11 +27,11 @@ class ChangeOwnerForm(forms.Form):
         cleaned_data = super().clean()
         assert isinstance(cleaned_data, dict)
 
-        eigenaar = cleaned_data.get("eigenaar")
-        identifier = cleaned_data.get("identifier")
-        naam = cleaned_data.get("naam")
+        has_eigenaar = bool(cleaned_data.get("eigenaar"))
+        has_identifier = bool(cleaned_data.get("identifier"))
+        has_naam = bool(cleaned_data.get("naam"))
 
-        match (bool(eigenaar), bool(identifier), bool(naam)):
+        match (has_eigenaar, has_identifier, has_naam):
             case (False, False, False):
                 raise ValidationError(
                     _("You need to provide a valid `owner` or `identifier` and `name`.")
