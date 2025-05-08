@@ -60,7 +60,7 @@ def change_owner(
         format_html(
             '<a href="{}">{}</a>',
             reverse(
-                f"admin:{opts.app_label}_{model_name}_change",
+                f"admin:{opts.app_label}_{opts.model_name}_change",
                 kwargs={"object_id": item.id},
             ),
             item.officiele_titel,
@@ -373,13 +373,13 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "uuid",
         "officiele_titel",
         "verkorte_titel",
+        "eigenaar__identifier",
     )
     list_filter = (
         "registratiedatum",
         "publicatiestatus",
         "archiefnominatie",
         ("archiefactiedatum", PastAndFutureDateFieldFilter),
-        "eigenaar",
     )
     date_hierarchy = "registratiedatum"
     inlines = (DocumentInlineAdmin,)
@@ -612,8 +612,13 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "verkorte_titel",
         "bestandsnaam",
         "publicatie__uuid",
+        "eigenaar__identifier",
     )
-    list_filter = ("registratiedatum", "creatiedatum", "publicatiestatus", "eigenaar")
+    list_filter = (
+        "registratiedatum",
+        "creatiedatum",
+        "publicatiestatus",
+    )
     date_hierarchy = "registratiedatum"
     actions = [sync_to_index, remove_from_index, revoke, change_owner]
 
