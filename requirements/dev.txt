@@ -342,6 +342,10 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-test-migrations==1.5.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 django-timeline-logger==5.0.0
     # via
     #   -c requirements/ci.txt
@@ -877,6 +881,7 @@ typing-extensions==4.12.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   django-test-migrations
     #   mozilla-django-oidc-db
     #   pydantic
     #   pydantic-core

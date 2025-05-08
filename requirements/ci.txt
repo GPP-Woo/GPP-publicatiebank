@@ -315,6 +315,8 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-test-migrations==1.5.0
+    # via -r requirements/test-tools.in
 django-timeline-logger==5.0.0
     # via
     #   -c requirements/base.txt
@@ -763,6 +765,7 @@ typing-extensions==4.12.2
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
+    #   django-test-migrations
     #   mozilla-django-oidc-db
     #   pyopenssl
     #   qrcode
