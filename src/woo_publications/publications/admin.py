@@ -78,21 +78,24 @@ def change_owner(
                 )
 
             for obj in queryset:
+                obj.eigenaar = owner
+                obj.save()
+
                 audit_admin_update(
                     content_object=obj,
                     object_data=serialize_instance(obj),
                     django_user=request.user,
                 )
-                obj.eigenaar = owner
 
-            if (count := queryset.count()) and count >= 1:
-                modeladmin.model.objects.bulk_update(queryset, ["eigenaar"])
-                modeladmin.message_user(
-                    request,
-                    _("Successfully changed %(count)d owner(s) of %(items)s.")
-                    % {"count": count, "items": model_ngettext(modeladmin.opts, count)},
-                    messages.SUCCESS,
-                )
+            modeladmin.message_user(
+                request,
+                _("Successfully changed %(count)d owner(s) of %(items)s.")
+                % {
+                    "count": queryset.count(),
+                    "items": model_ngettext(modeladmin.opts, queryset.count()),
+                },
+                messages.SUCCESS,
+            )
 
             modeladmin.model.objects.bulk_update(queryset, ["eigenaar"])
             return

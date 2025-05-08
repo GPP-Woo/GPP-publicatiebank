@@ -1529,6 +1529,54 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 ],
             )
 
+    @patch("woo_publications.publications.models.Document.register_in_documents_api")
+    def test_create_document_with_custom_owner(
+        self, mock_register_in_documents_api: MagicMock
+    ):
+        self.assertFalse(
+            OrganisationMember.objects.filter(
+                identifier="test-identifier", naam="test-naam"
+            ).exists(),
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[self.information_category]
+        )
+        endpoint = reverse("api:document-list")
+        body = {
+            "publicatie": publication.uuid,
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "officieleTitel": "Testdocument WOO-P + Open Zaak",
+            "creatiedatum": "2024-11-05",
+            "eigenaar": {
+                "identifier": "test-identifier",
+                "weergaveNaam": "test-naam",
+            },
+        }
+
+        response = self.client.post(
+            endpoint,
+            data=body,
+            headers={
+                **AUDIT_HEADERS,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_data = response.json()
+
+        self.assertEqual(
+            response_data["eigenaar"],
+            {
+                "identifier": "test-identifier",
+                "weergaveNaam": "test-naam",
+            },
+        )
+        self.assertTrue(
+            OrganisationMember.objects.filter(
+                identifier="test-identifier", naam="test-naam"
+            ).exists(),
+        )
+
     def test_create_revoked_document_results_in_error(self):
         publication = PublicationFactory.create(
             informatie_categorieen=[self.information_category]
