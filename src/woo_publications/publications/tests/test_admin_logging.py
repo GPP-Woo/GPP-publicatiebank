@@ -1077,8 +1077,11 @@ class TestDocumentAdminAuditLogging(WebTest):
             }
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_document_admin_delete(self):
+    def test_document_change_owner_log(self):
         publication = PublicationFactory.create()
+        org_member_1 = OrganisationMemberFactory.create(
+            naam="test-naam", identifier="test-identifier"
+        )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
@@ -1091,24 +1094,28 @@ class TestDocumentAdminAuditLogging(WebTest):
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 creatiedatum="2024-11-11",
             )
-        reverse_url = reverse(
-            "admin:publications_document_delete",
-            kwargs={"object_id": document.id},
-        )
 
-        response = self.app.get(reverse_url, user=self.user)
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+        form["_selected_action"] = [document.pk]
+        form["action"] = "change_owner"
+
+        response = form.submit()
 
         self.assertEqual(response.status_code, 200)
 
-        form = response.forms[1]
-        response = form.submit()
+        confirmation_form = response.forms[1]
+        confirmation_form["eigenaar"].select(text=str(org_member_1))
 
-        self.assertEqual(response.status_code, 302)
+        with freeze_time("2024-09-29T14:00:00-00:00"):
+            confirmation_form.submit()
 
-        log = TimelineLogProxy.objects.get()
-
+        update_log = TimelineLogProxy.objects.get()
         expected_data = {
-            "event": Events.delete,
+            "event": Events.update,
             "acting_user": {
                 "identifier": self.user.id,
                 "display_name": self.user.get_full_name(),
@@ -1116,7 +1123,7 @@ class TestDocumentAdminAuditLogging(WebTest):
             "object_data": {
                 "id": document.pk,
                 "lock": "",
-                "eigenaar": self.organisation_member.pk,
+                "eigenaar": org_member_1.pk,  # updated
                 "upload_complete": False,
                 "uuid": str(document.uuid),
                 "identifier": identifier,
@@ -1133,13 +1140,77 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "officiele_titel": "title one",
                 "document_service": None,
                 "registratiedatum": "2024-09-25T14:00:00Z",
-                "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
                 "soort_handeling": DocumentActionTypeOptions.declared,
             },
             "_cached_object_repr": "title one",
         }
+        self.maxDiff = None
+        self.assertEqual(update_log.extra_data, expected_data)
 
-        self.assertEqual(log.extra_data, expected_data)
+
+def test_document_admin_delete(self):
+    publication = PublicationFactory.create()
+    identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
+    with freeze_time("2024-09-25T14:00:00-00:00"):
+        document = DocumentFactory.create(
+            publicatie=publication,
+            identifier=identifier,
+            eigenaar=self.organisation_member,
+            publicatiestatus=PublicationStatusOptions.published,
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            creatiedatum="2024-11-11",
+        )
+    reverse_url = reverse(
+        "admin:publications_document_delete",
+        kwargs={"object_id": document.id},
+    )
+
+    response = self.app.get(reverse_url, user=self.user)
+
+    self.assertEqual(response.status_code, 200)
+
+    form = response.forms[1]
+    response = form.submit()
+
+    self.assertEqual(response.status_code, 302)
+
+    log = TimelineLogProxy.objects.get()
+
+    expected_data = {
+        "event": Events.delete,
+        "acting_user": {
+            "identifier": self.user.id,
+            "display_name": self.user.get_full_name(),
+        },
+        "object_data": {
+            "id": document.pk,
+            "lock": "",
+            "eigenaar": self.organisation_member.pk,
+            "upload_complete": False,
+            "uuid": str(document.uuid),
+            "identifier": identifier,
+            "publicatie": publication.pk,
+            "publicatiestatus": PublicationStatusOptions.published,
+            "bestandsnaam": "unknown.bin",
+            "creatiedatum": "2024-11-11",
+            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            "document_uuid": None,
+            "bestandsomvang": 0,
+            "verkorte_titel": "one",
+            "bestandsformaat": "unknown",
+            "officiele_titel": "title one",
+            "document_service": None,
+            "registratiedatum": "2024-09-25T14:00:00Z",
+            "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
+            "soort_handeling": DocumentActionTypeOptions.declared,
+        },
+        "_cached_object_repr": "title one",
+    }
+
+    self.assertEqual(log.extra_data, expected_data)
 
 
 @disable_admin_mfa()
