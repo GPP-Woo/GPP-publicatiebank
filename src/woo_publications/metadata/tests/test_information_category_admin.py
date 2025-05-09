@@ -66,7 +66,9 @@ class TestInformationCategoryAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, information_category.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, information_category.identifier, 2)
 
         with self.subTest("filter on identifier"):
             form["q"] = information_category2.identifier
@@ -75,8 +77,10 @@ class TestInformationCategoryAdmin(WebTest):
             self.assertEqual(search_response.status_code, 200)
 
             # test the amount of rows present
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, "second item", 1)
+            self.assertContains(search_response, "field-naam", 1)
+            # because of django 5.2 the checkbox for selecting items for action
+            # now has the clickable link name in its area label
+            self.assertContains(search_response, "second item", 2)
 
     def test_information_category_admin_list_filter(self):
         self.app.set_user(user=self.user)
@@ -102,7 +106,9 @@ class TestInformationCategoryAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, information_category.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, information_category.identifier, 2)
 
     def test_information_category_admin_can_not_update_item_with_oorsprong_waardenlijst(
         self,

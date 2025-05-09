@@ -106,7 +106,9 @@ class TestDocumentAdmin(WebTest):
 
             self.assertEqual(search_response.status_code, 200)
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, "title two", 1)
+            # because of django 5.2 the checkbox for selecting items for action
+            # now has the clickable link name in its area label
+            self.assertContains(search_response, "title two", 2)
 
         with self.subTest("filter on bestandsnaam"):
             form["q"] = "doc2.txt"
