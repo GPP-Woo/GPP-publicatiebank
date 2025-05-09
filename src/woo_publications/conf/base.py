@@ -8,14 +8,9 @@ from vng_api_common.conf.api import BASE_REST_FRAMEWORK
 
 from .utils import config
 
-init_sentry()
-
-
 TIME_ZONE = "Europe/Amsterdam"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-INSTALLED_APPS.remove("django.contrib.sites")
 
 INSTALLED_APPS = INSTALLED_APPS + [
     # External applications.

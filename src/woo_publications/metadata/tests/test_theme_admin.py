@@ -55,7 +55,9 @@ class TestInformationCategoryAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, theme.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, theme.identifier, 2)
 
         with self.subTest("filter on identifier"):
             form["q"] = theme2.identifier
@@ -66,7 +68,9 @@ class TestInformationCategoryAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, "second item", 1)
+            # because of django 5.2 the checkbox for selecting items for action
+            # now has the clickable link name in its area label
+            self.assertContains(search_response, "second item", 2)
 
     def test_theme_admin_can_not_update(
         self,
