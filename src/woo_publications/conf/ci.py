@@ -25,9 +25,6 @@ CACHES.update(
 # shut up logging
 mute_logging(LOGGING)
 
-# don't spend time on password hashing in tests/user factories
-PASSWORD_HASHERS = ["django.contrib.auth.hashers.UnsaltedMD5PasswordHasher"]
-
 ENVIRONMENT = "CI"
 
 #
