@@ -183,6 +183,7 @@ django==4.2.20
     #   django-timeline-logger
     #   django-treebeard
     #   django-two-factor-auth
+    #   django-upgrade-check
     #   djangorestframework
     #   djangorestframework-inclusions
     #   djangorestframework-recursive
@@ -355,6 +356,10 @@ django-two-factor-auth==1.17.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   maykin-2fa
+django-upgrade-check==1.1.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 django-webtest==1.9.12
     # via
     #   -c requirements/ci.txt
@@ -761,6 +766,11 @@ ruff==0.11.8
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+semantic-version==2.10.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+    #   django-upgrade-check
 sentry-sdk==2.14.0
     # via
     #   -c requirements/ci.txt
