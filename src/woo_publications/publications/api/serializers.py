@@ -1,4 +1,7 @@
+from typing import TypedDict
+
 from django.db import transaction
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -16,16 +19,26 @@ from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
 
 
+class OwnerData(TypedDict):
+    naam: str
+    identifier: str
+
+
+def update_or_create_organisation_member(
+    request: HttpRequest, details: OwnerData | None = None
+):
+    if details is None:
+        details = {
+            "identifier": request.headers[AUDIT_USER_ID_PARAMETER.name],
+            "naam": request.headers[AUDIT_USER_REPRESENTATION_PARAMETER.name],
+        }
+    return OrganisationMember.objects.get_and_sync(**details)
+
+
 class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
     weergave_naam = serializers.CharField(
         source="naam",
-        help_text=_("The display name of the user, as recorded in the audit trails."),
-    )
-    identifier = serializers.CharField(
-        help_text=_(
-            "The system identifier that uniquely identifies the user performing "
-            "the action."
-        ),
+        help_text=_("The display name of the user."),
     )
 
     class Meta:  # pyright: ignore
@@ -34,6 +47,24 @@ class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
             "identifier",
             "weergave_naam",
         )
+        # Removed the none basic validators which are getting in the way for
+        # update_or_create
+        extra_kwargs = {"identifier": {"validators": []}}
+
+    def validate(self, attrs):
+        has_naam = bool(attrs.get("naam"))
+        has_identifier = bool(attrs.get("identifier"))
+
+        # added custom validator to check if both are present or not in case
+        if has_naam != has_identifier:
+            raise serializers.ValidationError(
+                _(
+                    "The fields 'naam' and 'weergaveNaam' has to be both "
+                    "present or excluded."
+                )
+            )
+
+        return super().validate(attrs)
 
 
 class FilePartSerializer(serializers.Serializer[FilePart]):
@@ -130,7 +161,11 @@ class DocumentSerializer(serializers.ModelSerializer):
     )
     eigenaar = EigenaarSerializer(
         label=_("owner"),
-        help_text=_("The creator of the document."),
+        help_text=_(
+            "The creator of the document, derived from the audit headers.\n"
+            "Disclaimer**: If you use this field during creation/updating actions the "
+            "owner data will differ from the audit headers provided during creation."
+        ),
         allow_null=True,
         required=False,
     )
@@ -180,36 +215,19 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         return value
 
-    def get_or_create_organisation_member(self, owner: EigenaarSerializer | None):
-        identifier = self.context["request"].headers[AUDIT_USER_ID_PARAMETER.name]
-        naam = self.context["request"].headers[AUDIT_USER_REPRESENTATION_PARAMETER.name]
-
-        if owner:
-            identifier = owner["identifier"]
-            naam = owner["naam"]
-
-        org_member, _ = OrganisationMember.objects.get_or_create(
-            identifier=identifier,
-            naam=naam,
-        )
-
-        return org_member
-
     @transaction.atomic
     def update(self, instance, validated_data):
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
-            org_member, _ = OrganisationMember.objects.get_or_create(
-                identifier=eigenaar["identifier"],
-                naam=eigenaar["naam"],
+            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
+                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
             )
-            validated_data["eigenaar"] = org_member
         return super().update(instance, validated_data)
 
     @transaction.atomic
     def create(self, validated_data):
-        validated_data["eigenaar"] = self.get_or_create_organisation_member(
-            validated_data.get("eigenaar")
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
         )
         return super().create(validated_data)
 
@@ -251,7 +269,11 @@ class DocumentUpdateSerializer(DocumentSerializer):
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
     eigenaar = EigenaarSerializer(
         label=_("owner"),
-        help_text=_("The creator of the publication."),
+        help_text=_(
+            "The creator of the document, derived from the audit headers.\n"
+            "Disclaimer**: If you use this field during creation/updating actions the "
+            "owner data will differ from the audit headers provided during creation."
+        ),
         allow_null=True,
         required=False,
     )
@@ -422,21 +444,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         return value
 
-    def get_or_create_organisation_member(self, owner: EigenaarSerializer | None):
-        identifier = self.context["request"].headers[AUDIT_USER_ID_PARAMETER.name]
-        naam = self.context["request"].headers[AUDIT_USER_REPRESENTATION_PARAMETER.name]
-
-        if owner:
-            identifier = owner["identifier"]
-            naam = owner["naam"]
-
-        org_member, _ = OrganisationMember.objects.get_or_create(
-            identifier=identifier,
-            naam=naam,
-        )
-
-        return org_member
-
     @transaction.atomic
     def update(self, instance, validated_data):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
@@ -444,11 +451,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
-            org_member, _ = OrganisationMember.objects.get_or_create(
-                identifier=eigenaar["identifier"],
-                naam=eigenaar["naam"],
+            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
+                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
             )
-            validated_data["eigenaar"] = org_member
 
         if informatie_categorieen := validated_data.get("informatie_categorieen"):
             old_informatie_categorieen_set = {
@@ -477,8 +482,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     @transaction.atomic
     def create(self, validated_data):
-        validated_data["eigenaar"] = self.get_or_create_organisation_member(
-            validated_data.get("eigenaar")
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
         )
         publication = super().create(validated_data)
         publication.apply_retention_policy()

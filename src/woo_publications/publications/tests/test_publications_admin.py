@@ -1330,7 +1330,7 @@ class TestPublicationsAdmin(WebTest):
             self.assertFormError(
                 error_response.context["form"],
                 None,
-                _("You need to provide a valid `owner` or `identifier` and `name`."),
+                _("You need to provide a valid 'owner' or 'identifier' and 'name'."),
             )
 
         with self.subTest("only identifier supplied"):

@@ -112,7 +112,7 @@ paths:
       - in: query
         name: eigenaar
         schema:
-          type: integer
+          type: string
         description: Filter documenten op basis van de identificatie van de eigenaar.
       - in: query
         name: identifier
@@ -1226,7 +1226,7 @@ paths:
       - in: query
         name: eigenaar
         schema:
-          type: integer
+          type: string
         description: Filter publicaties op basis van de identificatie van de eigenaar.
       - in: query
         name: informatieCategorieen
@@ -1869,7 +1869,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
-          description: The creator of the document.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -1998,7 +2000,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
-          description: The creator of the document.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -2047,11 +2051,13 @@ components:
       properties:
         identifier:
           type: string
+          title: Identificatie
           description: De (unieke) identificatie waarmee de gebruiker die de actie
             uitvoert achterhaald kan worden.
+          maxLength: 255
         weergaveNaam:
           type: string
-          description: De weergavenaam van de gebruiker, zoals vastgelegd in de auditlogs.
+          description: The display name of the user.
       required:
       - identifier
       - weergaveNaam
@@ -2387,7 +2393,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
-          description: The creator of the document.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -2511,7 +2519,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
-          description: The creator of the publication.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2645,7 +2655,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
-          description: The creator of the publication.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'

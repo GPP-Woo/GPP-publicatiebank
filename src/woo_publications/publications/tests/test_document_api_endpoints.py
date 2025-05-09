@@ -158,8 +158,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
                 "eigenaar": {
-                    "identifier": self.organisation_member.identifier,
-                    "weergaveNaam": self.organisation_member.naam,
+                    "identifier": "id",
+                    "weergaveNaam": "username",
                 },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
@@ -192,8 +192,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
                 "eigenaar": {
-                    "identifier": self.organisation_member.identifier,
-                    "weergaveNaam": self.organisation_member.naam,
+                    "identifier": "id",
+                    "weergaveNaam": "username",
                 },
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
@@ -252,18 +252,9 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 headers=AUDIT_HEADERS,
             )
 
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
             data = response.json()
-            self.assertEqual(
-                data["eigenaar"],
-                [
-                    _(
-                        "Select a valid choice. That choice is not one "
-                        "of the available choices."
-                    )
-                ],
-            )
+            self.assertEqual(response.json()["count"], 0)
 
         with self.subTest("filter with no input"):
             response = self.client.get(
