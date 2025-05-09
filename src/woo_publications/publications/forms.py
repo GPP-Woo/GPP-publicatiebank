@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from woo_publications.accounts.models import OrganisationMember
@@ -8,7 +7,7 @@ from woo_publications.accounts.models import OrganisationMember
 class ChangeOwnerForm(forms.Form):
     eigenaar = forms.ModelChoiceField(
         label=_("Owner"),
-        queryset=OrganisationMember.objects.all(),
+        queryset=OrganisationMember.objects.order_by("naam"),
         required=False,
     )
     identifier = forms.CharField(
@@ -33,14 +32,18 @@ class ChangeOwnerForm(forms.Form):
 
         match (has_eigenaar, has_identifier, has_naam):
             case (False, False, False):
-                raise ValidationError(
-                    _("You need to provide a valid `owner` or `identifier` and `name`.")
+                self.add_error(
+                    None,
+                    error=_(
+                        "You need to provide a valid 'owner' or "
+                        "'identifier' and 'name'."
+                    ),
                 )
             case (True, False, False):
                 pass
             case (False, True, False):
-                raise ValidationError({"naam": _("This field is required.")})
+                self.add_error("naam", error=_("This field is required."))
             case (False, False, True):
-                raise ValidationError({"identifier": _("This field is required.")})
+                self.add_error("identifier", error=_("This field is required."))
 
         return cleaned_data

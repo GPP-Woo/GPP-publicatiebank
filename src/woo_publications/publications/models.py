@@ -593,6 +593,7 @@ class Document(ModelOwnerMixin, models.Model):
         As a side-effect, this populates ``self.zgw_document``.
         """
 
+        return
         # Look up which service to use to register the document
         config = GlobalConfiguration.get_solo()
         if (service := config.documents_api_service) is None:

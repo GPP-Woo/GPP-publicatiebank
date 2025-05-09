@@ -70,11 +70,11 @@ def change_owner(
 
     if (post := request.POST) and post.get("post"):
         if form.is_valid():
-            if eigenaar_pk := post.get("eigenaar"):
-                owner = OrganisationMember.objects.get(pk=eigenaar_pk)
-            else:
+            owner = form.cleaned_data["eigenaar"]
+            if not owner:
                 owner = OrganisationMember.objects.create(
-                    identifier=post.get("identifier"), naam=post.get("naam")
+                    identifier=form.cleaned_data["identifier"],
+                    naam=form.cleaned_data["naam"],
                 )
 
             for obj in queryset:
@@ -102,7 +102,7 @@ def change_owner(
 
     context = {
         **modeladmin.admin_site.each_context(request),
-        "title": _("Change owner of multiple objects"),
+        "title": _("Change owner"),
         "objects_name": model_name,
         "queryset": queryset,
         "changeable_objects": changeable_objects,

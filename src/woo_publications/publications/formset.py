@@ -23,10 +23,9 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
         user = self.request.user
         assert isinstance(user, User)
         form = super().empty_form
-        owner = OrganisationMember.objects.get_or_create(
+        form.fields["eigenaar"].initial = OrganisationMember.objects.get_and_sync(
             identifier=user.pk, naam=user.get_full_name() or user.username
         )
-        form.fields["eigenaar"].initial = owner
         return form
 
     def save_new(self, form, commit=True):
