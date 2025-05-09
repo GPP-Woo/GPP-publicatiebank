@@ -9,6 +9,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from woo_publications.accounts.tests.factories import OrganisationMemberFactory
 from woo_publications.api.tests.mixins import TokenAuthMixin
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.logging.constants import Events
@@ -31,6 +32,14 @@ AUDIT_HEADERS = {
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PublicationLoggingTests(TokenAuthMixin, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+
     def test_detail_logging(self):
         assert not TimelineLogProxy.objects.exists()
         ic = InformationCategoryFactory.create()
@@ -38,6 +47,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
+                eigenaar=self.organisation_member,
                 publisher=organisation,
                 verantwoordelijke=organisation,
                 opsteller=organisation,
@@ -100,6 +110,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "id": publication.pk,
                 "informatie_categorieen": [ic.pk],
                 "onderwerpen": [topic.pk],
+                "eigenaar": self.organisation_member.pk,
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -137,6 +148,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic2],
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
                 publisher=organisation,
                 verantwoordelijke=organisation,
@@ -174,6 +186,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "id": publication.pk,
                 "informatie_categorieen": [ic.pk],
                 "onderwerpen": [topic.pk],
+                "eigenaar": self.organisation_member.pk,
                 "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
                 "officiele_titel": "changed offical title",
                 "omschrijving": "changed description",
@@ -208,6 +221,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
                 onderwerpen=[topic, topic2],
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -219,6 +233,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             )
             published_document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 identifier="http://example.com/1",
                 officiele_titel="title",
@@ -226,10 +241,12 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             )
             concept_document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
             )
             revoked_document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.revoked,
             )
 
@@ -266,6 +283,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "id": publication.pk,
                     "informatie_categorieen": [ic.pk, ic2.pk],
                     "onderwerpen": [topic.pk, topic2.pk],
+                    "eigenaar": self.organisation_member.pk,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -299,6 +317,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "acting_user": {"identifier": "id", "display_name": "username"},
                 "object_data": {
                     "id": published_document.pk,
+                    "eigenaar": self.organisation_member.pk,
                     "lock": "",
                     "upload_complete": False,
                     "uuid": str(published_document.uuid),
@@ -320,7 +339,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 },
                 "_cached_object_repr": "title",
             }
-
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
     def test_destroy_publication(self):
@@ -334,6 +352,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 publisher=organisation,
                 verantwoordelijke=organisation,
                 opsteller=organisation,
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -361,6 +380,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "id": publication.id,
                 "informatie_categorieen": [ic.id],
                 "onderwerpen": [],
+                "eigenaar": self.organisation_member.pk,
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": (
@@ -386,9 +406,18 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
 
 
 class DocumentLoggingTests(TokenAuthMixin, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+
     def test_detail_logging(self):
         assert not TimelineLogProxy.objects.exists()
         document = DocumentFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
         )
         detail_url = reverse(
@@ -414,6 +443,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
         with freeze_time("2024-09-27T12:00:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
                 identifier="document-1",
                 officiele_titel="title one",
@@ -444,6 +474,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             "remarks": "remark",
             "acting_user": {"identifier": "id", "display_name": "username"},
             "object_data": {
+                "eigenaar": self.organisation_member.pk,
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
@@ -477,6 +508,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
         mock_download.return_value.status_code = 200
         information_category = InformationCategoryFactory.create()
         document = DocumentFactory.create(
+            eigenaar=self.organisation_member,
             publicatie__informatie_categorieen=[information_category],
             bestandsomvang=5,
             with_registered_document=True,

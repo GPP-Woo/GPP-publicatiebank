@@ -12,6 +12,10 @@
         "models": [
             [
                 "accounts",
+                "organisationmember"
+            ],
+            [
+                "accounts",
                 "user"
             ],
             [

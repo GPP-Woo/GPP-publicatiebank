@@ -1868,10 +1868,10 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -1906,7 +1906,6 @@ components:
       required:
       - bestandsdelen
       - creatiedatum
-      - eigenaar
       - laatstGewijzigdDatum
       - officieleTitel
       - publicatie
@@ -2000,10 +1999,10 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -2042,7 +2041,6 @@ components:
       - bestandsomvang
       - creatiedatum
       - documenthandelingen
-      - eigenaar
       - identifier
       - laatstGewijzigdDatum
       - publicatie
@@ -2051,15 +2049,15 @@ components:
     Eigenaar:
       type: object
       properties:
-        weergaveNaam:
-          type: string
-          readOnly: true
-          description: De weergavenaam van de gebruiker, zoals vastgelegd in de auditlogs.
         identifier:
           type: string
-          readOnly: true
+          title: Identificatie
           description: De (unieke) identificatie waarmee de gebruiker die de actie
             uitvoert achterhaald kan worden.
+          maxLength: 255
+        weergaveNaam:
+          type: string
+          description: The display name of the user.
       required:
       - identifier
       - weergaveNaam
@@ -2394,10 +2392,10 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die het document aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         registratiedatum:
           type: string
           format: date-time
@@ -2520,10 +2518,10 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die de publicatie aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2656,10 +2654,10 @@ components:
         eigenaar:
           allOf:
           - $ref: '#/components/schemas/Eigenaar'
-          readOnly: true
           nullable: true
-          description: De persoon die de publicatie aangemaakt heeft, afgeleid uit
-            de auditlogs.
+          description: |-
+            The creator of the document, derived from the audit headers.
+            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2728,7 +2726,6 @@ components:
             de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
-      - eigenaar
       - informatieCategorieen
       - laatstGewijzigdDatum
       - officieleTitel

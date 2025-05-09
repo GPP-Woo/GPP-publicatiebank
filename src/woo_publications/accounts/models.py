@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .managers import UserManager
+from .managers import OrganisationMemberManager, UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -69,3 +69,29 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         "Returns the short name for the user."
         return self.first_name
+
+
+class OrganisationMember(models.Model):
+    identifier = models.CharField(
+        _("identifier"),
+        help_text=_(
+            "The system identifier that uniquely identifies the user performing "
+            "the action."
+        ),
+        max_length=255,
+        unique=True,
+    )
+    naam = models.CharField(
+        _("naam"),
+        help_text=_("The display name of the user."),
+        max_length=255,
+    )
+
+    objects = OrganisationMemberManager()
+
+    class Meta:  # pyright: ignore
+        verbose_name = _("organisation member")
+        verbose_name_plural = _("organisation members")
+
+    def __str__(self):
+        return f"{self.naam} - ({self.identifier})"
