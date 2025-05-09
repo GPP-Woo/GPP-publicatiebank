@@ -68,7 +68,9 @@ class TestOrganisationAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, organisation.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, organisation.identifier, 2)
 
         with self.subTest("filter_on_identifier"):
             form["q"] = organisation2.identifier
@@ -78,7 +80,9 @@ class TestOrganisationAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, "second item", 1)
+            # because of django 5.2 the checkbox for selecting items for action
+            # now has the clickable link name in its area label
+            self.assertContains(search_response, "second item", 2)
 
     def test_organisation_admin_list_filters(self):
         self.app.set_user(user=self.user)
@@ -106,7 +110,9 @@ class TestOrganisationAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, organisation.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, organisation.identifier, 2)
 
         with self.subTest("filter_on_is_actief"):
             search_response = response.click(
@@ -117,7 +123,9 @@ class TestOrganisationAdmin(WebTest):
 
             # test the amount of rows present
             self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, organisation.identifier, 1)
+            # because of django 5.2 url fields now are clickable links
+            # so the identifier comes across as the name and href of the <a> tag
+            self.assertContains(search_response, organisation.identifier, 2)
 
     def test_organisation_admin_can_only_is_actief_from_waardenlijst_items(
         self,
