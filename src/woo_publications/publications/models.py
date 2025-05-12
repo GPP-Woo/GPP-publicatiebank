@@ -26,7 +26,6 @@ from woo_publications.contrib.documents_api.client import (
 )
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import (
-    ModelOwnerMixin,
     audit_admin_update,
     audit_api_update,
 )
@@ -124,7 +123,7 @@ class Topic(models.Model):
             )
 
 
-class Publication(ModelOwnerMixin, models.Model):
+class Publication(models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -354,7 +353,7 @@ class Publication(ModelOwnerMixin, models.Model):
         )
 
 
-class Document(ModelOwnerMixin, models.Model):
+class Document(models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
