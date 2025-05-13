@@ -1748,31 +1748,56 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
         )
 
-        data = {
-            "eigenaar": {
-                "identifier": "test-identifier",
-                "weergaveNaam": "test-naam",
-            },
-        }
+        with self.subTest("Incomplete owner data"):
+            data = {
+                "eigenaar": {
+                    # No "identifier" field given
+                    "weergaveNaam": "test-naam",
+                },
+            }
 
-        response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        response_data = response.json()
-
-        self.assertEqual(
-            response_data["eigenaar"],
-            {
-                "identifier": "test-identifier",
-                "weergaveNaam": "test-naam",
-            },
-        )
-        # OrganisationMember got created
-        self.assertTrue(
-            OrganisationMember.objects.filter(
-                identifier="test-identifier", naam="test-naam"
+            response_data = response.json()
+            self.assertEqual(
+                response_data["eigenaar"],
+                {
+                    "nonFieldErrors": [
+                        _(
+                            "The fields 'naam' and 'weergaveNaam' has to be "
+                            "both present or excluded."
+                        )
+                    ]
+                },
             )
-        )
+
+        with self.subTest("complete owner data"):
+            data = {
+                "eigenaar": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaar"],
+                {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            )
+            # OrganisationMember got created
+            self.assertTrue(
+                OrganisationMember.objects.filter(
+                    identifier="test-identifier", naam="test-naam"
+                )
+            )
 
     def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(  # noqa E501
         self,
