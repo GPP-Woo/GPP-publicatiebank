@@ -64,3 +64,4 @@ class UserAdmin(AdminAuditLogMixin, HijackUserAdminMixin, _UserAdmin):
 class OrganisationMemberAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = ("identifier", "naam")
     search_fields = ("identifier",)
+    readonly_fields = ("identifier",)
