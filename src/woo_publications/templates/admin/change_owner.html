@@ -34,8 +34,8 @@
         <hr />
     </fieldset>
 
-    <fieldset class="module aligned ">
-        {% blocktranslate %}
+    <fieldset class="module aligned delete-confirmation">
+        {% blocktranslate trimmed %}
         <p>
             Please specify the new owner here. There are two possible ways to do this:
         </p>
@@ -119,7 +119,7 @@
 
                 <div>
                     <input type="submit" value="{% translate 'Yes, I’m sure' %}">
-                    <a href="#" class="deletelink cancel-link">{% translate "No, take me back" %}</a>
+                    <a href="#" class="button cancel-link">{% translate "No, take me back" %}</a>
                 </div>
             </div>
         </form>
