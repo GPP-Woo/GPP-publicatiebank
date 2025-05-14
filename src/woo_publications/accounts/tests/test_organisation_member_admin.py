@@ -44,7 +44,7 @@ class TestOrganisationMemberAdmin(WebTest):
 
         self.assertEqual(search_response.status_code, 200)
         self.assertContains(search_response, "field-naam", 1)
-        self.assertContains(search_response, "second org member", 1)
+        self.assertContains(search_response, "second org member", 1, html=True)
 
     def test_organisation_member_admin_delete(self):
         org_member = OrganisationMemberFactory.create(
