@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 from django.db.migrations.state import StateApps
+
 from woo_publications.logging.constants import Events
 
 
@@ -83,20 +84,31 @@ def set_owner(apps: StateApps, _):
     Document = apps.get_model("publications", "document")
     Publication = apps.get_model("publications", "publication")
     OrganisationMember = apps.get_model("accounts", "organisationmember")
+    User = apps.get_model("accounts", "User")
+
+    oldest_user = User.objects.order_by("pk").first()
 
     for Model in [Document, Publication]:
         for obj in Model.objects.iterator():
-            if owner := get_owner(apps, obj):
-                organisation_member, _ = OrganisationMember.objects.get_or_create(
-                    identifier=owner["identifier"],
-                    naam=owner["display_name"],
-                )
-                obj.eigenaar = organisation_member
-                obj.save()
+            owner = get_owner(apps, obj)
+            if not owner:
+                # some (dev) environments may have very old data for which no audit trails existed
+                assert oldest_user is not None
+                owner = {
+                    "identifier": str(oldest_user.pk),
+                    "display_name": str(oldest_user.username),
+                }
+
+            organisation_member, _ = OrganisationMember.objects.get_or_create(
+                identifier=owner["identifier"],
+                naam=owner["display_name"],
+            )
+
+            obj.eigenaar = organisation_member
+            obj.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0003_organisationmember"),
         ("publications", "0020_topic_afbeelding"),
