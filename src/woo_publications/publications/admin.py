@@ -402,8 +402,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def get_changeform_initial_data(self, request: HttpRequest):
         assert isinstance(request.user, User)
         initial_data: dict = super().get_changeform_initial_data(request)
-        owner, _ = OrganisationMember.objects.get_or_create(
-            identifier=request.user.pk,
+        owner = OrganisationMember.objects.get_and_sync(
+            identifier=str(request.user.pk),
             naam=request.user.get_full_name() or request.user.username,
         )
         initial_data["eigenaar"] = owner
@@ -628,8 +628,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def get_changeform_initial_data(self, request: HttpRequest):
         assert isinstance(request.user, User)
         initial_data: dict = super().get_changeform_initial_data(request)
-        owner, _ = OrganisationMember.objects.get_or_create(
-            identifier=request.user.pk,
+        owner = OrganisationMember.objects.get_and_sync(
+            identifier=str(request.user.pk),
             naam=request.user.get_full_name() or request.user.username,
         )
         initial_data["eigenaar"] = owner

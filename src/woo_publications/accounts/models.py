@@ -89,9 +89,9 @@ class OrganisationMember(models.Model):
         max_length=255,
     )
 
-    objects: ClassVar[OrganisationMemberManager] = OrganisationMemberManager()  # pyright: ignore [reportIncompatibleVariableOverride]
+    objects: ClassVar[OrganisationMemberManager] = OrganisationMemberManager()  # pyright: ignore[reportIncompatibleVariableOverride]
 
-    class Meta:  # pyright: ignore
+    class Meta:
         verbose_name = _("organisation member")
         verbose_name_plural = _("organisation members")
 
