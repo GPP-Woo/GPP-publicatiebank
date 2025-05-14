@@ -19,7 +19,7 @@ class UserAdminTests(WebTest):
         )
         change_form = change_page.forms["user_form"]
         change_form["user_permissions"].select_multiple(
-            texts=["accounts | gebruiker | Can add user"]
+            texts=["Accounts | gebruiker | Can add user"]
         )
 
         response = change_form.submit(name="_save")

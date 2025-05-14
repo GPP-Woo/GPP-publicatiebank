@@ -48,7 +48,6 @@ PostgreSQL is the database used. PostgreSQL 13 and newer are supported.
    =============  ==========================
    PostgreSQL     Status
    =============  ==========================
-   13             Supported
    14             Supported
    15             Supported
    16             Automatically tested in CI
