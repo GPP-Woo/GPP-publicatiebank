@@ -10,7 +10,11 @@ from maykin_2fa.test import disable_admin_mfa
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test.factories import ServiceFactory
 
-from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document
@@ -23,14 +27,20 @@ class TestDocumentAdmin(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
 
     def test_document_admin_shows_items(self):
         DocumentFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
         DocumentFactory.create(
+            eigenaar=self.organisation_member,
             officiele_titel="title two",
             verkorte_titel="two",
             omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -48,9 +58,14 @@ class TestDocumentAdmin(WebTest):
     def test_document_admin_search(self):
         publication = PublicationFactory.create()
         publication2 = PublicationFactory.create()
+        org_member_1 = OrganisationMemberFactory.create(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
+                eigenaar=org_member_1,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -60,6 +75,7 @@ class TestDocumentAdmin(WebTest):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document2 = DocumentFactory.create(
                 publicatie=publication2,
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -126,12 +142,20 @@ class TestDocumentAdmin(WebTest):
             self.assertContains(search_response, "field-identifier", 1)
             self.assertContains(search_response, document.identifier, 1)
 
+        with self.subTest("filter on owner identifier"):
+            form["q"] = org_member_1.identifier
+            search_response = form.submit()
+
+            self.assertEqual(search_response.status_code, 200)
+            self.assertContains(search_response, "field-identifier", 1)
+            self.assertContains(search_response, document.identifier, 1)
+
     def test_document_admin_list_filters(self):
         self.app.set_user(user=self.user)
-
         with freeze_time("2024-09-24T12:00:00-00:00"):
             DocumentFactory.create(
                 publicatiestatus=PublicationStatusOptions.published,
+                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -141,6 +165,7 @@ class TestDocumentAdmin(WebTest):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document2 = DocumentFactory.create(
                 publicatiestatus=PublicationStatusOptions.concept,
+                eigenaar=self.organisation_member,
                 officiele_titel="title two",
                 verkorte_titel="two",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
@@ -238,9 +263,11 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 str(added_item.soort_handeling), DocumentActionTypeOptions.declared
             )
+            self.assertEqual(added_item.eigenaar, self.organisation_member)
 
         with self.subTest("complete data"):
             form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+            form["eigenaar"].select(text=str(self.organisation_member))
             form["publicatie"] = publication.id
             form["identifier"] = identifier
             form["officiele_titel"] = "The official title of this document"
@@ -266,6 +293,7 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 added_item.publicatiestatus, PublicationStatusOptions.concept
             )
+            self.assertEqual(added_item.eigenaar, self.organisation_member)
             self.assertEqual(added_item.publicatie, publication)
             self.assertEqual(added_item.identifier, identifier)
             self.assertEqual(
@@ -331,6 +359,10 @@ class TestDocumentAdmin(WebTest):
         )
 
     def test_document_admin_update(self):
+        org_member_1 = OrganisationMemberFactory(
+            identifier="test-identifier",
+            naam="test-naam",
+        )
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
                 officiele_titel="title one",
@@ -350,6 +382,7 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms["document_form"]
         form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["eigenaar"].select(text=str(org_member_1))
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "changed official title"
@@ -364,6 +397,7 @@ class TestDocumentAdmin(WebTest):
 
         document.refresh_from_db()
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.concept)
+        self.assertEqual(document.eigenaar, org_member_1)
         self.assertEqual(document.publicatie, publication)
         self.assertEqual(document.identifier, identifier)
         self.assertEqual(document.officiele_titel, "changed official title")
@@ -665,3 +699,97 @@ class TestDocumentAdmin(WebTest):
             mock_remove_document_from_index_delay.assert_any_call(
                 document_id=doc.pk, force=True
             )
+
+    def test_change_owner_action(self):
+        org_member_1 = OrganisationMemberFactory.create(
+            naam="test-naam", identifier="test-identifier"
+        )
+        doc1 = DocumentFactory.create(eigenaar=self.organisation_member)
+        doc2 = DocumentFactory.create(eigenaar=self.organisation_member)
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+
+        form = changelist.forms["changelist-form"]
+        form["_selected_action"] = [doc1.pk, doc2.pk]
+        form["action"] = "change_owner"
+
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 200)
+
+        with self.subTest("no data supplied"):
+            confirmation_form = response.forms[1]
+
+            error_response = confirmation_form.submit()
+            self.assertFormError(
+                error_response.context["form"],
+                None,
+                _("You need to provide a valid 'owner' or 'identifier' and 'name'."),
+            )
+
+        with self.subTest("only identifier supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = "admin@admin.admin"
+            confirmation_form["naam"] = ""
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"], "naam", _("This field is required.")
+            )
+
+        with self.subTest("only naam supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = ""
+            confirmation_form["naam"] = "admin@admin.admin"
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"],
+                "identifier",
+                _("This field is required."),
+            )
+
+        with self.subTest("identifier and naam supplied"):
+            self.assertFalse(
+                OrganisationMember.objects.filter(
+                    identifier="admin@admin.admin", naam="admin"
+                ).exists()
+            )
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].force_value([])
+            confirmation_form["identifier"] = "admin@admin.admin"
+            confirmation_form["naam"] = "admin"
+            confirmation_form.submit()
+
+            doc1.refresh_from_db()
+            doc2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+
+            org_member_2 = OrganisationMember.objects.get(
+                identifier="admin@admin.admin", naam="admin"
+            )
+
+            self.assertEqual(doc1.eigenaar, org_member_2)
+            self.assertEqual(doc2.eigenaar, org_member_2)
+
+        with self.subTest("eigenaar supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar"].select(text=str(org_member_1))
+            confirmation_form["identifier"] = ""
+            confirmation_form["naam"] = ""
+
+            confirmation_form.submit()
+
+            doc1.refresh_from_db()
+            doc2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(doc1.eigenaar, org_member_1)
+            self.assertEqual(doc2.eigenaar, org_member_1)

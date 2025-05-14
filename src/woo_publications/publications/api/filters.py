@@ -6,7 +6,6 @@ from django_filters.rest_framework import FilterSet, filters
 from django_filters.widgets import CSVWidget
 
 from woo_publications.constants import ArchiveNominationChoices
-from woo_publications.logging.service import OwnerFilter
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 
@@ -92,8 +91,10 @@ class DocumentFilterSet(FilterSet):
         field_name="laatst_gewijzigd_datum",
         lookup_expr="lte",
     )
-    eigenaar = OwnerFilter(
+    eigenaar = filters.CharFilter(
         help_text=_("Filter documents based on the owner identifier of the object."),
+        field_name="eigenaar__identifier",
+        lookup_expr="exact",
     )
     publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter documents based on the publication status."),
@@ -150,8 +151,10 @@ class PublicationFilterSet(FilterSet):
         help_text=_("Searches publications based on the official and short title."),
         method="search_official_and_short_title",
     )
-    eigenaar = OwnerFilter(
+    eigenaar = filters.CharFilter(
         help_text=_("Filter publications based on the owner identifier of the object."),
+        field_name="eigenaar__identifier",
+        lookup_expr="exact",
     )
     publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter publications based on the publication status."),

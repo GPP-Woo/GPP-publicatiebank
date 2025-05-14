@@ -1,8 +1,16 @@
+from typing import TypedDict
+
 from django.db import transaction
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 
+from woo_publications.accounts.models import OrganisationMember
+from woo_publications.api.drf_spectacular.headers import (
+    AUDIT_USER_ID_PARAMETER,
+    AUDIT_USER_REPRESENTATION_PARAMETER,
+)
 from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.service import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
@@ -11,19 +19,52 @@ from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
 
 
-class EigenaarSerializer(serializers.Serializer):
+class OwnerData(TypedDict):
+    naam: str
+    identifier: str
+
+
+def update_or_create_organisation_member(
+    request: HttpRequest, details: OwnerData | None = None
+):
+    if details is None:
+        details = {
+            "identifier": request.headers[AUDIT_USER_ID_PARAMETER.name],
+            "naam": request.headers[AUDIT_USER_REPRESENTATION_PARAMETER.name],
+        }
+    return OrganisationMember.objects.get_and_sync(**details)
+
+
+class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
     weergave_naam = serializers.CharField(
-        source="display_name",
-        read_only=True,
-        help_text=_("The display name of the user, as recorded in the audit trails."),
+        source="naam",
+        help_text=_("The display name of the user."),
     )
-    identifier = serializers.CharField(
-        read_only=True,
-        help_text=_(
-            "The system identifier that uniquely identifies the user performing "
-            "the action."
-        ),
-    )
+
+    class Meta:  # pyright: ignore
+        model = OrganisationMember
+        fields = (
+            "identifier",
+            "weergave_naam",
+        )
+        # Removed the none basic validators which are getting in the way for
+        # update_or_create
+        extra_kwargs = {"identifier": {"validators": []}}
+
+    def validate(self, attrs):
+        has_naam = bool(attrs.get("naam"))
+        has_identifier = bool(attrs.get("identifier"))
+
+        # added custom validator to check if both are present or not in case
+        if has_naam != has_identifier:
+            raise serializers.ValidationError(
+                _(
+                    "The fields 'naam' and 'weergaveNaam' has to be both "
+                    "present or excluded."
+                )
+            )
+
+        return super().validate(attrs)
 
 
 class FilePartSerializer(serializers.Serializer[FilePart]):
@@ -119,11 +160,14 @@ class DocumentSerializer(serializers.ModelSerializer):
         max_length=1,  # pyright: ignore[reportCallIssue]
     )
     eigenaar = EigenaarSerializer(
-        source="get_owner",
         label=_("owner"),
-        help_text=_("The creator of the document, derived from the audit logs."),
+        help_text=_(
+            "The creator of the document, derived from the audit headers.\n"
+            "Disclaimer**: If you use this field during creation/updating actions the "
+            "owner data will differ from the audit headers provided during creation."
+        ),
         allow_null=True,
-        read_only=True,
+        required=False,
     )
 
     class Meta:  # pyright: ignore
@@ -171,6 +215,22 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         return value
 
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if "eigenaar" in validated_data:
+            eigenaar = validated_data.pop("eigenaar")
+            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
+                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
+            )
+        return super().update(instance, validated_data)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
+        )
+        return super().create(validated_data)
+
 
 class DocumentUpdateSerializer(DocumentSerializer):
     publicatie = serializers.SlugRelatedField(
@@ -208,11 +268,14 @@ class DocumentUpdateSerializer(DocumentSerializer):
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
     eigenaar = EigenaarSerializer(
-        source="get_owner",
         label=_("owner"),
-        help_text=_("The creator of the publication, derived from the audit logs."),
+        help_text=_(
+            "The creator of the document, derived from the audit headers.\n"
+            "Disclaimer**: If you use this field during creation/updating actions the "
+            "owner data will differ from the audit headers provided during creation."
+        ),
         allow_null=True,
-        read_only=True,
+        required=False,
     )
     informatie_categorieen = serializers.SlugRelatedField(
         queryset=InformationCategory.objects.all(),
@@ -386,6 +449,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
         apply_retention = False
 
+        if "eigenaar" in validated_data:
+            eigenaar = validated_data.pop("eigenaar")
+            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
+                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
+            )
+
         if informatie_categorieen := validated_data.get("informatie_categorieen"):
             old_informatie_categorieen_set = {
                 ic.uuid for ic in instance.informatie_categorieen.all()
@@ -413,6 +482,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     @transaction.atomic
     def create(self, validated_data):
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
+        )
         publication = super().create(validated_data)
         publication.apply_retention_policy()
         return publication

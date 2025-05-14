@@ -1,4 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from django.contrib.auth.models import BaseUserManager
+from django.db import models, transaction
+
+if TYPE_CHECKING:
+    from .models import OrganisationMember
 
 
 class UserManager(BaseUserManager):
@@ -32,3 +40,10 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
 
         return self._create_user(username, email, password, **extra_fields)
+
+
+class OrganisationMemberManager(models.Manager["OrganisationMember"]):
+    @transaction.atomic
+    def get_and_sync(self, identifier: str, naam: str) -> OrganisationMember:
+        obj, _ = self.update_or_create(identifier=identifier, defaults={"naam": naam})
+        return obj

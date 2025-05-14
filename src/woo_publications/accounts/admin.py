@@ -11,7 +11,7 @@ from hijack.contrib.admin import HijackUserAdminMixin
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .forms import PreventPrivilegeEscalationMixin, UserChangeForm
-from .models import User
+from .models import OrganisationMember, User
 from .utils import validate_max_user_permissions
 
 
@@ -58,3 +58,10 @@ class UserAdmin(AdminAuditLogMixin, HijackUserAdminMixin, _UserAdmin):
             '<a href="{}">{}</a>',
             actions,
         )
+
+
+@admin.register(OrganisationMember)
+class OrganisationMemberAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    list_display = ("identifier", "naam")
+    search_fields = ("identifier",)
+    readonly_fields = ("identifier",)

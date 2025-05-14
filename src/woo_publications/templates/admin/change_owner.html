@@ -1,0 +1,128 @@
+{% extends "admin/change_form.html" %}
+{% load i18n l10n admin_urls static django_admin_index %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-owner-confirmation change-owner-selected-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+{% admin_index_settings as admin_index_settings %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+{# NOTE: Remove app groups if needed #}
+{% if not admin_index_settings.HIDE_APP_INDEX_PAGES %}
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+{% endif %}
+{% block breadcrumbs_pre_changelist %}{% endblock %}
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% translate 'Change owner' %}
+</div>
+{% endblock %}
+
+{% block content %}
+    <fieldset class="module aligned ">
+        <p>{% blocktranslate trimmed %}Are you sure you want to change the owner of the selected {{ objects_name }}? All of the following objects will have their owner changed:{% endblocktranslate %}</p>
+        <ul>
+            {% for changeable_object in changeable_objects %}
+                <li>{{ changeable_object }}</li>
+            {% endfor %}
+        </ul>
+        <hr />
+    </fieldset>
+
+    <fieldset class="module aligned delete-confirmation">
+        {% blocktranslate trimmed %}
+        <p>
+            Please specify the new owner here. There are two possible ways to do this:
+        </p>
+        <ol>
+            <li>Select an existing owner in the dropdown</li>
+            <li>Create a new owner by specifying their identifier and display name in the text fields</li>
+        </ol>
+        {% endblocktranslate %}
+
+        <form method="post">{% csrf_token %}
+            <div>
+                {% if form.errors %}
+                    <p class="errornote">
+                    {% blocktranslate %}Please correct the error(s) below.{% endblocktranslate %}
+                    </p>
+                    {{ form.non_field_errors }}
+                {% endif %}
+
+                <fieldset class="module aligned">
+                    <h2>{% translate 'Existing owner' %}</h2>
+                    <div class="form-row field-{{ form.eigenaar.name }}">
+                        {% if form.eigenaar.errors %}
+                            {{ form.eigenaar.errors }}
+                        {% endif %}
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_{{ form.eigenaar.name }}">{{ form.eigenaar.label }}: </label>
+                                {{ form.eigenaar }}
+                            </div>
+                            {% if form.eigenaar.help_text %}
+                                <div class="help" id="id_{{ form.eigenaar.name }}_helptext">
+                                    <div>{{ form.eigenaar.help_text }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <h2>{% translate 'New owner' %}</h2>
+                    <div class="form-row field-{{ form.identifier.name }}">
+                        {% if form.identifier.errors %}
+                            {{ form.identifier.errors }}
+                        {% endif %}
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_{{ form.identifier.name }}">{{ form.identifier.label }}: </label>
+                                {{ form.identifier }}
+                            </div>
+                            {% if form.identifier.help_text %}
+                                <div class="help" id="id_{{ form.identifier.name }}_helptext">
+                                    <div>{{ form.identifier.help_text }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-row field-{{ form.naam.name }}">
+                        {% if form.naam.errors %}
+                            {{ form.naam.errors }}
+                        {% endif %}
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_{{ form.naam.name }}">{{ form.naam.label }}: </label>
+                                {{ form.naam }}
+                            </div>
+                            {% if form.naam.help_text %}
+                                <div class="help" id="id_{{ form.naam.name }}_helptext">
+                                    <div>{{ form.naam.help_text }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div>
+                {% for obj in queryset %}
+                    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+                {% endfor %}
+
+                <input type="hidden" name="action" value="change_owner">
+                <input type="hidden" name="post" value="yes">
+
+                <div>
+                    <input type="submit" value="{% translate 'Yes, I’m sure' %}">
+                    <a href="#" class="button cancel-link">{% translate "No, take me back" %}</a>
+                </div>
+            </div>
+        </form>
+    </fieldset>
+
+{% endblock %}

@@ -10,6 +10,6 @@ pyquery
 tblib
 vcrpy
 zgw-consumers[testutils]
-
+django-test-migrations
 # Code formatting
 ruff

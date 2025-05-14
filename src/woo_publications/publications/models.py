@@ -26,7 +26,6 @@ from woo_publications.contrib.documents_api.client import (
 )
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import (
-    ModelOwnerMixin,
     audit_admin_update,
     audit_api_update,
 )
@@ -124,7 +123,7 @@ class Topic(models.Model):
             )
 
 
-class Publication(ModelOwnerMixin, models.Model):
+class Publication(models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -178,6 +177,14 @@ class Publication(ModelOwnerMixin, models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+    )
+    eigenaar = models.ForeignKey(
+        "accounts.OrganisationMember",
+        verbose_name=_("owner"),
+        help_text=_(
+            "The owner of this publication from gpp-app or gpp-publicatiebank."
+        ),
+        on_delete=models.PROTECT,
     )
     officiele_titel = models.CharField(
         _("official title"),
@@ -346,7 +353,7 @@ class Publication(ModelOwnerMixin, models.Model):
         )
 
 
-class Document(ModelOwnerMixin, models.Model):
+class Document(models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -362,6 +369,12 @@ class Document(ModelOwnerMixin, models.Model):
             "zero or more documents."
         ),
         on_delete=models.CASCADE,
+    )
+    eigenaar = models.ForeignKey(
+        "accounts.OrganisationMember",
+        verbose_name=_("owner"),
+        help_text=_("The owner of this document from gpp-app or gpp-publicatiebank."),
+        on_delete=models.PROTECT,
     )
     identifier = models.CharField(
         _("identifier"),
