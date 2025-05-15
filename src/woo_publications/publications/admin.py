@@ -334,13 +334,13 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "publisher",
                     "verantwoordelijke",
                     "opsteller",
-                    "eigenaar",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
                     "publicatiestatus",
                     "registratiedatum",
                     "laatst_gewijzigd_datum",
+                    "eigenaar",
                     "uuid",
                 )
             },
@@ -564,7 +564,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 "fields": (
                     "publicatie",
                     "identifier",
-                    "eigenaar",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
@@ -575,6 +574,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "publicatiestatus",
                     "registratiedatum",
                     "laatst_gewijzigd_datum",
+                    "eigenaar",
                     "uuid",
                 )
             },
