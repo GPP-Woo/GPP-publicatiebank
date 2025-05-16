@@ -361,6 +361,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     autocomplete_fields = (
         "informatie_categorieen",
         "onderwerpen",
+        "eigenaar",
     )
     raw_id_fields = (
         "publisher",
@@ -622,6 +623,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "creatiedatum",
         "publicatiestatus",
     )
+    autocomplete_fields = ("eigenaar",)
     date_hierarchy = "registratiedatum"
     actions = [sync_to_index, remove_from_index, revoke, change_owner]
 

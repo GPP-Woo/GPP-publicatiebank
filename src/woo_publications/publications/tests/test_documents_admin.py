@@ -382,7 +382,7 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms["document_form"]
         form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
-        form["eigenaar"].select(text=str(org_member_1))
+        form["eigenaar"].force_value([org_member_1.pk])
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "changed official title"

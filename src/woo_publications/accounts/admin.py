@@ -64,6 +64,7 @@ class UserAdmin(AdminAuditLogMixin, HijackUserAdminMixin, _UserAdmin):
 class OrganisationMemberAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = ("identifier", "naam")
     search_fields = ("identifier",)
+    ordering = ("naam",)
 
     def get_readonly_fields(self, request, obj=None):
         read_only_fields = super().get_readonly_fields(request, obj)
