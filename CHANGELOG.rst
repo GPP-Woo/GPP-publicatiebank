@@ -2,8 +2,30 @@
 Release notes
 =============
 
-1.1.1 (2025-05-02)
+1.2.0 (2025-05-20)
 ==================
+
+Features
+--------
+
+* Added Topics to the project which can be used to define extra information about Publications.
+  The Topic information can be promoted on the gpp-app.
+* Added archiving fields (retention) for publications. Based on the configured retention logic in the
+  Information Categories determines when linked publications will be archived/deposed.
+* The owner of Documents/Publications can now be changed.
+* Added bulk revoke and change owner actions in the admin for publications and documents.
+
+Project maintenance
+-------------------
+
+* Switched code quality tools to Ruff.
+* Simplified documentation test tools.
+* Added upgrade-check mechanism for "hard stops".
+* Upgraded framework version to next LTS release.
+  *Warning: this upgrade dropped support for PostgreSQL 13*
+
+1.1.1-rc.0 (2025-05-02)
+=======================
 
 Bugfix release.
 
@@ -77,7 +99,7 @@ Features
       and themes.
     - Manage publications and documents, where a publication acts as a container for one
       or more documents.
-    - Manage API clients and user acocunts.
+    - Manage API clients and user accounts.
     - View (audit) logs for actions performed on/related to publications.
     - Configure connections to external services, like a Documents API and OpenID
       Connect provider.
