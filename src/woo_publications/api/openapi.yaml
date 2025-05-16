@@ -1872,6 +1872,9 @@ components:
           description: |-
             The creator of the document, derived from the audit headers.
             Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+
+            De creator van het document, ingevuld van de audit headers.
+            Pas op**: Als je het veld gebruikt tijdens het aanmaken/updaten van het object, dan zal de eigenaar informatie anders zijn van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2003,6 +2006,9 @@ components:
           description: |-
             The creator of the document, derived from the audit headers.
             Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+
+            De creator van het document, ingevuld van de audit headers.
+            Pas op**: Als je het veld gebruikt tijdens het aanmaken/updaten van het object, dan zal de eigenaar informatie anders zijn van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2396,6 +2402,9 @@ components:
           description: |-
             The creator of the document, derived from the audit headers.
             Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+
+            De creator van het document, ingevuld van de audit headers.
+            Pas op**: Als je het veld gebruikt tijdens het aanmaken/updaten van het object, dan zal de eigenaar informatie anders zijn van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2522,6 +2531,9 @@ components:
           description: |-
             The creator of the document, derived from the audit headers.
             Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+
+            De creator van het document, ingevuld van de audit headers.
+            Pas op**: Als je het veld gebruikt tijdens het aanmaken/updaten van het object, dan zal de eigenaar informatie anders zijn van de audit headers.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2658,6 +2670,9 @@ components:
           description: |-
             The creator of the document, derived from the audit headers.
             Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+
+            De creator van het document, ingevuld van de audit headers.
+            Pas op**: Als je het veld gebruikt tijdens het aanmaken/updaten van het object, dan zal de eigenaar informatie anders zijn van de audit headers.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
