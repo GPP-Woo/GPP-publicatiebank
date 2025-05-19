@@ -484,7 +484,7 @@ class TestPublicationsAdmin(WebTest):
         with self.subTest("complete data updates publication"):
             form["informatie_categorieen"].select_multiple(texts=[ic.naam])
             form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
-            form["eigenaar"].select(text=str(org_member_1))
+            form["eigenaar"].force_value([org_member_1.pk])
             form["publisher"] = str(organisation2.pk)
             form["verantwoordelijke"] = str(organisation2.pk)
             form["opsteller"] = str(organisation2.pk)
