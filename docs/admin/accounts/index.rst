@@ -129,33 +129,48 @@ velden **dikgedrukt** weergegeven.
 * ``Rechten``. De mogelijke rechten op objecten die in de beheeromgeving zichtbaar zijn,
   typisch onderverdeeld in *toevoegen*, *wijzigen*, *verwijderen* en *inzien*.
 
-Organisatie Leden
------------------
+Organisatieleden
+----------------
 
-Een *organisatie lid* bestaat uit twee velden `identifier` en `naam`.
-Hiermee kunnen we de eigenaren van documenten en publicaties bijhouden van gpp-app en gpp-publicatiebank.
+Een *organisatielid* bevat de minimale velden om een medewerker te kunnen relateren: de
+unieke identificatie en de weergavenaam. Organisatieleden zijn eigenaars van publicaties
+en documenten. De gegevens worden gevuld via de beheeromgeving of (automatisch) via de
+GPP-app.
 
-In het beheerscherm van de *organisatie leden* wordt een lijst getoond van alle *organisatie leden*-registraties.
-Op dit scherm zijn de volgende acties mogelijk:
+In het beheerscherm van de *organisatieleden* zie je een lijst van alle
+*organisatieleden*-registraties. Op dit scherm zijn de volgende acties mogelijk:
 
-* Rechtboven zit een knop **organisatie lid toevoegen** waarmee een registratie toegevoegd kan worden.
-* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment wordt de actie **Geselecteerde documenten verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *organisatie lid*-registraties aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *organisatie lid*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Rechtboven zit een knop **organisatielid toevoegen** waarmee een medewerker toegevoegd
+  kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht
+  kan worden.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**.
+  Op dit moment wordt de actie **Geselecteerde documenten verwijderen** ondersteund.
+  Merk op dat het mogelijk is om in de lijst één of meerdere *organisatielid*-registraties
+  aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *organisatielid*-registraties. Door op de
+  kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
 
-Wanneer bij een *organisatie lid*-registratie op  de `identifier` wordt geklikt, wordt een scherm geopend met de *document*-details.
-Hierop zien we:
+Wanneer bij een *organisatielid*-registratie op  de `identificatie` wordt geklikt, wordt
+een scherm geopend met de *medewerker*-details. Hierop zien we:
 
 * **Alle metadatavelden**. Deze lichten we hieronder toe.
-* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *organisatie lid*-registratie.
-* Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de Admin-interface zijn uitgevoerd op de registratie.
-* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige
+  :ref:`audit trail<admin_logging_index>` van de *organisatielid*-registratie.
+* Rechtsboven een knop **Geschiedenis**. Deze toont de beheerhandelingen die vanuit de
+  Admin-interface zijn uitgevoerd op de registratie.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden
+  om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige
+  registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
 
-Op een *organisatie lid*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
+Op een *organisatielid*-registratie zijn de volgende metadata beschikbaar. Op het scherm
+worden verplichte velden **dikgedrukt** weergegeven.
 
-* ``Idenitfier``. Het unieke kenmerk dat intern aan het *organisatie lid* is toegekend.
-* ``Naam``. De weergave naam van een *organisatie lid*.
+* ``Identificatie``. Het unieke kenmerk dat intern aan het *organisatielid* is toegekend.
+  Deze kan je niet wijzigen voor bestaande objecten. De waarde moet uit de
+  inlogvoorziening van de organisatie komen.
+* ``Naam``. De weergavenaam van een *organisatielid*.
 
 TOTP devices
 ------------
