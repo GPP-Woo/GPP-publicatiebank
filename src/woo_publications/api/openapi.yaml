@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: WOO Publications
-  version: 1.0.0
+  version: 1.1.0
   description: |2
 
     ## Documentatie
@@ -1870,8 +1870,9 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
           description: |-
-            The creator of the document, derived from the audit headers.
-            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2001,8 +2002,9 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
           description: |-
-            The creator of the document, derived from the audit headers.
-            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2057,7 +2059,7 @@ components:
           maxLength: 255
         weergaveNaam:
           type: string
-          description: The display name of the user.
+          description: De weergavenaam van de gebruiker.
       required:
       - identifier
       - weergaveNaam
@@ -2394,8 +2396,9 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
           description: |-
-            The creator of the document, derived from the audit headers.
-            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2520,8 +2523,9 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
           description: |-
-            The creator of the document, derived from the audit headers.
-            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2656,8 +2660,9 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           nullable: true
           description: |-
-            The creator of the document, derived from the audit headers.
-            Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation.
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'

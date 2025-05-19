@@ -27,6 +27,7 @@ The backend contains the storage and exposes the API.
    =============== ===========
    Backend version API version
    =============== ===========
+   1.2.0           1.1.0
    1.1.0           1.0.0
    1.0.0           1.0.0
    =============== ===========
@@ -109,5 +110,5 @@ GPP-zoeken manages the search index to facilitate full text and faceted search.
    =============== ==========================
    GPP-zoeken API  Status
    =============== ==========================
-   1.0.0-rc.0      Tested in CI
+   2.0.0-rc.0      Tested in CI
    =============== ==========================
