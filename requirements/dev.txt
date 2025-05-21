@@ -170,6 +170,7 @@ django==5.2.1
     #   django-extensions
     #   django-filter
     #   django-formtools
+    #   django-fsm-2
     #   django-hijack
     #   django-jsonform
     #   django-log-outgoing-requests
@@ -250,6 +251,10 @@ django-formtools==2.5.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django-two-factor-auth
+django-fsm-2==4.0.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 django-hijack==3.6.0
     # via
     #   -c requirements/ci.txt
