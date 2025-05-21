@@ -44,7 +44,7 @@ from .tasks import (
 
 
 @admin.action(
-    description="Change %(verbose_name_plural)s owner(s)", permissions=["change"]
+    description=_("Change %(verbose_name_plural)s owner(s)"), permissions=["change"]
 )
 def change_owner(
     modeladmin: PublicationAdmin | DocumentAdmin,

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.2.0-rc.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-19 17:55+0200\n"
-"PO-Revision-Date: 2025-05-19 18:30+0200\n"
+"POT-Creation-Date: 2025-05-21 10:11+0200\n"
+"PO-Revision-Date: 2025-05-21 10:15+0200\n"
 "Last-Translator:   <sergei.maertens@maykinmedia.nl>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -104,8 +104,6 @@ msgstr ""
 
 #: woo_publications/accounts/models.py:88
 #: woo_publications/publications/api/serializers.py:41
-#| msgid ""
-#| "The display name of the user, as recorded in the audit trails."
 msgid "The display name of the user."
 msgstr "De weergavenaam van de gebruiker."
 
@@ -654,6 +652,12 @@ msgstr "Voorpagina"
 msgid "resource URI"
 msgstr "resource-URI"
 
+#: woo_publications/publications/admin.py:47
+#, python-format
+#| msgid "revoke the selected %(verbose_name_plural)s"
+msgid "Change %(verbose_name_plural)s owner(s)"
+msgstr "Wijzig de eigenaar van de geselecteerde %(verbose_name_plural)s"
+
 #: woo_publications/publications/admin.py:92
 #, python-format
 msgid "Successfully changed %(count)d owner(s) of %(items)s."
@@ -661,7 +665,6 @@ msgstr "De eigenaar van %(count)d %(items)s is met succes gewijzigd."
 
 #: woo_publications/publications/admin.py:105
 #: woo_publications/templates/admin/change_owner.html:22
-#| msgid "Change password"
 msgid "Change owner"
 msgstr "Eigenaar wijzigen"
 
@@ -703,17 +706,11 @@ msgstr[1] ""
 
 #: woo_publications/publications/admin.py:247
 #, python-format
-#| msgid ""
-#| "Remove the selected %(verbose_name_plural)s from the search index"
 msgid "revoke the selected %(verbose_name_plural)s"
-msgstr "trek de geselecteerde %(verbose_name_plural)s in"
+msgstr "Trek de geselecteerde %(verbose_name_plural)s in"
 
 #: woo_publications/publications/admin.py:294
 #, python-brace-format
-#| msgid ""
-#| "{count} {verbose_name} object scheduled for background processing."
-#| msgid_plural ""
-#| "{count} {verbose_name} objects scheduled for background processing."
 msgid "{count} {verbose_name} object revoked."
 msgid_plural "{count} {verbose_name} objects revoked."
 msgstr[0] "{count} {verbose_name}-object ingetrokken."
@@ -1343,12 +1340,10 @@ msgid "Declared"
 msgstr "Vastgesteld"
 
 #: woo_publications/publications/forms.py:9
-#| msgid "owner"
 msgid "Owner"
 msgstr "Eigenaar"
 
 #: woo_publications/publications/forms.py:14
-#| msgid "identifier"
 msgid "Identifier"
 msgstr "Identificatie"
 
@@ -1672,7 +1667,6 @@ msgid "Existing owner"
 msgstr "Bestaande eigenaar"
 
 #: woo_publications/templates/admin/change_owner.html:76
-#| msgid "owner"
 msgid "New owner"
 msgstr "Nieuwe eigenaar"
 
@@ -1789,7 +1783,6 @@ msgid "Last year"
 msgstr "Vorig Jaar"
 
 #: woo_publications/utils/admin.py:16
-#| msgid "creation date"
 msgid "No date"
 msgstr "Geen datum"
 
