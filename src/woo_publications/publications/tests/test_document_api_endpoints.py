@@ -1088,6 +1088,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             "verkorteTitel": "changed verkorte_title",
             "omschrijving": "changed omschrijving",
             "publicatiestatus": PublicationStatusOptions.published,
+            "creatiedatum": "2008-02-23",
         }
 
         detail_url = reverse(
@@ -1107,6 +1108,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response_data["publicatiestatus"], PublicationStatusOptions.published
         )
+        self.assertEqual(response_data["creatiedatum"], "2008-02-23")
 
     def test_partial_update_document(self):
         document = DocumentFactory.create(
