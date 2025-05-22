@@ -257,12 +257,17 @@ class DocumentUpdateSerializer(DocumentSerializer):
                 "verkorte_titel",
                 "omschrijving",
                 "publicatiestatus",
+                "eigenaar",
+                "creatiedatum",
             )
         ]
         extra_kwargs = {
             "officiele_titel": {
                 "required": False,
-            }
+            },
+            "creatiedatum": {
+                "required": False,
+            },
         }
 
 

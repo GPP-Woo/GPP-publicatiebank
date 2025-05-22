@@ -1980,7 +1980,6 @@ components:
         creatiedatum:
           type: string
           format: date
-          readOnly: true
           description: De datum waarop het document ontstaan is. Niet te verwarren
             met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
         bestandsformaat:
@@ -2041,7 +2040,6 @@ components:
       - bestandsformaat
       - bestandsnaam
       - bestandsomvang
-      - creatiedatum
       - documenthandelingen
       - identifier
       - laatstGewijzigdDatum
@@ -2374,7 +2372,6 @@ components:
         creatiedatum:
           type: string
           format: date
-          readOnly: true
           description: De datum waarop het document ontstaan is. Niet te verwarren
             met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
         bestandsformaat:
