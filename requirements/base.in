@@ -13,6 +13,7 @@ django-solo
 django-timeline-logger
 django-treebeard
 django-upgrade-check
+django-fsm-2
 
 # DRF & other API tooling
 open-api-framework
