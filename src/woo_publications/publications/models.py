@@ -769,9 +769,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         ),
         target=PublicationStatusOptions.published,
     )
-    def published(self, document_id: int | None = None):
+    def published(self, publicatie_id: int | None = None):
         try:
-            publicatie = Publication.objects.get(id=document_id)
+            publicatie = Publication.objects.get(id=publicatie_id)
         except Publication.DoesNotExist as err:
             raise TransitionNotAllowed(_("No publication found.")) from err
 
@@ -790,9 +790,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         source=PublicationStatusOptions.published,
         target=PublicationStatusOptions.revoked,
     )
-    def revoked(self, document_id: int | None = None):
+    def revoked(self, publicatie_id: int | None = None):
         try:
-            publicatie = Publication.objects.get(id=document_id)
+            publicatie = Publication.objects.get(id=publicatie_id)
         except Publication.DoesNotExist as err:
             raise TransitionNotAllowed(_("No publication found.")) from err
 
@@ -814,9 +814,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         ),
         target=PublicationStatusOptions.concept,
     )
-    def concept(self, document_id: int | None = None):
+    def concept(self, publicatie_id: int | None = None):
         try:
-            publicatie = Publication.objects.get(id=document_id)
+            publicatie = Publication.objects.get(id=publicatie_id)
         except Publication.DoesNotExist as err:
             raise TransitionNotAllowed(_("No publication found.")) from err
 

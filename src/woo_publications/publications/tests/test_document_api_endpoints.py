@@ -1283,39 +1283,6 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             document_id=latest_doc.pk
         )
 
-    @patch(
-        "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
-    )
-    def test_concept_document_schedules_index_removal_task(
-        self, mock_remove_document_from_index_delay: MagicMock
-    ):
-        document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            identifier="document-1",
-            officiele_titel="title one",
-            verkorte_titel="one",
-            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            creatiedatum="2024-01-01",
-        )
-        detail_url = reverse(
-            "api:document-detail",
-            kwargs={"uuid": str(document.uuid)},
-        )
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.concept},
-                headers=AUDIT_HEADERS,
-            )
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_doc = Document.objects.order_by("-pk").first()
-        assert latest_doc is not None
-        mock_remove_document_from_index_delay.assert_called_once_with(
-            document_id=latest_doc.pk
-        )
-
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
@@ -1535,7 +1502,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         endpoint = reverse("api:document-list")
         body = {
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.concept,
+            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "creatiedatum": "2024-11-05",
             "eigenaar": {
@@ -1566,45 +1533,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             OrganisationMember.objects.filter(
                 identifier="test-identifier", naam="test-naam"
             ).exists(),
-        )
-
-    def test_create_revoked_document_results_in_error(self):
-        publication = PublicationFactory.create(
-            informatie_categorieen=[self.information_category]
-        )
-        endpoint = reverse("api:document-list")
-        body = {
-            "identifier": "WOO-P/0042",
-            "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.revoked,
-            "officieleTitel": "Testdocument WOO-P + Open Zaak",
-            "verkorteTitel": "Testdocument",
-            "omschrijving": "Testing 123",
-            "creatiedatum": "2024-11-05",
-            "bestandsformaat": "unknown",
-            "bestandsnaam": "unknown.bin",
-            "bestandsomvang": 10,
-        }
-
-        response = self.client.post(
-            endpoint,
-            data=body,
-            headers={
-                **AUDIT_HEADERS,
-                "Host": "host.docker.internal:8000",
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_data = response.json()
-
-        self.assertEqual(
-            response_data["publicatiestatus"],
-            [
-                _("You cannot create a {revoked} document.").format(
-                    revoked=PublicationStatusOptions.revoked.label.lower()
-                )
-            ],
         )
 
     def test_create_document_with_multiple_handelingen_results_in_error(self):

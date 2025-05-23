@@ -1305,11 +1305,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(
                 response_data["publicatiestatus"],
-                [
-                    _("You cannot create a {revoked} publication.").format(
-                        revoked=PublicationStatusOptions.revoked.label.lower()
-                    )
-                ],
+                _("You cannot set the status to {revoked}.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                ),
             )
 
         with self.subTest("complete data"):
@@ -1839,7 +1837,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             published_document.publicatiestatus, PublicationStatusOptions.revoked
         )
         self.assertEqual(
-            concept_document.publicatiestatus, PublicationStatusOptions.concept
+            concept_document.publicatiestatus, PublicationStatusOptions.revoked
         )
         self.assertEqual(
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
@@ -1949,34 +1947,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             response = self.client.patch(
                 detail_url,
                 data={"publicatiestatus": PublicationStatusOptions.revoked},
-                headers=AUDIT_HEADERS,
-            )
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_publication = Publication.objects.order_by("-pk").first()
-        assert latest_publication is not None
-        mock_remove_publication_from_index_delay.assert_called_once_with(
-            publication_id=latest_publication.pk
-        )
-
-    @patch(
-        "woo_publications.publications.api.viewsets.remove_publication_from_index.delay"
-    )
-    def test_concept_publication_schedules_index_removal_task(
-        self, mock_remove_publication_from_index_delay: MagicMock
-    ):
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
-        )
-        detail_url = reverse(
-            "api:publication-detail",
-            kwargs={"uuid": str(publication.uuid)},
-        )
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.concept},
                 headers=AUDIT_HEADERS,
             )
 

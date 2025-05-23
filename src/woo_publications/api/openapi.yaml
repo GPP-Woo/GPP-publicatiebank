@@ -396,6 +396,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DocumentUpdate'
+        required: true
       security:
       - tokenAuth: []
       responses:
@@ -1910,6 +1911,7 @@ components:
       - laatstGewijzigdDatum
       - officieleTitel
       - publicatie
+      - publicatiestatus
       - registratiedatum
       - uuid
     DocumentAction:
@@ -2046,6 +2048,7 @@ components:
       - identifier
       - laatstGewijzigdDatum
       - publicatie
+      - publicatiestatus
       - registratiedatum
       - uuid
     Eigenaar:

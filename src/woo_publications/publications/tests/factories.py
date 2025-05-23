@@ -10,6 +10,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
+from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 
 TEST_IMG_PATH = (
@@ -25,6 +26,7 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
     publisher = factory.SubFactory(OrganisationFactory, is_actief=True)
     eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
+    publicatiestatus = PublicationStatusOptions.published
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -61,6 +63,7 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
     creatiedatum = factory.Faker("past_date")
+    publicatiestatus = PublicationStatusOptions.published
 
     class Meta:  # pyright: ignore
         model = Document
