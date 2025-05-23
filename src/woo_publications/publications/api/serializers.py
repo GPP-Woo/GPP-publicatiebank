@@ -4,7 +4,9 @@ from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
+from django_fsm import TransitionNotAllowed
 from rest_framework import serializers
+from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.api.drf_spectacular.headers import (
@@ -12,7 +14,7 @@ from woo_publications.api.drf_spectacular.headers import (
     AUDIT_USER_REPRESENTATION_PARAMETER,
 )
 from woo_publications.contrib.documents_api.client import FilePart
-from woo_publications.logging.service import extract_audit_parameters
+from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
@@ -201,14 +203,54 @@ class DocumentSerializer(serializers.ModelSerializer):
             },
         }
 
+    def _change_publicatie_status(
+        self,
+        document: Document,
+        publicatiestatus=PublicationStatusOptions,
+        publicatie_id: int | None = None,
+    ):
+        mappings = [
+            {
+                "transition": document.concept,
+                "status": PublicationStatusOptions.concept,
+                "message": _("You cannot set the status to {concept}.").format(
+                    concept=PublicationStatusOptions.concept.label.lower()
+                ),
+            },
+            {
+                "transition": document.published,
+                "status": PublicationStatusOptions.published,
+                "message": _("You cannot set the status to {published}.").format(
+                    published=PublicationStatusOptions.published.label.lower()
+                ),
+            },
+            {
+                "transition": document.revoked,
+                "status": PublicationStatusOptions.revoked,
+                "message": _("You cannot set the status to {revoked}.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                ),
+            },
+        ]
+
+        for mapping in mappings:
+            if mapping["status"] == publicatiestatus:
+                try:
+                    return mapping["transition"](publicatie_id)
+                except TransitionNotAllowed as err:
+                    raise serializers.ValidationError(
+                        {"publicatiestatus": mapping["message"]}
+                    ) from err
+
     def validate_publicatiestatus(
         self, value: PublicationStatusOptions
     ) -> PublicationStatusOptions:
-        # new record
-        if not self.instance:
-            if value == PublicationStatusOptions.revoked:
+        if self.instance:
+            assert isinstance(self.instance, Document)
+
+            if self.instance.publicatiestatus == PublicationStatusOptions.revoked:
                 raise serializers.ValidationError(
-                    _("You cannot create a {revoked} document.").format(
+                    _("You cannot modify a {revoked} document.").format(
                         revoked=PublicationStatusOptions.revoked.label.lower()
                     )
                 )
@@ -217,15 +259,32 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        if publicatiestatus := validated_data.get("publicatiestatus"):
+            publicatie = validated_data.get("publicatie", instance.publicatie)
+            self._change_publicatie_status(
+                document=instance,
+                publicatiestatus=publicatiestatus,
+                publicatie_id=publicatie.pk,
+            )
+
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
             validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
                 identifier=eigenaar["identifier"], naam=eigenaar["naam"]
             )
+
         return super().update(instance, validated_data)
 
     @transaction.atomic
     def create(self, validated_data):
+        publicatiestatus = validated_data["publicatie"].publicatiestatus
+
+        self._change_publicatie_status(
+            document=self.Meta.model(),
+            publicatiestatus=publicatiestatus,
+            publicatie_id=validated_data["publicatie"].pk,
+        )
+
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
@@ -370,7 +429,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     "published documents also get revoked."
                 ).format(
                     revoked=PublicationStatusOptions.revoked.label.lower(),
-                )
+                ),
+                "required": False,
             },
             "bron_bewaartermijn": {
                 "help_text": _(
@@ -420,6 +480,54 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
+    def _change_publicatie_status(
+        self,
+        request: Request,
+        publication: Publication,
+        publicatiestatus: PublicationStatusOptions,
+    ):
+        user_id, user_repr, remarks = extract_audit_parameters(request)
+
+        mappings = [
+            {
+                "transition": publication.concept,
+                "status": PublicationStatusOptions.concept,
+                "message": _("You cannot set the status to {concept}.").format(
+                    concept=PublicationStatusOptions.concept.label.lower()
+                ),
+            },
+            {
+                "transition": publication.published,
+                "status": PublicationStatusOptions.published,
+                "message": _("You cannot set the status to {published}.").format(
+                    published=PublicationStatusOptions.published.label.lower()
+                ),
+            },
+            {
+                "transition": publication.revoked,
+                "status": PublicationStatusOptions.revoked,
+                "message": _("You cannot set the status to {revoked}.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                ),
+            },
+        ]
+
+        for mapping in mappings:
+            if mapping["status"] == publicatiestatus:
+                try:
+                    return mapping["transition"](
+                        request=request,
+                        user={
+                            "identifier": user_id,
+                            "display_name": user_repr,
+                        },
+                        remarks=remarks,
+                    )
+                except TransitionNotAllowed as err:
+                    raise serializers.ValidationError(
+                        {"publicatiestatus": mapping["message"]}
+                    ) from err
+
     def validate_publicatiestatus(
         self, value: PublicationStatusOptions
     ) -> PublicationStatusOptions:
@@ -433,14 +541,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                         revoked=PublicationStatusOptions.revoked.label.lower()
                     )
                 )
-        # new record
-        else:
-            if value == PublicationStatusOptions.revoked:
-                raise serializers.ValidationError(
-                    _("You cannot create a {revoked} publication.").format(
-                        revoked=PublicationStatusOptions.revoked.label.lower()
-                    )
-                )
 
         return value
 
@@ -448,6 +548,13 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     def update(self, instance, validated_data):
         assert instance.publicatiestatus != PublicationStatusOptions.revoked
         apply_retention = False
+
+        if publicatiestatus := validated_data.get("publicatiestatus"):
+            self._change_publicatie_status(
+                request=self.context["request"],
+                publication=instance,
+                publicatiestatus=publicatiestatus,
+            )
 
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
@@ -466,15 +573,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         publication = super().update(instance, validated_data)
 
-        if validated_data.get("publicatiestatus") == PublicationStatusOptions.revoked:
-            user_id, user_repr, remarks = extract_audit_parameters(
-                self.context["request"]
-            )
-
-            publication.revoke_own_published_documents(
-                user={"identifier": user_id, "display_name": user_repr}, remarks=remarks
-            )
-
         if apply_retention:
             publication.apply_retention_policy()
 
@@ -482,9 +580,20 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     @transaction.atomic
     def create(self, validated_data):
+        publicatiestatus = validated_data.get(
+            "publicatiestatus", PublicationStatusOptions.published
+        )
+
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
+
+        self._change_publicatie_status(
+            request=self.context["request"],
+            publication=self.Meta.model(),
+            publicatiestatus=publicatiestatus,
+        )
+
         publication = super().create(validated_data)
         publication.apply_retention_policy()
         return publication

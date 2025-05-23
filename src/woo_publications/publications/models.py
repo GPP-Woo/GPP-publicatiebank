@@ -14,6 +14,12 @@ from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
+from django_fsm import (
+    ConcurrentTransitionMixin,
+    FSMField,
+    TransitionNotAllowed,
+    transition,
+)
 from rest_framework.reverse import reverse
 from zgw_consumers.constants import APITypes
 
@@ -123,7 +129,7 @@ class Topic(models.Model):
             )
 
 
-class Publication(models.Model):
+class Publication(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -196,11 +202,10 @@ class Publication(models.Model):
         blank=True,
     )
     omschrijving = models.TextField(_("description"), blank=True)
-    publicatiestatus = models.CharField(
+    publicatiestatus = FSMField(
         _("status"),
         max_length=12,
         choices=PublicationStatusOptions.choices,
-        default=PublicationStatusOptions.published,
     )
     registratiedatum = models.DateTimeField(
         _("created on"),
@@ -275,24 +280,25 @@ class Publication(models.Model):
                 )
             )
 
-    def revoke_own_published_documents(
+    def revoke_own_documents(
         self, user: User | ActingUser, remarks: str | None = None
     ) -> None:
         from .tasks import remove_document_from_index
 
-        published_documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
-            publicatiestatus=PublicationStatusOptions.published
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            models.Q(publicatiestatus=PublicationStatusOptions.concept)
+            | models.Q(publicatiestatus=PublicationStatusOptions.published)
         )
 
-        # get a list of IDs of published documents, make sure to evaluate the queryset
-        # so it's not affected by the `update` query
-        document_ids_to_log = list(published_documents.values_list("pk", flat=True))
+        # get a list of IDs of published/concept documents, make sure to evaluate the
+        # queryset so it's not affected by the `update` query
+        document_ids_to_log = list(documents.values_list("pk", flat=True))
         for document_id in document_ids_to_log:
             transaction.on_commit(
                 partial(remove_document_from_index.delay, document_id=document_id)
             )
 
-        published_documents.update(
+        documents.update(
             publicatiestatus=PublicationStatusOptions.revoked,
             laatst_gewijzigd_datum=timezone.now(),
         )
@@ -309,6 +315,54 @@ class Publication(models.Model):
                 "remarks": remarks,
             }
         )
+        for document in Document.objects.filter(pk__in=document_ids_to_log):
+            log_callback(
+                content_object=document,
+                object_data=serialize_instance(document),
+                **log_extra_kwargs,  # pyright: ignore[reportArgumentType]
+            )
+
+    def publish_own_documents(
+        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
+    ) -> None:
+        from .tasks import index_document
+
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            models.Q(publicatiestatus=PublicationStatusOptions.concept)
+            | models.Q(publicatiestatus=PublicationStatusOptions.published)
+        )
+
+        for document in documents:
+            download_url = document.absolute_document_download_uri(request=request)
+            transaction.on_commit(
+                partial(
+                    index_document.delay,
+                    document_id=document.pk,
+                    download_url=download_url,
+                )
+            )
+
+        documents.update(
+            publicatiestatus=PublicationStatusOptions.published,
+            laatst_gewijzigd_datum=timezone.now(),
+        )
+
+        # audit log actions
+        is_django_user = isinstance(user, User)
+        log_callback = audit_admin_update if is_django_user else audit_api_update
+        log_extra_kwargs = (
+            {"django_user": user}
+            if is_django_user
+            else {
+                "user_id": user["identifier"],
+                "user_display": user["display_name"],
+                "remarks": remarks,
+            }
+        )
+
+        # get a list of IDs of published/concept documents, make sure to evaluate the
+        # queryset so it's not affected by the `update` query
+        document_ids_to_log = list(documents.values_list("pk", flat=True))
         for document in Document.objects.filter(pk__in=document_ids_to_log):
             log_callback(
                 content_object=document,
@@ -352,8 +406,49 @@ class Publication(models.Model):
             .values_list("sitemap_uuid", flat=True)
         )
 
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
+            PublicationStatusOptions.published,
+        ),
+        target=PublicationStatusOptions.published,
+    )
+    def published(
+        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
+    ):
+        if self.publicatiestatus == PublicationStatusOptions.concept:
+            self.publish_own_documents(request=request, user=user, remarks=remarks)
 
-class Document(models.Model):
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+    )
+    def revoked(
+        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
+    ):
+        if self.publicatiestatus == PublicationStatusOptions.published:
+            self.revoke_own_documents(user=user, remarks=remarks)
+
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
+        ),
+        target=PublicationStatusOptions.concept,
+    )
+    def concept(self, *args, **kwargs):
+        return self.publicatiestatus
+
+
+class Document(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -420,11 +515,10 @@ class Document(models.Model):
         default=0,
         help_text=_("Size of the file on disk, in bytes."),
     )
-    publicatiestatus = models.CharField(
+    publicatiestatus = FSMField(
         _("status"),
         max_length=12,
         choices=PublicationStatusOptions.choices,
-        default=PublicationStatusOptions.published,
     )
     registratiedatum = models.DateTimeField(
         _("created on"),
@@ -665,3 +759,73 @@ class Document(models.Model):
                 self.save(update_fields=("lock", "upload_complete"))
 
         return completed
+
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
+            PublicationStatusOptions.published,
+        ),
+        target=PublicationStatusOptions.published,
+    )
+    def published(self, document_id: int | None = None):
+        try:
+            publicatie = Publication.objects.get(id=document_id)
+        except Publication.DoesNotExist as err:
+            raise TransitionNotAllowed(_("No publication found.")) from err
+
+        if publicatie.publicatiestatus == PublicationStatusOptions.concept:
+            raise TransitionNotAllowed(
+                _(
+                    "The given publicatiestatus isn't compatible with the "
+                    "publicatiestatus from the linked publication."
+                )
+            )
+
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+    )
+    def revoked(self, document_id: int | None = None):
+        try:
+            publicatie = Publication.objects.get(id=document_id)
+        except Publication.DoesNotExist as err:
+            raise TransitionNotAllowed(_("No publication found.")) from err
+
+        if publicatie.publicatiestatus == PublicationStatusOptions.concept:
+            raise TransitionNotAllowed(
+                _(
+                    "The given publicatiestatus isn't compatible with the "
+                    "publicatiestatus from the linked publication."
+                )
+            )
+
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
+        ),
+        target=PublicationStatusOptions.concept,
+    )
+    def concept(self, document_id: int | None = None):
+        try:
+            publicatie = Publication.objects.get(id=document_id)
+        except Publication.DoesNotExist as err:
+            raise TransitionNotAllowed(_("No publication found.")) from err
+
+        if publicatie.publicatiestatus != PublicationStatusOptions.concept:
+            raise TransitionNotAllowed(
+                _(
+                    "The given publicatiestatus isn't compatible with the "
+                    "publicatiestatus from the linked publication."
+                )
+            )
+
+        return self.publicatiestatus
