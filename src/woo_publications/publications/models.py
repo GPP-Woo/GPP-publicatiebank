@@ -415,7 +415,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         target=PublicationStatusOptions.concept,
     )
     def concept(self, *args, **kwargs):
-        return self.publicatiestatus
+        return PublicationStatusOptions.concept
 
     @transition(
         field="publicatiestatus",
@@ -432,7 +432,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         if self.publicatiestatus == PublicationStatusOptions.concept:
             self.publish_own_documents(request=request, user=user, remarks=remarks)
 
-        return self.publicatiestatus
+        return PublicationStatusOptions.published
 
     @transition(
         field="publicatiestatus",
@@ -445,11 +445,11 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         if self.publicatiestatus == PublicationStatusOptions.published:
             self.revoke_own_documents(user=user, remarks=remarks)
 
-        return self.publicatiestatus
+        return PublicationStatusOptions.revoked
 
 
 class LinkedPublicationError(Exception):
-    def __init__(self, message: str):
+    def __init__(self, message):
         self.message = message
         super().__init__(message)
 
@@ -795,7 +795,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
             )
 
-        return self.publicatiestatus
+        return PublicationStatusOptions.concept
 
     @transition(
         field="publicatiestatus",
@@ -827,7 +827,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
             )
 
-        return self.publicatiestatus
+        return PublicationStatusOptions.published
 
     @transition(
         field="publicatiestatus",
@@ -855,4 +855,4 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
             )
 
-        return self.publicatiestatus
+        return PublicationStatusOptions.revoked

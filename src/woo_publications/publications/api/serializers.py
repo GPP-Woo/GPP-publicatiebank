@@ -199,7 +199,8 @@ class DocumentSerializer(serializers.ModelSerializer):
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} document."
-                ).format(revoked=PublicationStatusOptions.revoked.label.lower())
+                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
+                "required": False,
             },
         }
 
@@ -243,7 +244,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                     ) from err
                 except LinkedPublicationError as err:
                     raise serializers.ValidationError(
-                        {"publicatiestatus": err}
+                        {"publicatiestatus": err.message}
                     ) from err
 
     def validate_publicatiestatus(
@@ -281,9 +282,10 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        publicatiestatus = validated_data["publicatie"].publicatiestatus
+        publicatie_publicatiestatus = validated_data["publicatie"].publicatiestatus
+        publicatiestatus = validated_data.get("publicatiestatus", publicatie_publicatiestatus)
 
-        self._change_publicatie_status(
+        validated_data["publicatiestatus"] = self._change_publicatie_status(
             document=self.Meta.model(),
             publicatiestatus=publicatiestatus,
             publicatie_id=validated_data["publicatie"].pk,
