@@ -411,6 +411,17 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         source=(  # pyright: ignore[reportArgumentType]
             "",
             PublicationStatusOptions.concept,
+        ),
+        target=PublicationStatusOptions.concept,
+    )
+    def concept(self, *args, **kwargs):
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
             PublicationStatusOptions.published,
         ),
         target=PublicationStatusOptions.published,
@@ -436,16 +447,11 @@ class Publication(ConcurrentTransitionMixin, models.Model):
 
         return self.publicatiestatus
 
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-        ),
-        target=PublicationStatusOptions.concept,
-    )
-    def concept(self, *args, **kwargs):
-        return self.publicatiestatus
+
+class LinkedPublicationError(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
 
 
 class Document(ConcurrentTransitionMixin, models.Model):
@@ -765,6 +771,37 @@ class Document(ConcurrentTransitionMixin, models.Model):
         source=(  # pyright: ignore[reportArgumentType]
             "",
             PublicationStatusOptions.concept,
+        ),
+        target=PublicationStatusOptions.concept,
+    )
+    def concept(self, publicatie_id: int | None = None):
+        try:
+            publicatie = Publication.objects.get(id=publicatie_id)
+        except Publication.DoesNotExist as err:
+            raise TransitionNotAllowed(_("No publication found.")) from err
+
+        if publicatie.publicatiestatus == PublicationStatusOptions.published:
+            raise LinkedPublicationError(
+                _(
+                    "The given publicatiestatus isn't compatible with the "
+                    "publicatiestatus from the linked publication."
+                )
+            )
+
+        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
+            raise LinkedPublicationError(
+                _(
+                    "You can't alter the data of document to a {revoked} publication."
+                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
+            )
+
+        return self.publicatiestatus
+
+    @transition(
+        field="publicatiestatus",
+        source=(  # pyright: ignore[reportArgumentType]
+            "",
+            PublicationStatusOptions.concept,
             PublicationStatusOptions.published,
         ),
         target=PublicationStatusOptions.published,
@@ -776,11 +813,18 @@ class Document(ConcurrentTransitionMixin, models.Model):
             raise TransitionNotAllowed(_("No publication found.")) from err
 
         if publicatie.publicatiestatus == PublicationStatusOptions.concept:
-            raise TransitionNotAllowed(
+            raise LinkedPublicationError(
                 _(
                     "The given publicatiestatus isn't compatible with the "
                     "publicatiestatus from the linked publication."
                 )
+            )
+
+        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
+            raise LinkedPublicationError(
+                _(
+                    "You can't alter the data of document to a {revoked} publication."
+                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
             )
 
         return self.publicatiestatus
@@ -797,35 +841,18 @@ class Document(ConcurrentTransitionMixin, models.Model):
             raise TransitionNotAllowed(_("No publication found.")) from err
 
         if publicatie.publicatiestatus == PublicationStatusOptions.concept:
-            raise TransitionNotAllowed(
+            raise LinkedPublicationError(
                 _(
                     "The given publicatiestatus isn't compatible with the "
                     "publicatiestatus from the linked publication."
                 )
             )
 
-        return self.publicatiestatus
-
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-        ),
-        target=PublicationStatusOptions.concept,
-    )
-    def concept(self, publicatie_id: int | None = None):
-        try:
-            publicatie = Publication.objects.get(id=publicatie_id)
-        except Publication.DoesNotExist as err:
-            raise TransitionNotAllowed(_("No publication found.")) from err
-
-        if publicatie.publicatiestatus != PublicationStatusOptions.concept:
-            raise TransitionNotAllowed(
+        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
+            raise LinkedPublicationError(
                 _(
-                    "The given publicatiestatus isn't compatible with the "
-                    "publicatiestatus from the linked publication."
-                )
+                    "You can't alter the data of document to a {revoked} publication."
+                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
             )
 
         return self.publicatiestatus

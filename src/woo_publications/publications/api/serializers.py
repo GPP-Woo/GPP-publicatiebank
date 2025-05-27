@@ -18,7 +18,7 @@ from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication, Topic
+from ..models import Document, LinkedPublicationError, Publication, Topic
 
 
 class OwnerData(TypedDict):
@@ -240,6 +240,10 @@ class DocumentSerializer(serializers.ModelSerializer):
                 except TransitionNotAllowed as err:
                     raise serializers.ValidationError(
                         {"publicatiestatus": mapping["message"]}
+                    ) from err
+                except LinkedPublicationError as err:
+                    raise serializers.ValidationError(
+                        {"publicatiestatus": err}
                     ) from err
 
     def validate_publicatiestatus(
