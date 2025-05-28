@@ -13,6 +13,7 @@ django-solo
 django-timeline-logger
 django-treebeard
 django-upgrade-check
+maykin-common[axes,mfa]
 
 # DRF & other API tooling
 open-api-framework
