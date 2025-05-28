@@ -17,6 +17,7 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "capture_tag",
     "hijack",
     "hijack.contrib.admin",
+    "maykin_common",
     "timeline_logger",
     "treebeard",
     "upgrade_check",
@@ -128,7 +129,7 @@ MAX_IMG_WIDTH = config(
 ADMIN_INDEX_SHOW_REMAINING_APPS = False
 ADMIN_INDEX_SHOW_REMAINING_APPS_TO_SUPERUSERS = True
 ADMIN_INDEX_DISPLAY_DROP_DOWN_MENU_CONDITION_FUNCTION = (
-    "woo_publications.utils.django_two_factor_auth.should_display_dropdown_menu"
+    "maykin_common.django_two_factor_auth.should_display_dropdown_menu"
 )
 
 #
