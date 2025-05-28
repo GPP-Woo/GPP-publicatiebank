@@ -8,7 +8,7 @@ from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 
-handler500 = "woo_publications.utils.views.server_error"
+handler500 = "maykin_common.views.server_error"
 admin.site.enable_nav_sidebar = False
 admin.site.site_header = _("WOO publications")
 admin.site.site_title = _("WOO publications")
