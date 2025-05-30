@@ -1217,6 +1217,440 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
                 1,
             )
 
+    def test_api_status_update_happy_flow(self):
+        concept_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        publish_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+
+        concept_concept_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie=concept_publicatie,
+        )
+        concept_published_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie=publish_publicatie,
+        )
+        published_published_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie=publish_publicatie,
+        )
+
+        concept_concept_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(concept_concept_document.uuid)},
+        )
+        concept_published_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(concept_published_document.uuid)},
+        )
+        published_published_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(published_published_document.uuid)},
+        )
+
+        with self.subTest("concept document, concept publication -> concept"):
+            response = self.client.patch(
+                concept_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["publicatiestatus"], PublicationStatusOptions.concept)
+
+        with self.subTest("concept document, published publication -> published"):
+            response = self.client.patch(
+                concept_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"], PublicationStatusOptions.published
+            )
+
+        with self.subTest("published document, published publication -> published"):
+            response = self.client.patch(
+                published_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"], PublicationStatusOptions.published
+            )
+
+        with self.subTest("published document, published publication -> revoked"):
+            response = self.client.patch(
+                published_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["publicatiestatus"], PublicationStatusOptions.revoked)
+
+    def test_api_status_concept_update_errors(self):
+        concept_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        publish_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        revoked_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        concept_concept_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie=concept_publicatie,
+        )
+        concept_published_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie=publish_publicatie,
+        )
+        concept_revoked_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie=revoked_publicatie,
+        )
+
+        concept_concept_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(concept_concept_document.uuid)},
+        )
+        concept_published_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(concept_published_document.uuid)},
+        )
+        concept_revoked_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(concept_revoked_document.uuid)},
+        )
+
+        with self.subTest("concept document, concept publication -> revoked"):
+            response = self.client.patch(
+                concept_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {revoked}.").format(
+                        revoked=PublicationStatusOptions.revoked.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("concept document, concept publication -> published"):
+            response = self.client.patch(
+                concept_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "The given publicatiestatus isn't compatible with the "
+                        "publicatiestatus from the linked publication."
+                    )
+                ],
+            )
+
+        with self.subTest("concept document, published publication -> concept"):
+            response = self.client.patch(
+                concept_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "The given publicatiestatus isn't compatible with the "
+                        "publicatiestatus from the linked publication."
+                    )
+                ],
+            )
+
+        with self.subTest("concept document, published publication -> revoked"):
+            response = self.client.patch(
+                concept_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {revoked}.").format(
+                        revoked=PublicationStatusOptions.revoked.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("concept document, revoked publication -> concept"):
+            response = self.client.patch(
+                concept_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "You can't alter the data of document to a {revoked} "
+                        "publication."
+                    ).format(revoked=PublicationStatusOptions.revoked.label.lower())
+                ],
+            )
+
+        with self.subTest("concept document, revoked publication -> published"):
+            response = self.client.patch(
+                concept_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "You can't alter the data of document to a {revoked} "
+                        "publication."
+                    ).format(revoked=PublicationStatusOptions.revoked.label.lower())
+                ],
+            )
+
+        with self.subTest("concept document, revoked publication -> revoked"):
+            response = self.client.patch(
+                concept_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {revoked}.").format(
+                        revoked=PublicationStatusOptions.revoked.label.lower()
+                    )
+                ],
+            )
+
+    def test_api_status_published_update_errors(self):
+        concept_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        publish_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        revoked_publicatie = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked
+        )
+
+        published_concept_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie=concept_publicatie,
+        )
+        published_published_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie=publish_publicatie,
+        )
+        published_revoked_document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie=revoked_publicatie,
+        )
+
+        published_concept_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(published_concept_document.uuid)},
+        )
+        published_published_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(published_published_document.uuid)},
+        )
+        published_revoked_document_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(published_revoked_document.uuid)},
+        )
+
+        with self.subTest("published document, concept publication -> concept"):
+            response = self.client.patch(
+                published_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {concept}.").format(
+                        concept=PublicationStatusOptions.concept.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("published document, concept publication -> concept"):
+            response = self.client.patch(
+                published_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {concept}.").format(
+                        concept=PublicationStatusOptions.concept.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("published document, concept publication -> published"):
+            response = self.client.patch(
+                published_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "The given publicatiestatus isn't compatible with the "
+                        "publicatiestatus from the linked publication."
+                    )
+                ],
+            )
+
+        with self.subTest("published document, concept publication -> revoked"):
+            response = self.client.patch(
+                published_concept_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "The given publicatiestatus isn't compatible with the "
+                        "publicatiestatus from the linked publication."
+                    )
+                ],
+            )
+
+        with self.subTest("published document, published publication -> concept"):
+            response = self.client.patch(
+                published_published_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {concept}.").format(
+                        concept=PublicationStatusOptions.concept.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("published document, revoked publication -> concept"):
+            response = self.client.patch(
+                published_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _("You cannot set the status to {concept}.").format(
+                        concept=PublicationStatusOptions.concept.label.lower()
+                    )
+                ],
+            )
+
+        with self.subTest("published document, revoked publication -> published"):
+            response = self.client.patch(
+                published_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "You can't alter the data of document to a {revoked} "
+                        "publication."
+                    ).format(revoked=PublicationStatusOptions.revoked.label.lower())
+                ],
+            )
+
+        with self.subTest("published document, revoked publication -> revoked"):
+            response = self.client.patch(
+                published_revoked_document_url,
+                data={"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["publicatiestatus"],
+                [
+                    _(
+                        "You can't alter the data of document to a {revoked} "
+                        "publication."
+                    ).format(revoked=PublicationStatusOptions.revoked.label.lower())
+                ],
+            )
+
     @patch("woo_publications.publications.api.viewsets.index_document.delay")
     def test_publish_document_schedules_index_task(
         self, mock_index_document_delay: MagicMock
@@ -1275,39 +1709,6 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             response = self.client.patch(
                 detail_url,
                 data={"publicatiestatus": PublicationStatusOptions.revoked},
-                headers=AUDIT_HEADERS,
-            )
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_doc = Document.objects.order_by("-pk").first()
-        assert latest_doc is not None
-        mock_remove_document_from_index_delay.assert_called_once_with(
-            document_id=latest_doc.pk
-        )
-
-    @patch(
-        "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
-    )
-    def test_concept_document_schedules_index_removal_task(
-        self, mock_remove_document_from_index_delay: MagicMock
-    ):
-        document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            identifier="document-1",
-            officiele_titel="title one",
-            verkorte_titel="one",
-            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            creatiedatum="2024-01-01",
-        )
-        detail_url = reverse(
-            "api:document-detail",
-            kwargs={"uuid": str(document.uuid)},
-        )
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.concept},
                 headers=AUDIT_HEADERS,
             )
 
@@ -1537,7 +1938,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         endpoint = reverse("api:document-list")
         body = {
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.concept,
+            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "creatiedatum": "2024-11-05",
             "eigenaar": {
@@ -1570,22 +1971,21 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists(),
         )
 
-    def test_create_revoked_document_results_in_error(self):
+    @patch("woo_publications.publications.models.Document.register_in_documents_api")
+    def test_create_document_with_no_status_gains_the_publication_status(
+        self, mock_register_in_documents_api: MagicMock
+    ):
         publication = PublicationFactory.create(
-            informatie_categorieen=[self.information_category]
+            informatie_categorieen=[self.information_category],
+            publicatiestatus=PublicationStatusOptions.published,
         )
+
         endpoint = reverse("api:document-list")
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.revoked,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
-            "verkorteTitel": "Testdocument",
-            "omschrijving": "Testing 123",
             "creatiedatum": "2024-11-05",
-            "bestandsformaat": "unknown",
-            "bestandsnaam": "unknown.bin",
-            "bestandsomvang": 10,
         }
 
         response = self.client.post(
@@ -1593,20 +1993,16 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             data=body,
             headers={
                 **AUDIT_HEADERS,
-                "Host": "host.docker.internal:8000",
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.json()
-
         self.assertEqual(
-            response_data["publicatiestatus"],
-            [
-                _("You cannot create a {revoked} document.").format(
-                    revoked=PublicationStatusOptions.revoked.label.lower()
-                )
-            ],
+            response_data["publicatiestatus"], publication.publicatiestatus
+        )
+        self.assertEqual(
+            response_data["publicatiestatus"], PublicationStatusOptions.published
         )
 
     def test_create_document_with_multiple_handelingen_results_in_error(self):

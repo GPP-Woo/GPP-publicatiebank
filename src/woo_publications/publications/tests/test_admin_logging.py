@@ -149,6 +149,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 informatie_categorieen=[ic, ic2],
                 onderwerpen=[topic, topic2],
                 eigenaar=self.organisation_member,
+                publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -165,7 +166,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         form = response.forms["publication_form"]
         form["informatie_categorieen"].select_multiple(texts=[ic.naam])
         form["onderwerpen"].select_multiple(texts=[topic.officiele_titel])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publisher"] = str(organisation2.pk)
         form["verantwoordelijke"] = str(organisation2.pk)
         form["opsteller"] = str(organisation2.pk)
@@ -209,7 +210,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
                     "opsteller": organisation2.pk,
-                    "publicatiestatus": PublicationStatusOptions.concept,
+                    "publicatiestatus": PublicationStatusOptions.published,
                     "publisher": organisation2.pk,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "uuid": str(publication.uuid),
@@ -225,7 +226,7 @@ class TestPublicationAdminAuditLogging(WebTest):
             }
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_admin_update_revoke_published_documents_when_revoking_publication(self):
+    def test_admin_update_revoke_documents_when_revoking_publication(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
         topic = TopicFactory.create()
@@ -257,6 +258,9 @@ class TestPublicationAdminAuditLogging(WebTest):
                 publicatie=publication,
                 eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.concept,
+                identifier="http://example.com/2",
+                officiele_titel="title two",
+                creatiedatum="2024-10-17",
             )
             revoked_document = DocumentFactory.create(
                 publicatie=publication,
@@ -301,7 +305,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         concept_document.refresh_from_db()
         revoked_document.refresh_from_db()
 
-        self.assertEqual(TimelineLogProxy.objects.count(), 3)
+        self.assertEqual(TimelineLogProxy.objects.count(), 4)
 
         with self.subTest("update publication audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
@@ -341,7 +345,7 @@ class TestPublicationAdminAuditLogging(WebTest):
 
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
-        with self.subTest("update document audit logging"):
+        with self.subTest("update published document audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 published_document
             ).get()
@@ -375,6 +379,44 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "soort_handeling": DocumentActionTypeOptions.declared,
                 },
                 "_cached_object_repr": "title",
+            }
+
+            self.assertEqual(update_publication_log.extra_data, expected_data)
+
+        with self.subTest("update concept document audit logging"):
+            update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
+                concept_document
+            ).get()
+
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": concept_document.pk,
+                    "lock": "",
+                    "eigenaar": self.organisation_member.pk,
+                    "upload_complete": False,
+                    "uuid": str(concept_document.uuid),
+                    "identifier": "http://example.com/2",
+                    "publicatie": publication.id,
+                    "publicatiestatus": PublicationStatusOptions.revoked,
+                    "bestandsnaam": "unknown.bin",
+                    "creatiedatum": "2024-10-17",
+                    "omschrijving": "",
+                    "document_uuid": None,
+                    "bestandsomvang": 0,
+                    "verkorte_titel": "",
+                    "bestandsformaat": "unknown",
+                    "officiele_titel": "title two",
+                    "document_service": None,
+                    "registratiedatum": "2024-09-27T00:14:00Z",
+                    "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "soort_handeling": DocumentActionTypeOptions.declared,
+                },
+                "_cached_object_repr": "title two",
             }
 
             self.assertEqual(update_publication_log.extra_data, expected_data)
