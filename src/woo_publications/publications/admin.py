@@ -29,7 +29,7 @@ from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
-from .forms import ChangeOwnerForm
+from .forms import ChangeOwnerForm, DocumentForm, PublicationForm
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication, Topic
 from .tasks import (
@@ -314,6 +314,7 @@ class DocumentInlineAdmin(admin.StackedInline):
 
 @admin.register(Publication)
 class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = PublicationForm
     list_display = (
         "officiele_titel",
         "verkorte_titel",
@@ -511,6 +512,11 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         if not change or (change and "informatie_categorieen" in form.changed_data):
             form.instance.apply_retention_policy()  # pyright: ignore[reportAttributeAccessIssue]
 
+    def get_form(self, request, *args, **kwargs):
+        form = super().get_form(request, *args, **kwargs)
+        form.request = request
+        return form
+
     def get_formset_kwargs(
         self,
         request: HttpRequest,
@@ -547,6 +553,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = DocumentForm
     list_display = (
         "officiele_titel",
         "verkorte_titel",
@@ -627,6 +634,26 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     date_hierarchy = "registratiedatum"
     actions = [sync_to_index, remove_from_index, revoke, change_owner]
 
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if not obj:
+            readonly_fields += ("publicatiestatus",)
+
+        return readonly_fields
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "publicatie":
+            kwargs["queryset"] = Publication.objects.filter(
+                ~models.Q(publicatiestatus=PublicationStatusOptions.revoked)
+            )
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_changeform_initial_data(self, request: HttpRequest):
         assert isinstance(request.user, User)
         initial_data: dict = super().get_changeform_initial_data(request)
@@ -640,6 +667,9 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def save_model(
         self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
     ):
+        if not obj.publicatiestatus and form.cleaned_data["publicatiestatus"]:
+            obj.publicatiestatus = form.cleaned_data["publicatiestatus"]
+
         super().save_model(request, obj, form, change)
 
         new_status = obj.publicatiestatus
