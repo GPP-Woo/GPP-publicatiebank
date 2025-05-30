@@ -3,11 +3,13 @@ import uuid
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
+from django_fsm import TransitionNotAllowed
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test.factories import ServiceFactory
 
 from woo_publications.config.models import GlobalConfiguration
 
+from ..constants import PublicationStatusOptions
 from ..models import Document
 from .factories import DocumentFactory
 
@@ -61,3 +63,26 @@ class TestDocumentApi(TestCase):
 
         with self.assertRaises(RuntimeError):
             document.register_in_documents_api(lambda s: s)
+
+    def test_status_change_with_none_existing_publication(self):
+        document_concept = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        document_published = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
+
+        with self.subTest(method=document_concept.concept) and self.assertRaisesMessage(
+            TransitionNotAllowed, "No publication found."
+        ):
+            document_concept.concept(publicatie_id=9999999999999)
+
+        with self.subTest(
+            method=document_concept.published
+        ) and self.assertRaisesMessage(TransitionNotAllowed, "No publication found."):
+            document_published.published(publicatie_id=9999999999999)
+
+        with self.subTest(method=document_concept.revoked) and self.assertRaisesMessage(
+            TransitionNotAllowed, "No publication found."
+        ):
+            document_published.revoked(publicatie_id=9999999999999)

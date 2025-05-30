@@ -286,7 +286,7 @@ def revoke(
 
         if model is Publication:
             assert isinstance(obj, Publication)
-            obj.revoke_own_published_documents(request.user)
+            obj.revoke_own_documents(request.user)
 
     modeladmin.message_user(
         request,
@@ -422,7 +422,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         is_revoked = new_status == PublicationStatusOptions.revoked
 
         if is_revoked and is_status_change:
-            obj.revoke_own_published_documents(request.user)
+            obj.revoke_own_documents(request.user)
 
         super().save_model(request, obj, form, change)
 
