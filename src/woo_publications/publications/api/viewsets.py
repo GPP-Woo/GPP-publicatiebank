@@ -123,14 +123,12 @@ class DocumentViewSet(
     def perform_update(self, serializer):
         document = serializer.instance
         assert document is not None
-        original_status = document.publicatiestatus
         super().perform_update(serializer)
         new_status = document.publicatiestatus
 
-        match (original_status, new_status):
-            # from anything to published -> reindex (even if no status is changed,
-            # update the metadata)
-            case (_, PublicationStatusOptions.published):
+        match new_status:
+            # when the status is published then index data.
+            case PublicationStatusOptions.published:
                 document_url = document.absolute_document_download_uri(self.request)
                 transaction.on_commit(
                     partial(
@@ -139,11 +137,8 @@ class DocumentViewSet(
                         download_url=document_url,
                     )
                 )
-            # from published to anything else -> remove from index
-            case (
-                PublicationStatusOptions.published,
-                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
-            ):
+            # when the status is revoked then remove the data from the index.
+            case PublicationStatusOptions.revoked:
                 transaction.on_commit(
                     partial(remove_document_from_index.delay, document_id=document.pk)
                 )
@@ -363,22 +358,17 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     def perform_update(self, serializer):
         publication = serializer.instance
         assert publication is not None
-        original_status = publication.publicatiestatus
         super().perform_update(serializer)
         new_status = publication.publicatiestatus
 
-        match (original_status, new_status):
-            # from anything to published -> reindex (even if no status is changed,
-            # update the metadata)
-            case (_, PublicationStatusOptions.published):
+        match new_status:
+            # when the status is published then index data.
+            case PublicationStatusOptions.published:
                 transaction.on_commit(
                     partial(index_publication.delay, publication_id=publication.pk)
                 )
-            # from published to anything else -> remove from index
-            case (
-                PublicationStatusOptions.published,
-                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
-            ):
+            # when the status is revoked then remove the data from the index.
+            case PublicationStatusOptions.revoked:
                 transaction.on_commit(
                     partial(
                         remove_publication_from_index.delay,
