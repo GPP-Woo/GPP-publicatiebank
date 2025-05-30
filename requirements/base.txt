@@ -82,6 +82,7 @@ django==5.2.1
     #   django-csp
     #   django-filter
     #   django-formtools
+    #   django-fsm-2
     #   django-hijack
     #   django-jsonform
     #   django-log-outgoing-requests
@@ -137,6 +138,8 @@ django-filter==24.3
     #   open-api-framework
 django-formtools==2.5.1
     # via django-two-factor-auth
+django-fsm-2==4.0.0
+    # via -r requirements/base.in
 django-hijack==3.6.0
     # via -r requirements/base.in
 django-ipware==7.0.1
