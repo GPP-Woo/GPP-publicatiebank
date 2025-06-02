@@ -206,6 +206,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         _("status"),
         max_length=12,
         choices=PublicationStatusOptions.choices,
+        # protected=True,  TODO - enable in the future?
     )
     registratiedatum = models.DateTimeField(
         _("created on"),
