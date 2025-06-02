@@ -212,6 +212,8 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         }
 
     def validate(self, attrs):
+        attrs = super().validate(attrs)
+
         instance = self.instance
         assert isinstance(instance, Document | None)
 
@@ -233,7 +235,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             case _:  # pragma: no cover
                 raise AssertionError("unreachable code")
 
-        return super().validate(attrs)
+        return attrs
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -481,6 +483,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         }
 
     def validate(self, attrs):
+        attrs = super().validate(attrs)
+
         instance = self.instance
         assert isinstance(instance, Publication | None)
 
