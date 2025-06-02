@@ -1,12 +1,10 @@
 import logging
-from contextlib import contextmanager
 from typing import TypedDict
 
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
-from django_fsm import TransitionNotAllowed
 from rest_framework import serializers
 
 from woo_publications.accounts.models import OrganisationMember
@@ -18,7 +16,7 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, LinkedPublicationError, Publication, Topic
+from ..models import Document, Publication, Topic
 from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
@@ -38,22 +36,6 @@ def update_or_create_organisation_member(
             "naam": request.headers[AUDIT_USER_REPRESENTATION_PARAMETER.name],
         }
     return OrganisationMember.objects.get_and_sync(**details)
-
-
-@contextmanager
-def handle_state_exception(publicatiestatus: PublicationStatusOptions):
-    try:
-        yield
-    except TransitionNotAllowed as err:
-        raise serializers.ValidationError(
-            {
-                "publicatiestatus": _("You cannot set the status to {status}.").format(
-                    status=publicatiestatus.label.lower()
-                ),
-            }
-        ) from err
-    except LinkedPublicationError as err:
-        raise serializers.ValidationError({"publicatiestatus": err.message}) from err
 
 
 class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
