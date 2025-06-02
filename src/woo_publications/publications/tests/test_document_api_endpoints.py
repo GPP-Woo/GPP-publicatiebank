@@ -109,7 +109,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             document = DocumentFactory.create(
                 publicatie=publication,
                 eigenaar=self.organisation_member,
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-1",
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -186,7 +186,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing "
                 "elit.",
-                "publicatiestatus": PublicationStatusOptions.concept,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "creatiedatum": "2024-01-01",
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
@@ -213,7 +213,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             document = DocumentFactory.create(
                 publicatie=publication,
                 eigenaar=org_member_1,
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-1",
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -381,7 +381,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-1",
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -391,7 +391,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-24T12:00:00-00:00"):
             DocumentFactory.create(
                 publicatie=publication2,
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-2",
                 officiele_titel="title two",
                 verkorte_titel="two",
@@ -450,13 +450,16 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
     def test_list_document_filter_publication_status(self):
         published = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            publicatiestatus=PublicationStatusOptions.published,
         )
         concept = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+            publicatiestatus=PublicationStatusOptions.concept,
         )
         revoked = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
+            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatiestatus=PublicationStatusOptions.revoked,
         )
         list_url = reverse("api:document-list")
 
@@ -1123,7 +1126,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
 
     def test_partial_update_document(self):
         document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept,
+            publicatiestatus=PublicationStatusOptions.published,
             identifier="document-1",
             officiele_titel="title one",
             verkorte_titel="one",
@@ -1154,7 +1157,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         )
         document = DocumentFactory.create(
             eigenaar=org_member_1,
-            publicatiestatus=PublicationStatusOptions.concept,
+            publicatiestatus=PublicationStatusOptions.published,
             identifier="document-1",
             officiele_titel="title one",
             verkorte_titel="one",

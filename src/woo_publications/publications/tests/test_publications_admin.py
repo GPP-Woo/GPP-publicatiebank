@@ -661,12 +661,6 @@ class TestPublicationsAdmin(WebTest):
         published_document = DocumentFactory.create(
             publicatie=publication, publicatiestatus=PublicationStatusOptions.published
         )
-        concept_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
-        )
-        revoked_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.revoked
-        )
 
         reverse_url = reverse(
             "admin:publications_publication_change",
@@ -687,29 +681,14 @@ class TestPublicationsAdmin(WebTest):
 
         publication.refresh_from_db()
         published_document.refresh_from_db()
-        concept_document.refresh_from_db()
-        revoked_document.refresh_from_db()
 
         self.assertEqual(publication.publicatiestatus, PublicationStatusOptions.revoked)
         self.assertEqual(
             published_document.publicatiestatus, PublicationStatusOptions.revoked
         )
-        self.assertEqual(
-            concept_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-        self.assertEqual(
-            revoked_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
 
-        mock_remove_document_from_index_delay(document_id=published_document.pk)
-        mock_remove_document_from_index_delay(document_id=concept_document.pk)
-
-        mock_remove_document_from_index_delay.assert_has_calls(
-            [
-                call(document_id=published_document.pk),
-                call(document_id=concept_document.pk),
-            ],
-            any_order=True,
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=published_document.pk
         )
 
     def test_publications_admin_not_allowed_to_update_when_publication_is_revoked(self):
@@ -747,12 +726,6 @@ class TestPublicationsAdmin(WebTest):
         published_document = DocumentFactory.create(
             publicatie=publication,
             publicatiestatus=PublicationStatusOptions.published,
-        )
-        DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
-        )
-        DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.revoked
         )
         reverse_url = reverse(
             "admin:publications_publication_delete",
@@ -1055,49 +1028,6 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertFalse(Document.objects.filter(pk=document.pk).exists())
         mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
-
-    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
-    def test_inline_document_delete_do_not_schedules_index_removal_task_when_not_published(  # noqa: E501
-        self, mock_remove_document_from_index: MagicMock
-    ):
-        ic = InformationCategoryFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            eigenaar=self.organisation_member,
-            officiele_titel="title one",
-        )
-        for publicationstatus in [
-            PublicationStatusOptions.concept,
-            PublicationStatusOptions.revoked,
-        ]:
-            with self.subTest(publicationstatus):
-                document = DocumentFactory.create(
-                    publicatie=publication,
-                    eigenaar=self.organisation_member,
-                    publicatiestatus=publicationstatus,
-                )
-                reverse_url = reverse(
-                    "admin:publications_publication_change",
-                    kwargs={"object_id": publication.id},
-                )
-
-                response = self.app.get(reverse_url, user=self.user)
-
-                self.assertEqual(response.status_code, 200)
-
-                form = response.forms["publication_form"]
-                form["document_set-0-DELETE"] = True
-
-                with self.captureOnCommitCallbacks(execute=True):
-                    deletion_response = form.submit(name="_save")
-
-                self.assertRedirects(
-                    deletion_response,
-                    reverse("admin:publications_publication_changelist"),
-                )
-
-                self.assertFalse(Document.objects.filter(pk=document.pk).exists())
-                mock_remove_document_from_index.assert_not_called()
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):

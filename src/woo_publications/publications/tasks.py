@@ -76,12 +76,9 @@ def remove_document_from_index(*, document_id: int, force: bool = False) -> str 
 
     document = Document.objects.get(pk=document_id)
     if (
-        (current_status := document.publicatiestatus)
-        and not force
-        and (
-            current_status == PublicationStatusOptions.concept
-            or current_status == PublicationStatusOptions.published
-        )
+        not force
+        and (current_status := document.publicatiestatus)
+        == PublicationStatusOptions.published
     ):
         logger.info(
             "Document has publication status %s, skipping index removal.",

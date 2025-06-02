@@ -73,7 +73,7 @@ class TestDocumentApi(TestCase):
             self.subTest("publish concept document without related publication"),
             self.assertRaises(TransitionNotAllowed),
         ):
-            concept_document = DocumentFactory.build(
+            concept_document = Document(
                 publicatie=None,
                 publicatiestatus=PublicationStatusOptions.concept,
             )
@@ -84,7 +84,7 @@ class TestDocumentApi(TestCase):
             self.subTest("revoke published document without related publication"),
             self.assertRaises(TransitionNotAllowed),
         ):
-            published_document = DocumentFactory.build(
+            published_document = Document(
                 publicatie=None,
                 publicatiestatus=PublicationStatusOptions.published,
             )

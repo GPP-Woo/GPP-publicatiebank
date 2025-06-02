@@ -79,6 +79,40 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
             document_uuid=factory.Faker("uuid4"),
         )
 
+    @factory.post_generation
+    def _validate_publication_state(obj, *args, **kwargs):
+        """
+        Ensure that the factories are in a consistent state.
+        """
+        try:
+            publication = obj.publicatie
+        except Publication.DoesNotExist as exc:
+            raise ValueError("A document must be related to a publication.") from exc
+
+        assert isinstance(publication, Publication)
+
+        match publication.publicatiestatus:
+            case PublicationStatusOptions.concept:
+                if not obj.publicatiestatus == PublicationStatusOptions.concept:
+                    raise ValueError(
+                        "'concept' publications can only have 'concept' documents."
+                    )
+            case PublicationStatusOptions.published:
+                if obj.publicatiestatus not in (
+                    PublicationStatusOptions.published,
+                    PublicationStatusOptions.revoked,
+                ):
+                    raise ValueError(
+                        "'published' publications can only have 'published' and "
+                        "'revoked' documents."
+                    )
+
+            case PublicationStatusOptions.revoked:
+                if not obj.publicatiestatus == PublicationStatusOptions.revoked:
+                    raise ValueError(
+                        "'revoked' publications can only have 'revoked' documents."
+                    )
+
 
 class TopicFactory(factory.django.DjangoModelFactory[Topic]):
     afbeelding = factory.django.ImageField(width=10, height=10, image_format="jpg")
