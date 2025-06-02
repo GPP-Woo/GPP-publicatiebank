@@ -65,24 +65,27 @@ class TestDocumentApi(TestCase):
             document.register_in_documents_api(lambda s: s)
 
     def test_status_change_with_none_existing_publication(self):
-        document_concept = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept
-        )
-        document_published = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
-        )
-
-        with self.subTest(method=document_concept.concept) and self.assertRaisesMessage(
-            TransitionNotAllowed, "No publication found."
+        # TODO: when the field is protected, direct assignment will not be possible
+        # TODO: if we enable factory/model level consistency checks, this will not be
+        # possible either
+        with (
+            self.subTest("publish concept document without related publication"),
+            self.assertRaises(TransitionNotAllowed),
         ):
-            document_concept.concept(publicatie_id=9999999999999)
+            concept_document = DocumentFactory.build(
+                publicatie=None,
+                publicatiestatus=PublicationStatusOptions.concept,
+            )
 
-        with self.subTest(
-            method=document_concept.published
-        ) and self.assertRaisesMessage(TransitionNotAllowed, "No publication found."):
-            document_published.published(publicatie_id=9999999999999)
+            concept_document.publish()
 
-        with self.subTest(method=document_concept.revoked) and self.assertRaisesMessage(
-            TransitionNotAllowed, "No publication found."
+        with (
+            self.subTest("revoke published document without related publication"),
+            self.assertRaises(TransitionNotAllowed),
         ):
-            document_published.revoked(publicatie_id=9999999999999)
+            published_document = DocumentFactory.build(
+                publicatie=None,
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+
+            published_document.revoke()

@@ -510,9 +510,10 @@ class PublicatieStatusMatch:
         self.expected = expected
 
     def __call__(self, instance: Document) -> bool:
-        publication: Publication | None = instance.publicatie
         # if there's no related publication, we can't do anything
-        if publication is None:
+        try:
+            publication: Publication = instance.publicatie
+        except Publication.DoesNotExist:
             return False
         return publication.publicatiestatus in self.expected
 
