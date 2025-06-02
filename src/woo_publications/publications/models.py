@@ -311,7 +311,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         Publish the publication.
 
         Concept and freshly created publications can be published. Publishing triggers
-        the publication of all related documents.
+        the publication of all related documents and schedules the index background
+        task.
         """
         from .tasks import index_publication
 
@@ -347,10 +348,33 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         Revoke the publication.
 
         Only published publications can be revoked. Revoking a publication triggers
-        revocation of the related documents.
+        revocation of the related documents and schedules a background task to remove
+        the publication from the search index.
         """
-        # TODO: revoke related documents
-        # TODO: trigger index removal
+        from .tasks import remove_publication_from_index
+
+        # schedule index removal to the search API
+        transaction.on_commit(
+            partial(remove_publication_from_index.delay, publication_id=self.pk)
+        )
+
+        # revoke all related (still published) documents in the same transaction.
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        # prepare the condition for the document condition check
+        self_copy = copy(self)
+        self_copy.publicatiestatus = PublicationStatusOptions.revoked
+        # note that we perform a memory efficient iteration to call the document state
+        # transitions, but may spawn a large amount of save/update queries. We can
+        # revisit this and complicate the code for performance if we notice performance
+        # degradation.
+        for document in documents.iterator():
+            # update in memory so that the transition condition is satisfied. Note that
+            # calling code should make sure to wrap these operations in a transaction!
+            document.publicatie = self_copy
+            document.revoke()
+            document.save()
 
     def revoke_own_documents(
         self, user: User | ActingUser, remarks: str | None = None
@@ -774,7 +798,11 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         Revocation sends an update to the search API to remove it from the index.
         """
-        # TODO: trigger index removal
+        from .tasks import remove_document_from_index
+
+        transaction.on_commit(
+            partial(remove_document_from_index.delay, document_id=self.pk)
+        )
 
     def absolute_document_download_uri(self, request: HttpRequest) -> str:
         """

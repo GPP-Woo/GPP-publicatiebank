@@ -35,9 +35,7 @@ from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from ..tasks import (
     index_document,
-    index_publication,
     remove_document_from_index,
-    remove_publication_from_index,
 )
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
@@ -343,35 +341,6 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
-
-    @transaction.atomic()
-    def perform_create(self, serializer):
-        super().perform_create(serializer)
-        assert serializer.instance is not None
-        publication = serializer.instance
-        assert publication is not None
-        transaction.on_commit(
-            partial(index_publication.delay, publication_id=publication.pk)
-        )
-
-    @transaction.atomic()
-    def perform_update(self, serializer):
-        publication = serializer.instance
-        assert publication is not None
-        super().perform_update(serializer)
-        new_status = publication.publicatiestatus
-
-        match new_status:
-            # when the status is revoked then remove the data from the index.
-            case PublicationStatusOptions.revoked:
-                transaction.on_commit(
-                    partial(
-                        remove_publication_from_index.delay,
-                        publication_id=publication.pk,
-                    )
-                )
-            case _:  # pragma: no cover
-                pass
 
 
 @extend_schema(tags=["Onderwerpen"])

@@ -249,22 +249,6 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
 
-        # updating with the same status must be possible (since other metadata fields
-        # can change)
-        with self.subTest("identity 'update'"):
-            publication3 = PublicationFactory.create(
-                publicatiestatus=PublicationStatusOptions.revoked,
-                informatie_categorieen=[information_category],
-            )
-            endpoint = reverse(
-                "api:publication-detail", kwargs={"uuid": publication3.uuid}
-            )
-            body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
-
-            response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     @patch("woo_publications.publications.tasks.index_publication.delay")
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_publish_side_effects(
@@ -306,6 +290,64 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         )
         mock_index_document.assert_called_once_with(
             document_id=document.pk, download_url=f"http://testserver{download_path}"
+        )
+
+    @patch("woo_publications.publications.tasks.remove_publication_from_index.delay")
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_revoke_side_effects(
+        self,
+        mock_remove_document_from_index_delay: MagicMock,
+        mock_remove_publication_from_index_delay: MagicMock,
+    ):
+        """
+        Assert the publication revoke action side effects.
+
+        * the publication index removal background tasks is triggered
+        * related published documents get revoked together with the publication
+        * the related document index removal tasks get triggered for published documents
+        """
+        information_category = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        published_document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        revoked_document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.revoked,
+        )
+        endpoint = reverse("api:publication-detail", kwargs={"uuid": publication.uuid})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # the already revoked document should not have been touched at all
+        original_last_modified_revoked_document = (
+            revoked_document.laatst_gewijzigd_datum
+        )  # noqa: E501
+        revoked_document.refresh_from_db()
+        self.assertEqual(
+            revoked_document.laatst_gewijzigd_datum,
+            original_last_modified_revoked_document,
+        )
+        published_document.refresh_from_db()
+        self.assertEqual(
+            published_document.publicatiestatus,
+            PublicationStatusOptions.revoked,
+        )
+        mock_remove_publication_from_index_delay.assert_called_once_with(
+            publication_id=publication.pk
+        )
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=published_document.pk
         )
 
 

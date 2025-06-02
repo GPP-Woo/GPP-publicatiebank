@@ -31,7 +31,7 @@ from woo_publications.metadata.tests.factories import (
 
 from ..constants import PublicationStatusOptions
 from ..models import Publication
-from .factories import DocumentFactory, PublicationFactory, TopicFactory
+from .factories import PublicationFactory, TopicFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -1607,9 +1607,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertFalse(publication.onderwerpen.filter(uuid=topic.uuid).exists())
 
     def test_update_revoked_publication_cannot_be_modified(self):
-        ic = InformationCategoryFactory.create(
-            oorsprong=InformationCategoryOrigins.value_list
-        )
+        ic = InformationCategoryFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
@@ -1624,7 +1622,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         data = {
             "informatieCategorieen": [str(ic.uuid)],
             "publisher": str(organisation.uuid),
-            "publicatiestatus": PublicationStatusOptions.published,
+            "publicatiestatus": PublicationStatusOptions.revoked,
             "officieleTitel": "changed offical title",
             "verkorteTitel": "changed short title",
             "omschrijving": "changed description",
@@ -1633,10 +1631,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        response_data = response.json()
         self.assertEqual(
-            response_data["publicatiestatus"],
+            response.data["non_field_errors"],
             [
                 _("You cannot modify a {revoked} publication.").format(
                     revoked=PublicationStatusOptions.revoked.label.lower()
@@ -1775,52 +1771,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 )
             )
 
-    def test_partial_update_when_revoking_publication_the_published_documents_also_get_revoked(  # noqa E501
-        self,
-    ):
-        ic = InformationCategoryFactory.create(
-            oorsprong=InformationCategoryOrigins.value_list
-        )
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            publicatiestatus=PublicationStatusOptions.published,
-        )
-        published_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.published
-        )
-        concept_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
-        )
-        revoked_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.revoked
-        )
-
-        detail_url = reverse(
-            "api:publication-detail",
-            kwargs={"uuid": str(publication.uuid)},
-        )
-        data = {"publicatiestatus": PublicationStatusOptions.revoked}
-
-        response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        published_document.refresh_from_db()
-        concept_document.refresh_from_db()
-        revoked_document.refresh_from_db()
-
-        self.assertEqual(
-            response.json()["publicatiestatus"], PublicationStatusOptions.revoked
-        )
-        self.assertEqual(
-            published_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-        self.assertEqual(
-            concept_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-        self.assertEqual(
-            revoked_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-
     def test_destroy_publication(self):
         ic = InformationCategoryFactory.create(
             oorsprong=InformationCategoryOrigins.value_list
@@ -1841,96 +1791,58 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Publication.objects.filter(uuid=publication.uuid).exists())
 
-    @patch("woo_publications.publications.api.viewsets.index_publication.delay")
-    def test_publish_publication_update_schedules_index_task(
+    @patch("woo_publications.publications.tasks.index_publication.delay")
+    def test_create_published_publication_schedules_index_task(
         self, mock_index_publication_delay: MagicMock
     ):
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept,
-        )
-        detail_url = reverse(
-            "api:publication-detail",
-            kwargs={"uuid": str(publication.uuid)},
-        )
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.published},
-                headers=AUDIT_HEADERS,
-            )
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_publication = Publication.objects.order_by("-pk").first()
-        assert latest_publication is not None
-        mock_index_publication_delay.assert_called_once_with(
-            publication_id=latest_publication.pk
-        )
-
-    @patch("woo_publications.publications.api.viewsets.index_publication.delay")
-    def test_publish_publication_create_schedules_index_task(
-        self, mock_index_publication_delay: MagicMock
-    ):
-        ic = InformationCategoryFactory.create(
-            oorsprong=InformationCategoryOrigins.value_list
-        )
+        information_category = InformationCategoryFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         list_url = reverse("api:publication-list")
-
-        data = {
-            "informatieCategorieen": [str(ic.uuid)],
-            "publicatiestatus": PublicationStatusOptions.concept,
+        body = {
+            "informatieCategorieen": [str(information_category.uuid)],
             "publisher": str(organisation.uuid),
             "verantwoordelijke": str(organisation.uuid),
             "opsteller": str(organisation.uuid),
-            "officieleTitel": "title one",
-            "verkorteTitel": "one",
-            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            "bronBewaartermijn": "Selectielijst gemeenten 2020",
-            "selectiecategorie": "",
-            "archiefnominatie": ArchiveNominationChoices.retain,
-            "archiefactiedatum": "2025-01-01",
-            "toelichtingBewaartermijn": "",
+            "officieleTitel": "Test",
         }
 
         with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.post(
-                list_url,
-                data=data,
-                headers=AUDIT_HEADERS,
-            )
+            response = self.client.post(list_url, data=body, headers=AUDIT_HEADERS)
 
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        latest_publication = Publication.objects.order_by("-pk").first()
-        assert latest_publication is not None
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created_publication = Publication.objects.get()
         mock_index_publication_delay.assert_called_once_with(
-            publication_id=latest_publication.pk
+            publication_id=created_publication.pk
         )
 
-    @patch(
-        "woo_publications.publications.api.viewsets.remove_publication_from_index.delay"
-    )
-    def test_revoke_publication_schedules_index_removal_task(
-        self, mock_remove_publication_from_index_delay: MagicMock
+    @patch("woo_publications.publications.tasks.index_publication.delay")
+    def test_updated_publication_schedules_index_task(
+        self, mock_index_publication_delay: MagicMock
     ):
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
-        )
-        detail_url = reverse(
-            "api:publication-detail",
-            kwargs={"uuid": str(publication.uuid)},
-        )
+        """
+        Assert that the search index update task is always triggered on update.
 
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.revoked},
-                headers=AUDIT_HEADERS,
-            )
+        Even without status changes, metadata updates must reach the search index.
+        """
+        information_category = InformationCategoryFactory.create()
+        for _status in PublicationStatusOptions:
+            mock_index_publication_delay.reset_mock()
 
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_publication = Publication.objects.order_by("-pk").first()
-        assert latest_publication is not None
-        mock_remove_publication_from_index_delay.assert_called_once_with(
-            publication_id=latest_publication.pk
-        )
+            with self.subTest(status=_status):
+                publication = PublicationFactory.create(
+                    publicatiestatus=PublicationStatusOptions.concept,
+                    informatie_categorieen=[information_category],
+                )
+                endpoint = reverse(
+                    "api:publication-detail",
+                    kwargs={"uuid": str(publication.uuid)},
+                )
+                body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
+
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                mock_index_publication_delay.assert_called_once_with(
+                    publication_id=publication.pk
+                )

@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 from typing import TypedDict
 
 from django.db import transaction
@@ -18,6 +19,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
+from ..tasks import index_publication
 from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
@@ -478,6 +480,23 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
+    def validate(self, attrs):
+        instance = self.instance
+        assert isinstance(instance, Publication | None)
+
+        # updating revoked publications is not allowed
+        if (
+            instance is not None
+            and instance.publicatiestatus == PublicationStatusOptions.revoked
+        ):
+            raise serializers.ValidationError(
+                _("You cannot modify a {revoked} publication.").format(
+                    revoked=PublicationStatusOptions.revoked.label.lower()
+                )
+            )
+
+        return attrs
+
     @transaction.atomic
     def update(self, instance, validated_data):
         apply_retention = False
@@ -512,6 +531,11 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
                 instance.revoke()
             case _:
+                # ensure that the search index is updated - publish/revoke state
+                # transitions call these tasks themselves
+                transaction.on_commit(
+                    partial(index_publication.delay, publication_id=instance.pk)
+                )
                 logger.debug(
                     "state_transition_skipped",
                     extra={
