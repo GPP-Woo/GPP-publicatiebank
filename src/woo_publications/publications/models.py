@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import uuid
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Collection, Iterator
 from functools import partial
 from uuid import UUID
 
@@ -57,6 +59,9 @@ from .typing import DocumentActions
 _DOCUMENT_NOT_SET = models.Q(document_service=None, document_uuid=None)
 # when the document is specified both the service and uuid needs to be set
 _DOCUMENT_SET = ~models.Q(document_service=None) & ~models.Q(document_uuid=None)
+
+# The method `get_available_publicatiestatus_transitions` is provided by django-fsm
+type GetAvailablePublicatiestatusTransitions = Callable[[], Iterator[Transition]]
 
 
 class Topic(models.Model):
@@ -266,7 +271,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         blank=True,
     )
 
-    get_available_publicatiestatus_transitions: Callable[[], Iterator[Transition]]
+    get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
 
     class Meta:  # pyright: ignore
         verbose_name = _("publication")
@@ -500,6 +505,18 @@ class LinkedPublicationError(Exception):
         super().__init__(message)
 
 
+class PublicatieStatusMatch:
+    def __init__(self, expected: Collection[PublicationStatusOptions]):
+        self.expected = expected
+
+    def __call__(self, instance: Document) -> bool:
+        publication: Publication | None = instance.publicatie
+        # if there's no related publication, we can't do anything
+        if publication is None:
+            return False
+        return publication.publicatiestatus in self.expected
+
+
 class Document(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
@@ -634,6 +651,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         ),
     )
 
+    get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
+
     # Private property managed by the getter and setter below.
     _zgw_document: ZGWDocument | None = None
 
@@ -718,6 +737,61 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Set the (created) ZGWDocument in the cache.
         """
         self._zgw_document = document
+
+    @transition(
+        field=publicatiestatus,
+        source="",
+        target=PublicationStatusOptions.concept,
+        conditions=(PublicatieStatusMatch({PublicationStatusOptions.concept}),),
+    )
+    def draft(self) -> None:
+        """
+        Mark the document as 'concept'.
+
+        Draft documents can only occur within draft publications.
+        """
+        pass
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.concept,
+        target=PublicationStatusOptions.published,
+        conditions=(PublicatieStatusMatch({PublicationStatusOptions.published}),),
+    )
+    def publish(self) -> None:
+        """
+        Publish the document.
+
+        A published document can only occur within a published publication. Publish the
+        publication to trigger the publication of the documents. When a document is
+        published, it's sent to the search API for indexing.
+        """
+        # TODO: trigger index addition
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+        conditions=(
+            PublicatieStatusMatch(
+                {
+                    PublicationStatusOptions.published,
+                    PublicationStatusOptions.revoked,
+                }
+            ),
+        ),
+    )
+    def revoke(self) -> None:
+        """
+        Revoke the document.
+
+        Revoked documents can occur within published and revoked publications. When a
+        publication is revoked, all its documents will be revoked automatically. A
+        document can also be revoked individually.
+
+        Revocation sends an update to the search API to remove it from the index.
+        """
+        # TODO: trigger index removal
 
     def absolute_document_download_uri(self, request: HttpRequest) -> str:
         """
@@ -812,14 +886,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         return completed
 
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-        ),
-        target=PublicationStatusOptions.concept,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=(  # pyright: ignore[reportArgumentType]
+    #         "",
+    #         PublicationStatusOptions.concept,
+    #     ),
+    #     target=PublicationStatusOptions.concept,
+    # )
     def concept(self, publicatie_id: int | None = None):
         try:
             publicatie = Publication.objects.get(id=publicatie_id)
@@ -843,15 +917,15 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         return PublicationStatusOptions.concept
 
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-            PublicationStatusOptions.published,
-        ),
-        target=PublicationStatusOptions.published,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=(  # pyright: ignore[reportArgumentType]
+    #         "",
+    #         PublicationStatusOptions.concept,
+    #         PublicationStatusOptions.published,
+    #     ),
+    #     target=PublicationStatusOptions.published,
+    # )
     def published(self, publicatie_id: int | None = None):
         try:
             publicatie = Publication.objects.get(id=publicatie_id)
@@ -875,11 +949,11 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         return PublicationStatusOptions.published
 
-    @transition(
-        field="publicatiestatus",
-        source=PublicationStatusOptions.published,
-        target=PublicationStatusOptions.revoked,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=PublicationStatusOptions.published,
+    #     target=PublicationStatusOptions.revoked,
+    # )
     def revoked(self, publicatie_id: int | None = None):
         try:
             publicatie = Publication.objects.get(id=publicatie_id)

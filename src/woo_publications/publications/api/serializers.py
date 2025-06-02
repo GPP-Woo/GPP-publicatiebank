@@ -19,6 +19,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, LinkedPublicationError, Publication, Topic
+from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
 
@@ -215,75 +216,39 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
                 "read_only": True,
             },
             "publicatiestatus": {
+                # read-only unless it's an update, see DocumentUpdateSerializer below
+                "read_only": True,
+                "validators": [PublicationStatusValidator()],
                 "help_text": _(
-                    "\n**Disclaimer**: you can't create a {revoked} document."
-                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
-                "required": False,
+                    "\nOn creation, the publicatiestatus is derived from the "
+                    "publication and cannot be specified directly."
+                ),
             },
         }
-
-    def _validate_publicatiestatus(
-        self,
-        document: Document,
-        publicatiestatus=PublicationStatusOptions,
-        publicatie_id: int | None = None,
-    ):
-        match publicatiestatus:
-            case PublicationStatusOptions.concept:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.concept
-                ):
-                    return document.concept(publicatie_id=publicatie_id)
-
-            case PublicationStatusOptions.published:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.published
-                ):
-                    return document.published(publicatie_id=publicatie_id)
-
-            case PublicationStatusOptions.revoked:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.revoked
-                ):
-                    return document.revoked(publicatie_id=publicatie_id)
 
     def validate(self, attrs):
         instance = self.instance
         assert isinstance(instance, Document | None)
 
-        publicatie = attrs.get("publicatie", instance.publicatie if instance else None)
-        assert publicatie
-
-        if not self.partial or attrs.get("publicatiestatus"):
-            publicatiestatus = attrs.get(
-                "publicatiestatus",
-                instance.publicatiestatus
-                if instance
-                else attrs["publicatie"].publicatiestatus,
-            )
-
-            self._validate_publicatiestatus(
-                document=instance or self.Meta.model(),
-                publicatiestatus=publicatiestatus,
-                publicatie_id=publicatie.pk,
-            )
+        # publicatie can be absent for partial updates
+        publication: Publication
+        match (instance, self.partial):
+            # create
+            case None, False:
+                publication = attrs["publicatie"]
+                # Adding new documents to revoked publications is forbidden.
+                if publication.publicatiestatus == PublicationStatusOptions.revoked:
+                    raise serializers.ValidationError(
+                        _("Adding documents to revoked publications is not allowed."),
+                        code="publication_revoked",
+                    )
+            # (partial) update
+            case Document(), bool():
+                publication = attrs.get("publicatie", instance.publicatie)
+            case _:  # pragma: no cover
+                raise AssertionError("unreachable code")
 
         return super().validate(attrs)
-
-    def validate_publicatiestatus(
-        self, value: PublicationStatusOptions
-    ) -> PublicationStatusOptions:
-        if self.instance:
-            assert isinstance(self.instance, Document)
-
-            if self.instance.publicatiestatus == PublicationStatusOptions.revoked:
-                raise serializers.ValidationError(
-                    _("You cannot modify a {revoked} document.").format(
-                        revoked=PublicationStatusOptions.revoked.label.lower()
-                    )
-                )
-
-        return value
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -293,14 +258,36 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
                 identifier=eigenaar["identifier"], naam=eigenaar["naam"]
             )
 
+        # pop the target state from the validate data to avoid setting it directly,
+        # instead apply the state transitions based on old -> new state
+        current_publication_status: PublicationStatusOptions = instance.publicatiestatus
+        new_publication_status: PublicationStatusOptions = validated_data.pop(
+            "publicatiestatus",
+            current_publication_status,
+        )
+
+        match (current_publication_status, new_publication_status):
+            case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
+                instance.revoke()
+            case _:
+                logger.debug(
+                    "state_transition_skipped",
+                    extra={
+                        "source_status": current_publication_status,
+                        "target_status": new_publication_status,
+                        "model": instance._meta.model_name,
+                        "pk": instance.pk,
+                    },
+                )
+
         return super().update(instance, validated_data)
 
     @transaction.atomic
     def create(self, validated_data):
-        if not validated_data.get("publicatiestatus"):
-            validated_data["publicatiestatus"] = validated_data[
-                "publicatie"
-            ].publicatiestatus
+        # on create, the status is always derived from the publication. Anything
+        # submitted by the client is ignored.
+        publication: Publication = validated_data["publicatie"]
+        validated_data["publicatiestatus"] = publication.publicatiestatus
 
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
@@ -343,6 +330,10 @@ class DocumentUpdateSerializer(DocumentSerializer):
             },
             "creatiedatum": {
                 "required": False,
+            },
+            "publicatiestatus": {
+                **DocumentSerializer.Meta.extra_kwargs["publicatiestatus"],
+                "read_only": False,
             },
         }
 
@@ -454,6 +445,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 ),
                 "required": False,
                 "default": PublicationStatusOptions.published,
+                "validators": [PublicationStatusValidator()],
             },
             "bron_bewaartermijn": {
                 "help_text": _(
@@ -502,32 +494,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 )
             },
         }
-
-    def validate_publicatiestatus(
-        self, value: PublicationStatusOptions
-    ) -> PublicationStatusOptions:
-        instance = self.instance or Publication()
-        assert isinstance(instance, Publication)
-
-        current_state = instance.publicatiestatus
-
-        # no state change -> nothing to validate, since no transitions will be called.
-        if value == current_state:
-            return value
-
-        # given the current instance and its available state transitions, validate that
-        # the requested publicatiestatus is allowed.
-        allowed_target_statuses: set[PublicationStatusOptions] = {
-            status.target
-            for status in instance.get_available_publicatiestatus_transitions()
-        }
-        if value not in allowed_target_statuses:
-            message = _(
-                "Changing the state from '{current}' to '{value}' is not allowed."
-            ).format(current=current_state, value=value)
-            raise serializers.ValidationError(message, code="invalid_state")
-
-        return value
 
     @transaction.atomic
     def update(self, instance, validated_data):
