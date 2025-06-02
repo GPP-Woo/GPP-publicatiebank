@@ -4,6 +4,8 @@ Test the allowed/blocked publicatiestatus changes for Publicatie and Document.
 See https://github.com/GPP-Woo/GPP-publicatiebank/issues/266 for the requirements.
 """
 
+from unittest.mock import patch
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
@@ -18,7 +20,7 @@ from woo_publications.metadata.tests.factories import (
 )
 
 from ..constants import PublicationStatusOptions
-from .factories import PublicationFactory
+from .factories import DocumentFactory, PublicationFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -141,6 +143,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_published_publication(self):
@@ -201,6 +204,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_revoked_publication(self):
@@ -258,4 +262,263 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestCase):
+    """
+    Test the publicatiestatus transition behaviour in the API.
+    """
+
+    def setUp(self):
+        super().setUp()
+
+        # mock out the interaction with the Documents API, it's not relevant for these
+        # tests
+        patcher = patch(
+            "woo_publications.publications.models.Document.register_in_documents_api"
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_create_ignores_publicatiestatus(self):
+        """
+        Assert that the publicatiestatus field is **ignored** for new documents.
+
+        Instead, the status is derived from the related publication and creawting
+        documents in a revoked publication must not be possible at all.
+        """
+        information_category = InformationCategoryFactory.create()
+        endpoint = reverse("api:document-list")
+        base = {
+            "officieleTitel": "Test",
+            "creatiedatum": "2024-11-05",
+        }
+
+        with self.subTest("concept publication"):
+            concept_publication = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.concept,
+                informatie_categorieen=[information_category],
+            )
+
+            for _status in PublicationStatusOptions:
+                with self.subTest(request_body_publicatiestatus=_status):
+                    body = {
+                        **base,
+                        "publicatie": concept_publication.uuid,
+                        "publicatiestatus": _status,
+                    }
+
+                    response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
+
+                    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+                    self.assertEqual(
+                        response.json()["publicatiestatus"],
+                        PublicationStatusOptions.concept,
+                    )
+
+        with self.subTest("published publication"):
+            published_publication = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                informatie_categorieen=[information_category],
+            )
+
+            for _status in PublicationStatusOptions:
+                with self.subTest(request_body_publicatiestatus=_status):
+                    body = {
+                        **base,
+                        "publicatie": published_publication.uuid,
+                        "publicatiestatus": _status,
+                    }
+
+                    response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
+
+                    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+                    self.assertEqual(
+                        response.json()["publicatiestatus"],
+                        PublicationStatusOptions.published,
+                    )
+
+        with self.subTest("revoked publication"):
+            revoked_publication = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.revoked,
+                informatie_categorieen=[information_category],
+            )
+
+            for _status in PublicationStatusOptions:
+                with self.subTest(request_body_publicatiestatus=_status):
+                    body = {
+                        **base,
+                        "publicatie": revoked_publication.uuid,
+                        "publicatiestatus": _status,
+                    }
+
+                    response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
+
+                    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                    self.assertEqual(list(response.data.keys()), ["non_field_errors"])
+
+    def test_concept_document(self):
+        """
+        Assert that the status cannot be set via the API.
+
+        Concept documents can only occur within concept publications.
+        """
+        information_category = InformationCategoryFactory.create()
+        concept_document = DocumentFactory.create(
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+            publicatie__informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        endpoint = reverse(
+            "api:document-detail", kwargs={"uuid": concept_document.uuid}
+        )
+
+        with self.subTest("publish (blocked)"):
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
+
+        with self.subTest("revoke (blocked)"):
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
+
+        # updating with the same status must be possible (since other metadata fields
+        # can change)
+        with self.subTest("identity 'update'"):
+            body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
+
+            response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_published_document(self):
+        """
+        Check the valid state transitions for published documents.
+
+        Published documents can only occur within published publications.
+        """
+        information_category = InformationCategoryFactory.create()
+
+        with self.subTest("concept (blocked)"):
+            published_document1 = DocumentFactory.create(
+                publicatie__publicatiestatus=PublicationStatusOptions.published,
+                publicatie__informatie_categorieen=[information_category],
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+            endpoint = reverse(
+                "api:document-detail", kwargs={"uuid": published_document1.uuid}
+            )
+
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.concept},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
+
+        with self.subTest("revoke"):
+            published_document2 = DocumentFactory.create(
+                publicatie__publicatiestatus=PublicationStatusOptions.published,
+                publicatie__informatie_categorieen=[information_category],
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+            endpoint = reverse(
+                "api:document-detail", kwargs={"uuid": published_document2.uuid}
+            )
+
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(
+                response.json()["publicatiestatus"],
+                PublicationStatusOptions.revoked,
+            )
+
+        # updating with the same status must be possible (since other metadata fields
+        # can change)
+        with self.subTest("identity 'update'"):
+            published_document3 = DocumentFactory.create(
+                publicatie__publicatiestatus=PublicationStatusOptions.published,
+                publicatie__informatie_categorieen=[information_category],
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+            endpoint = reverse(
+                "api:document-detail", kwargs={"uuid": published_document3.uuid}
+            )
+            body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
+
+            response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_revoked_document(self):
+        """
+        Check the valid state transitions for revoked documents.
+
+        Revoked documents can occur within published and revoked publications.
+        """
+        information_category = InformationCategoryFactory.create()
+        revoked_document1 = DocumentFactory.create(
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            publicatie__informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.revoked,
+        )
+        revoked_document2 = DocumentFactory.create(
+            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.revoked,
+        )
+
+        for document in (revoked_document1, revoked_document2):
+            document_subtest_kwargs = {
+                "publication_status": document.publicatie.publicatiestatus
+            }
+            endpoint = reverse("api:document-detail", kwargs={"uuid": document.uuid})
+
+            with self.subTest("concept (blocked)", **document_subtest_kwargs):
+                response = self.client.patch(
+                    endpoint,
+                    {"publicatiestatus": PublicationStatusOptions.concept},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
+
+            with self.subTest("published (blocked)", **document_subtest_kwargs):
+                response = self.client.patch(
+                    endpoint,
+                    {"publicatiestatus": PublicationStatusOptions.published},
+                    headers=AUDIT_HEADERS,
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(list(response.data.keys()), ["publicatiestatus"])
+
+            # updating with the same status must be possible (since other metadata
+            # fields can change)
+            with self.subTest("identity 'update'", **document_subtest_kwargs):
+                body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
+
+                response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
