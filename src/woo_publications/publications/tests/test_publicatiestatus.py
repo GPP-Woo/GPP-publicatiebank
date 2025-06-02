@@ -267,13 +267,17 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
 
     @patch("woo_publications.publications.tasks.index_publication.delay")
     @patch("woo_publications.publications.tasks.index_document.delay")
-    def test_publish_cascades_to_documents(
+    def test_publish_side_effects(
         self,
         mock_index_document: MagicMock,
         mock_index_publication: MagicMock,
     ):
         """
-        Assert that related documents get published together with the publication.
+        Assert the publication publish action side effects.
+
+        * the publication index background tasks is triggered
+        * related documents get published together with the publication
+        * the related document index tasks get triggered
         """
         information_category = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
@@ -297,6 +301,12 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         document.refresh_from_db()
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         mock_index_publication.assert_called_once_with(publication_id=publication.pk)
+        download_path = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
+        mock_index_document.assert_called_once_with(
+            document_id=document.pk, download_url=f"http://testserver{download_path}"
+        )
 
 
 class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestCase):

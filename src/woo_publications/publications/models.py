@@ -306,7 +306,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
         target=PublicationStatusOptions.published,
     )
-    def publish(self) -> None:
+    def publish(self, request: HttpRequest) -> None:
         """
         Publish the publication.
 
@@ -334,7 +334,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             # update in memory so that the transition condition is satisfied. Note that
             # calling code should make sure to wrap these operations in a transaction!
             document.publicatie = self_copy
-            document.publish()
+            document.publish(request=request)
             document.save()
 
     @transition(
@@ -733,7 +733,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
         target=PublicationStatusOptions.published,
         conditions=(PublicatieStatusMatch({PublicationStatusOptions.published}),),
     )
-    def publish(self) -> None:
+    def publish(self, request: HttpRequest) -> None:
         """
         Publish the document.
 
@@ -741,7 +741,15 @@ class Document(ConcurrentTransitionMixin, models.Model):
         publication to trigger the publication of the documents. When a document is
         published, it's sent to the search API for indexing.
         """
-        # TODO: trigger index addition
+        from .tasks import index_document
+
+        # schedule indexing to the search API
+        download_url = self.absolute_document_download_uri(request=request)
+        transaction.on_commit(
+            partial(
+                index_document.delay, document_id=self.pk, download_url=download_url
+            )
+        )
 
     @transition(
         field=publicatiestatus,

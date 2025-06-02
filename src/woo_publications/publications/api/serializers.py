@@ -6,6 +6,7 @@ from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.api.drf_spectacular.headers import (
@@ -506,7 +507,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         match (current_publication_status, new_publication_status):
             case (PublicationStatusOptions.concept, PublicationStatusOptions.published):
-                instance.publish()
+                request: Request = self.context["request"]
+                instance.publish(request)
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
                 instance.revoke()
             case _:
@@ -547,7 +549,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             case PublicationStatusOptions.concept:
                 publication.draft()
             case PublicationStatusOptions.published:
-                publication.publish()
+                request: Request = self.context["request"]
+                publication.publish(request)
             case _:
                 raise ValueError(
                     f"Unexpected creation publicatiestatus: {publicatiestatus}"
