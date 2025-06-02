@@ -15,6 +15,7 @@ from woo_publications.api.drf_spectacular.headers import (
     AUDIT_USER_REPRESENTATION_PARAMETER,
 )
 from woo_publications.contrib.documents_api.client import FilePart
+from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
@@ -540,12 +541,22 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             if old_informatie_categorieen_set != new_informatie_categorieen_set:
                 apply_retention = True
 
+        request: Request = self.context["request"]
+        user_id, user_repr, remarks = extract_audit_parameters(request)
+
         match (current_publication_status, new_publication_status):
             case (PublicationStatusOptions.concept, PublicationStatusOptions.published):
-                request: Request = self.context["request"]
-                instance.publish(request)
+                instance.publish(
+                    request,
+                    user={"identifier": user_id, "display_name": user_repr},
+                    remarks=remarks,
+                )
+
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
-                instance.revoke()
+                instance.revoke(
+                    user={"identifier": user_id, "display_name": user_repr},
+                    remarks=remarks,
+                )
             case _:
                 # ensure that the search index is updated - publish/revoke state
                 # transitions call these tasks themselves
@@ -590,7 +601,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 publication.draft()
             case PublicationStatusOptions.published:
                 request: Request = self.context["request"]
-                publication.publish(request)
+                user_id, user_repr, remarks = extract_audit_parameters(request)
+                publication.publish(
+                    request,
+                    user={"identifier": user_id, "display_name": user_repr},
+                    remarks=remarks,
+                )
             case _:
                 raise ValueError(
                     f"Unexpected creation publicatiestatus: {publicatiestatus}"

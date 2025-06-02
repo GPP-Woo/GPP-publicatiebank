@@ -24,6 +24,7 @@ from django_fsm import (
     transition,
 )
 from rest_framework.reverse import reverse
+from typing_extensions import deprecated
 from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import User
@@ -306,7 +307,12 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
         target=PublicationStatusOptions.published,
     )
-    def publish(self, request: HttpRequest) -> None:
+    def publish(
+        self,
+        request: HttpRequest,
+        user: User | ActingUser,
+        remarks: str = "",
+    ) -> None:
         """
         Publish the publication.
 
@@ -321,7 +327,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
 
         # publish all related documents in the same transaction. All documents must have
         # the concept status at this point, but we err on the side of caution.
-        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+        documents: models.QuerySet[Document] = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
             publicatiestatus=PublicationStatusOptions.concept
         )
         # prepare the condition for the document condition check
@@ -337,13 +343,14 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             document.publicatie = self_copy
             document.publish(request=request)
             document.save()
+            document._log_update(user=user, remarks=remarks)
 
     @transition(
         field=publicatiestatus,
         source=PublicationStatusOptions.published,
         target=PublicationStatusOptions.revoked,
     )
-    def revoke(self) -> None:
+    def revoke(self, user: User | ActingUser, remarks: str = "") -> None:
         """
         Revoke the publication.
 
@@ -375,7 +382,9 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             document.publicatie = self_copy
             document.revoke()
             document.save()
+            document._log_update(user=user, remarks=remarks)
 
+    @deprecated("To be replaced with explicit .revoke() call")
     def revoke_own_documents(
         self, user: User | ActingUser, remarks: str | None = None
     ) -> None:
@@ -411,54 +420,6 @@ class Publication(ConcurrentTransitionMixin, models.Model):
                 "remarks": remarks,
             }
         )
-        for document in Document.objects.filter(pk__in=document_ids_to_log):
-            log_callback(
-                content_object=document,
-                object_data=serialize_instance(document),
-                **log_extra_kwargs,  # pyright: ignore[reportArgumentType]
-            )
-
-    def publish_own_documents(
-        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
-    ) -> None:
-        from .tasks import index_document
-
-        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
-            models.Q(publicatiestatus=PublicationStatusOptions.concept)
-            | models.Q(publicatiestatus=PublicationStatusOptions.published)
-        )
-
-        for document in documents:
-            download_url = document.absolute_document_download_uri(request=request)
-            transaction.on_commit(
-                partial(
-                    index_document.delay,
-                    document_id=document.pk,
-                    download_url=download_url,
-                )
-            )
-
-        documents.update(
-            publicatiestatus=PublicationStatusOptions.published,
-            laatst_gewijzigd_datum=timezone.now(),
-        )
-
-        # audit log actions
-        is_django_user = isinstance(user, User)
-        log_callback = audit_admin_update if is_django_user else audit_api_update
-        log_extra_kwargs = (
-            {"django_user": user}
-            if is_django_user
-            else {
-                "user_id": user["identifier"],
-                "user_display": user["display_name"],
-                "remarks": remarks,
-            }
-        )
-
-        # get a list of IDs of published/concept documents, make sure to evaluate the
-        # queryset so it's not affected by the `update` query
-        document_ids_to_log = list(documents.values_list("pk", flat=True))
         for document in Document.objects.filter(pk__in=document_ids_to_log):
             log_callback(
                 content_object=document,
@@ -764,6 +725,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         A published document can only occur within a published publication. Publish the
         publication to trigger the publication of the documents. When a document is
         published, it's sent to the search API for indexing.
+
+        Publication events are logged to the audit log.
         """
         from .tasks import index_document
 
@@ -803,6 +766,24 @@ class Document(ConcurrentTransitionMixin, models.Model):
         transaction.on_commit(
             partial(remove_document_from_index.delay, document_id=self.pk)
         )
+
+    def _log_update(self, user: User | ActingUser, remarks: str = "") -> None:
+        # audit log the publication event
+        serialized = serialize_instance(self)
+        if isinstance(user, User):
+            audit_admin_update(
+                content_object=self,
+                object_data=serialized,
+                django_user=user,
+            )
+        else:
+            audit_api_update(
+                content_object=self,
+                object_data=serialized,
+                user_id=str(user["identifier"]),
+                user_display=user["display_name"],
+                remarks=remarks,
+            )
 
     def absolute_document_download_uri(self, request: HttpRequest) -> str:
         """
