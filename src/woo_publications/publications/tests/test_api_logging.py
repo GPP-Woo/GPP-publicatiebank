@@ -599,14 +599,16 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
         }
         self.assertEqual(log.extra_data, expected_data)
 
-    def test_update_documentation(self):
+    def test_update_document(self):
         assert not TimelineLogProxy.objects.exists()
-        publication = PublicationFactory.create()
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
         with freeze_time("2024-09-27T12:00:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
                 eigenaar=self.organisation_member,
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 identifier="document-1",
                 officiele_titel="title one",
                 verkorte_titel="one",
