@@ -607,3 +607,35 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_revoke_side_effects(
+        self,
+        mock_remove_document_from_index_delay: MagicMock,
+    ):
+        """
+        Assert the document revoke action side effects.
+
+        * the document index removal tasks get triggered
+        """
+        information_category = InformationCategoryFactory.create()
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[information_category],
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        endpoint = reverse("api:document-detail", kwargs={"uuid": document.uuid})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.revoked},
+                headers=AUDIT_HEADERS,
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        document.refresh_from_db()
+        self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
+        mock_remove_document_from_index_delay.assert_called_once_with(
+            document_id=document.pk
+        )

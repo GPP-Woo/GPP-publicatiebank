@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import IntegrityError, transaction
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 
 from django_fsm import TransitionNotAllowed
 from zgw_consumers.constants import APITypes
@@ -68,6 +68,7 @@ class TestDocumentApi(TestCase):
         # TODO: when the field is protected, direct assignment will not be possible
         # TODO: if we enable factory/model level consistency checks, this will not be
         # possible either
+        request = RequestFactory().post("/irrelevant")
         with (
             self.subTest("publish concept document without related publication"),
             self.assertRaises(TransitionNotAllowed),
@@ -77,7 +78,7 @@ class TestDocumentApi(TestCase):
                 publicatiestatus=PublicationStatusOptions.concept,
             )
 
-            concept_document.publish()
+            concept_document.publish(request)
 
         with (
             self.subTest("revoke published document without related publication"),

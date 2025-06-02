@@ -31,11 +31,9 @@ from woo_publications.logging.service import (
 )
 
 from ...logging.api_tools import AuditTrailRetrieveMixin
-from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from ..tasks import (
     index_document,
-    remove_document_from_index,
 )
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
@@ -116,32 +114,6 @@ class DocumentViewSet(
         woo_document.register_in_documents_api(
             build_absolute_uri=self.request.build_absolute_uri,
         )
-
-    @transaction.atomic()
-    def perform_update(self, serializer):
-        document = serializer.instance
-        assert document is not None
-        super().perform_update(serializer)
-        new_status = document.publicatiestatus
-
-        match new_status:
-            # when the status is published then index data.
-            case PublicationStatusOptions.published:
-                document_url = document.absolute_document_download_uri(self.request)
-                transaction.on_commit(
-                    partial(
-                        index_document.delay,
-                        document_id=document.pk,
-                        download_url=document_url,
-                    )
-                )
-            # when the status is revoked then remove the data from the index.
-            case PublicationStatusOptions.revoked:
-                transaction.on_commit(
-                    partial(remove_document_from_index.delay, document_id=document.pk)
-                )
-            case _:  # pragma: no cover
-                pass
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
