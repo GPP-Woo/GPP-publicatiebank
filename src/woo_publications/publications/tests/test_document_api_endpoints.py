@@ -1372,7 +1372,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "verkorteTitel": "Testdocument",
             "omschrijving": "Testing 123",
@@ -1452,7 +1451,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "verkorteTitel": "Testdocument",
             "omschrijving": "Testing 123",
@@ -1504,7 +1502,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         endpoint = reverse("api:document-list")
         body = {
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "creatiedatum": "2024-11-05",
             "eigenaar": {
@@ -1547,7 +1544,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
-            "publicatiestatus": PublicationStatusOptions.published,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
             "verkorteTitel": "Testdocument",
             "omschrijving": "Testing 123",
