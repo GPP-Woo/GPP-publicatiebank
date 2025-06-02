@@ -1837,10 +1837,11 @@ components:
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
+          readOnly: true
           title: Status
           description: |2-
 
-            **Waarschuwing**: je kan geen ingetrokken document aanmaken.
+            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
 
             * `gepubliceerd` - Gepubliceerd
             * `concept` - Concept
@@ -1911,6 +1912,7 @@ components:
       - laatstGewijzigdDatum
       - officieleTitel
       - publicatie
+      - publicatiestatus
       - registratiedatum
       - uuid
     DocumentAction:
@@ -1978,6 +1980,13 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
+          description: |2-
+
+            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         creatiedatum:
           type: string
           format: date
@@ -2371,6 +2380,13 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
+          description: |2-
+
+            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         creatiedatum:
           type: string
           format: date
@@ -2528,6 +2544,7 @@ components:
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
+          default: gepubliceerd
           title: Status
           description: |2-
 
@@ -2665,6 +2682,7 @@ components:
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
+          default: gepubliceerd
           title: Status
           description: |2-
 
