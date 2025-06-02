@@ -1,5 +1,5 @@
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from functools import partial
 from uuid import UUID
 
@@ -17,6 +17,7 @@ from dateutil.relativedelta import relativedelta
 from django_fsm import (
     ConcurrentTransitionMixin,
     FSMField,
+    Transition,
     TransitionNotAllowed,
     transition,
 )
@@ -265,6 +266,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         blank=True,
     )
 
+    get_available_publicatiestatus_transitions: Callable[[], Iterator[Transition]]
+
     class Meta:  # pyright: ignore
         verbose_name = _("publication")
         verbose_name_plural = _("publications")
@@ -280,6 +283,48 @@ class Publication(ConcurrentTransitionMixin, models.Model):
                     revoked=PublicationStatusOptions.revoked.label.lower()
                 )
             )
+
+    @transition(
+        field=publicatiestatus, source="", target=PublicationStatusOptions.concept
+    )
+    def draft(self) -> None:
+        """
+        Mark the publication as 'concept'.
+
+        Only freshly created publications can be a draft.
+        """
+        pass
+
+    @transition(
+        field=publicatiestatus,
+        # type annotations are missing and pyright infers that only string is allowed
+        source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
+        target=PublicationStatusOptions.published,
+    )
+    def publish(self) -> None:
+        """
+        Publish the publication.
+
+        Concept and freshly created publications can be published. Publishing triggers
+        the publication of all related documents.
+        """
+        # TODO: publish related documents
+        # TODO: trigger index addition
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+    )
+    def revoke(self) -> None:
+        """
+        Revoke the publication.
+
+        Only published publications can be revoked. Revoking a publication triggers
+        revocation of the related documents.
+        """
+        # TODO: revoke related documents
+        # TODO: trigger index removal
 
     def revoke_own_documents(
         self, user: User | ActingUser, remarks: str | None = None
@@ -407,26 +452,26 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             .values_list("sitemap_uuid", flat=True)
         )
 
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-        ),
-        target=PublicationStatusOptions.concept,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=(  # pyright: ignore[reportArgumentType]
+    #         "",
+    #         PublicationStatusOptions.concept,
+    #     ),
+    #     target=PublicationStatusOptions.concept,
+    # )
     def concept(self, *args, **kwargs):
         return PublicationStatusOptions.concept
 
-    @transition(
-        field="publicatiestatus",
-        source=(  # pyright: ignore[reportArgumentType]
-            "",
-            PublicationStatusOptions.concept,
-            PublicationStatusOptions.published,
-        ),
-        target=PublicationStatusOptions.published,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=(  # pyright: ignore[reportArgumentType]
+    #         "",
+    #         PublicationStatusOptions.concept,
+    #         PublicationStatusOptions.published,
+    #     ),
+    #     target=PublicationStatusOptions.published,
+    # )
     def published(
         self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
     ):
@@ -435,11 +480,11 @@ class Publication(ConcurrentTransitionMixin, models.Model):
 
         return PublicationStatusOptions.published
 
-    @transition(
-        field="publicatiestatus",
-        source=PublicationStatusOptions.published,
-        target=PublicationStatusOptions.revoked,
-    )
+    # @transition(
+    #     field="publicatiestatus",
+    #     source=PublicationStatusOptions.published,
+    #     target=PublicationStatusOptions.revoked,
+    # )
     def revoked(
         self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
     ):

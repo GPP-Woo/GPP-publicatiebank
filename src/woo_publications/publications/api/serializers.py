@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from typing import TypedDict
 
@@ -7,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 from django_fsm import TransitionNotAllowed
 from rest_framework import serializers
-from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.api.drf_spectacular.headers import (
@@ -15,11 +15,12 @@ from woo_publications.api.drf_spectacular.headers import (
     AUDIT_USER_REPRESENTATION_PARAMETER,
 )
 from woo_publications.contrib.documents_api.client import FilePart
-from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, LinkedPublicationError, Publication, Topic
+
+logger = logging.getLogger(__name__)
 
 
 class OwnerData(TypedDict):
@@ -452,6 +453,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     revoked=PublicationStatusOptions.revoked.label.lower(),
                 ),
                 "required": False,
+                "default": PublicationStatusOptions.published,
             },
             "bron_bewaartermijn": {
                 "help_text": _(
@@ -501,92 +503,43 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
-    def _validate_publicatiestatus(
-        self,
-        request: Request,
-        publication: Publication,
-        publicatiestatus: PublicationStatusOptions,
-    ) -> PublicationStatusOptions:
-        user_id, user_repr, remarks = extract_audit_parameters(request)
-
-        match publicatiestatus:
-            case PublicationStatusOptions.concept:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.concept
-                ):
-                    return publication.concept(
-                        request=request,
-                        user={
-                            "identifier": user_id,
-                            "display_name": user_repr,
-                        },
-                        remarks=remarks,
-                    )
-
-            case PublicationStatusOptions.published:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.published
-                ):
-                    return publication.published(
-                        request=request,
-                        user={
-                            "identifier": user_id,
-                            "display_name": user_repr,
-                        },
-                        remarks=remarks,
-                    )
-
-            case PublicationStatusOptions.revoked:
-                with handle_state_exception(
-                    publicatiestatus=PublicationStatusOptions.revoked
-                ):
-                    return publication.revoked(
-                        request=request,
-                        user={
-                            "identifier": user_id,
-                            "display_name": user_repr,
-                        },
-                        remarks=remarks,
-                    )
-
-    def validate(self, attrs):
-        instance = self.instance
-        assert isinstance(instance, Publication | None)
-
-        if not self.partial or attrs.get("publicatiestatus"):
-            publicatiestatus = attrs.get(
-                "publicatiestatus",
-                instance.publicatiestatus
-                if instance
-                else PublicationStatusOptions.published,
-            )
-
-            self._validate_publicatiestatus(
-                request=self.context["request"],
-                publication=instance or self.Meta.model(),
-                publicatiestatus=publicatiestatus,
-            )
-
-        return super().validate(attrs)
-
     def validate_publicatiestatus(
         self, value: PublicationStatusOptions
     ) -> PublicationStatusOptions:
-        if self.instance:
-            assert isinstance(self.instance, Publication)
+        instance = self.instance or Publication()
+        assert isinstance(instance, Publication)
 
-            if self.instance.publicatiestatus == PublicationStatusOptions.revoked:
-                raise serializers.ValidationError(
-                    _("You cannot modify a {revoked} publication.").format(
-                        revoked=PublicationStatusOptions.revoked.label.lower()
-                    )
-                )
+        current_state = instance.publicatiestatus
+
+        # no state change -> nothing to validate, since no transitions will be called.
+        if value == current_state:
+            return value
+
+        # given the current instance and its available state transitions, validate that
+        # the requested publicatiestatus is allowed.
+        allowed_target_statuses: set[PublicationStatusOptions] = {
+            status.target
+            for status in instance.get_available_publicatiestatus_transitions()
+        }
+        if value not in allowed_target_statuses:
+            message = _(
+                "Changing the state from '{current}' to '{value}' is not allowed."
+            ).format(current=current_state, value=value)
+            raise serializers.ValidationError(message, code="invalid_state")
 
         return value
 
     @transaction.atomic
     def update(self, instance, validated_data):
         apply_retention = False
+
+        # pop the target state from the validate data to avoid setting it directly,
+        # instead apply the state transitions based on old -> new state
+        current_publication_status: PublicationStatusOptions = instance.publicatiestatus
+        new_publication_status: PublicationStatusOptions = validated_data.pop(
+            "publicatiestatus",
+            current_publication_status,
+        )
 
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
@@ -603,6 +556,22 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             if old_informatie_categorieen_set != new_informatie_categorieen_set:
                 apply_retention = True
 
+        match (current_publication_status, new_publication_status):
+            case (PublicationStatusOptions.concept, PublicationStatusOptions.published):
+                instance.publish()
+            case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
+                instance.revoke()
+            case _:
+                logger.debug(
+                    "state_transition_skipped",
+                    extra={
+                        "source_status": current_publication_status,
+                        "target_status": new_publication_status,
+                        "model": instance._meta.model_name,
+                        "pk": instance.pk,
+                    },
+                )
+
         publication = super().update(instance, validated_data)
 
         if apply_retention:
@@ -612,14 +581,30 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     @transaction.atomic
     def create(self, validated_data):
-        if not validated_data.get("publicatiestatus"):
-            validated_data["publicatiestatus"] = PublicationStatusOptions.published
+        # pop the target state since we apply it through the transition methods instead
+        # of setting it directly. The field default ensures that missing keys get a
+        # default and the field disallows the empty string.
+        publicatiestatus: PublicationStatusOptions = validated_data.pop(
+            "publicatiestatus"
+        )
 
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
 
         publication = super().create(validated_data)
+
+        # handle the publicatiestatus
+        match publicatiestatus:
+            case PublicationStatusOptions.concept:
+                publication.draft()
+            case PublicationStatusOptions.published:
+                publication.publish()
+            case _:
+                raise ValueError(
+                    f"Unexpected creation publicatiestatus: {publicatiestatus}"
+                )
+
         publication.apply_retention_policy()
         return publication
 
