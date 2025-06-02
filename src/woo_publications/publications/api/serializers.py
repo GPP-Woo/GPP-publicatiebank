@@ -19,7 +19,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
-from ..tasks import index_publication
+from ..tasks import index_document, index_publication
 from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
@@ -257,6 +257,18 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
                 instance.revoke()
             case _:
+                request: Request = self.context["request"]
+                # ensure that the search index is updated - revoke state transitions
+                # call these tasks themselves
+                download_url = instance.absolute_document_download_uri(request)
+                transaction.on_commit(
+                    partial(
+                        index_document.delay,
+                        document_id=instance.pk,
+                        download_url=download_url,
+                    )
+                )
+
                 logger.debug(
                     "state_transition_skipped",
                     extra={

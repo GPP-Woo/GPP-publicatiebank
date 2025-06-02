@@ -1073,9 +1073,14 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
 
 class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
-    def test_update_document(self):
+    @patch("woo_publications.publications.tasks.index_document.delay")
+    def test_update_document_schedules_index_update_task(
+        self,
+        mock_index_document_delay: MagicMock,
+    ):
         document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            publicatiestatus=PublicationStatusOptions.published,
             identifier="document-1",
             officiele_titel="title one",
             verkorte_titel="one",
@@ -1096,12 +1101,12 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             kwargs={"uuid": str(document.uuid)},
         )
 
-        response = self.client.put(detail_url, data=body, headers=AUDIT_HEADERS)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.put(detail_url, data=body, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_data = response.json()
-
         self.assertEqual(response_data["officieleTitel"], "changed officiele_title")
         self.assertEqual(response_data["verkorteTitel"], "changed verkorte_title")
         self.assertEqual(response_data["omschrijving"], "changed omschrijving")
@@ -1109,6 +1114,12 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             response_data["publicatiestatus"], PublicationStatusOptions.published
         )
         self.assertEqual(response_data["creatiedatum"], "2008-02-23")
+        download_path = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
+        mock_index_document_delay.assert_called_once_with(
+            document_id=document.pk, download_url=f"http://testserver{download_path}"
+        )
 
     def test_partial_update_document(self):
         document = DocumentFactory.create(
@@ -1216,39 +1227,6 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
                 ).count(),
                 1,
             )
-
-    @patch(
-        "woo_publications.publications.api.viewsets.remove_document_from_index.delay"
-    )
-    def test_revoke_document_schedules_index_removal_task(
-        self, mock_remove_document_from_index_delay: MagicMock
-    ):
-        document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            identifier="document-1",
-            officiele_titel="title one",
-            verkorte_titel="one",
-            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            creatiedatum="2024-01-01",
-        )
-        detail_url = reverse(
-            "api:document-detail",
-            kwargs={"uuid": str(document.uuid)},
-        )
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(
-                detail_url,
-                data={"publicatiestatus": PublicationStatusOptions.revoked},
-                headers=AUDIT_HEADERS,
-            )
-
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        latest_doc = Document.objects.order_by("-pk").first()
-        assert latest_doc is not None
-        mock_remove_document_from_index_delay.assert_called_once_with(
-            document_id=latest_doc.pk
-        )
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
