@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable, Collection, Iterator
+from copy import copy
 from functools import partial
 from uuid import UUID
 
@@ -313,8 +314,29 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         Concept and freshly created publications can be published. Publishing triggers
         the publication of all related documents.
         """
-        # TODO: publish related documents
-        # TODO: trigger index addition
+        from .tasks import index_publication
+
+        # schedule indexing to the search API
+        transaction.on_commit(partial(index_publication.delay, publication_id=self.pk))
+
+        # publish all related documents in the same transaction. All documents must have
+        # the concept status at this point, but we err on the side of caution.
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        # prepare the condition for the document condition check
+        self_copy = copy(self)
+        self_copy.publicatiestatus = PublicationStatusOptions.published
+        # note that we perform a memory efficient iteration to call the document state
+        # transitions, but may spawn a large amount of save/update queries. We can
+        # revisit this and complicate the code for performance if we notice performance
+        # degradation.
+        for document in documents.iterator():
+            # update in memory so that the transition condition is satisfied. Note that
+            # calling code should make sure to wrap these operations in a transaction!
+            document.publicatie = self_copy
+            document.publish()
+            document.save()
 
     @transition(
         field=publicatiestatus,

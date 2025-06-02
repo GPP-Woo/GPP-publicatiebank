@@ -362,11 +362,6 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
         new_status = publication.publicatiestatus
 
         match new_status:
-            # when the status is published then index data.
-            case PublicationStatusOptions.published:
-                transaction.on_commit(
-                    partial(index_publication.delay, publication_id=publication.pk)
-                )
             # when the status is revoked then remove the data from the index.
             case PublicationStatusOptions.revoked:
                 transaction.on_commit(

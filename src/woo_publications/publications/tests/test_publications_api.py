@@ -1,5 +1,5 @@
 import tempfile
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -1288,30 +1288,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response_data["publisher"], [_("This field is required.")])
 
-        with self.subTest("trying to create a revoked publication results in errors"):
-            data = {
-                "informatieCategorieen": [str(ic.uuid)],
-                "publisher": str(organisation.uuid),
-                "publicatiestatus": PublicationStatusOptions.revoked,
-                "officieleTitel": "changed offical title",
-                "verkorteTitel": "changed short title",
-                "omschrijving": "changed description",
-            }
-
-            response = self.client.post(url, data, headers=AUDIT_HEADERS)
-
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            response_data = response.json()
-
-            self.assertEqual(
-                response_data["publicatiestatus"],
-                [
-                    _("You cannot set the status to {revoked}.").format(
-                        revoked=PublicationStatusOptions.revoked.label.lower()
-                    )
-                ],
-            )
-
         with self.subTest("complete data"):
             data = {
                 "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
@@ -1843,62 +1819,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
         self.assertEqual(
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
-        )
-
-    @patch("woo_publications.publications.api.viewsets.index_publication.delay")
-    @patch("woo_publications.publications.tasks.index_document.delay")
-    def test_partial_update_when_publishing_publication_the_published_documents_also_get_published(  # noqa E501
-        self,
-        mock_index_document: MagicMock,
-        mock_index_publication: MagicMock,
-    ):
-        ic = InformationCategoryFactory.create(
-            oorsprong=InformationCategoryOrigins.value_list
-        )
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            publicatiestatus=PublicationStatusOptions.concept,
-        )
-        concept_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.concept
-        )
-        published_document = DocumentFactory.create(
-            publicatie=publication, publicatiestatus=PublicationStatusOptions.published
-        )
-
-        detail_url = reverse(
-            "api:publication-detail",
-            kwargs={"uuid": str(publication.uuid)},
-        )
-        data = {"publicatiestatus": PublicationStatusOptions.published}
-
-        with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        concept_document.refresh_from_db()
-        published_document.refresh_from_db()
-
-        self.assertEqual(
-            response.json()["publicatiestatus"], PublicationStatusOptions.published
-        )
-        self.assertEqual(
-            published_document.publicatiestatus, PublicationStatusOptions.published
-        )
-        self.assertEqual(
-            concept_document.publicatiestatus, PublicationStatusOptions.published
-        )
-
-        mock_index_publication.assert_called_once_with(publication_id=publication.pk)
-        mock_index_document(document_id=concept_document.pk)
-        mock_index_document(document_id=published_document.pk)
-        mock_index_document.assert_has_calls(
-            [
-                call(document_id=published_document.pk),
-                call(document_id=concept_document.pk),
-            ],
-            any_order=True,
         )
 
     def test_destroy_publication(self):

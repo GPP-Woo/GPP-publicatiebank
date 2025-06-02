@@ -4,7 +4,7 @@ Test the allowed/blocked publicatiestatus changes for Publicatie and Document.
 See https://github.com/GPP-Woo/GPP-publicatiebank/issues/266 for the requirements.
 """
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -264,6 +264,39 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch("woo_publications.publications.tasks.index_publication.delay")
+    @patch("woo_publications.publications.tasks.index_document.delay")
+    def test_publish_cascades_to_documents(
+        self,
+        mock_index_document: MagicMock,
+        mock_index_publication: MagicMock,
+    ):
+        """
+        Assert that related documents get published together with the publication.
+        """
+        information_category = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        endpoint = reverse("api:publication-detail", kwargs={"uuid": publication.uuid})
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.patch(
+                endpoint,
+                {"publicatiestatus": PublicationStatusOptions.published},
+                headers=AUDIT_HEADERS,
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        document.refresh_from_db()
+        self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
+        mock_index_publication.assert_called_once_with(publication_id=publication.pk)
 
 
 class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestCase):
