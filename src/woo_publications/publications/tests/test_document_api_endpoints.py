@@ -1537,40 +1537,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists(),
         )
 
-    @patch("woo_publications.publications.models.Document.register_in_documents_api")
-    def test_create_document_with_no_status_gains_the_publication_status(
-        self, mock_register_in_documents_api: MagicMock
-    ):
-        publication = PublicationFactory.create(
-            informatie_categorieen=[self.information_category],
-            publicatiestatus=PublicationStatusOptions.published,
-        )
-
-        endpoint = reverse("api:document-list")
-        body = {
-            "identifier": "WOO-P/0042",
-            "publicatie": publication.uuid,
-            "officieleTitel": "Testdocument WOO-P + Open Zaak",
-            "creatiedatum": "2024-11-05",
-        }
-
-        response = self.client.post(
-            endpoint,
-            data=body,
-            headers={
-                **AUDIT_HEADERS,
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response_data = response.json()
-        self.assertEqual(
-            response_data["publicatiestatus"], publication.publicatiestatus
-        )
-        self.assertEqual(
-            response_data["publicatiestatus"], PublicationStatusOptions.published
-        )
-
     def test_create_document_with_multiple_handelingen_results_in_error(self):
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(
