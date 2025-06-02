@@ -21,7 +21,6 @@ from django_fsm import (
     ConcurrentTransitionMixin,
     FSMField,
     Transition,
-    TransitionNotAllowed,
     transition,
 )
 from rest_framework.reverse import reverse
@@ -479,53 +478,6 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             .values_list("sitemap_uuid", flat=True)
         )
 
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=(  # pyright: ignore[reportArgumentType]
-    #         "",
-    #         PublicationStatusOptions.concept,
-    #     ),
-    #     target=PublicationStatusOptions.concept,
-    # )
-    def concept(self, *args, **kwargs):
-        return PublicationStatusOptions.concept
-
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=(  # pyright: ignore[reportArgumentType]
-    #         "",
-    #         PublicationStatusOptions.concept,
-    #         PublicationStatusOptions.published,
-    #     ),
-    #     target=PublicationStatusOptions.published,
-    # )
-    def published(
-        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
-    ):
-        if self.publicatiestatus == PublicationStatusOptions.concept:
-            self.publish_own_documents(request=request, user=user, remarks=remarks)
-
-        return PublicationStatusOptions.published
-
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=PublicationStatusOptions.published,
-    #     target=PublicationStatusOptions.revoked,
-    # )
-    def revoked(
-        self, request: HttpRequest, user: User | ActingUser, remarks: str | None = None
-    ):
-        if self.publicatiestatus == PublicationStatusOptions.published:
-            self.revoke_own_documents(user=user, remarks=remarks)
-
-        return PublicationStatusOptions.revoked
-
-
-class LinkedPublicationError(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(message)
-
 
 class PublicatieStatusMatch:
     def __init__(self, expected: Collection[PublicationStatusOptions]):
@@ -908,94 +860,3 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 self.save(update_fields=("lock", "upload_complete"))
 
         return completed
-
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=(  # pyright: ignore[reportArgumentType]
-    #         "",
-    #         PublicationStatusOptions.concept,
-    #     ),
-    #     target=PublicationStatusOptions.concept,
-    # )
-    def concept(self, publicatie_id: int | None = None):
-        try:
-            publicatie = Publication.objects.get(id=publicatie_id)
-        except Publication.DoesNotExist as err:
-            raise TransitionNotAllowed(_("No publication found.")) from err
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.published:
-            raise LinkedPublicationError(
-                _(
-                    "The given publicatiestatus isn't compatible with the "
-                    "publicatiestatus from the linked publication."
-                )
-            )
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
-            raise LinkedPublicationError(
-                _(
-                    "You can't alter the data of document to a {revoked} publication."
-                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
-            )
-
-        return PublicationStatusOptions.concept
-
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=(  # pyright: ignore[reportArgumentType]
-    #         "",
-    #         PublicationStatusOptions.concept,
-    #         PublicationStatusOptions.published,
-    #     ),
-    #     target=PublicationStatusOptions.published,
-    # )
-    def published(self, publicatie_id: int | None = None):
-        try:
-            publicatie = Publication.objects.get(id=publicatie_id)
-        except Publication.DoesNotExist as err:
-            raise TransitionNotAllowed(_("No publication found.")) from err
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.concept:
-            raise LinkedPublicationError(
-                _(
-                    "The given publicatiestatus isn't compatible with the "
-                    "publicatiestatus from the linked publication."
-                )
-            )
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
-            raise LinkedPublicationError(
-                _(
-                    "You can't alter the data of document to a {revoked} publication."
-                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
-            )
-
-        return PublicationStatusOptions.published
-
-    # @transition(
-    #     field="publicatiestatus",
-    #     source=PublicationStatusOptions.published,
-    #     target=PublicationStatusOptions.revoked,
-    # )
-    def revoked(self, publicatie_id: int | None = None):
-        try:
-            publicatie = Publication.objects.get(id=publicatie_id)
-        except Publication.DoesNotExist as err:
-            raise TransitionNotAllowed(_("No publication found.")) from err
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.concept:
-            raise LinkedPublicationError(
-                _(
-                    "The given publicatiestatus isn't compatible with the "
-                    "publicatiestatus from the linked publication."
-                )
-            )
-
-        if publicatie.publicatiestatus == PublicationStatusOptions.revoked:
-            raise LinkedPublicationError(
-                _(
-                    "You can't alter the data of document to a {revoked} publication."
-                ).format(revoked=PublicationStatusOptions.revoked.label.lower()),
-            )
-
-        return PublicationStatusOptions.revoked
