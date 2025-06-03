@@ -6,6 +6,7 @@ from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
+from django_fsm import FSMField
 from rest_framework import serializers
 from rest_framework.request import Request
 
@@ -21,6 +22,7 @@ from woo_publications.metadata.models import InformationCategory, Organisation
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from ..tasks import index_document, index_publication
+from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
@@ -211,6 +213,14 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
                 ),
             },
         }
+
+    def get_fields(self):
+        fields = super().get_fields()
+        assert fields["publicatiestatus"].help_text
+        fsm_field = Document._meta.get_field("publicatiestatus")
+        assert isinstance(fsm_field, FSMField)
+        fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
+        return fields
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -494,6 +504,14 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 )
             },
         }
+
+    def get_fields(self):
+        fields = super().get_fields()
+        assert fields["publicatiestatus"].help_text
+        fsm_field = Publication._meta.get_field("publicatiestatus")
+        assert isinstance(fsm_field, FSMField)
+        fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
+        return fields
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

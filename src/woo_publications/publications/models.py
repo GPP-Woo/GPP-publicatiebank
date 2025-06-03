@@ -710,7 +710,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         Draft documents can only occur within draft publications.
         """
-        pass
+        pass  # pragma: no cover
 
     @transition(
         field=publicatiestatus,

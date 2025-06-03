@@ -1839,13 +1839,12 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           readOnly: true
           title: Status
-          description: |2-
-
-            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
+          description: "\nOn creation, the publicatiestatus is derived from the publication\
+            \ and cannot be specified directly.\n\nThe possible state transitions\
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
+            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
+            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
+            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -1980,13 +1979,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
-          description: |2-
-
-            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
+          description: "\nOn creation, the publicatiestatus is derived from the publication\
+            \ and cannot be specified directly.\n\nThe possible state transitions\
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
+            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
+            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
+            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2380,13 +2378,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
-          description: |2-
-
-            On creation, the publicatiestatus is derived from the publication and cannot be specified directly.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
+          description: "\nOn creation, the publicatiestatus is derived from the publication\
+            \ and cannot be specified directly.\n\nThe possible state transitions\
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
+            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
+            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
+            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2546,15 +2543,14 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: |2-
-
-            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
-
-            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
+          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
+            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
+            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
+            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
+            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
+            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
+            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
+            * `ingetrokken` - Ingetrokken"
         registratiedatum:
           type: string
           format: date-time
@@ -2615,6 +2611,12 @@ components:
       - ingetrokken
       type: string
       description: |-
+        * `""` -> `"concept"`
+        * `"concept"` -> `"gepubliceerd"`
+        * `"gepubliceerd"` -> `"ingetrokken"`.
+
+        Note that some transitions may be limited by business logic.
+
         * `gepubliceerd` - Gepubliceerd
         * `concept` - Concept
         * `ingetrokken` - Ingetrokken
@@ -2684,15 +2686,14 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: |2-
-
-            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
-
-            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
-
-            * `gepubliceerd` - Gepubliceerd
-            * `concept` - Concept
-            * `ingetrokken` - Ingetrokken
+          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
+            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
+            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
+            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
+            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
+            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
+            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
+            * `ingetrokken` - Ingetrokken"
         registratiedatum:
           type: string
           format: date-time
