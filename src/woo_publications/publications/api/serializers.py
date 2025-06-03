@@ -607,7 +607,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     user={"identifier": user_id, "display_name": user_repr},
                     remarks=remarks,
                 )
-            case _:
+            case _:  # pragma: no cover
                 raise ValueError(
                     f"Unexpected creation publicatiestatus: {publicatiestatus}"
                 )
