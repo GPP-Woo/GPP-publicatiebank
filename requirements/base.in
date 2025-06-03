@@ -7,13 +7,14 @@ Pillow
 django~=5.2
 django-axes[ipware]
 django-capture-tag
+django-fsm-2
 django-hijack
 django-rosetta
 django-solo
 django-timeline-logger
 django-treebeard
 django-upgrade-check
-django-fsm-2
+maykin-common[axes,mfa]
 
 # DRF & other API tooling
 open-api-framework
