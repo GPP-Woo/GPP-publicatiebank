@@ -21,7 +21,10 @@ class SearchClientTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            doc = DocumentFactory.create(publicatiestatus=publication_status)
+            doc = DocumentFactory.create(
+                publicatie__publicatiestatus=publication_status,
+                publicatiestatus=publication_status,
+            )
             with (
                 self.subTest(publication_status=publication_status),
                 client,
@@ -49,7 +52,9 @@ class SearchClientTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
+            publication = PublicationFactory.build(publicatiestatus=publication_status)
             doc = DocumentFactory.build(
+                publicatie=publication,
                 publicatiestatus=publication_status,
                 uuid="5e033c6c-6430-46c1-9efd-05899ec63382",
             )

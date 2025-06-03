@@ -1,13 +1,15 @@
 import uuid
 
 from django.db import IntegrityError, transaction
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 
+from django_fsm import TransitionNotAllowed
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test.factories import ServiceFactory
 
 from woo_publications.config.models import GlobalConfiguration
 
+from ..constants import PublicationStatusOptions
 from ..models import Document
 from .factories import DocumentFactory
 
@@ -61,3 +63,30 @@ class TestDocumentApi(TestCase):
 
         with self.assertRaises(RuntimeError):
             document.register_in_documents_api(lambda s: s)
+
+    def test_status_change_with_none_existing_publication(self):
+        # TODO: when the field is protected, direct assignment will not be possible
+        # TODO: if we enable factory/model level consistency checks, this will not be
+        # possible either
+        request = RequestFactory().post("/irrelevant")
+        with (
+            self.subTest("publish concept document without related publication"),
+            self.assertRaises(TransitionNotAllowed),
+        ):
+            concept_document = Document(
+                publicatie=None,
+                publicatiestatus=PublicationStatusOptions.concept,
+            )
+
+            concept_document.publish(request)
+
+        with (
+            self.subTest("revoke published document without related publication"),
+            self.assertRaises(TransitionNotAllowed),
+        ):
+            published_document = Document(
+                publicatie=None,
+                publicatiestatus=PublicationStatusOptions.published,
+            )
+
+            published_document.revoke()

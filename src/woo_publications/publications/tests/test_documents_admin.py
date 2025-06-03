@@ -164,6 +164,7 @@ class TestDocumentAdmin(WebTest):
             )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document2 = DocumentFactory.create(
+                publicatie__publicatiestatus=PublicationStatusOptions.concept,
                 publicatiestatus=PublicationStatusOptions.concept,
                 eigenaar=self.organisation_member,
                 officiele_titel="title two",
@@ -567,10 +568,6 @@ class TestDocumentAdmin(WebTest):
             publicatie__publicatiestatus=PublicationStatusOptions.published,
         )
         DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            publicatie__publicatiestatus=PublicationStatusOptions.concept,
-        )
-        DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked,
             publicatie__publicatiestatus=PublicationStatusOptions.published,
         )
@@ -602,10 +599,6 @@ class TestDocumentAdmin(WebTest):
             publicatie__publicatiestatus=PublicationStatusOptions.published,
         )
         DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            publicatie__publicatiestatus=PublicationStatusOptions.concept,
-        )
-        DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked,
             publicatie__publicatiestatus=PublicationStatusOptions.published,
         )
@@ -630,10 +623,6 @@ class TestDocumentAdmin(WebTest):
         DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
             publicatie__publicatiestatus=PublicationStatusOptions.published,
-        )
-        DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published,
-            publicatie__publicatiestatus=PublicationStatusOptions.concept,
         )
         DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked,
@@ -665,13 +654,16 @@ class TestDocumentAdmin(WebTest):
         mock_remove_document_from_index_delay: MagicMock,
     ):
         published_document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.published
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            publicatiestatus=PublicationStatusOptions.published,
         )
         concept_document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept
+            publicatie__publicatiestatus=PublicationStatusOptions.concept,
+            publicatiestatus=PublicationStatusOptions.concept,
         )
         revoked_document = DocumentFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
+            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatiestatus=PublicationStatusOptions.revoked,
         )
 
         changelist = self.app.get(

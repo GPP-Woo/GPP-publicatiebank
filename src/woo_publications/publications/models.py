@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Collection, Iterator
+from copy import copy
 from functools import partial
 from uuid import UUID
 
@@ -14,7 +17,14 @@ from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
+from django_fsm import (
+    ConcurrentTransitionMixin,
+    FSMField,
+    Transition,
+    transition,
+)
 from rest_framework.reverse import reverse
+from typing_extensions import deprecated
 from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import User
@@ -50,6 +60,9 @@ from .typing import DocumentActions
 _DOCUMENT_NOT_SET = models.Q(document_service=None, document_uuid=None)
 # when the document is specified both the service and uuid needs to be set
 _DOCUMENT_SET = ~models.Q(document_service=None) & ~models.Q(document_uuid=None)
+
+# The method `get_available_publicatiestatus_transitions` is provided by django-fsm
+type GetAvailablePublicatiestatusTransitions = Callable[[], Iterator[Transition]]
 
 
 class Topic(models.Model):
@@ -123,7 +136,7 @@ class Topic(models.Model):
             )
 
 
-class Publication(models.Model):
+class Publication(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -196,11 +209,11 @@ class Publication(models.Model):
         blank=True,
     )
     omschrijving = models.TextField(_("description"), blank=True)
-    publicatiestatus = models.CharField(
+    publicatiestatus = FSMField(
         _("status"),
         max_length=12,
         choices=PublicationStatusOptions.choices,
-        default=PublicationStatusOptions.published,
+        # protected=True,  TODO - enable in the future?
     )
     registratiedatum = models.DateTimeField(
         _("created on"),
@@ -259,6 +272,8 @@ class Publication(models.Model):
         blank=True,
     )
 
+    get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
+
     class Meta:  # pyright: ignore
         verbose_name = _("publication")
         verbose_name_plural = _("publications")
@@ -275,24 +290,120 @@ class Publication(models.Model):
                 )
             )
 
-    def revoke_own_published_documents(
+    @transition(
+        field=publicatiestatus, source="", target=PublicationStatusOptions.concept
+    )
+    def draft(self) -> None:
+        """
+        Mark the publication as 'concept'.
+
+        Only freshly created publications can be a draft.
+        """
+        pass
+
+    @transition(
+        field=publicatiestatus,
+        # type annotations are missing and pyright infers that only string is allowed
+        source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
+        target=PublicationStatusOptions.published,
+    )
+    def publish(
+        self,
+        request: HttpRequest,
+        user: User | ActingUser,
+        remarks: str = "",
+    ) -> None:
+        """
+        Publish the publication.
+
+        Concept and freshly created publications can be published. Publishing triggers
+        the publication of all related documents and schedules the index background
+        task.
+        """
+        from .tasks import index_publication
+
+        # schedule indexing to the search API
+        transaction.on_commit(partial(index_publication.delay, publication_id=self.pk))
+
+        # publish all related documents in the same transaction. All documents must have
+        # the concept status at this point, but we err on the side of caution.
+        documents: models.QuerySet[Document] = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus=PublicationStatusOptions.concept
+        )
+        # prepare the condition for the document condition check
+        self_copy = copy(self)
+        self_copy.publicatiestatus = PublicationStatusOptions.published
+        # note that we perform a memory efficient iteration to call the document state
+        # transitions, but may spawn a large amount of save/update queries. We can
+        # revisit this and complicate the code for performance if we notice performance
+        # degradation.
+        for document in documents.iterator():
+            # update in memory so that the transition condition is satisfied. Note that
+            # calling code should make sure to wrap these operations in a transaction!
+            document.publicatie = self_copy
+            document.publish(request=request)
+            document.save()
+            document._log_update(user=user, remarks=remarks)
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+    )
+    def revoke(self, user: User | ActingUser, remarks: str = "") -> None:
+        """
+        Revoke the publication.
+
+        Only published publications can be revoked. Revoking a publication triggers
+        revocation of the related documents and schedules a background task to remove
+        the publication from the search index.
+        """
+        from .tasks import remove_publication_from_index
+
+        # schedule index removal to the search API
+        transaction.on_commit(
+            partial(remove_publication_from_index.delay, publication_id=self.pk)
+        )
+
+        # revoke all related (still published) documents in the same transaction.
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus=PublicationStatusOptions.published
+        )
+        # prepare the condition for the document condition check
+        self_copy = copy(self)
+        self_copy.publicatiestatus = PublicationStatusOptions.revoked
+        # note that we perform a memory efficient iteration to call the document state
+        # transitions, but may spawn a large amount of save/update queries. We can
+        # revisit this and complicate the code for performance if we notice performance
+        # degradation.
+        for document in documents.iterator():
+            # update in memory so that the transition condition is satisfied. Note that
+            # calling code should make sure to wrap these operations in a transaction!
+            document.publicatie = self_copy
+            document.revoke()
+            document.save()
+            document._log_update(user=user, remarks=remarks)
+
+    @deprecated("To be replaced with explicit .revoke() call")
+    def revoke_own_documents(
         self, user: User | ActingUser, remarks: str | None = None
     ) -> None:
         from .tasks import remove_document_from_index
 
-        published_documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
-            publicatiestatus=PublicationStatusOptions.published
+        documents = self.document_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
+            models.Q(publicatiestatus=PublicationStatusOptions.concept)
+            | models.Q(publicatiestatus=PublicationStatusOptions.published)
         )
 
-        # get a list of IDs of published documents, make sure to evaluate the queryset
-        # so it's not affected by the `update` query
-        document_ids_to_log = list(published_documents.values_list("pk", flat=True))
+        # get a list of IDs of published/concept documents, make sure to evaluate the
+        # queryset so it's not affected by the `update` query
+        document_ids_to_log = list(documents.values_list("pk", flat=True))
         for document_id in document_ids_to_log:
             transaction.on_commit(
                 partial(remove_document_from_index.delay, document_id=document_id)
             )
 
-        published_documents.update(
+        documents.update(
             publicatiestatus=PublicationStatusOptions.revoked,
             laatst_gewijzigd_datum=timezone.now(),
         )
@@ -353,7 +464,20 @@ class Publication(models.Model):
         )
 
 
-class Document(models.Model):
+class PublicatieStatusMatch:
+    def __init__(self, expected: Collection[PublicationStatusOptions]):
+        self.expected = expected
+
+    def __call__(self, instance: Document) -> bool:
+        # if there's no related publication, we can't do anything
+        try:
+            publication: Publication = instance.publicatie
+        except Publication.DoesNotExist:
+            return False
+        return publication.publicatiestatus in self.expected
+
+
+class Document(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
     uuid = models.UUIDField(
         _("UUID"),
@@ -420,11 +544,10 @@ class Document(models.Model):
         default=0,
         help_text=_("Size of the file on disk, in bytes."),
     )
-    publicatiestatus = models.CharField(
+    publicatiestatus = FSMField(
         _("status"),
         max_length=12,
         choices=PublicationStatusOptions.choices,
-        default=PublicationStatusOptions.published,
     )
     registratiedatum = models.DateTimeField(
         _("created on"),
@@ -487,6 +610,8 @@ class Document(models.Model):
             "Marker to indicate if the upload to the Documenten API is finalized."
         ),
     )
+
+    get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
 
     # Private property managed by the getter and setter below.
     _zgw_document: ZGWDocument | None = None
@@ -572,6 +697,93 @@ class Document(models.Model):
         Set the (created) ZGWDocument in the cache.
         """
         self._zgw_document = document
+
+    @transition(
+        field=publicatiestatus,
+        source="",
+        target=PublicationStatusOptions.concept,
+        conditions=(PublicatieStatusMatch({PublicationStatusOptions.concept}),),
+    )
+    def draft(self) -> None:
+        """
+        Mark the document as 'concept'.
+
+        Draft documents can only occur within draft publications.
+        """
+        pass  # pragma: no cover
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.concept,
+        target=PublicationStatusOptions.published,
+        conditions=(PublicatieStatusMatch({PublicationStatusOptions.published}),),
+    )
+    def publish(self, request: HttpRequest) -> None:
+        """
+        Publish the document.
+
+        A published document can only occur within a published publication. Publish the
+        publication to trigger the publication of the documents. When a document is
+        published, it's sent to the search API for indexing.
+
+        Publication events are logged to the audit log.
+        """
+        from .tasks import index_document
+
+        # schedule indexing to the search API
+        download_url = self.absolute_document_download_uri(request=request)
+        transaction.on_commit(
+            partial(
+                index_document.delay, document_id=self.pk, download_url=download_url
+            )
+        )
+
+    @transition(
+        field=publicatiestatus,
+        source=PublicationStatusOptions.published,
+        target=PublicationStatusOptions.revoked,
+        conditions=(
+            PublicatieStatusMatch(
+                {
+                    PublicationStatusOptions.published,
+                    PublicationStatusOptions.revoked,
+                }
+            ),
+        ),
+    )
+    def revoke(self) -> None:
+        """
+        Revoke the document.
+
+        Revoked documents can occur within published and revoked publications. When a
+        publication is revoked, all its documents will be revoked automatically. A
+        document can also be revoked individually.
+
+        Revocation sends an update to the search API to remove it from the index.
+        """
+        from .tasks import remove_document_from_index
+
+        transaction.on_commit(
+            partial(remove_document_from_index.delay, document_id=self.pk)
+        )
+
+    def _log_update(self, user: User | ActingUser, remarks: str = "") -> None:
+        # audit log the publication event
+        serialized = serialize_instance(self)
+        if isinstance(user, User):
+            audit_admin_update(
+                content_object=self,
+                object_data=serialized,
+                django_user=user,
+            )
+        else:
+            audit_api_update(
+                content_object=self,
+                object_data=serialized,
+                user_id=str(user["identifier"]),
+                user_display=user["display_name"],
+                remarks=remarks,
+            )
 
     def absolute_document_download_uri(self, request: HttpRequest) -> str:
         """

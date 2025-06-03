@@ -10,6 +10,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
+from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 
 TEST_IMG_PATH = (
@@ -25,6 +26,7 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
     publisher = factory.SubFactory(OrganisationFactory, is_actief=True)
     eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
+    publicatiestatus = PublicationStatusOptions.published
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -61,6 +63,7 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
     creatiedatum = factory.Faker("past_date")
+    publicatiestatus = PublicationStatusOptions.published
 
     class Meta:  # pyright: ignore
         model = Document
@@ -75,6 +78,40 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
             ),
             document_uuid=factory.Faker("uuid4"),
         )
+
+    @factory.post_generation
+    def _validate_publication_state(obj, *args, **kwargs):
+        """
+        Ensure that the factories are in a consistent state.
+        """
+        try:
+            publication = obj.publicatie
+        except Publication.DoesNotExist as exc:
+            raise ValueError("A document must be related to a publication.") from exc
+
+        assert isinstance(publication, Publication)
+
+        match publication.publicatiestatus:
+            case PublicationStatusOptions.concept:
+                if not obj.publicatiestatus == PublicationStatusOptions.concept:
+                    raise ValueError(
+                        "'concept' publications can only have 'concept' documents."
+                    )
+            case PublicationStatusOptions.published:
+                if obj.publicatiestatus not in (
+                    PublicationStatusOptions.published,
+                    PublicationStatusOptions.revoked,
+                ):
+                    raise ValueError(
+                        "'published' publications can only have 'published' and "
+                        "'revoked' documents."
+                    )
+
+            case PublicationStatusOptions.revoked:
+                if not obj.publicatiestatus == PublicationStatusOptions.revoked:
+                    raise ValueError(
+                        "'revoked' publications can only have 'revoked' documents."
+                    )
 
 
 class TopicFactory(factory.django.DjangoModelFactory[Topic]):

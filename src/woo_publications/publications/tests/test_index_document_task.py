@@ -41,22 +41,14 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            doc = DocumentFactory.create(publicatiestatus=publication_status)
+            doc = DocumentFactory.create(
+                publicatie__publicatiestatus=publication_status,
+                publicatiestatus=publication_status,
+            )
             with self.subTest(publication_status=publication_status):
                 remote_task_id = index_document(document_id=doc.pk)
 
                 self.assertIsNone(remote_task_id)
-
-    def test_index_skipped_for_unpublished_publication(self):
-        doc = DocumentFactory.create(
-            publicatie__publicatiestatus=PublicationStatusOptions.concept,
-            publicatiestatus=PublicationStatusOptions.published,
-            upload_complete=True,
-        )
-
-        remote_task_id = index_document(document_id=doc.pk)
-
-        self.assertIsNone(remote_task_id)
 
     def test_index_skipped_for_incomplete_uploads(self):
         doc = DocumentFactory.create(

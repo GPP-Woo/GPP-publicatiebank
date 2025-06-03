@@ -31,13 +31,9 @@ from woo_publications.logging.service import (
 )
 
 from ...logging.api_tools import AuditTrailRetrieveMixin
-from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from ..tasks import (
     index_document,
-    index_publication,
-    remove_document_from_index,
-    remove_publication_from_index,
 )
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
@@ -118,37 +114,6 @@ class DocumentViewSet(
         woo_document.register_in_documents_api(
             build_absolute_uri=self.request.build_absolute_uri,
         )
-
-    @transaction.atomic()
-    def perform_update(self, serializer):
-        document = serializer.instance
-        assert document is not None
-        original_status = document.publicatiestatus
-        super().perform_update(serializer)
-        new_status = document.publicatiestatus
-
-        match (original_status, new_status):
-            # from anything to published -> reindex (even if no status is changed,
-            # update the metadata)
-            case (_, PublicationStatusOptions.published):
-                document_url = document.absolute_document_download_uri(self.request)
-                transaction.on_commit(
-                    partial(
-                        index_document.delay,
-                        document_id=document.pk,
-                        download_url=document_url,
-                    )
-                )
-            # from published to anything else -> remove from index
-            case (
-                PublicationStatusOptions.published,
-                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
-            ):
-                transaction.on_commit(
-                    partial(remove_document_from_index.delay, document_id=document.pk)
-                )
-            case _:  # pragma: no cover
-                pass
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
@@ -348,45 +313,6 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
-
-    @transaction.atomic()
-    def perform_create(self, serializer):
-        super().perform_create(serializer)
-        assert serializer.instance is not None
-        publication = serializer.instance
-        assert publication is not None
-        transaction.on_commit(
-            partial(index_publication.delay, publication_id=publication.pk)
-        )
-
-    @transaction.atomic()
-    def perform_update(self, serializer):
-        publication = serializer.instance
-        assert publication is not None
-        original_status = publication.publicatiestatus
-        super().perform_update(serializer)
-        new_status = publication.publicatiestatus
-
-        match (original_status, new_status):
-            # from anything to published -> reindex (even if no status is changed,
-            # update the metadata)
-            case (_, PublicationStatusOptions.published):
-                transaction.on_commit(
-                    partial(index_publication.delay, publication_id=publication.pk)
-                )
-            # from published to anything else -> remove from index
-            case (
-                PublicationStatusOptions.published,
-                PublicationStatusOptions.revoked | PublicationStatusOptions.concept,
-            ):
-                transaction.on_commit(
-                    partial(
-                        remove_publication_from_index.delay,
-                        publication_id=publication.pk,
-                    )
-                )
-            case _:  # pragma: no cover
-                pass
 
 
 @extend_schema(tags=["Onderwerpen"])

@@ -149,6 +149,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 informatie_categorieen=[ic, ic2],
                 onderwerpen=[topic, topic2],
                 eigenaar=self.organisation_member,
+                publicatiestatus=PublicationStatusOptions.concept,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -165,7 +166,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         form = response.forms["publication_form"]
         form["informatie_categorieen"].select_multiple(texts=[ic.naam])
         form["onderwerpen"].select_multiple(texts=[topic.officiele_titel])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publisher"] = str(organisation2.pk)
         form["verantwoordelijke"] = str(organisation2.pk)
         form["opsteller"] = str(organisation2.pk)
@@ -209,7 +210,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
                     "opsteller": organisation2.pk,
-                    "publicatiestatus": PublicationStatusOptions.concept,
+                    "publicatiestatus": PublicationStatusOptions.published,
                     "publisher": organisation2.pk,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "uuid": str(publication.uuid),
@@ -225,13 +226,14 @@ class TestPublicationAdminAuditLogging(WebTest):
             }
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_admin_update_revoke_published_documents_when_revoking_publication(self):
+    def test_admin_update_revoke_documents_when_revoking_publication(self):
         assert not TimelineLogProxy.objects.exists()
         ic, ic2 = InformationCategoryFactory.create_batch(2)
         topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         with freeze_time("2024-09-27T00:14:00-00:00"):
             publication = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
                 publisher=organisation,
                 verantwoordelijke=organisation,
                 opsteller=organisation,
@@ -252,16 +254,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                 identifier="http://example.com/1",
                 officiele_titel="title",
                 creatiedatum="2024-10-17",
-            )
-            concept_document = DocumentFactory.create(
-                publicatie=publication,
-                eigenaar=self.organisation_member,
-                publicatiestatus=PublicationStatusOptions.concept,
-            )
-            revoked_document = DocumentFactory.create(
-                publicatie=publication,
-                eigenaar=self.organisation_member,
-                publicatiestatus=PublicationStatusOptions.revoked,
             )
 
         reverse_url = reverse(
@@ -298,8 +290,6 @@ class TestPublicationAdminAuditLogging(WebTest):
 
         publication.refresh_from_db()
         published_document.refresh_from_db()
-        concept_document.refresh_from_db()
-        revoked_document.refresh_from_db()
 
         self.assertEqual(TimelineLogProxy.objects.count(), 3)
 
@@ -341,7 +331,7 @@ class TestPublicationAdminAuditLogging(WebTest):
 
             self.assertEqual(update_publication_log.extra_data, expected_data)
 
-        with self.subTest("update document audit logging"):
+        with self.subTest("update published document audit logging"):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 published_document
             ).get()
@@ -1148,69 +1138,70 @@ class TestDocumentAdminAuditLogging(WebTest):
         self.maxDiff = None
         self.assertEqual(update_log.extra_data, expected_data)
 
-
-def test_document_admin_delete(self):
-    publication = PublicationFactory.create()
-    identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
-    with freeze_time("2024-09-25T14:00:00-00:00"):
-        document = DocumentFactory.create(
-            publicatie=publication,
-            identifier=identifier,
-            eigenaar=self.organisation_member,
-            publicatiestatus=PublicationStatusOptions.published,
-            officiele_titel="title one",
-            verkorte_titel="one",
-            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            creatiedatum="2024-11-11",
+    def test_document_admin_delete(self):
+        publication = PublicationFactory.create()
+        identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
+        with freeze_time("2024-09-25T14:00:00-00:00"):
+            document = DocumentFactory.create(
+                publicatie=publication,
+                identifier=identifier,
+                eigenaar=self.organisation_member,
+                publicatiestatus=PublicationStatusOptions.published,
+                officiele_titel="title one",
+                verkorte_titel="one",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                creatiedatum="2024-11-11",
+            )
+        reverse_url = reverse(
+            "admin:publications_document_delete",
+            kwargs={"object_id": document.id},
         )
-    reverse_url = reverse(
-        "admin:publications_document_delete",
-        kwargs={"object_id": document.id},
-    )
 
-    response = self.app.get(reverse_url, user=self.user)
+        response = self.app.get(reverse_url, user=self.user)
 
-    self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
-    form = response.forms[1]
-    response = form.submit()
+        form = response.forms[1]
+        response = form.submit()
 
-    self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
 
-    log = TimelineLogProxy.objects.get()
+        log = TimelineLogProxy.objects.get()
 
-    expected_data = {
-        "event": Events.delete,
-        "acting_user": {
-            "identifier": self.user.id,
-            "display_name": self.user.get_full_name(),
-        },
-        "object_data": {
-            "id": document.pk,
-            "lock": "",
-            "eigenaar": self.organisation_member.pk,
-            "upload_complete": False,
-            "uuid": str(document.uuid),
-            "identifier": identifier,
-            "publicatie": publication.pk,
-            "publicatiestatus": PublicationStatusOptions.published,
-            "bestandsnaam": "unknown.bin",
-            "creatiedatum": "2024-11-11",
-            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            "document_uuid": None,
-            "bestandsomvang": 0,
-            "verkorte_titel": "one",
-            "bestandsformaat": "unknown",
-            "officiele_titel": "title one",
-            "document_service": None,
-            "registratiedatum": "2024-09-25T14:00:00Z",
-            "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
-            "soort_handeling": DocumentActionTypeOptions.declared,
-        },
-        "_cached_object_repr": "title one",
-    }
+        expected_data = {
+            "event": Events.delete,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": document.pk,
+                "lock": "",
+                "eigenaar": self.organisation_member.pk,
+                "upload_complete": False,
+                "uuid": str(document.uuid),
+                "identifier": identifier,
+                "publicatie": publication.pk,
+                "publicatiestatus": PublicationStatusOptions.published,
+                "bestandsnaam": "unknown.bin",
+                "creatiedatum": "2024-11-11",
+                "omschrijving": (
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                ),
+                "document_uuid": None,
+                "bestandsomvang": 0,
+                "verkorte_titel": "one",
+                "bestandsformaat": "unknown",
+                "officiele_titel": "title one",
+                "document_service": None,
+                "registratiedatum": "2024-09-25T14:00:00Z",
+                "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
+                "soort_handeling": DocumentActionTypeOptions.declared,
+            },
+            "_cached_object_repr": "title one",
+        }
 
-    self.assertEqual(log.extra_data, expected_data)
+        self.assertEqual(log.extra_data, expected_data)
 
 
 @disable_admin_mfa()
