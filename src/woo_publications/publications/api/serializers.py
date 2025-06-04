@@ -1,12 +1,14 @@
 import logging
 from functools import partial
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from django_fsm import FSMField
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.request import Request
 
@@ -411,11 +413,20 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         allow_null=True,
         required=False,
     )
+    url_publicatie_intern = serializers.SerializerMethodField(
+        label=_("internal publication url"),
+        help_text=_(
+            "URL to the UI of the internal application where the publication life "
+            "cycle is managed. Requires the global configuration parameter to be set, "
+            "otherwise an empty string is returned."
+        ),
+    )
 
     class Meta:  # pyright: ignore
         model = Publication
         fields = (
             "uuid",
+            "url_publicatie_intern",
             "informatie_categorieen",
             "di_woo_informatie_categorieen",
             "onderwerpen",
@@ -632,6 +643,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         publication.apply_retention_policy()
         return publication
+
+    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
+    def get_url_publicatie_intern(self, obj: Publication) -> str:
+        return obj.gpp_app_url
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
