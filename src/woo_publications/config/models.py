@@ -52,6 +52,16 @@ class GlobalConfiguration(SingletonModel):
         blank=False,
         related_name="+",
     )
+    gpp_app_publication_url_template = models.URLField(
+        _("GPP-app publication URL template"),
+        max_length=500,
+        default="",
+        blank=True,
+        help_text=_(
+            "URL pattern to a publication in the GPP app. The special token <UUID> "
+            "will be replaced with the system identifier of each publication."
+        ),
+    )
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         verbose_name = _("global configuration")
