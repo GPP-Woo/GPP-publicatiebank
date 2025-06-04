@@ -13,6 +13,7 @@ from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
 )
+from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -57,6 +58,22 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "field-uuid", 2)
+
+    def test_admin_shows_link_to_gpp_app(self):
+        config = GlobalConfiguration.get_solo()
+        self.addCleanup(config.clear_cache)
+        config.gpp_app_publication_url_template = "https://example.com/<UUID>"
+        config.save()
+        publication = PublicationFactory.create()
+
+        response = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, _("Open in app"))
+        self.assertContains(response, f"https://example.com/{publication.uuid}")
 
     def test_publications_admin_search(self):
         org_member_1 = OrganisationMemberFactory.create(
