@@ -13,6 +13,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models, transaction
 from django.http import HttpRequest
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _
 
@@ -462,6 +463,12 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             .distinct("sitemap_uuid")
             .values_list("sitemap_uuid", flat=True)
         )
+
+    @cached_property
+    def gpp_app_url(self) -> str:
+        global_config = GlobalConfiguration.get_solo()
+        url_template = global_config.gpp_app_publication_url_template
+        return url_template.replace("<UUID>", str(self.uuid))
 
 
 class PublicatieStatusMatch:
