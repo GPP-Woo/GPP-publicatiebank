@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import logging
+from collections.abc import Callable
+from functools import partial
 from typing import Literal
 
 from django import forms
+from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
@@ -11,6 +15,9 @@ from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
 from .models import Document, Publication
+from .tasks import index_document, index_publication
+
+logger = logging.getLogger(__name__)
 
 
 class ChangeOwnerForm(forms.Form):
@@ -60,24 +67,25 @@ class ChangeOwnerForm(forms.Form):
 
 class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
     request: HttpRequest
-    initial_publicatiestatus: PublicationStatusOptions | Literal[""]
+    initial_publication_status: PublicationStatusOptions | Literal[""]
 
     def __init__(self, *args, request: HttpRequest, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.request = request
-        self.initial_publicatiestatus = self.instance.publicatiestatus
+        self.initial_publication_status = self.instance.publicatiestatus
 
-        if self.instance and self.fields.get("publicatiestatus"):
-            allowed_values: list[str] = [
+        publicatiestatus_field = self.fields.get("publicatiestatus")
+        if self.instance and publicatiestatus_field is not None:
+            assert isinstance(publicatiestatus_field, forms.ChoiceField)
+            allowed_values: set[str] = {
                 status.target.value
                 for status in self.instance.get_available_publicatiestatus_transitions()
-            ]
-
+            }
             if selected_publicatiestatus := self.instance.publicatiestatus:
-                allowed_values.append(selected_publicatiestatus)
+                allowed_values.add(selected_publicatiestatus)
 
-            self.fields["publicatiestatus"].choices = [  # pyright: ignore[reportAttributeAccessIssue]
+            publicatiestatus_field.choices = [
                 choice
                 for choice in PublicationStatusOptions.choices
                 if choice[0] in allowed_values
@@ -87,60 +95,135 @@ class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
 class PublicationAdminForm(PublicationStatusForm[Publication]):
     def save(self, commit=True):
         assert is_authenticated_request(self.request)
-        publicatie_status = self.cleaned_data["publicatiestatus"]
+        new_publication_status = self.cleaned_data.pop("publicatiestatus")
+        # reset the publication status to the 'current' status - at this point the
+        # instance has the newly selected status because of ModelForm._post_clean which
+        # assigns the cleaned_data to the instance *before* the save is called.
+        # Failing to reset this brings us to invalid state transitions.
+        self.instance.publicatiestatus = self.initial_publication_status
+
+        # prepare the callback to invoke after saving the publication to the database,
+        # which requires the PK to be known to be able to dispatch celery tasks.
+        post_save_callback: Callable[[], None] | None = None
+
+        match (self.initial_publication_status, new_publication_status):
+            # newly created concept
+            case ("", PublicationStatusOptions.concept):
+                post_save_callback = self.instance.draft
+            # newly created published or existing concept being published
+            case (
+                "" | PublicationStatusOptions.concept,
+                PublicationStatusOptions.published,
+            ):
+                post_save_callback = partial(
+                    self.instance.publish, request=self.request, user=self.request.user
+                )
+            # revoke published
+            case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
+                post_save_callback = partial(
+                    self.instance.revoke, user=self.request.user
+                )
+            case _:
+                assert self.instance.pk is not None, (
+                    "Codepath may not hit for new instances"
+                )
+                # ensure that the search index is updated - publish/revoke state
+                # transitions call these tasks themselves
+                transaction.on_commit(
+                    partial(index_publication.delay, publication_id=self.instance.pk)
+                )
+                logger.debug(
+                    "state_transition_skipped",
+                    extra={
+                        "source_status": self.initial_publication_status,
+                        "target_status": new_publication_status,
+                        "model": Publication._meta.model_name,
+                        "pk": self.instance.pk,
+                    },
+                )
 
         publication = super().save(commit=commit)
         # cannot force the commit as True because of the AttributeError:
         # 'PublicationForm' object has no attribute 'save_m2m'.
         # So we manually save it after running the super
-        publication.save()
+        if not publication.pk:
+            publication.save()
 
-        self.instance.publicatiestatus = self.initial_publicatiestatus
-
-        if publicatie_status == PublicationStatusOptions.published:
-            publication.publish(self.request, user=self.request.user)
-
-        elif self.initial_publicatiestatus != publicatie_status:
-            match publicatie_status:
-                case PublicationStatusOptions.concept:
-                    publication.draft()
-                case PublicationStatusOptions.revoked:
-                    publication.revoke(user=self.request.user)
-
-        publication.refresh_from_db()
+        if post_save_callback is not None:
+            post_save_callback()
 
         return publication
 
 
 class DocumentAdminForm(PublicationStatusForm[Document]):
     def save(self, commit=True):
-        publicatie_status = self.instance.publicatie.publicatiestatus
-        if (
-            self.cleaned_data.get("publicatiestatus")
-            == PublicationStatusOptions.revoked
-        ):
-            publicatie_status = PublicationStatusOptions.revoked
+        new_publication_status = self.instance.publicatie.publicatiestatus
+        # ignore the form field unless it's set to revoke
+        specified_new_publication_status = self.cleaned_data.pop(
+            "publicatiestatus", None
+        )
+        if specified_new_publication_status == PublicationStatusOptions.revoked:
+            new_publication_status = specified_new_publication_status
 
-        self.instance.publicatiestatus = publicatie_status
+        # reset the document status to the 'current' status - at this point the
+        # instance has the newly selected status because of ModelForm._post_clean which
+        # assigns the cleaned_data to the instance *before* the save is called.
+        # Failing to reset this brings us to invalid state transitions.
+        self.instance.publicatiestatus = self.initial_publication_status
+
+        # prepare the callback to invoke after saving the document to the database,
+        # which requires the PK to be known to be able to dispatch celery tasks.
+        post_save_callback: Callable[[], None] | None = None
+
+        match (self.initial_publication_status, new_publication_status):
+            # newly created concept
+            case ("", PublicationStatusOptions.concept):
+                post_save_callback = self.instance.draft
+            # newly created published or existing concept being published
+            case (
+                "" | PublicationStatusOptions.concept,
+                PublicationStatusOptions.published,
+            ):
+                post_save_callback = partial(
+                    self.instance.publish, request=self.request
+                )
+            # revoke published
+            case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
+                post_save_callback = self.instance.revoke
+            case _:
+                assert self.instance.pk is not None, (
+                    "Codepath may not hit for new instances"
+                )
+                # ensure that the search index is updated - publish/revoke state
+                # transitions call these tasks themselves
+                download_url = self.instance.absolute_document_download_uri(
+                    self.request
+                )
+                transaction.on_commit(
+                    partial(
+                        index_document.delay,
+                        document_id=self.instance.pk,
+                        download_url=download_url,
+                    )
+                )
+                logger.debug(
+                    "state_transition_skipped",
+                    extra={
+                        "source_status": self.initial_publication_status,
+                        "target_status": new_publication_status,
+                        "model": Document._meta.model_name,
+                        "pk": self.instance.pk,
+                    },
+                )
 
         document = super().save(commit=commit)
         # cannot force the commit as True because of the AttributeError:
         # 'DocumentForm' object has no attribute 'save_m2m'.
         # So we manually save it after running the super
-        document.save()
+        if not document.pk:
+            document.save()
 
-        self.instance.publicatiestatus = self.initial_publicatiestatus
-
-        if publicatie_status == PublicationStatusOptions.published:
-            document.publish(self.request)
-
-        elif self.initial_publicatiestatus != publicatie_status:
-            match publicatie_status:
-                case PublicationStatusOptions.concept:
-                    document.draft()
-                case PublicationStatusOptions.revoked:
-                    document.revoke()
-
-        document.refresh_from_db()
+        if post_save_callback is not None:
+            post_save_callback()
 
         return document
