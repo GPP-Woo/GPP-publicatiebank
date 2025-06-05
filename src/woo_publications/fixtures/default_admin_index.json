@@ -167,6 +167,10 @@
             ],
             [
                 "publications",
+                "publicationidentifier"
+            ],
+            [
+                "publications",
                 "topic"
             ]
         ]

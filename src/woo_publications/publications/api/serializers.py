@@ -22,7 +22,7 @@ from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication, Topic
+from ..models import Document, Publication, PublicationIdentifier, Topic
 from ..tasks import index_document, index_publication
 from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator
@@ -350,6 +350,17 @@ class DocumentUpdateSerializer(DocumentSerializer):
         }
 
 
+class PublicationIdentifierSerializer(
+    serializers.ModelSerializer[PublicationIdentifier]
+):
+    class Meta:  # pyright: ignore
+        model = PublicationIdentifier
+        fields = (
+            "kenmerk",
+            "bron",
+        )
+
+
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
     eigenaar = EigenaarSerializer(
         label=_("owner"),
@@ -421,6 +432,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "otherwise an empty string is returned."
         ),
     )
+    kenmerken = PublicationIdentifierSerializer(
+        help_text=_("The publication identifiers attached to this publication."),
+        many=True,
+        source="publicationidentifier_set",
+        required=False,
+    )
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -433,6 +450,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "publisher",
             "verantwoordelijke",
             "opsteller",
+            "kenmerken",
             "officiele_titel",
             "verkorte_titel",
             "omschrijving",
@@ -555,6 +573,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             current_publication_status,
         )
 
+        update_publicatie_identifiers = "publicationidentifier_set" in validated_data
+        publication_identifiers = validated_data.pop("publicationidentifier_set", [])
+
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
             validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
@@ -604,6 +625,13 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         publication = super().update(instance, validated_data)
 
+        if update_publicatie_identifiers:
+            publication.publicationidentifier_set.all().delete()  # pyright: ignore[reportAttributeAccessIssue]
+            PublicationIdentifier.objects.bulk_create(
+                PublicationIdentifier(publicatie=publication, **identifiers)
+                for identifiers in publication_identifiers
+            )
+
         if apply_retention:
             publication.apply_retention_policy()
 
@@ -617,12 +645,18 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         publicatiestatus: PublicationStatusOptions = validated_data.pop(
             "publicatiestatus"
         )
+        publication_identifiers = validated_data.pop("publicationidentifier_set", [])
 
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
 
         publication = super().create(validated_data)
+
+        PublicationIdentifier.objects.bulk_create(
+            PublicationIdentifier(publicatie=publication, **identifiers)
+            for identifiers in publication_identifiers
+        )
 
         # handle the publicatiestatus
         match publicatiestatus:
