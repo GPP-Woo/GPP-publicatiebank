@@ -538,6 +538,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             ),
             get_logs_link(obj),
         ]
+        if gpp_app_url := obj.gpp_app_url:
+            actions.append((gpp_app_url, _("Open in app")))
         return format_html_join(
             " | ",
             '<a href="{}">{}</a>',

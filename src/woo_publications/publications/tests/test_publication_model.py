@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from freezegun import freeze_time
 
+from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import InformationCategoryFactory
 from woo_publications.publications.tests.factories import PublicationFactory
@@ -110,3 +111,32 @@ class TestPublicationModel(TestCase):
             publication.archiefactiedatum, date(2044, 9, 24)
         )  # 2024-09-24 + 20 years
         self.assertEqual(publication.toelichting_bewaartermijn, "forth bewaartermijn")
+
+    def test_calculate_gpp_app_publication_url(self):
+        config = GlobalConfiguration.get_solo()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
+        with self.subTest("no URL template configured"):
+            config.gpp_app_publication_url_template = ""
+            config.save()
+            publication1 = PublicationFactory.build()
+
+            result = publication1.gpp_app_url
+
+            self.assertEqual(result, "")
+
+        with self.subTest("with URL template configured"):
+            config.gpp_app_publication_url_template = (
+                "https://example.com/gpp-app/nested/<UUID>/edit"
+            )
+            config.save()
+            publication2 = PublicationFactory.build(
+                uuid="771b79e5-3ba7-4fdf-9a89-00a6a5227a8d"
+            )
+
+            result = publication2.gpp_app_url
+
+            self.assertEqual(
+                result,
+                "https://example.com/gpp-app/nested/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d/edit",
+            )

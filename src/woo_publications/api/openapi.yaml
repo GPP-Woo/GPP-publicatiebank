@@ -2484,6 +2484,18 @@ components:
           type: string
           format: uuid
           readOnly: true
+        urlPublicatieIntern:
+          oneOf:
+          - type: string
+            format: uri
+          - enum:
+            - ''
+            type: string
+          readOnly: true
+          title: internal publication url
+          description: URL to the UI of the internal application where the publication
+            life cycle is managed. Requires the global configuration parameter to
+            be set, otherwise an empty string is returned.
         informatieCategorieen:
           type: array
           items:
@@ -2627,6 +2639,18 @@ components:
           type: string
           format: uuid
           readOnly: true
+        urlPublicatieIntern:
+          oneOf:
+          - type: string
+            format: uri
+          - enum:
+            - ''
+            type: string
+          readOnly: true
+          title: internal publication url
+          description: URL to the UI of the internal application where the publication
+            life cycle is managed. Requires the global configuration parameter to
+            be set, otherwise an empty string is returned.
         informatieCategorieen:
           type: array
           items:
@@ -2754,6 +2778,7 @@ components:
       - officieleTitel
       - publisher
       - registratiedatum
+      - urlPublicatieIntern
       - uuid
     SoortHandelingEnum:
       enum:
