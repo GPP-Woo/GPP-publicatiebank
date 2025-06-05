@@ -1,18 +1,20 @@
 from functools import partial
 
 from django.db import transaction
+from django.forms import ModelForm
 from django.http import HttpRequest
 
 from woo_publications.accounts.models import OrganisationMember, User
 from woo_publications.logging.admin_tools import AuditLogInlineformset
 
 from .constants import PublicationStatusOptions
-from .models import Publication
+from .models import Document, Publication
 from .tasks import remove_document_from_index
 
 
-class DocumentAuditLogInlineformset(AuditLogInlineformset):
+class DocumentInlineformset(AuditLogInlineformset[Document, Publication, ModelForm]):
     request: HttpRequest
+    instance: Publication
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
@@ -29,21 +31,24 @@ class DocumentAuditLogInlineformset(AuditLogInlineformset):
         )
         return form
 
-    def save_new(self, form, commit=True):
-        assert isinstance(self.instance, Publication)
-        # set the publicatiestatus from the form instance to its parent.
-        publicatie_status = form.instance.publicatiestatus = (
-            self.instance.publicatiestatus
-        )
+    def save_new(self, form: ModelForm[Document], commit=True):
+        # save it manually so that we have a guaranteed record in the database, allowing
+        # us to call the state transitions later
+        document = super().save_new(form, commit=False)
+        document.save()
 
-        document = super().save_new(form, commit)
+        # call the state transitions before the main save, otherwise the audit logs
+        # record the wrong snapshot data
+        match self.instance.publicatiestatus:
+            case PublicationStatusOptions.concept:
+                document.draft()
+            case PublicationStatusOptions.published:
+                document.publish(request=self.request)
+            case _:  # pragma: no cover
+                # you can't create new documents for revoked publications
+                raise RuntimeError("Unreachable code")
 
-        if publicatie_status == PublicationStatusOptions.published:
-            self.instance.publicatiestatus = self.initial_publicatiestatus
-            document.publish(self.request)
-            document.refresh_from_db()
-
-        return document
+        return super().save_new(form, commit)
 
     def delete_existing(self, obj, commit=True):
         if obj.publicatiestatus == PublicationStatusOptions.published:

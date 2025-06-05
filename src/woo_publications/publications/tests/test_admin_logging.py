@@ -40,6 +40,8 @@ class TestPublicationAdminAuditLogging(WebTest):
     classes, which should cover the rest of the apps/models.
     """
 
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

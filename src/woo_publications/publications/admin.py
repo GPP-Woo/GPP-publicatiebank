@@ -34,7 +34,7 @@ from .forms import (
     DocumentAdminForm,
     PublicationAdminForm,
 )
-from .formset import DocumentAuditLogInlineformset
+from .formset import DocumentInlineformset
 from .models import Document, Publication, PublicationIdentifier, Topic
 from .tasks import (
     index_document,
@@ -307,7 +307,7 @@ def revoke(
 
 
 class DocumentInlineAdmin(admin.StackedInline):
-    formset = DocumentAuditLogInlineformset
+    formset = DocumentInlineformset
     model = Document
     readonly_fields = (
         "publicatiestatus",
