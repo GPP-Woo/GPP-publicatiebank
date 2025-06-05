@@ -2,11 +2,15 @@
 from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
+import django_stubs_ext
 from open_api_framework.conf.base import *  # noqa
 from upgrade_check import UpgradeCheck, VersionRange
 from vng_api_common.conf.api import BASE_REST_FRAMEWORK
 
 from .utils import config
+
+django_stubs_ext.monkeypatch()
+
 
 TIME_ZONE = "Europe/Amsterdam"
 

@@ -11,6 +11,7 @@ django-fsm-2
 django-hijack
 django-rosetta
 django-solo
+django-stubs-ext
 django-timeline-logger
 django-treebeard
 django-upgrade-check
