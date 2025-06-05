@@ -99,6 +99,7 @@ django==5.2.1
     #   django-setup-configuration
     #   django-simple-certmanager
     #   django-solo
+    #   django-stubs-ext
     #   django-timeline-logger
     #   django-treebeard
     #   django-two-factor-auth
@@ -188,6 +189,8 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-stubs-ext==5.2.0
+    # via -r requirements/base.in
 django-timeline-logger==5.0.0
     # via -r requirements/base.in
 django-treebeard==4.7.1
@@ -378,6 +381,7 @@ tornado==6.5
     # via flower
 typing-extensions==4.12.2
     # via
+    #   django-stubs-ext
     #   mozilla-django-oidc-db
     #   pyopenssl
     #   qrcode

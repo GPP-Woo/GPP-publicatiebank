@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import Literal
+
 from django import forms
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
+from .models import Document, Publication
 
 
 class ChangeOwnerForm(forms.Form):
@@ -52,12 +58,15 @@ class ChangeOwnerForm(forms.Form):
         return cleaned_data
 
 
-class PublicationStatusForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
+class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
+    request: HttpRequest
+    initial_publicatiestatus: PublicationStatusOptions | Literal[""]
+
+    def __init__(self, *args, request: HttpRequest, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.initial_publicatiestatus = self.instance.publicatiestatus or ""
+        self.request = request
+        self.initial_publicatiestatus = self.instance.publicatiestatus
 
         if self.instance and self.fields.get("publicatiestatus"):
             allowed_values: list[str] = [
@@ -75,7 +84,7 @@ class PublicationStatusForm(forms.ModelForm):
             ]
 
 
-class PublicationAdminForm(PublicationStatusForm):
+class PublicationAdminForm(PublicationStatusForm[Publication]):
     def save(self, commit=True):
         assert is_authenticated_request(self.request)
         publicatie_status = self.cleaned_data["publicatiestatus"]
@@ -103,7 +112,7 @@ class PublicationAdminForm(PublicationStatusForm):
         return publication
 
 
-class DocumentAdminForm(PublicationStatusForm):
+class DocumentAdminForm(PublicationStatusForm[Document]):
     def save(self, commit=True):
         publicatie_status = self.instance.publicatie.publicatiestatus
         if (
