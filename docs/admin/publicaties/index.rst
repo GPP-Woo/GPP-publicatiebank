@@ -190,3 +190,30 @@ Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het sch
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het onderwerp nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het onderwerp voor het laatst gewijzigd was.
+
+Kenmerken
+---------
+
+In het beheerscherm van het *kenmerk* wordt een lijst getoond van alle *kenmerken*-registraties die zijn opgeslagen in de publicatiebank.
+Op dit scherm zijn de volgende acties mogelijk:
+
+* Rechtsboven zit een knop **kenmerk toevoegen** waarmee een registratie toegevoegd kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere kenmerken**. Op dit moment wordt alleen de actie **Geselecteerde onderwerpen verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *kenmerk*-registraties aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *kenmerk*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Bij een *kenmerk*-registratie kan op de `kenmerk` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
+
+Wanneer bij een *kenmerk*-registratie op de `kenmerk` wordt geklikt, wordt een scherm geopend met de *kenmerk*-details.
+Hierop zien we:
+
+* **Alle metadatavelden**. Deze lichten we hieronder toe.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *kenmerk*-registratie.
+* Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de Admin-interface zijn uitgevoerd op de registratie.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
+* Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
+
+Op een *kenmerk*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
+
+* ``Publicatie``. Het *kenmerk* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*
+* ``Kenmerk``. De unique IRI die het kenmerk beschrijft.
+* ``Bron``. De informatie dat beschrijft waar het kenmerk zich bevind.
