@@ -296,7 +296,11 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     @transition(
         field=publicatiestatus,
         # type annotations are missing and pyright infers that only string is allowed
-        source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
+        source=(
+            "",
+            PublicationStatusOptions.concept,
+            PublicationStatusOptions.published,
+        ),  # pyright:ignore[reportArgumentType]
         target=PublicationStatusOptions.published,
     )
     def publish(
@@ -738,7 +742,11 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     @transition(
         field=publicatiestatus,
-        source=PublicationStatusOptions.concept,
+        source=(
+            "",
+            PublicationStatusOptions.concept,
+            PublicationStatusOptions.published,
+        ),  # pyright:ignore[reportArgumentType]
         target=PublicationStatusOptions.published,
         conditions=(PublicatieStatusMatch({PublicationStatusOptions.published}),),
     )
