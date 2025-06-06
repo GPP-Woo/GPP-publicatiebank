@@ -212,6 +212,7 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                 "identifier": added_item.identifier,
                 "naam": "new item",
                 "naam_meervoud": "new items",
+                "omschrijving": "",
                 "definitie": (
                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris "
                     "risus nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris "
@@ -296,6 +297,7 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                     "identifier": information_category.identifier,
                     "naam": "changed",
                     "naam_meervoud": "changed",
+                    "omschrijving": "",
                     "definitie": "changed",
                     "oorsprong": InformationCategoryOrigins.custom_entry,
                     "bron_bewaartermijn": "Selectielijst gemeenten 2020",
@@ -354,6 +356,7 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                 "identifier": information_category.identifier,
                 "naam": "naam",
                 "naam_meervoud": "namen",
+                "omschrijving": "",
                 "definitie": "definitie",
                 "oorsprong": InformationCategoryOrigins.value_list,
                 "bron_bewaartermijn": "test",
