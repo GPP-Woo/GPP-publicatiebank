@@ -187,6 +187,7 @@ django==5.2.1
     #   django-setup-configuration
     #   django-simple-certmanager
     #   django-solo
+    #   django-stubs-ext
     #   django-timeline-logger
     #   django-treebeard
     #   django-two-factor-auth
@@ -348,6 +349,10 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-stubs-ext==5.2.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 django-test-migrations==1.5.0
     # via
     #   -c requirements/ci.txt
@@ -891,6 +896,7 @@ typing-extensions==4.12.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   django-stubs-ext
     #   django-test-migrations
     #   mozilla-django-oidc-db
     #   pydantic

@@ -216,7 +216,9 @@ class TestDocumentAdmin(WebTest):
 
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_document_admin_create(self):
-        publication = PublicationFactory.create()
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
 
         response = self.app.get(
@@ -226,22 +228,7 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms["document_form"]
 
-        with self.subTest("trying to create a revoked publication results in errors"):
-            form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
-
-            submit_response = form.submit(name="_save")
-
-            self.assertEqual(submit_response.status_code, 200)
-            self.assertFormError(
-                submit_response.context["adminform"],
-                None,
-                _("You cannot create a {revoked} document.").format(
-                    revoked=PublicationStatusOptions.revoked.label.lower()
-                ),
-            )
-
         with self.subTest("documenthandeling fields save default values"):
-            form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
             form["publicatie"] = publication.id
             form["identifier"] = identifier
             form["officiele_titel"] = "The official title of this document"
@@ -262,12 +249,14 @@ class TestDocumentAdmin(WebTest):
             assert added_item is not None
             # test if defaults will be saved
             self.assertEqual(
+                added_item.publicatiestatus, PublicationStatusOptions.concept
+            )
+            self.assertEqual(
                 str(added_item.soort_handeling), DocumentActionTypeOptions.declared
             )
             self.assertEqual(added_item.eigenaar, self.organisation_member)
 
         with self.subTest("complete data"):
-            form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
             form["eigenaar"].select(text=str(self.organisation_member))
             form["publicatie"] = publication.id
             form["identifier"] = identifier
@@ -321,7 +310,9 @@ class TestDocumentAdmin(WebTest):
     def test_document_create_schedules_index_task(
         self, mock_index_document_delay: MagicMock
     ):
-        publication = PublicationFactory.create()
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published
+        )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
 
         response = self.app.get(
@@ -330,7 +321,6 @@ class TestDocumentAdmin(WebTest):
         )
 
         form = response.forms["document_form"]
-        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "The official title of this document"
@@ -364,13 +354,14 @@ class TestDocumentAdmin(WebTest):
             identifier="test-identifier",
             naam="test-naam",
         )
+        publication = PublicationFactory.create()
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
+                publicatie=publication,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             )
-        publication = PublicationFactory.create()
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
         reverse_url = reverse(
             "admin:publications_document_change",
@@ -382,9 +373,12 @@ class TestDocumentAdmin(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["document_form"]
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+
+        # assert that publicatie isn't editable after creation
+        self.assertNotIn("publicatie", form.fields)
+
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["eigenaar"].force_value([org_member_1.pk])
-        form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "changed official title"
         form["verkorte_titel"] = "changed short title"
@@ -397,7 +391,7 @@ class TestDocumentAdmin(WebTest):
         self.assertEqual(response.status_code, 302)
 
         document.refresh_from_db()
-        self.assertEqual(document.publicatiestatus, PublicationStatusOptions.concept)
+        self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         self.assertEqual(document.eigenaar, org_member_1)
         self.assertEqual(document.publicatie, publication)
         self.assertEqual(document.identifier, identifier)
@@ -448,6 +442,29 @@ class TestDocumentAdmin(WebTest):
             document_id=document.pk,
             download_url=f"http://testserver{download_url}",
         )
+
+    def test_document_cannot_update_when_revoked(self):
+        document = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        )
+        reverse_url = reverse(
+            "admin:publications_document_change",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["document_form"]
+        self.assertNotIn("officiele_titel", form.fields)
+
+        response = form.submit(name="_save", expect_errors=True)
+
+        self.assertEqual(response.status_code, 403)
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")
     def test_document_update_schedules_remove_from_index_task(

@@ -1,8 +1,6 @@
-from typing import Any
-
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.forms import BaseInlineFormSet
+from django.forms import BaseInlineFormSet, ModelForm
 from django.urls import reverse
 from django.utils.translation import gettext
 
@@ -71,7 +69,7 @@ class AdminAuditLogMixin:
         request,
         object_id,
         form_url="",
-        extra_context: dict[str, Any] | None = None,
+        extra_context: dict[str, object] | None = None,
     ):
         if object_id and request.method == "GET":
             object = self.model.objects.get(pk=object_id)
@@ -106,7 +104,11 @@ class AdminAuditLogMixin:
         return kwargs
 
 
-class AuditLogInlineformset(BaseInlineFormSet):
+class AuditLogInlineformset[
+    M: models.Model,
+    ParentM: models.Model,
+    ModelFormT: ModelForm,
+](BaseInlineFormSet[M, ParentM, ModelFormT]):
     """
     Custom formset class for admin inlines to enable audit logging.
 
@@ -120,11 +122,12 @@ class AuditLogInlineformset(BaseInlineFormSet):
     def save_new(self, form, commit=True):
         obj = super().save_new(form, commit)
 
-        audit_admin_create(
-            content_object=obj,
-            django_user=self.django_user,
-            object_data=serialize_instance(obj),
-        )
+        if commit:
+            audit_admin_create(
+                content_object=obj,
+                django_user=self.django_user,
+                object_data=serialize_instance(obj),
+            )
 
         return obj
 
