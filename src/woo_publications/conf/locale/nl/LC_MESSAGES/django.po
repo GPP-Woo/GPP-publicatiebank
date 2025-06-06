@@ -19,12 +19,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.0\n"
 
-#: woo_publications/accounts/admin.py:51 woo_publications/metadata/admin.py:94
-#: woo_publications/metadata/admin.py:144
-#: woo_publications/metadata/admin.py:183
+#: woo_publications/accounts/admin.py:51 woo_publications/metadata/admin.py:95
+#: woo_publications/metadata/admin.py:145
+#: woo_publications/metadata/admin.py:184
 #: woo_publications/publications/admin.py:530
-#: woo_publications/publications/admin.py:696
-#: woo_publications/publications/admin.py:817
+#: woo_publications/publications/admin.py:698
+#: woo_publications/publications/admin.py:819
 msgid "actions"
 msgstr "acties"
 
@@ -84,9 +84,9 @@ msgstr ""
 
 #: woo_publications/accounts/models.py:78
 #: woo_publications/metadata/models.py:39
-#: woo_publications/metadata/models.py:121
-#: woo_publications/metadata/models.py:151
-#: woo_publications/publications/models.py:380
+#: woo_publications/metadata/models.py:127
+#: woo_publications/metadata/models.py:157
+#: woo_publications/publications/models.py:511
 msgid "identifier"
 msgstr "identificatie"
 
@@ -103,7 +103,7 @@ msgid "naam"
 msgstr ""
 
 #: woo_publications/accounts/models.py:88
-#: woo_publications/publications/api/serializers.py:41
+#: woo_publications/publications/api/serializers.py:52
 msgid "The display name of the user."
 msgstr "De weergavenaam van de gebruiker."
 
@@ -190,9 +190,9 @@ msgstr ""
 "Telefoonnummer van de contactpersoon voor deze applicatie en API-sleutel."
 
 #: woo_publications/api/models.py:60
-#: woo_publications/publications/models.py:100
-#: woo_publications/publications/models.py:216
-#: woo_publications/publications/models.py:440
+#: woo_publications/publications/models.py:114
+#: woo_publications/publications/models.py:230
+#: woo_publications/publications/models.py:570
 msgid "last modified"
 msgstr "laatst gewijzigd op"
 
@@ -315,12 +315,12 @@ msgstr "(object niet bekend)"
 msgid "%(timestamp)s | %(user)s | <code>%(event)s</code>: %(object)s."
 msgstr "%(timestamp)s | %(user)s | <code>%(event)s</code>: %(object)s."
 
-#: woo_publications/metadata/admin.py:46
+#: woo_publications/metadata/admin.py:47
 #: woo_publications/publications/admin.py:349
 msgid "Archiving"
 msgstr "Archivering"
 
-#: woo_publications/metadata/admin.py:118
+#: woo_publications/metadata/admin.py:119
 #: woo_publications/metadata/templates/metadata/admin_information_category_api_resources.html:8
 msgid "Information object type API resource URLs"
 msgstr "Resource-URLs van informatieobjecttypen"
@@ -373,12 +373,12 @@ msgstr "Zoek organisaties op basis van de oorsprong van de gegevens."
 msgid "Filter the organisations depending on their activity status:"
 msgstr "Filter de organisaties op hun actief-status:"
 
-#: woo_publications/metadata/api/serializers.py:25
+#: woo_publications/metadata/api/serializers.py:26
 msgid "Controls the (default) ordering of categories in result lists."
 msgstr ""
 "Heeft invloed op de (standaard-)sortering van categorieën in de resultaten."
 
-#: woo_publications/metadata/api/serializers.py:46
+#: woo_publications/metadata/api/serializers.py:47
 #, python-brace-format
 msgid ""
 "The name of the organisation (can only be modified when `oorsprong` is "
@@ -387,12 +387,12 @@ msgstr ""
 "De naam van de organisatie (deze kan enkel gewijzigd worden als de "
 "`oorsprong` `{custom_entry}` is)."
 
-#: woo_publications/metadata/api/serializers.py:64
+#: woo_publications/metadata/api/serializers.py:65
 msgid ""
 "You cannot modify the name of organisations populated from a value list."
 msgstr "Je kan de naam van organisaties uit waardelijsten niet aanpassen."
 
-#: woo_publications/metadata/api/serializers.py:77
+#: woo_publications/metadata/api/serializers.py:78
 msgid "The nested themes attached to this current theme."
 msgstr "De subthema's die binnen het huidige thema bestaan."
 
@@ -476,12 +476,12 @@ msgid "Alternative government organisations"
 msgstr "Register overige overheidsorganisaties compleet"
 
 #: woo_publications/metadata/models.py:37
-#: woo_publications/metadata/models.py:119
-#: woo_publications/metadata/models.py:149
-#: woo_publications/publications/api/serializers.py:72
-#: woo_publications/publications/models.py:58
-#: woo_publications/publications/models.py:129
-#: woo_publications/publications/models.py:359
+#: woo_publications/metadata/models.py:125
+#: woo_publications/metadata/models.py:155
+#: woo_publications/publications/api/serializers.py:83
+#: woo_publications/publications/models.py:72
+#: woo_publications/publications/models.py:143
+#: woo_publications/publications/models.py:490
 msgid "UUID"
 msgstr "UUID"
 
@@ -495,8 +495,8 @@ msgstr ""
 "gegenereerd."
 
 #: woo_publications/metadata/models.py:50
-#: woo_publications/metadata/models.py:131
-#: woo_publications/metadata/models.py:162
+#: woo_publications/metadata/models.py:137
+#: woo_publications/metadata/models.py:168
 #: woo_publications/metadata/templates/metadata/admin_information_category_api_resources.html:20
 msgid "name"
 msgstr "naam"
@@ -510,7 +510,7 @@ msgid "definition"
 msgstr "definitie"
 
 #: woo_publications/metadata/models.py:54
-#: woo_publications/metadata/models.py:164
+#: woo_publications/metadata/models.py:170
 #: woo_publications/metadata/templates/metadata/admin_information_category_api_resources.html:37
 msgid "origin"
 msgstr "oorsprong"
@@ -527,25 +527,36 @@ msgstr ""
 "of verwijderd worden."
 
 #: woo_publications/metadata/models.py:67
-#: woo_publications/publications/models.py:227
+#: woo_publications/publications/models.py:90
+#: woo_publications/publications/models.py:212
+#: woo_publications/publications/models.py:525
+msgid "description"
+msgstr "omschrijving"
+
+#: woo_publications/metadata/models.py:68
+msgid "The brief explanation shown to employees and citizens."
+msgstr "De beknopte toelichting die aan medewerkers en burgers getoond wordt."
+
+#: woo_publications/metadata/models.py:73
+#: woo_publications/publications/models.py:241
 msgid "retention policy source"
 msgstr "bron bewaartermijn"
 
-#: woo_publications/metadata/models.py:69
-#: woo_publications/publications/models.py:229
+#: woo_publications/metadata/models.py:75
+#: woo_publications/publications/models.py:243
 msgid ""
 "The source of the retention policy (example: Selectielijst gemeenten 2020)."
 msgstr ""
 "De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst "
 "gemeenten 2020)."
 
-#: woo_publications/metadata/models.py:77
-#: woo_publications/publications/models.py:236
+#: woo_publications/metadata/models.py:83
+#: woo_publications/publications/models.py:250
 msgid "selection category"
 msgstr "selectiecategorie"
 
-#: woo_publications/metadata/models.py:79
-#: woo_publications/publications/models.py:238
+#: woo_publications/metadata/models.py:85
+#: woo_publications/publications/models.py:252
 msgid ""
 "The category as specified in the provided retention policy source (example: "
 "20.1.2)."
@@ -553,41 +564,41 @@ msgstr ""
 "De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron "
 "bewaartermijn voorkomt (bijvoorbeeld: 20.1.2)."
 
-#: woo_publications/metadata/models.py:86
-#: woo_publications/publications/models.py:245
+#: woo_publications/metadata/models.py:92
+#: woo_publications/publications/models.py:259
 msgid "archive action"
 msgstr "archiefnominatie"
 
-#: woo_publications/metadata/models.py:87
-#: woo_publications/publications/models.py:246
+#: woo_publications/metadata/models.py:93
+#: woo_publications/publications/models.py:260
 msgid "Determines if the archived data will be retained or disposed."
 msgstr ""
 "Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief "
 "vernietigd worden."
 
-#: woo_publications/metadata/models.py:94
+#: woo_publications/metadata/models.py:100
 msgid "retention period"
 msgstr "bewaartermijn"
 
-#: woo_publications/metadata/models.py:95
+#: woo_publications/metadata/models.py:101
 msgid "The retention period in years."
 msgstr "De bewaartermijn in aantal jaren."
 
-#: woo_publications/metadata/models.py:101
-#: woo_publications/publications/models.py:258
+#: woo_publications/metadata/models.py:107
+#: woo_publications/publications/models.py:272
 msgid "retention policy explanation"
 msgstr "toelichting bewaartermijn"
 
-#: woo_publications/metadata/models.py:108
+#: woo_publications/metadata/models.py:114
 msgid "information category"
 msgstr "informatiecategorie"
 
-#: woo_publications/metadata/models.py:109
-#: woo_publications/publications/models.py:136
+#: woo_publications/metadata/models.py:115
+#: woo_publications/publications/models.py:150
 msgid "information categories"
 msgstr "informatiecategorieën"
 
-#: woo_publications/metadata/models.py:123
+#: woo_publications/metadata/models.py:129
 msgid ""
 "The unique IRI that identifies this theme in the overheid.nl value list. For"
 " entries that have been added manually, an identifier is generated."
@@ -595,15 +606,15 @@ msgstr ""
 "De unieke IRI waarmee het thema in de overheid.nl waardenlijst gedefinieerd "
 "is. Voor zelf-toegevoegde items wordt een identificatie gegenereerd."
 
-#: woo_publications/metadata/models.py:138
+#: woo_publications/metadata/models.py:144
 msgid "theme"
 msgstr "thema"
 
-#: woo_publications/metadata/models.py:139
+#: woo_publications/metadata/models.py:145
 msgid "themes"
 msgstr "thema's"
 
-#: woo_publications/metadata/models.py:153
+#: woo_publications/metadata/models.py:159
 msgid ""
 "The unique IRI that identifies this organisation in the overheid.nl value "
 "list. For entries that have been added manually, an identifier is generated."
@@ -612,7 +623,7 @@ msgstr ""
 "waardelijsten. Voor zelf-toegevoegde items wordt een identificatie "
 "gegenereerd."
 
-#: woo_publications/metadata/models.py:166
+#: woo_publications/metadata/models.py:172
 msgid ""
 "Determines where the organisation is defined and sourced from, and how the "
 "identifier should be interpreted. If the value list is the origin, the "
@@ -623,19 +634,19 @@ msgstr ""
 "waardelijst als oorsprong gebruikt wordt, dan kan de organisatie niet "
 "bewerkt of verwijderd worden."
 
-#: woo_publications/metadata/models.py:176
+#: woo_publications/metadata/models.py:182
 msgid "is active"
 msgstr "actief"
 
-#: woo_publications/metadata/models.py:177
+#: woo_publications/metadata/models.py:183
 msgid "Displays if the the organisation is currently active or not."
 msgstr "Geeft de actief-status van de organisatie aan."
 
-#: woo_publications/metadata/models.py:185
+#: woo_publications/metadata/models.py:191
 msgid "organisation"
 msgstr "organisatie"
 
-#: woo_publications/metadata/models.py:186
+#: woo_publications/metadata/models.py:192
 msgid "organisations"
 msgstr "organisaties"
 
@@ -654,7 +665,6 @@ msgstr "resource-URI"
 
 #: woo_publications/publications/admin.py:47
 #, python-format
-#| msgid "revoke the selected %(verbose_name_plural)s"
 msgid "Change %(verbose_name_plural)s owner(s)"
 msgstr "Wijzig de eigenaar van de geselecteerde %(verbose_name_plural)s"
 
@@ -720,24 +730,28 @@ msgstr[1] "{count} {verbose_name}-objecten ingetrokken."
 msgid "Show documents"
 msgstr "Toon documenten"
 
-#: woo_publications/publications/admin.py:584
+#: woo_publications/publications/admin.py:542
+msgid "Open in app"
+msgstr ""
+
+#: woo_publications/publications/admin.py:586
 msgid "Document actions"
 msgstr "Documenthandelingen"
 
-#: woo_publications/publications/admin.py:594
+#: woo_publications/publications/admin.py:596
 msgid "Documents API integration"
 msgstr "Documenten-API-koppeling"
 
-#: woo_publications/publications/admin.py:692
-#: woo_publications/publications/models.py:419
+#: woo_publications/publications/admin.py:694
+#: woo_publications/publications/models.py:550
 msgid "file size"
 msgstr "bestandsomvang"
 
-#: woo_publications/publications/admin.py:707
+#: woo_publications/publications/admin.py:709
 msgid "at time"
 msgstr "op moment"
 
-#: woo_publications/publications/admin.py:711
+#: woo_publications/publications/admin.py:713
 msgid "was associated with"
 msgstr "was geassocieerd met"
 
@@ -902,40 +916,40 @@ msgstr ""
 msgid "Filter topics based on the publication status."
 msgstr "Filter onderwerpen op publicatiestatus."
 
-#: woo_publications/publications/api/serializers.py:62
+#: woo_publications/publications/api/serializers.py:73
 msgid ""
 "The fields 'naam' and 'weergaveNaam' has to be both present or excluded."
 msgstr ""
 "De velden 'naam' en 'weergaveNaam' moeten beide opgegeven of weggelaten "
 "worden."
 
-#: woo_publications/publications/api/serializers.py:73
+#: woo_publications/publications/api/serializers.py:84
 msgid "The unique ID for a given file part for a document."
 msgstr "Het unieke ID van een bestandsdeel horend bij een document."
 
-#: woo_publications/publications/api/serializers.py:77
+#: woo_publications/publications/api/serializers.py:88
 msgid "url"
 msgstr "url"
 
-#: woo_publications/publications/api/serializers.py:78
+#: woo_publications/publications/api/serializers.py:89
 msgid "Endpoint where to submit the file part data to."
 msgstr "Endpoint waar het bestandsdeel geüpload moet worden."
 
-#: woo_publications/publications/api/serializers.py:83
+#: woo_publications/publications/api/serializers.py:94
 msgid "order"
 msgstr "volgorde"
 
-#: woo_publications/publications/api/serializers.py:84
+#: woo_publications/publications/api/serializers.py:95
 msgid "Index of the filepart, indicating which chunk is being uploaded."
 msgstr ""
 "Index van het bestandsdeel, geeft aan welk bestandsdeel precies geüpload "
 "wordt."
 
-#: woo_publications/publications/api/serializers.py:89
+#: woo_publications/publications/api/serializers.py:100
 msgid "size"
 msgstr "grootte"
 
-#: woo_publications/publications/api/serializers.py:91
+#: woo_publications/publications/api/serializers.py:102
 msgid ""
 "Chunk size, in bytes. Large files must be cut up into chunks, where each "
 "chunk has an expected chunk size (configured on the Documents API server). A"
@@ -948,11 +962,11 @@ msgstr ""
 "bestandsdeel is pas voltooid als er binaire data van precies deze omvang "
 "geüpload zijn."
 
-#: woo_publications/publications/api/serializers.py:99
+#: woo_publications/publications/api/serializers.py:110
 msgid "binary content"
 msgstr "binaire data"
 
-#: woo_publications/publications/api/serializers.py:101
+#: woo_publications/publications/api/serializers.py:112
 msgid ""
 "The binary data of this chunk, which will be forwarded to the underlying "
 "Documents API. The file size must match the part's `omvang`."
@@ -961,15 +975,15 @@ msgstr ""
 "Documenten-API. De bestandsgrootte moet overeenkomen met de `omvang` van het"
 " bestandsdeel."
 
-#: woo_publications/publications/api/serializers.py:119
+#: woo_publications/publications/api/serializers.py:130
 msgid "The unique identifier of the organisation."
 msgstr "De unieke identificatie van de organisatie."
 
-#: woo_publications/publications/api/serializers.py:126
+#: woo_publications/publications/api/serializers.py:137
 msgid "document upload completed"
 msgstr "documentupload voltooid"
 
-#: woo_publications/publications/api/serializers.py:128
+#: woo_publications/publications/api/serializers.py:139
 msgid ""
 "Indicates if all chunks of the file have been received and the document has "
 "been unlocked and made 'ready for use' in the upstream Documents API."
@@ -978,16 +992,16 @@ msgstr ""
 "document ontgrendeld en klaar voor gebruik is in de achterliggende "
 "Documenten-API."
 
-#: woo_publications/publications/api/serializers.py:138
-#: woo_publications/publications/api/serializers.py:238
+#: woo_publications/publications/api/serializers.py:149
+#: woo_publications/publications/api/serializers.py:313
 msgid "The unique identifier of the publication."
 msgstr "De unieke identificatie van de publicatie."
 
-#: woo_publications/publications/api/serializers.py:141
+#: woo_publications/publications/api/serializers.py:152
 msgid "file parts"
 msgstr "bestandsdelen"
 
-#: woo_publications/publications/api/serializers.py:143
+#: woo_publications/publications/api/serializers.py:154
 msgid ""
 "The expected file parts/chunks to upload the file contents. These are "
 "derived from the specified total file size (`bestandsomvang`) in the "
@@ -997,8 +1011,8 @@ msgstr ""
 "zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`) in "
 "de body van de document create operatie."
 
-#: woo_publications/publications/api/serializers.py:154
-#: woo_publications/publications/api/serializers.py:243
+#: woo_publications/publications/api/serializers.py:165
+#: woo_publications/publications/api/serializers.py:318
 msgid ""
 "The document actions of this document, currently only one action will be "
 "used per document."
@@ -1007,15 +1021,15 @@ msgstr ""
 "handeling opgeven. Als je dit niet opgeeft, dan worden standaardwaarden "
 "gebruikt."
 
-#: woo_publications/publications/api/serializers.py:163
-#: woo_publications/publications/api/serializers.py:271
-#: woo_publications/publications/models.py:183
-#: woo_publications/publications/models.py:375
+#: woo_publications/publications/api/serializers.py:174
+#: woo_publications/publications/api/serializers.py:355
+#: woo_publications/publications/models.py:197
+#: woo_publications/publications/models.py:506
 msgid "owner"
 msgstr "eigenaar"
 
-#: woo_publications/publications/api/serializers.py:165
-#: woo_publications/publications/api/serializers.py:273
+#: woo_publications/publications/api/serializers.py:176
+#: woo_publications/publications/api/serializers.py:357
 msgid ""
 "The creator of the document, derived from the audit headers.\n"
 "Disclaimer**: If you use this field during creation/updating actions the owner data will differ from the audit headers provided during creation."
@@ -1024,23 +1038,20 @@ msgstr ""
 "\n"
 "**Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers."
 
-#: woo_publications/publications/api/serializers.py:199
-#, python-brace-format
+#: woo_publications/publications/api/serializers.py:213
 msgid ""
 "\n"
-"**Disclaimer**: you can't create a {revoked} document."
+"On creation, the publicatiestatus is derived from the publication and cannot be specified directly."
 msgstr ""
-"\n"
-"**Waarschuwing**: je kan geen {revoked} document aanmaken."
 
-#: woo_publications/publications/api/serializers.py:211
-#: woo_publications/publications/models.py:515
-#, python-brace-format
-msgid "You cannot create a {revoked} document."
-msgstr "Je kan geen {revoked} document aanmaken."
+#: woo_publications/publications/api/serializers.py:242
+#, fuzzy
+#| msgid "Filter documents based on the publication status."
+msgid "Adding documents to revoked publications is not allowed."
+msgstr "Filter documenten op publicatiestatus."
 
-#: woo_publications/publications/api/serializers.py:284
-#: woo_publications/publications/models.py:138
+#: woo_publications/publications/api/serializers.py:368
+#: woo_publications/publications/models.py:152
 msgid ""
 "The information categories clarify the kind of information present in the "
 "publication."
@@ -1048,12 +1059,12 @@ msgstr ""
 "De informatiecategorie verduidelijkt de soort informatie die in de "
 "publicatie voorkomt."
 
-#: woo_publications/publications/api/serializers.py:293
+#: woo_publications/publications/api/serializers.py:377
 msgid "The information categories used for the sitemap"
 msgstr "De informatiecategorieën voor in de sitemap."
 
-#: woo_publications/publications/api/serializers.py:300
-#: woo_publications/publications/models.py:146
+#: woo_publications/publications/api/serializers.py:384
+#: woo_publications/publications/models.py:160
 msgid ""
 "Topics capture socially relevant information that spans multiple "
 "publications. They can remain relevant for tens of years and exceed the life"
@@ -1063,23 +1074,36 @@ msgstr ""
 "publicaties omvatten. Ze kunnen tientallen jaren relevant blijven en "
 "overstijgen de typische levensduur van een enkele publicatie."
 
-#: woo_publications/publications/api/serializers.py:311
-#: woo_publications/publications/models.py:156
+#: woo_publications/publications/api/serializers.py:395
+#: woo_publications/publications/models.py:170
 msgid "The organisation which publishes the publication."
 msgstr "De organisatie die de publicatie publiceert."
 
-#: woo_publications/publications/api/serializers.py:318
-#: woo_publications/publications/models.py:165
+#: woo_publications/publications/api/serializers.py:402
+#: woo_publications/publications/models.py:179
 msgid "The organisation which is liable for the publication and its contents."
 msgstr ""
 "De organisatie die verantwoordelijk is voor de publicatie en haar inhoud."
 
-#: woo_publications/publications/api/serializers.py:327
-#: woo_publications/publications/models.py:176
+#: woo_publications/publications/api/serializers.py:411
+#: woo_publications/publications/models.py:190
 msgid "The organisation which drafted the publication and its content."
 msgstr "De organisatie die de publicatie en haar inhoud opgesteld heeft."
 
-#: woo_publications/publications/api/serializers.py:368
+#: woo_publications/publications/api/serializers.py:417
+#, fuzzy
+#| msgid "Update a publication entirely."
+msgid "internal publication url"
+msgstr "Werk een publicatie (in zijn geheel) bij."
+
+#: woo_publications/publications/api/serializers.py:419
+msgid ""
+"URL to the UI of the internal application where the publication life cycle "
+"is managed. Requires the global configuration parameter to be set, otherwise"
+" an empty string is returned."
+msgstr ""
+
+#: woo_publications/publications/api/serializers.py:461
 #, python-brace-format
 msgid ""
 "\n"
@@ -1092,7 +1116,7 @@ msgstr ""
 "\n"
 "**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken."
 
-#: woo_publications/publications/api/serializers.py:377
+#: woo_publications/publications/api/serializers.py:473
 msgid ""
 "The source of the retention policy (example: Selectielijst gemeenten 2020).\n"
 "\n"
@@ -1102,7 +1126,7 @@ msgstr ""
 "\n"
 "**Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën)."
 
-#: woo_publications/publications/api/serializers.py:387
+#: woo_publications/publications/api/serializers.py:483
 msgid ""
 "The category as specified in the provided retention policy source (example: 20.1.2).\n"
 "\n"
@@ -1112,7 +1136,7 @@ msgstr ""
 "\n"
 "**Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën)."
 
-#: woo_publications/publications/api/serializers.py:397
+#: woo_publications/publications/api/serializers.py:493
 msgid ""
 "Determines if the archived data will be retained or destroyed.\n"
 "\n"
@@ -1122,7 +1146,7 @@ msgstr ""
 "\n"
 "**Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën)."
 
-#: woo_publications/publications/api/serializers.py:406
+#: woo_publications/publications/api/serializers.py:502
 msgid ""
 "Date when the publication will be archived or destroyed.\n"
 "\n"
@@ -1132,7 +1156,7 @@ msgstr ""
 "\n"
 "**Opmerking** een handmatige opgegeven waarde wordt bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarde uit de gekoppelde informatiecategorie(ën)."
 
-#: woo_publications/publications/api/serializers.py:415
+#: woo_publications/publications/api/serializers.py:511
 msgid ""
 "**Note** on create or when updating the information categories, manually "
 "provided values are ignored and overwritten by the automatically derived "
@@ -1142,51 +1166,62 @@ msgstr ""
 "wanneer de informatiecategorieën bijgewerkt worden) overschreven met de "
 "automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën)."
 
-#: woo_publications/publications/api/serializers.py:432
+#: woo_publications/publications/api/serializers.py:539
 #, python-brace-format
 msgid "You cannot modify a {revoked} publication."
 msgstr "Je kan een {revoked} publicatie niet wijzigen."
 
-#: woo_publications/publications/api/serializers.py:440
-#: woo_publications/publications/models.py:273
-#, python-brace-format
-msgid "You cannot create a {revoked} publication."
-msgstr "Je kan geen {revoked} publicatie aanmaken."
-
-#: woo_publications/publications/api/serializers.py:497
+#: woo_publications/publications/api/serializers.py:656
 msgid "The publication attached to this topic."
 msgstr "De publicatie die aan dit onderwerp gekoppeld is."
 
-#: woo_publications/publications/api/viewsets.py:62
+#: woo_publications/publications/api/utils.py:17
+#, python-brace-format
+msgid ""
+"\n"
+"\n"
+"The possible state transitions are: \n"
+"\n"
+"{transitions}.\n"
+"\n"
+"Note that some transitions may be limited by business logic."
+msgstr ""
+
+#: woo_publications/publications/api/validators.py:43
+#, python-brace-format
+msgid "Changing the state from '{current}' to '{value}' is not allowed."
+msgstr ""
+
+#: woo_publications/publications/api/viewsets.py:58
 msgid "All available documents."
 msgstr "Alle beschikbare documenten."
 
-#: woo_publications/publications/api/viewsets.py:63
+#: woo_publications/publications/api/viewsets.py:59
 msgid "Returns a paginated result list of existing documents."
 msgstr ""
 "Geeft een resultatenlijst (met paginering) terug van de bestaande "
 "documenten."
 
-#: woo_publications/publications/api/viewsets.py:66
-#: woo_publications/publications/api/viewsets.py:67
+#: woo_publications/publications/api/viewsets.py:62
+#: woo_publications/publications/api/viewsets.py:63
 msgid "Retrieve a specific document."
 msgstr "Haal een specifiek document op."
 
-#: woo_publications/publications/api/viewsets.py:70
-#: woo_publications/publications/api/viewsets.py:71
+#: woo_publications/publications/api/viewsets.py:66
+#: woo_publications/publications/api/viewsets.py:67
 msgid "Update the metadata of a specific document."
 msgstr "Werk de metadata van een specifiek document bij."
 
-#: woo_publications/publications/api/viewsets.py:74
-#: woo_publications/publications/api/viewsets.py:75
+#: woo_publications/publications/api/viewsets.py:70
+#: woo_publications/publications/api/viewsets.py:71
 msgid "Update the metadata of a specific document partially."
 msgstr "Werk de metadata van een specifiek document gedeeltelijk bij."
 
-#: woo_publications/publications/api/viewsets.py:78
+#: woo_publications/publications/api/viewsets.py:74
 msgid "Register a document's metadata."
 msgstr "Registreer de metadata van een document."
 
-#: woo_publications/publications/api/viewsets.py:80
+#: woo_publications/publications/api/viewsets.py:76
 msgid ""
 "Creating a document results in the registration of the metadata and prepares the client for the upload of the binary data.\n"
 "\n"
@@ -1212,11 +1247,11 @@ msgstr ""
 "* een Documenten-API-service instellen en selecteren\n"
 "* een organisatie-RSIN instellen om te gebruiken voor geregistreerde documenten"
 
-#: woo_publications/publications/api/viewsets.py:160
+#: woo_publications/publications/api/viewsets.py:125
 msgid "Upload file part"
 msgstr "Bestandsdeel uploaden"
 
-#: woo_publications/publications/api/viewsets.py:162
+#: woo_publications/publications/api/viewsets.py:127
 msgid ""
 "Send the binary data for a file part to perform the actual file upload. The response data of the document create endpoints returns the list of expected file parts, pointing to this endpoint. The client must split the binary file in the expected part sizes and then upload each chunk individually.\n"
 "\n"
@@ -1230,11 +1265,11 @@ msgstr ""
 "\n"
 "**NOTE** dit endpoint verwacht `multipart/form-data` gegevens in plaats van JSON - op deze manier kan de base64-encoding overhead voorkomen worden."
 
-#: woo_publications/publications/api/viewsets.py:219
+#: woo_publications/publications/api/viewsets.py:184
 msgid "Download the binary file contents"
 msgstr "Download de binaire bestandsdata"
 
-#: woo_publications/publications/api/viewsets.py:221
+#: woo_publications/publications/api/viewsets.py:186
 msgid ""
 "Download the binary content of the document. The endpoint does not return JSON data, but instead the file content is streamed.\n"
 "\n"
@@ -1244,74 +1279,74 @@ msgstr ""
 "\n"
 "Je kan enkel bestanden downloaden waarvan de upload naar de achterliggende Documenten-API voltooid is."
 
-#: woo_publications/publications/api/viewsets.py:228
+#: woo_publications/publications/api/viewsets.py:193
 msgid "The binary file contents."
 msgstr "De binaire bestandsinhoud."
 
-#: woo_publications/publications/api/viewsets.py:232
+#: woo_publications/publications/api/viewsets.py:197
 msgid "Bad gateway - failure to stream content."
 msgstr "Bad gateway - kon de inhoud niet streamen."
 
-#: woo_publications/publications/api/viewsets.py:240
+#: woo_publications/publications/api/viewsets.py:205
 msgid "Total size in bytes of the download."
 msgstr "Totale grootte (in bytes) van de download."
 
-#: woo_publications/publications/api/viewsets.py:248
+#: woo_publications/publications/api/viewsets.py:213
 msgid "Marks the file as attachment and includes the filename."
 msgstr ""
 "Markeert het bestand als 'bijlage' en bevat de bestandsnaam van het "
 "document."
 
-#: woo_publications/publications/api/viewsets.py:277
+#: woo_publications/publications/api/viewsets.py:242
 msgid "Could not download from the upstream."
 msgstr "Kon niet downloaden van de achterliggende service."
 
-#: woo_publications/publications/api/viewsets.py:321
+#: woo_publications/publications/api/viewsets.py:286
 msgid "All available publications."
 msgstr "Alle beschikbare publicaties."
 
-#: woo_publications/publications/api/viewsets.py:322
+#: woo_publications/publications/api/viewsets.py:287
 msgid "Returns a paginated result list of existing publications."
 msgstr ""
 "Geeft een lijst (met paginering) terug van alle bestaande publicaties."
 
-#: woo_publications/publications/api/viewsets.py:325
-#: woo_publications/publications/api/viewsets.py:326
+#: woo_publications/publications/api/viewsets.py:290
+#: woo_publications/publications/api/viewsets.py:291
 msgid "Retrieve a specific publication."
 msgstr "Haal een specifieke publicatie op."
 
-#: woo_publications/publications/api/viewsets.py:329
-#: woo_publications/publications/api/viewsets.py:330
+#: woo_publications/publications/api/viewsets.py:294
+#: woo_publications/publications/api/viewsets.py:295
 msgid "Create a publication."
 msgstr "Maak een publicatie aan."
 
-#: woo_publications/publications/api/viewsets.py:333
-#: woo_publications/publications/api/viewsets.py:334
+#: woo_publications/publications/api/viewsets.py:298
+#: woo_publications/publications/api/viewsets.py:299
 msgid "Update a publication partially."
 msgstr "Werk een publicatie (gedeeltelijk) bij."
 
-#: woo_publications/publications/api/viewsets.py:337
-#: woo_publications/publications/api/viewsets.py:338
+#: woo_publications/publications/api/viewsets.py:302
+#: woo_publications/publications/api/viewsets.py:303
 msgid "Update a publication entirely."
 msgstr "Werk een publicatie (in zijn geheel) bij."
 
-#: woo_publications/publications/api/viewsets.py:341
-#: woo_publications/publications/api/viewsets.py:342
+#: woo_publications/publications/api/viewsets.py:306
+#: woo_publications/publications/api/viewsets.py:307
 msgid "Destroy a publication."
 msgstr "Vernietig een publicatie."
 
-#: woo_publications/publications/api/viewsets.py:395
+#: woo_publications/publications/api/viewsets.py:321
 msgid "All available topics."
 msgstr "Alle beschikbare onderwerpen."
 
-#: woo_publications/publications/api/viewsets.py:396
+#: woo_publications/publications/api/viewsets.py:322
 msgid "Returns a paginated result list of existing topics."
 msgstr ""
 "Geeft een resultatenlijst (met paginering) terug van de bestaande "
 "onderwerpen."
 
-#: woo_publications/publications/api/viewsets.py:399
-#: woo_publications/publications/api/viewsets.py:400
+#: woo_publications/publications/api/viewsets.py:325
+#: woo_publications/publications/api/viewsets.py:326
 msgid "Retrieve a specific topic."
 msgstr "Haal een specifiek onderwerp op."
 
@@ -1348,7 +1383,7 @@ msgid "Identifier"
 msgstr "Identificatie"
 
 #: woo_publications/publications/forms.py:15
-#: woo_publications/publications/models.py:381
+#: woo_publications/publications/models.py:512
 msgid "The (primary) unique identifier."
 msgstr "De (primaire) unieke identificatie."
 
@@ -1365,52 +1400,46 @@ msgstr "Je moet of een 'eigenaar', of 'identifier' en 'naam' (samen) opgeven."
 msgid "This field is required."
 msgstr "Dit veld is vereist."
 
-#: woo_publications/publications/models.py:64
+#: woo_publications/publications/models.py:78
 msgid "Afbeelding"
 msgstr "Afbeelding"
 
-#: woo_publications/publications/models.py:73
-#: woo_publications/publications/models.py:190
-#: woo_publications/publications/models.py:386
+#: woo_publications/publications/models.py:87
+#: woo_publications/publications/models.py:204
+#: woo_publications/publications/models.py:517
 msgid "official title"
 msgstr "officiële titel"
 
-#: woo_publications/publications/models.py:76
-#: woo_publications/publications/models.py:198
-#: woo_publications/publications/models.py:394
-msgid "description"
-msgstr "omschrijving"
-
-#: woo_publications/publications/models.py:78
-#: woo_publications/publications/models.py:200
-#: woo_publications/publications/models.py:424
+#: woo_publications/publications/models.py:92
+#: woo_publications/publications/models.py:214
+#: woo_publications/publications/models.py:555
 msgid "status"
 msgstr "status"
 
-#: woo_publications/publications/models.py:84
+#: woo_publications/publications/models.py:98
 msgid "promote"
 msgstr "promoot"
 
-#: woo_publications/publications/models.py:87
+#: woo_publications/publications/models.py:101
 msgid ""
 "Marker to indicate that this topic will be promoted within the frontend "
 "application."
 msgstr ""
 "Vlag die aangeeft of dit onderwerp gepromoot wordt in het burgerportaal."
 
-#: woo_publications/publications/models.py:92
-#: woo_publications/publications/models.py:206
-#: woo_publications/publications/models.py:430
+#: woo_publications/publications/models.py:106
+#: woo_publications/publications/models.py:220
+#: woo_publications/publications/models.py:560
 msgid "created on"
 msgstr "geregistreerd op"
 
-#: woo_publications/publications/models.py:96
+#: woo_publications/publications/models.py:110
 msgid ""
 "System timestamp reflecting when the topic was registered in the database."
 msgstr ""
 "Systeemdatum en -tijd wanneer het onderwerp geregistreerd is in de database."
 
-#: woo_publications/publications/models.py:104
+#: woo_publications/publications/models.py:118
 msgid ""
 "System timestamp reflecting when the topic was last modified in the "
 "database."
@@ -1418,43 +1447,43 @@ msgstr ""
 "Systeemdatum en -tijd wanneer het onderwerp laatst gewijzigd is in de "
 "database."
 
-#: woo_publications/publications/models.py:110
+#: woo_publications/publications/models.py:124
 msgid "topic"
 msgstr "onderwerp"
 
-#: woo_publications/publications/models.py:111
-#: woo_publications/publications/models.py:144
+#: woo_publications/publications/models.py:125
+#: woo_publications/publications/models.py:158
 msgid "topics"
 msgstr "onderwerpen"
 
-#: woo_publications/publications/models.py:120
+#: woo_publications/publications/models.py:134
 #, python-brace-format
 msgid "You cannot create a {revoked} topic."
 msgstr "Je kan geen {revoked} onderwerp aanmaken."
 
-#: woo_publications/publications/models.py:154
+#: woo_publications/publications/models.py:168
 msgid "publisher"
 msgstr "publisher"
 
-#: woo_publications/publications/models.py:162
+#: woo_publications/publications/models.py:176
 msgid "liable organisation"
 msgstr "verantwoordelijke organisatie"
 
-#: woo_publications/publications/models.py:174
+#: woo_publications/publications/models.py:188
 msgid "drafter"
 msgstr "opsteller"
 
-#: woo_publications/publications/models.py:185
+#: woo_publications/publications/models.py:199
 msgid "The owner of this publication from gpp-app or gpp-publicatiebank."
 msgstr ""
 "De eigenaar van deze publicatie afgeleid van gpp-app of gpp-publicatiebank."
 
-#: woo_publications/publications/models.py:194
-#: woo_publications/publications/models.py:390
+#: woo_publications/publications/models.py:208
+#: woo_publications/publications/models.py:521
 msgid "short title"
 msgstr "verkorte titel"
 
-#: woo_publications/publications/models.py:210
+#: woo_publications/publications/models.py:224
 msgid ""
 "System timestamp reflecting when the publication was registered in the "
 "database. Not to be confused with the creation date of the publication, "
@@ -1464,7 +1493,7 @@ msgstr ""
 "Niet te verwarren met de creatiedatum van de publicatie, die typisch *voor* "
 "de registratiedatum valt."
 
-#: woo_publications/publications/models.py:220
+#: woo_publications/publications/models.py:234
 msgid ""
 "System timestamp reflecting when the publication was last modified in the "
 "database."
@@ -1472,25 +1501,30 @@ msgstr ""
 "Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd is in de "
 "database."
 
-#: woo_publications/publications/models.py:252
+#: woo_publications/publications/models.py:266
 msgid "archive action date"
 msgstr "archiefactiedatum"
 
-#: woo_publications/publications/models.py:253
+#: woo_publications/publications/models.py:267
 msgid "Date when the publication will be archived or disposed."
 msgstr ""
 "Datum waarop de publicatie overgebracht of definitief vernietigd zal worden."
 
-#: woo_publications/publications/models.py:263
-#: woo_publications/publications/models.py:366
+#: woo_publications/publications/models.py:279
+#: woo_publications/publications/models.py:497
 msgid "publication"
 msgstr "publicatie"
 
-#: woo_publications/publications/models.py:264
+#: woo_publications/publications/models.py:280
 msgid "publications"
 msgstr "publicaties"
 
-#: woo_publications/publications/models.py:368
+#: woo_publications/publications/models.py:289
+#, python-brace-format
+msgid "You cannot create a {revoked} publication."
+msgstr "Je kan geen {revoked} publicatie aanmaken."
+
+#: woo_publications/publications/models.py:499
 msgid ""
 "The publication that this document belongs to. A publication may have zero "
 "or more documents."
@@ -1498,16 +1532,16 @@ msgstr ""
 "De publicatie waaronder dit document valt. Een publicatie kan nul of meer "
 "documenten bevatten."
 
-#: woo_publications/publications/models.py:376
+#: woo_publications/publications/models.py:507
 msgid "The owner of this document from gpp-app or gpp-publicatiebank."
 msgstr ""
 "De eigenaar van dit document afgeleid van gpp-app of gpp-publicatiebank."
 
-#: woo_publications/publications/models.py:396
+#: woo_publications/publications/models.py:527
 msgid "creation date"
 msgstr "creatiedatum"
 
-#: woo_publications/publications/models.py:398
+#: woo_publications/publications/models.py:529
 msgid ""
 "Date when the (physical) document came into existence. Not to be confused "
 "with the registration timestamp of the document - the creation date is "
@@ -1516,11 +1550,11 @@ msgstr ""
 "De datum waarop het document ontstaan is. Niet te verwarren met de "
 "registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum."
 
-#: woo_publications/publications/models.py:404
+#: woo_publications/publications/models.py:535
 msgid "file format"
 msgstr "bestandsformaat"
 
-#: woo_publications/publications/models.py:407
+#: woo_publications/publications/models.py:538
 msgid ""
 "TODO - placeholder accepting anything, in the future this will be validated "
 "against a reference value list."
@@ -1528,21 +1562,21 @@ msgstr ""
 "TODO - placeholder accepting anything, in the future this will be validated "
 "against a reference value list."
 
-#: woo_publications/publications/models.py:413
+#: woo_publications/publications/models.py:544
 msgid "file name"
 msgstr "bestandsnaam"
 
-#: woo_publications/publications/models.py:415
+#: woo_publications/publications/models.py:546
 msgid "File name 'on disk' of the document, e.g. 'gelakt-verslag.pdf'."
 msgstr ""
 "Bestandsnaam 'op de harde schijf' van het document, bijvoorbeeld 'gelakt-"
 "verslag.pdf'."
 
-#: woo_publications/publications/models.py:421
+#: woo_publications/publications/models.py:552
 msgid "Size of the file on disk, in bytes."
 msgstr "Bestandsgrootte op de harde schijf, in bytes."
 
-#: woo_publications/publications/models.py:434
+#: woo_publications/publications/models.py:564
 msgid ""
 "System timestamp reflecting when the document was registered in the "
 "database. Not to be confused with the creation date of the document, which "
@@ -1552,7 +1586,7 @@ msgstr ""
 "Niet te verwarren met de creatiedatum van de publicatie, die typisch *voor* "
 "de registratiedatum valt."
 
-#: woo_publications/publications/models.py:444
+#: woo_publications/publications/models.py:574
 msgid ""
 "System timestamp reflecting when the document was last modified in the "
 "database."
@@ -1560,52 +1594,52 @@ msgstr ""
 "Systeemdatum en -tijd wanneer het document laatst gewijzigd is in de "
 "database."
 
-#: woo_publications/publications/models.py:451
+#: woo_publications/publications/models.py:581
 msgid "action type"
 msgstr "soort handeling"
 
-#: woo_publications/publications/models.py:459
+#: woo_publications/publications/models.py:589
 msgid "Documents API Service"
 msgstr "Documenten API-service"
 
-#: woo_publications/publications/models.py:468
+#: woo_publications/publications/models.py:598
 msgid "document UUID"
 msgstr "document-UUID"
 
-#: woo_publications/publications/models.py:469
+#: woo_publications/publications/models.py:599
 msgid "The UUID of the API resource recorded in the Documenten API."
 msgstr ""
 "Het UUID van de API-resource zoals die in de Documenten API vastgelegd is."
 
-#: woo_publications/publications/models.py:476
+#: woo_publications/publications/models.py:606
 msgid "document lock"
 msgstr "documentvergrendelingscode"
 
-#: woo_publications/publications/models.py:480
+#: woo_publications/publications/models.py:610
 msgid ""
 "The lock value to be able to update this document in the Documents API."
 msgstr ""
 "De ontgrendelsleutel nodig voor updates aan het document in de Documenten "
 "API."
 
-#: woo_publications/publications/models.py:484
+#: woo_publications/publications/models.py:614
 msgid "upload completed"
 msgstr "documentupload voltooid"
 
-#: woo_publications/publications/models.py:487
+#: woo_publications/publications/models.py:617
 msgid "Marker to indicate if the upload to the Documenten API is finalized."
 msgstr ""
 "Markering om aan te geven of de upload naar de Documenten API afgerond is."
 
-#: woo_publications/publications/models.py:495
+#: woo_publications/publications/models.py:627
 msgid "document"
 msgstr "document"
 
-#: woo_publications/publications/models.py:496
+#: woo_publications/publications/models.py:628
 msgid "documents"
 msgstr "documenten"
 
-#: woo_publications/publications/models.py:502
+#: woo_publications/publications/models.py:634
 msgid ""
 "You must specify both the Documents API service and document UUID to "
 "identify a document."
@@ -1613,25 +1647,30 @@ msgstr ""
 "Je moet de Documenten API-service én het document-UUID allebei opgeven om "
 "naar een document te verwijzen."
 
+#: woo_publications/publications/models.py:647
+#, python-brace-format
+msgid "You cannot create a {revoked} document."
+msgstr "Je kan geen {revoked} document aanmaken."
+
 #: woo_publications/templates/admin/base_site.html:5
-#: woo_publications/templates/admin/base_site.html:23
+#: woo_publications/templates/admin/base_site.html:24
 #: woo_publications/templates/index.html:91
 msgid "Administration"
 msgstr "Beheer"
 
-#: woo_publications/templates/admin/base_site.html:38
+#: woo_publications/templates/admin/base_site.html:39
 msgid "View site"
 msgstr "Toon site"
 
-#: woo_publications/templates/admin/base_site.html:44
+#: woo_publications/templates/admin/base_site.html:45
 msgid "Account security"
 msgstr "Accountbeveiliging"
 
-#: woo_publications/templates/admin/base_site.html:47
+#: woo_publications/templates/admin/base_site.html:48
 msgid "Change password"
 msgstr "Wachtwoord wijzigen"
 
-#: woo_publications/templates/admin/base_site.html:52
+#: woo_publications/templates/admin/base_site.html:53
 msgid "Log out"
 msgstr "Afmelden"
 
@@ -1790,20 +1829,6 @@ msgstr "Geen datum"
 msgid "Has date"
 msgstr "Heeft datum"
 
-#: woo_publications/utils/management/commands/clear_cache.py:10
-msgid "Clear given cache only"
-msgstr "Leeg alleen de opgegeven cache"
-
-#: woo_publications/utils/templates/utils/includes/version_info.html:4
-#, python-format
-msgid "version %(RELEASE)s"
-msgstr "versie %(RELEASE)s"
-
-#: woo_publications/utils/templates/utils/includes/version_info.html:8
-#, python-format
-msgid "GIT SHA: %(GIT_SHA)s"
-msgstr "GIT SHA: %(GIT_SHA)s"
-
 #: woo_publications/utils/validators.py:15
 #, python-brace-format
 msgid ""
@@ -1818,11 +1843,11 @@ msgstr ""
 msgid "File size exceeds max size of {max_img_size}."
 msgstr "De bestandsgrootte is groter dan de toegestane {max_img_size}."
 
-#: woo_publications/conf/base.py:59
+#: woo_publications/conf/base.py:60
 msgid "WOO Publications"
 msgstr "WOO-Publicatiebank"
 
-#: woo_publications/conf/base.py:198
+#: woo_publications/conf/base.py:199
 msgid ""
 "\n"
 "## Documentation\n"
@@ -1972,7 +1997,17 @@ msgstr ""
 "De service die verantwoordelijk is voor het indexeren en doorzoeken van "
 "openbare documenten."
 
-#: woo_publications/config/models.py:57
+#: woo_publications/config/models.py:56
+msgid "GPP-app publication URL template"
+msgstr ""
+
+#: woo_publications/config/models.py:61
+msgid ""
+"URL pattern to a publication in the GPP app. The special token <UUID> will "
+"be replaced with the system identifier of each publication."
+msgstr ""
+
+#: woo_publications/config/models.py:67
 msgid "global configuration"
 msgstr "algemene instellingen"
 
