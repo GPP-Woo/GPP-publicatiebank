@@ -87,7 +87,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         data = {
             "informatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
-            "publicatiestatus": PublicationStatusOptions.concept,
+            "publicatiestatus": PublicationStatusOptions.published,
             "publisher": str(organisation.uuid),
             "verantwoordelijke": str(organisation.uuid),
             "opsteller": str(organisation.uuid),
@@ -116,7 +116,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "omschrijving": "Lorem ipsum dolor sit amet, "
                 "consectetur adipiscing elit.",
                 "opsteller": organisation.pk,
-                "publicatiestatus": PublicationStatusOptions.concept,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "publisher": organisation.pk,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "uuid": response.json()["uuid"],

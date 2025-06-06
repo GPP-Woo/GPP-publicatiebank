@@ -1342,12 +1342,12 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "
                 "consectetur adipiscing elit.",
-                # These values will be overwritten
-                "bronBewaartermijn": "THIS VALUE WON'T BE USED",
-                "selectiecategorie": "THIS VALUE WON'T BE USED",
+                # These values will not be overwritten because the status is concept
+                "bronBewaartermijn": "THIS VALUE WILL BE USED",
+                "selectiecategorie": "THIS VALUE WILL BE USED",
                 "archiefnominatie": ArchiveNominationChoices.destroy,
                 "archiefactiedatum": "3000-01-01",
-                "toelichtingBewaartermijn": "THIS VALUE WON'T BE USED",
+                "toelichtingBewaartermijn": "THIS VALUE WILL BE USED",
             }
 
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
@@ -1376,11 +1376,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
-                "bronBewaartermijn": "bewaartermijn",
-                "selectiecategorie": "",
-                "archiefnominatie": ArchiveNominationChoices.retain,
-                "archiefactiedatum": "2029-09-24",
-                "toelichtingBewaartermijn": "",
+                "bronBewaartermijn": "THIS VALUE WILL BE USED",
+                "selectiecategorie": "THIS VALUE WILL BE USED",
+                "archiefnominatie": ArchiveNominationChoices.destroy,
+                "archiefactiedatum": "3000-01-01",
+                "toelichtingBewaartermijn": "THIS VALUE WILL BE USED",
             }
 
             # diWooInformatieCategorieen ordering is done on the UUID field to make
@@ -1454,7 +1454,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             informatie_categorieen=[ic, ic2],
             publisher=organisation3,
             eigenaar=self.organisation_member,
-            publicatiestatus=PublicationStatusOptions.concept,
+            publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -1891,3 +1891,120 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 mock_index_publication_delay.assert_called_once_with(
                     publication_id=publication.pk
                 )
+
+
+class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
+    def test_create_publication_status_concept(self):
+        url = reverse("api:publication-list")
+
+        data = {
+            "publicatiestatus": PublicationStatusOptions.concept,
+        }
+
+        response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(), {"officieleTitel": [_("This field is required.")]}
+        )
+
+    def test_create_publication_status_publish(self):
+        url = reverse("api:publication-list")
+
+        data = {
+            "publicatiestatus": PublicationStatusOptions.published,
+        }
+
+        response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "officieleTitel": [_("This field is required.")],
+                "informatieCategorieen": [_("This field is required.")],
+                "publisher": [_("This field is required.")],
+            },
+        )
+
+    def test_update_publication_status_concept(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "officieleTitel": "",
+        }
+
+        response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "officieleTitel": [_("This field cannot be null.")],
+            },
+        )
+
+    def test_update_publication_status_publish(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "publicatiestatus": PublicationStatusOptions.published,
+            "officieleTitel": "",
+        }
+
+        response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "officieleTitel": [_("This field cannot be null.")],
+                "informatieCategorieen": [_("This field is required.")],
+                "publisher": [_("This field is required.")],
+            },
+        )
+
+    def test_update_publication_status_revoked(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "publicatiestatus": PublicationStatusOptions.revoked,
+            "officieleTitel": "",
+            "informatieCategorieen": [],
+            "publisher": "",
+        }
+
+        response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {
+                "officieleTitel": [_("This field cannot be null.")],
+                "informatieCategorieen": [_("This list may not be empty.")],
+                "publisher": [_("This field cannot be null.")],
+            },
+        )

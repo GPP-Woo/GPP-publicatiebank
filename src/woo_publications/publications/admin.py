@@ -29,7 +29,7 @@ from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
-from .forms import ChangeOwnerForm
+from .forms import ChangeOwnerForm, PublicationAdminForm
 from .formset import DocumentAuditLogInlineformset
 from .models import Document, Publication, Topic
 from .tasks import (
@@ -314,6 +314,7 @@ class DocumentInlineAdmin(admin.StackedInline):
 
 @admin.register(Publication)
 class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = PublicationAdminForm
     list_display = (
         "officiele_titel",
         "verkorte_titel",

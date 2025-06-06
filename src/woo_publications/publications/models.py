@@ -170,6 +170,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         help_text=_("The organisation which publishes the publication."),
         limit_choices_to={"is_actief": True},
         on_delete=models.CASCADE,
+        # only allow null for concept
+        null=True,
     )
     verantwoordelijke = models.ForeignKey(
         "metadata.organisation",
@@ -429,21 +431,25 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             )
 
     def apply_retention_policy(self):
-        information_category = get_retention_informatie_category(
-            self.informatie_categorieen.all()
-        )
-        assert information_category is not None, (
-            "A publication must have at least one information category"
-        )
-        self.bron_bewaartermijn = information_category.bron_bewaartermijn
-        self.selectiecategorie = information_category.selectiecategorie
-        self.archiefnominatie = information_category.archiefnominatie
-        self.archiefactiedatum = localdate(
-            self.registratiedatum
-            + relativedelta(years=information_category.bewaartermijn)
-        )
-        self.toelichting_bewaartermijn = information_category.toelichting_bewaartermijn
-        self.save()
+        if self.publicatiestatus != PublicationStatusOptions.concept:
+            information_category = get_retention_informatie_category(
+                self.informatie_categorieen.all()
+            )
+            assert information_category is not None, (
+                "A publication must have at least one information category"
+            )
+            self.bron_bewaartermijn = information_category.bron_bewaartermijn
+            self.selectiecategorie = information_category.selectiecategorie
+            self.archiefnominatie = information_category.archiefnominatie
+            self.archiefactiedatum = localdate(
+                self.registratiedatum
+                + relativedelta(years=information_category.bewaartermijn)
+            )
+            self.toelichting_bewaartermijn = (
+                information_category.toelichting_bewaartermijn
+            )
+
+            self.save()
 
     @property
     def get_diwoo_informatie_categorieen_uuids(

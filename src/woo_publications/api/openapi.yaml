@@ -1348,7 +1348,8 @@ paths:
           description: ''
     post:
       operationId: publicatiesCreate
-      description: Maak een publicatie aan.
+      description: "Create a publication. \n\n When creating a publication as a concept\
+        \ the only required field is `officieleTitel`."
       summary: Maak een publicatie aan.
       parameters:
       - in: header
@@ -1445,7 +1446,8 @@ paths:
           description: ''
     put:
       operationId: publicatiesUpdate
-      description: Werk een publicatie (in zijn geheel) bij.
+      description: "Update a publication entirely. \n\n When updating a publication\
+        \ as a concept the only required field is `officieleTitel`."
       summary: Werk een publicatie (in zijn geheel) bij.
       parameters:
       - in: header

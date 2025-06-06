@@ -312,7 +312,9 @@ class TestPublicationsAdmin(WebTest):
         with self.subTest("complete data creates publication"):
             # Force the value because the select box options get loaded in with js
             form["informatie_categorieen"].force_value([ic.id, ic2.id, ic3.id])
-            form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+            form["publicatiestatus"].select(
+                text=PublicationStatusOptions.published.label
+            )
             form["publisher"] = str(organisation.pk)
             form["verantwoordelijke"] = str(organisation.pk)
             form["opsteller"] = str(organisation.pk)
@@ -334,7 +336,7 @@ class TestPublicationsAdmin(WebTest):
             added_item = Publication.objects.order_by("-pk").first()
             assert added_item is not None
             self.assertEqual(
-                added_item.publicatiestatus, PublicationStatusOptions.concept
+                added_item.publicatiestatus, PublicationStatusOptions.published
             )
             self.assertQuerySetEqual(
                 added_item.informatie_categorieen.all(), [ic, ic2, ic3], ordered=False
@@ -435,7 +437,7 @@ class TestPublicationsAdmin(WebTest):
                 verantwoordelijke=organisation,
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -1366,3 +1368,180 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(pub1.eigenaar, org_member_1)
             self.assertEqual(pub2.eigenaar, org_member_1)
+
+
+@disable_admin_mfa()
+class TestPublicationRequiredFields(WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
+
+    def test_create_publicatie_status_concept(self):
+        reverse_url = reverse("admin:publications_publication_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+
+        # IC and Publisher didn't contain any errors when not provided
+        self.assertFormError(
+            submit_response.context["adminform"], "informatie_categorieen", []
+        )
+        self.assertFormError(submit_response.context["adminform"], "publisher", [])
+
+    def test_create_publicatie_status_publish(self):
+        reverse_url = reverse("admin:publications_publication_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )
+
+    def test_update_publicatie_status_concept(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+
+        # IC and Publisher didn't contain any errors when not provided
+        self.assertFormError(
+            submit_response.context["adminform"], "informatie_categorieen", []
+        )
+        self.assertFormError(submit_response.context["adminform"], "publisher", [])
+
+    def test_update_publicatie_status_published(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )
+
+    def test_update_publicatie_status_revoke(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
+        form["informatie_categorieen"].force_value([])
+        form["publisher"].force_value("")
+
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )
