@@ -1842,10 +1842,10 @@ components:
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
             \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -1983,10 +1983,10 @@ components:
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
             \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2387,10 +2387,10 @@ components:
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
             \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2572,9 +2572,9 @@ components:
             \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
             \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
             gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\n\
-            Note that some transitions may be limited by business logic.\n\n* `gepubliceerd`\
-            \ - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
+            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
+            * `ingetrokken` - Ingetrokken"
         registratiedatum:
           type: string
           format: date-time
@@ -2638,7 +2638,6 @@ components:
         * `""` -> `"concept"`
         * `""` -> `"gepubliceerd"`
         * `"concept"` -> `"gepubliceerd"`
-        * `"gepubliceerd"` -> `"gepubliceerd"`
         * `"gepubliceerd"` -> `"ingetrokken"`.
 
         Note that some transitions may be limited by business logic.
@@ -2734,9 +2733,9 @@ components:
             \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
             \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
             gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\n\
-            Note that some transitions may be limited by business logic.\n\n* `gepubliceerd`\
-            \ - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
+            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
+            * `ingetrokken` - Ingetrokken"
         registratiedatum:
           type: string
           format: date-time
