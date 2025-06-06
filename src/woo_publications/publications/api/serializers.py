@@ -456,6 +456,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "laatst_gewijzigd_datum": {
                 "read_only": True,
             },
+            "informatie_categorieen": {
+                "required": True,
+            },
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} publication."
@@ -518,6 +521,20 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     def get_fields(self):
         fields = super().get_fields()
+        # When the given status (with fall back on the set data) is concept
+        # Then make all fields optional.
+        if hasattr(self, "initial_data"):
+            publicatiestatus = self.initial_data.get("publicatiestatus")
+            if not publicatiestatus and self.instance:
+                assert isinstance(self.instance, Publication)
+                publicatiestatus = self.instance.publicatiestatus
+
+            if publicatiestatus == PublicationStatusOptions.concept:
+                for field in fields:
+                    # Ensure that officiele_titel remains required.
+                    if field != "officiele_titel":
+                        fields[field].required = False
+
         assert fields["publicatiestatus"].help_text
         fsm_field = Publication._meta.get_field("publicatiestatus")
         assert isinstance(fsm_field, FSMField)
@@ -640,6 +657,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 raise ValueError(
                     f"Unexpected creation publicatiestatus: {publicatiestatus}"
                 )
+
+        publication.save()
 
         publication.apply_retention_policy()
         return publication

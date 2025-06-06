@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from woo_publications.accounts.models import OrganisationMember
+from woo_publications.publications.constants import PublicationStatusOptions
 
 
 class ChangeOwnerForm(forms.Form):
@@ -47,3 +48,13 @@ class ChangeOwnerForm(forms.Form):
                 self.add_error("identifier", error=_("This field is required."))
 
         return cleaned_data
+
+
+class PublicationAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.data.get("publicatiestatus") == PublicationStatusOptions.concept:
+            for field in self.fields:
+                # Ensure that officiele_titel remains required.
+                if field != "officiele_titel":
+                    self.fields[field].required = False
