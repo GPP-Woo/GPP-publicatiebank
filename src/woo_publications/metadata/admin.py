@@ -36,6 +36,7 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                     "naam",
                     "naam_meervoud",
                     "definitie",
+                    "omschrijving",
                     "oorsprong",
                     "identifier",
                     "uuid",

@@ -16,6 +16,7 @@ class InformationCategorySerializer(serializers.ModelSerializer):
             "naam",
             "naam_meervoud",
             "definitie",
+            "omschrijving",
             "oorsprong",
             "order",
         )

@@ -2133,6 +2133,10 @@ components:
           maxLength: 80
         definitie:
           type: string
+        omschrijving:
+          type: string
+          description: De beknopte toelichting die aan medewerkers en burgers getoond
+            wordt.
         oorsprong:
           allOf:
           - $ref: '#/components/schemas/InformationCategoryOorsprongEnum'

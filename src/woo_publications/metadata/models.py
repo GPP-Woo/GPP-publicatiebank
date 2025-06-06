@@ -62,6 +62,12 @@ class InformationCategory(OrderedModel):
         max_length=15,
         default=InformationCategoryOrigins.custom_entry,
     )
+    # Optional fields:
+    omschrijving = models.TextField(
+        _("description"),
+        help_text=_("The brief explanation shown to employees and citizens."),
+        blank=True,
+    )
     # Retention fields:
     bron_bewaartermijn = models.CharField(
         _("retention policy source"),

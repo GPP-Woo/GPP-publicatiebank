@@ -132,6 +132,7 @@ class TestInformationCategoryAdmin(WebTest):
         self.assertNotIn("naam_meervoud", form.fields)
         self.assertNotIn("definitie", form.fields)
         # always accessible fields:
+        self.assertIn("omschrijving", form.fields)
         self.assertIn("bron_bewaartermijn", form.fields)
         self.assertIn("selectiecategorie", form.fields)
         self.assertIn("archiefnominatie", form.fields)
