@@ -65,6 +65,7 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 
 * ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant".
 * ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten".
+* ``Omschrijving``. De beknopte toelichting die aan medewerkers en burgers getoond wordt.
 * ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding van op welke wijze de *informatiecategorie* is toegevoegd; via de landelijke waardelijst of zelf toegevoegd.
