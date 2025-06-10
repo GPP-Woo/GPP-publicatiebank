@@ -471,6 +471,41 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         return url_template.replace("<UUID>", str(self.uuid))
 
 
+class PublicationIdentifier(models.Model):
+    id: int  # implicitly provided by django
+    publicatie = models.ForeignKey(
+        Publication,
+        verbose_name=_("publication"),
+        help_text=_("The publication that this identifier identifies."),
+        on_delete=models.CASCADE,
+    )
+    kenmerk = models.CharField(
+        _("identifier"),
+        max_length=40,
+        help_text=_(
+            "The identifier that (combined with bron) uniquely identifies the "
+            "publication."
+        ),
+    )
+    bron = models.CharField(
+        _("source"),
+        max_length=40,
+        help_text=_("Determines where the identifier is defined and sourced from."),
+    )
+
+    class Meta:
+        verbose_name = _("kenmerk")
+        verbose_name_plural = _("kenmerken")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kenmerk", "bron"], name="unique_identifier"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.bron}: {self.kenmerk}"
+
+
 class PublicatieStatusMatch:
     def __init__(self, expected: Collection[PublicationStatusOptions]):
         self.expected = expected
