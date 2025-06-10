@@ -29,13 +29,15 @@ from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
-from .forms import (
-    ChangeOwnerForm,
-    DocumentAdminForm,
-    PublicationAdminForm,
-)
+from .forms import ChangeOwnerForm, DocumentAdminForm, PublicationAdminForm
 from .formset import DocumentInlineformset
-from .models import Document, Publication, PublicationIdentifier, Topic
+from .models import (
+    Document,
+    DocumentIdentifier,
+    Publication,
+    PublicationIdentifier,
+    Topic,
+)
 from .tasks import (
     index_document,
     index_publication,
@@ -538,6 +540,11 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         )
 
 
+class DocumentIdentifierInlineAdmin(admin.TabularInline):
+    model = DocumentIdentifier
+    extra = 0
+
+
 @admin.register(Document)
 class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     form = DocumentAdminForm
@@ -617,6 +624,9 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "creatiedatum",
         "publicatiestatus",
     )
+    inlines = [
+        DocumentIdentifierInlineAdmin,
+    ]
     autocomplete_fields = ("eigenaar",)
     date_hierarchy = "registratiedatum"
     actions = [sync_to_index, remove_from_index, revoke, change_owner]
