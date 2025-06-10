@@ -3,6 +3,7 @@ from functools import partial
 from typing import Literal, TypedDict
 
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
@@ -22,7 +23,7 @@ from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document, Publication, Topic
+from ..models import Document, Publication, PublicationIdentifier, Topic
 from ..tasks import index_document, index_publication
 from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator
@@ -350,6 +351,17 @@ class DocumentUpdateSerializer(DocumentSerializer):
         }
 
 
+class PublicationIdentifierSerializer(
+    serializers.ModelSerializer[PublicationIdentifier]
+):
+    class Meta:  # pyright: ignore
+        model = PublicationIdentifier
+        fields = (
+            "kenmerk",
+            "bron",
+        )
+
+
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
     eigenaar = EigenaarSerializer(
         label=_("owner"),
@@ -421,6 +433,16 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "otherwise an empty string is returned."
         ),
     )
+    kenmerken = PublicationIdentifierSerializer(
+        help_text=_("The publication identifiers attached to this publication."),
+        many=True,
+        source="publicationidentifier_set",
+        required=False,
+        # Disabling the unique constraint validator that got set by the model.
+        # This default validator clashes with the update action.
+        # The validation is picked up in the method `validate_kenmerken`.
+        validators=[],
+    )
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -433,6 +455,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "publisher",
             "verantwoordelijke",
             "opsteller",
+            "kenmerken",
             "officiele_titel",
             "verkorte_titel",
             "omschrijving",
@@ -516,6 +539,50 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
+    # This mimics the default UniqueConstraint validator with the difference
+    # that it ignores its own items. This ensures that when updating the item
+    # the current data can be passed with new items.
+    def validate_kenmerken(self, value):
+        # Assert that there weren't any duplicated items given by the user.
+        if (
+            unique_value := {tuple(identifier.items()) for identifier in value}
+        ) and len(unique_value) != len(value):
+            raise serializers.ValidationError(
+                _("You cannot provide identical identifiers.")
+            )
+
+        # build OR query filter.
+        expression = Q()
+        for identifier in value:
+            expression |= Q(
+                **{"kenmerk": identifier["kenmerk"], "bron": identifier["bron"]}
+            )
+
+        if (
+            duplicate_identifiers := PublicationIdentifier.objects.exclude(
+                publicatie=self.instance
+            )
+            .filter(expression)
+            .values_list("kenmerk", "bron")
+        ):
+            error_message = _(
+                "The fields {field_names} must make a unique set."
+            ).format(field_names="kenmerk, bron")
+            errors = []
+
+            # build error list to tell the user which fields the existing identifier
+            # resides in. By showing a nonFieldErrors based at the position
+            # of the existing identifier.
+            for identifier in value:
+                if tuple(identifier.values()) in duplicate_identifiers:
+                    errors.append({"nonFieldErrors": [error_message]})
+                else:
+                    errors.append({})
+
+            raise serializers.ValidationError(errors)
+
+        return value
+
     def get_fields(self):
         fields = super().get_fields()
         assert fields["publicatiestatus"].help_text
@@ -554,6 +621,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "publicatiestatus",
             current_publication_status,
         )
+
+        update_publicatie_identifiers = "publicationidentifier_set" in validated_data
+        publication_identifiers = validated_data.pop("publicationidentifier_set", [])
 
         if "eigenaar" in validated_data:
             eigenaar = validated_data.pop("eigenaar")
@@ -604,6 +674,13 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         publication = super().update(instance, validated_data)
 
+        if update_publicatie_identifiers:
+            publication.publicationidentifier_set.all().delete()  # pyright: ignore[reportAttributeAccessIssue]
+            PublicationIdentifier.objects.bulk_create(
+                PublicationIdentifier(publicatie=publication, **identifiers)
+                for identifiers in publication_identifiers
+            )
+
         if apply_retention:
             publication.apply_retention_policy()
 
@@ -617,12 +694,18 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         publicatiestatus: PublicationStatusOptions = validated_data.pop(
             "publicatiestatus"
         )
+        publication_identifiers = validated_data.pop("publicationidentifier_set", [])
 
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
 
         publication = super().create(validated_data)
+
+        PublicationIdentifier.objects.bulk_create(
+            PublicationIdentifier(publicatie=publication, **identifiers)
+            for identifiers in publication_identifiers
+        )
 
         # handle the publicatiestatus
         match publicatiestatus:
