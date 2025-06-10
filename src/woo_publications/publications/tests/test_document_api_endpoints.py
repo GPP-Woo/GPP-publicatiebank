@@ -35,8 +35,8 @@ from woo_publications.metadata.tests.factories import (
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
-from ..models import Document
-from .factories import DocumentFactory, PublicationFactory
+from ..models import Document, DocumentIdentifier
+from .factories import DocumentFactory, DocumentIdentifierFactory, PublicationFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -148,6 +148,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid": str(document2.uuid),
                 "identifier": "document-2",
                 "publicatie": str(publication2.uuid),
+                "kenmerken": [],
                 "officieleTitel": "title two",
                 "verkorteTitel": "two",
                 "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
@@ -182,6 +183,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid": str(document.uuid),
                 "identifier": "document-1",
                 "publicatie": str(publication.uuid),
+                "kenmerken": [],
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing "
@@ -1030,6 +1032,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "uuid": str(document.uuid),
             "identifier": "document-1",
             "publicatie": str(publication.uuid),
+            "kenmerken": [],
             "officieleTitel": "title one",
             "verkorteTitel": "one",
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -1229,6 +1232,153 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
                     naam="new-owner-naam",
                 ).count(),
                 1,
+            )
+
+    def test_partial_publication_kenmerken(self):
+        document = DocumentFactory.create()
+        DocumentIdentifierFactory.create(
+            document=document, kenmerk="kenmerk 1", bron="bron 1"
+        )
+        detail_url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.subTest("kenmerken not provided"):
+            data = {
+                "officieleTitel": "bla",
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["kenmerken"], [{"kenmerk": "kenmerk 1", "bron": "bron 1"}]
+            )
+            self.assertTrue(
+                DocumentIdentifier.objects.filter(
+                    document=document, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+
+        with self.subTest("updating kenmerken"):
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ]
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["kenmerken"],
+                [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ],
+            )
+            self.assertTrue(
+                DocumentIdentifier.objects.filter(
+                    document=document, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+            self.assertTrue(
+                DocumentIdentifier.objects.filter(
+                    document=document, kenmerk="kenmerk 2", bron="bron 2"
+                ).exists()
+            )
+
+        with self.subTest("updating kenmerken empty array"):
+            data = {"kenmerken": []}
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(response_data["kenmerken"], [])
+            self.assertFalse(
+                DocumentIdentifier.objects.filter(
+                    document=document, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+            self.assertFalse(
+                DocumentIdentifier.objects.filter(
+                    document=document, kenmerk="kenmerk 2", bron="bron 2"
+                ).exists()
+            )
+
+    def test_partial_update_kenmerken_validation(self):
+        document = DocumentFactory.create()
+        document2 = DocumentFactory.create()
+        DocumentIdentifierFactory.create(
+            document=document, kenmerk="kenmerk 1", bron="bron 1"
+        )
+        DocumentIdentifierFactory.create(
+            document=document, kenmerk="kenmerk 2", bron="bron 2"
+        )
+        with self.subTest("validate duplicated items given"):
+            url = reverse(
+                "api:document-detail",
+                kwargs={"uuid": str(document.uuid)},
+            )
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                ]
+            }
+
+            response = self.client.patch(url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            self.assertEqual(
+                response.json()["kenmerken"],
+                [_("You cannot provide identical identifiers.")],
+            )
+
+        with self.subTest("validate unique constraint"):
+            url = reverse(
+                "api:document-detail",
+                kwargs={"uuid": str(document2.uuid)},
+            )
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ]
+            }
+
+            response = self.client.patch(url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            self.assertEqual(
+                response.json()["kenmerken"],
+                [
+                    {
+                        "nonFieldErrors": [
+                            _(
+                                "The fields {field_names} must make a unique set."
+                            ).format(field_names="kenmerk, bron")
+                        ]
+                    },
+                    # indicates that there is no problem with the second item given.
+                    {},
+                    {
+                        "nonFieldErrors": [
+                            _(
+                                "The fields {field_names} must make a unique set."
+                            ).format(field_names="kenmerk, bron")
+                        ]
+                    },
+                ],
             )
 
 
@@ -1478,6 +1628,47 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             OrganisationMember.objects.filter(
                 identifier="test-identifier", naam="test-naam"
             ).exists(),
+        )
+
+    @patch("woo_publications.publications.models.Document.register_in_documents_api")
+    def test_create_document_with_inline_kenmerken(
+        self, mock_register_in_documents_api: MagicMock
+    ):
+        publication = PublicationFactory.create(
+            informatie_categorieen=[self.information_category]
+        )
+        endpoint = reverse("api:document-list")
+        body = {
+            "publicatie": publication.uuid,
+            "officieleTitel": "Testdocument WOO-P + Open Zaak",
+            "creatiedatum": "2024-11-05",
+            "kenmerken": [
+                {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+            ],
+        }
+
+        response = self.client.post(
+            endpoint,
+            data=body,
+            headers={
+                **AUDIT_HEADERS,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_data = response.json()
+
+        created_document = Document.objects.get(uuid=response_data["uuid"])
+        self.assertTrue(
+            DocumentIdentifier.objects.filter(
+                document=created_document, kenmerk="kenmerk 1", bron="bron 1"
+            ).exists()
+        )
+        self.assertTrue(
+            DocumentIdentifier.objects.filter(
+                document=created_document, kenmerk="kenmerk 2", bron="bron 2"
+            ).exists()
         )
 
     def test_create_document_with_multiple_handelingen_results_in_error(self):
