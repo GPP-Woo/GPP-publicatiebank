@@ -23,9 +23,6 @@ module.exports = {
     // Path to the scss (sources) directory
     scssSrcDir: `${sourcesRoot}scss/`,
 
-    // Path to the js entry point (source)
-    jsEntry: `${sourcesRoot}js/index.js`,
-
     // Path to the (transpiled) js directory
     jsDir: `${staticRoot}bundles/`,
 };
