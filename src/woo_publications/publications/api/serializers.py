@@ -12,6 +12,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.request import Request
+from rest_framework.settings import api_settings
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.api.drf_spectacular.headers import (
@@ -554,9 +555,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         # build OR query filter.
         expression = Q()
         for identifier in value:
-            expression |= Q(
-                **{"kenmerk": identifier["kenmerk"], "bron": identifier["bron"]}
-            )
+            expression |= Q(kenmerk=identifier["kenmerk"], bron=identifier["bron"])
 
         if (
             duplicate_identifiers := PublicationIdentifier.objects.exclude(
@@ -575,7 +574,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             # of the existing identifier.
             for identifier in value:
                 if tuple(identifier.values()) in duplicate_identifiers:
-                    errors.append({"nonFieldErrors": [error_message]})
+                    errors.append({api_settings.NON_FIELD_ERRORS_KEY: [error_message]})
                 else:
                     errors.append({})
 
