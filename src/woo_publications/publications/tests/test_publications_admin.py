@@ -252,8 +252,8 @@ class TestPublicationsAdmin(WebTest):
             bewaartermijn=5,
             toelichting_bewaartermijn="toelichting",
         )
-        organisation = OrganisationFactory(is_actief=True)
-        deactivated_organisation = OrganisationFactory(is_actief=False)
+        organisation = OrganisationFactory.create(is_actief=True)
+        deactivated_organisation = OrganisationFactory.create(is_actief=False)
         reverse_url = reverse("admin:publications_publication_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -276,21 +276,21 @@ class TestPublicationsAdmin(WebTest):
 
         with self.subTest("assert that revoked isn't a valid publicatiestatus option"):
             self.assertEqual(len(form["publicatiestatus"].options), 2)
-            self.assertTrue(
+            self.assertIn(
                 (
                     PublicationStatusOptions.concept.value,
                     False,
                     PublicationStatusOptions.concept.label,
-                )
-                in form["publicatiestatus"].options
+                ),
+                form["publicatiestatus"].options,
             )
-            self.assertTrue(
+            self.assertIn(
                 (
                     PublicationStatusOptions.published.value,
                     False,
                     PublicationStatusOptions.published.label,
-                )
-                in form["publicatiestatus"].options
+                ),
+                form["publicatiestatus"].options,
             )
 
         with self.subTest(
@@ -376,7 +376,7 @@ class TestPublicationsAdmin(WebTest):
         self, mock_index_publication_delay: MagicMock
     ):
         ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory(is_actief=True)
+        organisation = OrganisationFactory.create(is_actief=True)
         reverse_url = reverse("admin:publications_publication_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -1134,18 +1134,14 @@ class TestPublicationsAdmin(WebTest):
         self.assertEqual(
             concept_document.publicatiestatus, PublicationStatusOptions.revoked
         )
-
         self.assertEqual(
             revoked_document.publicatiestatus, PublicationStatusOptions.revoked
         )
-
         self.assertEqual(
             published_document.publicatiestatus, PublicationStatusOptions.revoked
         )
-
         mock_remove_document_from_index_delay(document_id=published_document.pk)
         mock_remove_document_from_index_delay(document_id=concept_document.pk)
-
         mock_remove_document_from_index_delay.assert_has_calls(
             [
                 call(document_id=published_document.pk),
@@ -1177,6 +1173,7 @@ class TestPublicationsAdmin(WebTest):
             confirmation_form = response.forms[1]
 
             error_response = confirmation_form.submit()
+
             self.assertFormError(
                 error_response.context["form"],
                 None,
@@ -1225,11 +1222,9 @@ class TestPublicationsAdmin(WebTest):
             pub2.refresh_from_db()
 
             self.assertEqual(response.status_code, 200)
-
             org_member_2 = OrganisationMember.objects.get(
                 identifier="admin@admin.admin", naam="admin"
             )
-
             self.assertEqual(pub1.eigenaar, org_member_2)
             self.assertEqual(pub2.eigenaar, org_member_2)
 

@@ -663,11 +663,8 @@ class PublicationStateTransitionAdminTests(WebTest):
         )
 
     def test_publication_admin_create_concept(self):
-        assert Publication.objects.count() == 0
-
         ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory(is_actief=True)
-
+        organisation = OrganisationFactory.create(is_actief=True)
         reverse_url = reverse("admin:publications_publication_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -678,21 +675,21 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         # assert that the only two legal options are concept and published
         self.assertEqual(len(form["publicatiestatus"].options), 2)
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.concept.value,
                 False,
                 PublicationStatusOptions.concept.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.published.value,
                 False,
                 PublicationStatusOptions.published.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
 
         form["informatie_categorieen"].force_value([ic.id])
@@ -703,20 +700,15 @@ class PublicationStateTransitionAdminTests(WebTest):
         add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         added_item = Publication.objects.get()
-
         self.assertEqual(added_item.publicatiestatus, PublicationStatusOptions.concept)
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_admin_create_publish(
         self, mock_index_publication_delay: MagicMock
     ):
-        assert Publication.objects.count() == 0
-
         ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory(is_actief=True)
-
+        organisation = OrganisationFactory.create(is_actief=True)
         reverse_url = reverse("admin:publications_publication_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -733,9 +725,7 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         added_item = Publication.objects.get()
-
         self.assertEqual(
             added_item.publicatiestatus, PublicationStatusOptions.published
         )
@@ -751,7 +741,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         mock_index_publication_delay: MagicMock,
     ):
         ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory(is_actief=True)
+        organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             publisher=organisation,
             informatie_categorieen=[ic],
@@ -775,21 +765,21 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         # assert that the only two legal options are concept and published
         self.assertEqual(len(form["publicatiestatus"].options), 2)
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.concept.value,
                 True,
                 PublicationStatusOptions.concept.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.published.value,
                 False,
                 PublicationStatusOptions.published.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
 
         form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
@@ -798,13 +788,11 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         publication.refresh_from_db()
         document.refresh_from_db()
         download_url = reverse(
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
-
         self.assertEqual(
             publication.publicatiestatus, PublicationStatusOptions.published
         )
@@ -824,7 +812,6 @@ class PublicationStateTransitionAdminTests(WebTest):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 document
             ).get(extra_data__event=Events.update)
-
             log_extra_data = update_publication_log.extra_data
 
             self.assertEqual(
@@ -840,7 +827,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         mock_remove_publication_from_index_delay: MagicMock,
     ):
         ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory(is_actief=True)
+        organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             publisher=organisation,
             informatie_categorieen=[ic],
@@ -864,21 +851,21 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         # assert that the only two legal options are published and revoked
         self.assertEqual(len(form["publicatiestatus"].options), 2)
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.published.value,
                 True,
                 PublicationStatusOptions.published.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.revoked.value,
                 False,
                 PublicationStatusOptions.revoked.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
 
         form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
@@ -887,10 +874,8 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         publication.refresh_from_db()
         document.refresh_from_db()
-
         self.assertEqual(publication.publicatiestatus, PublicationStatusOptions.revoked)
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
         mock_remove_publication_from_index_delay.assert_called_once_with(
@@ -907,7 +892,6 @@ class PublicationStateTransitionAdminTests(WebTest):
             update_publication_log = TimelineLogProxy.objects.for_object(  # pyright: ignore[reportAttributeAccessIssue]
                 document
             ).get(extra_data__event=Events.update)
-
             log_extra_data = update_publication_log.extra_data
 
             self.assertEqual(
@@ -916,13 +900,10 @@ class PublicationStateTransitionAdminTests(WebTest):
             )
 
     def test_document_admin_create_from_concept_publication(self):
-        assert Document.objects.count() == 0
-
         publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept,
         )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
-
         reverse_url = reverse("admin:publications_document_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -942,22 +923,17 @@ class PublicationStateTransitionAdminTests(WebTest):
         add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         added_item = Document.objects.get()
-
         self.assertEqual(added_item.publicatiestatus, PublicationStatusOptions.concept)
 
     @patch("woo_publications.publications.admin.index_document.delay")
     def test_document_admin_create_from_publish_publication(
         self, mock_index_document_delay: MagicMock
     ):
-        assert Document.objects.count() == 0
-
         publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
         )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
-
         reverse_url = reverse("admin:publications_document_add")
 
         response = self.app.get(reverse_url, user=self.user)
@@ -974,12 +950,10 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         added_item = Document.objects.get()
         download_url = reverse(
             "api:document-download", kwargs={"uuid": str(added_item.uuid)}
         )
-
         self.assertEqual(
             added_item.publicatiestatus, PublicationStatusOptions.published
         )
@@ -992,8 +966,6 @@ class PublicationStateTransitionAdminTests(WebTest):
     def test_document_admin_update_alter_published_document_reindexes_data(
         self, mock_index_document_delay: MagicMock
     ):
-        assert Document.objects.count() == 0
-
         publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
         )
@@ -1001,7 +973,6 @@ class PublicationStateTransitionAdminTests(WebTest):
             publicatie=publication,
             publicatiestatus=PublicationStatusOptions.published,
         )
-
         reverse_url = reverse(
             "admin:publications_document_change",
             kwargs={"object_id": document.pk},
@@ -1015,21 +986,21 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         # assert that the only two legal options are published and revoked
         self.assertEqual(len(form["publicatiestatus"].options), 2)
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.published.value,
                 True,
                 PublicationStatusOptions.published.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
-        self.assertTrue(
+        self.assertIn(
             (
                 PublicationStatusOptions.revoked.value,
                 False,
                 PublicationStatusOptions.revoked.label,
-            )
-            in form["publicatiestatus"].options
+            ),
+            form["publicatiestatus"].options,
         )
 
         form["officiele_titel"] = "published document"
@@ -1038,12 +1009,10 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         document.refresh_from_db()
         download_url = reverse(
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
-
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         mock_index_document_delay.assert_called_once_with(
             document_id=document.pk,
@@ -1054,8 +1023,6 @@ class PublicationStateTransitionAdminTests(WebTest):
     def test_document_admin_update_alter_to_revoked(
         self, mock_remove_document_from_index_delay: MagicMock
     ):
-        assert Document.objects.count() == 0
-
         publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published
         )
@@ -1063,7 +1030,6 @@ class PublicationStateTransitionAdminTests(WebTest):
             publicatie=publication,
             publicatiestatus=PublicationStatusOptions.published,
         )
-
         reverse_url = reverse(
             "admin:publications_document_change",
             kwargs={"object_id": document.pk},
@@ -1080,9 +1046,7 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
-
         document.refresh_from_db()
-
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
         mock_remove_document_from_index_delay.assert_called_once_with(
             document_id=document.pk,

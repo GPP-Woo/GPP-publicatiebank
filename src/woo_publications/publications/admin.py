@@ -634,9 +634,9 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def get_readonly_fields(self, request: HttpRequest, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
 
-        if not obj:
+        if obj is None:
             readonly_fields += ("publicatiestatus",)
-        if obj:
+        else:
             readonly_fields += ("publicatie",)
 
         return readonly_fields

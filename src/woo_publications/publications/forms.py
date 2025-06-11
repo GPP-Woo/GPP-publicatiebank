@@ -87,7 +87,7 @@ class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
 
             publicatiestatus_field.choices = [
                 choice
-                for choice in PublicationStatusOptions.choices
+                for choice in publicatiestatus_field.choices
                 if choice[0] in allowed_values
             ]
 
