@@ -1,14 +1,2 @@
 // page layout
 @use "view";
-@use "page-title";
-@use "page-content";
-@use "footer";
-
-// containers
-@use "tabs";
-@use "list";
-@use "button-group";
-
-// typical "leaf" nodes
-@use "button";
-@use "link";
