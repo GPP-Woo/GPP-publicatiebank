@@ -31,8 +31,8 @@ from woo_publications.metadata.tests.factories import (
 )
 
 from ..constants import PublicationStatusOptions
-from ..models import Publication
-from .factories import PublicationFactory, TopicFactory
+from ..models import Publication, PublicationIdentifier
+from .factories import PublicationFactory, PublicationIdentifierFactory, TopicFactory
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -166,6 +166,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "diWooInformatieCategorieen": [str(ic.uuid)],
                 "onderwerpen": [str(topic.uuid)],
                 "publisher": str(publication.publisher.uuid),
+                "kenmerken": [],
                 "verantwoordelijke": None,
                 "opsteller": None,
                 "officieleTitel": "title one",
@@ -196,6 +197,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "diWooInformatieCategorieen": [str(ic2.uuid)],
                 "onderwerpen": [],
                 "publisher": str(publication2.publisher.uuid),
+                "kenmerken": [],
                 "verantwoordelijke": None,
                 "opsteller": None,
                 "officieleTitel": "title two",
@@ -252,6 +254,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [],
             "publisher": str(publication.publisher.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "title one",
@@ -277,6 +280,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic2.uuid)],
             "onderwerpen": [],
             "publisher": str(publication2.publisher.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "title two",
@@ -929,6 +933,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [],
             "publisher": str(publication.publisher.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "title one",
@@ -951,6 +956,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic2.uuid)],
             "onderwerpen": [],
             "publisher": str(publication2.publisher.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "title two",
@@ -1126,6 +1132,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
             "publisher": str(publication.publisher.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "title one",
@@ -1338,6 +1345,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ],
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -1365,6 +1376,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ],
                 "officieleTitel": "title one",
                 "verkorteTitel": "one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -1390,6 +1405,18 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertIn(str(ic2.uuid), response_data["diWooInformatieCategorieen"])
             del response_data["diWooInformatieCategorieen"]
             self.assertEqual(response_data, expected_data)
+
+            created_publication = Publication.objects.get(uuid=response_data["uuid"])
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    publicatie=created_publication, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    publicatie=created_publication, kenmerk="kenmerk 2", bron="bron 2"
+                ).exists()
+            )
 
         with self.subTest("with custom eigenaar given"):
             self.assertFalse(
@@ -1461,6 +1488,10 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             bron_bewaartermijn="Selectielijst gemeenten 2020",
             archiefactiedatum="2035-01-01",
         )
+        publication_identifier = PublicationIdentifierFactory.create(
+            publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+        )
+
         detail_url = reverse(
             "api:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
@@ -1520,6 +1551,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "publisher": str(organisation.uuid),
                 "verantwoordelijke": str(organisation2.uuid),
                 "opsteller": str(organisation3.uuid),
+                "kenmerken": [
+                    # when the field isn't given in the update
+                    # expect the data to not be changed
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"}
+                ],
                 "officieleTitel": "changed offical title",
                 "verkorteTitel": "changed short title",
                 "publicatiestatus": PublicationStatusOptions.published,
@@ -1545,6 +1581,11 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     naam="test-naam",
                 ).count(),
                 1,
+            )
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    pk=publication_identifier.pk
+                ).exists()
             )
 
     def test_update_publication_with_no_nieuw_ic_does_not_overwrite_retention_fields(
@@ -1723,6 +1764,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
             "publisher": str(organisation.uuid),
+            "kenmerken": [],
             "verantwoordelijke": None,
             "opsteller": None,
             "officieleTitel": "changed offical title",
@@ -1744,6 +1786,153 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         # test that only officiele_titel got changed
         self.assertEqual(response_data, expected_data)
+
+    def test_partial_publication_kenmerken(self):
+        publication = PublicationFactory.create()
+        PublicationIdentifierFactory.create(
+            publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        with self.subTest("kenmerken not provided"):
+            data = {
+                "officieleTitel": "bla",
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["kenmerken"], [{"kenmerk": "kenmerk 1", "bron": "bron 1"}]
+            )
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+
+        with self.subTest("updating kenmerken"):
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ]
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["kenmerken"],
+                [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ],
+            )
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+            self.assertTrue(
+                PublicationIdentifier.objects.filter(
+                    publicatie=publication, kenmerk="kenmerk 2", bron="bron 2"
+                ).exists()
+            )
+
+        with self.subTest("updating kenmerken empty array"):
+            data = {"kenmerken": []}
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(response_data["kenmerken"], [])
+            self.assertFalse(
+                PublicationIdentifier.objects.filter(
+                    publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+                ).exists()
+            )
+            self.assertFalse(
+                PublicationIdentifier.objects.filter(
+                    publicatie=publication, kenmerk="kenmerk 2", bron="bron 2"
+                ).exists()
+            )
+
+    def test_kenmerken_validation(self):
+        publication = PublicationFactory.create()
+        publication2 = PublicationFactory.create()
+        PublicationIdentifierFactory.create(
+            publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
+        )
+        PublicationIdentifierFactory.create(
+            publicatie=publication, kenmerk="kenmerk 2", bron="bron 2"
+        )
+        with self.subTest("validate duplicated items given"):
+            url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(publication.uuid)},
+            )
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                ]
+            }
+
+            response = self.client.patch(url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            self.assertEqual(
+                response.json()["kenmerken"],
+                [_("You cannot provide identical identifiers.")],
+            )
+
+        with self.subTest("validate unique constraint"):
+            url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(publication2.uuid)},
+            )
+            data = {
+                "kenmerken": [
+                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
+                    {"kenmerk": "new kenmerk", "bron": "new bron"},
+                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                ]
+            }
+
+            response = self.client.patch(url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            self.assertEqual(
+                response.json()["kenmerken"],
+                [
+                    {
+                        "nonFieldErrors": [
+                            _(
+                                "The fields {field_names} must make a unique set."
+                            ).format(field_names="kenmerk, bron")
+                        ]
+                    },
+                    # indicates that there is no problem with the second item given.
+                    {},
+                    {
+                        "nonFieldErrors": [
+                            _(
+                                "The fields {field_names} must make a unique set."
+                            ).format(field_names="kenmerk, bron")
+                        ]
+                    },
+                ],
+            )
 
     def test_partial_publication_new_owner(self):
         ic = InformationCategoryFactory.create(

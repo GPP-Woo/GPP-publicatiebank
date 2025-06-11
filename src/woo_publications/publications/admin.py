@@ -31,7 +31,7 @@ from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 from .constants import PublicationStatusOptions
 from .forms import ChangeOwnerForm
 from .formset import DocumentAuditLogInlineformset
-from .models import Document, Publication, Topic
+from .models import Document, Publication, PublicationIdentifier, Topic
 from .tasks import (
     index_document,
     index_publication,
@@ -312,6 +312,11 @@ class DocumentInlineAdmin(admin.StackedInline):
     extra = 0
 
 
+class PublicationIdentifierInlineAdmin(admin.TabularInline):
+    model = PublicationIdentifier
+    extra = 0
+
+
 @admin.register(Publication)
 class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = (
@@ -386,7 +391,10 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         ("archiefactiedatum", PastAndFutureDateFieldFilter),
     )
     date_hierarchy = "registratiedatum"
-    inlines = (DocumentInlineAdmin,)
+    inlines = (
+        PublicationIdentifierInlineAdmin,
+        DocumentInlineAdmin,
+    )
     actions = [
         sync_to_index,
         remove_from_index,

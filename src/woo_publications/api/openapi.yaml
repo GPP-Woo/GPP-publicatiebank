@@ -2537,6 +2537,11 @@ components:
           format: uuid
           nullable: true
           description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationIdentifier'
+          description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2692,6 +2697,11 @@ components:
           format: uuid
           nullable: true
           description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationIdentifier'
+          description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2784,6 +2794,23 @@ components:
       - registratiedatum
       - urlPublicatieIntern
       - uuid
+    PublicationIdentifier:
+      type: object
+      properties:
+        kenmerk:
+          type: string
+          title: Identificatie
+          description: The identifier that (combined with bron) uniquely identifies
+            the publication.
+          maxLength: 40
+        bron:
+          type: string
+          title: Source
+          description: Determines where the identifier is defined and sourced from.
+          maxLength: 40
+      required:
+      - bron
+      - kenmerk
     SoortHandelingEnum:
       enum:
       - ondertekening

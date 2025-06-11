@@ -308,7 +308,9 @@ class DocumentViewSet(
     ),
 )
 class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
-    queryset = Publication.objects.order_by("-registratiedatum")
+    queryset = Publication.objects.prefetch_related(
+        "publicationidentifier_set"
+    ).order_by("-registratiedatum")
     serializer_class = PublicationSerializer
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"

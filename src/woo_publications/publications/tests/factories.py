@@ -11,7 +11,7 @@ from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
 from ..constants import PublicationStatusOptions
-from ..models import Document, Publication, Topic
+from ..models import Document, Publication, PublicationIdentifier, Topic
 
 TEST_IMG_PATH = (
     Path(settings.DJANGO_PROJECT_DIR)
@@ -56,6 +56,17 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
 
         if extracted:
             obj.onderwerpen.set(extracted)
+
+
+class PublicationIdentifierFactory(
+    factory.django.DjangoModelFactory[PublicationIdentifier]
+):
+    publicatie = factory.SubFactory(PublicationFactory)
+    kenmerk = factory.Sequence(lambda n: f"kenmerk-{n}")
+    bron = factory.Sequence(lambda n: f"bron-{n}")
+
+    class Meta:  # pyright: ignore
+        model = PublicationIdentifier
 
 
 class DocumentFactory(factory.django.DjangoModelFactory[Document]):
