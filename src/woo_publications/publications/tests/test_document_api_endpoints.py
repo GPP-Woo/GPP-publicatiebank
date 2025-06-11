@@ -458,7 +458,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.concept,
         )
         revoked = DocumentFactory.create(
-            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__revoked=True,
             publicatiestatus=PublicationStatusOptions.revoked,
         )
         list_url = reverse("api:document-list")

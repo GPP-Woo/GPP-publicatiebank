@@ -41,7 +41,13 @@ class IndexPublicationTaskTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            publication = PublicationFactory.create(publicatiestatus=publication_status)
+            if publication_status == PublicationStatusOptions.revoked:
+                publication = PublicationFactory.create(revoked=True)
+            else:
+                publication = PublicationFactory.create(
+                    publicatiestatus=publication_status
+                )
+
             with self.subTest(publication_status=publication_status):
                 remote_task_id = index_publication(publication_id=publication.pk)
 

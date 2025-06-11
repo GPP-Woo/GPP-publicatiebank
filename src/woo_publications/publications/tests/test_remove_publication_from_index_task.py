@@ -28,9 +28,7 @@ class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
         config = GlobalConfiguration.get_solo()
         config.gpp_search_service = None
         config.save()
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
-        )
+        publication = PublicationFactory.create(revoked=True)
 
         remote_task_id = remove_publication_from_index(publication_id=publication.pk)
 
@@ -48,7 +46,7 @@ class RemovePublicationFromIndexTaskTests(VCRMixin, TestCase):
     def test_remove_revoked_publication(self):
         publication = PublicationFactory.create(
             uuid="1e4ed09f-c4d1-4eae-acf3-6b1378d8c05b",
-            publicatiestatus=PublicationStatusOptions.revoked,
+            revoked=True,
         )
 
         remote_task_id = remove_publication_from_index(publication_id=publication.pk)

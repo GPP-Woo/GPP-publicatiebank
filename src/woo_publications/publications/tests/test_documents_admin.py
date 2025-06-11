@@ -679,7 +679,7 @@ class TestDocumentAdmin(WebTest):
             publicatiestatus=PublicationStatusOptions.concept,
         )
         revoked_document = DocumentFactory.create(
-            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__revoked=True,
             publicatiestatus=PublicationStatusOptions.revoked,
         )
 

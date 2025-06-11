@@ -21,10 +21,17 @@ class SearchClientTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            doc = DocumentFactory.create(
-                publicatie__publicatiestatus=publication_status,
-                publicatiestatus=publication_status,
-            )
+            if publication_status == PublicationStatusOptions.revoked:
+                doc = DocumentFactory.create(
+                    publicatie__revoked=True,
+                    publicatiestatus=publication_status,
+                )
+            else:
+                doc = DocumentFactory.create(
+                    publicatie__publicatiestatus=publication_status,
+                    publicatiestatus=publication_status,
+                )
+
             with (
                 self.subTest(publication_status=publication_status),
                 client,
@@ -87,7 +94,13 @@ class SearchClientTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            publication = PublicationFactory.create(publicatiestatus=publication_status)
+            if publication_status == PublicationStatusOptions.revoked:
+                publication = PublicationFactory.create(revoked=True)
+            else:
+                publication = PublicationFactory.create(
+                    publicatiestatus=publication_status
+                )
+
             with (
                 self.subTest(publication_status=publication_status),
                 client,

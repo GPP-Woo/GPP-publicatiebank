@@ -717,7 +717,7 @@ class TestPublicationsAdmin(WebTest):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
-            publicatiestatus=PublicationStatusOptions.revoked,
+            revoked=True,
         )
         reverse_url = reverse(
             "admin:publications_publication_change",
@@ -780,9 +780,7 @@ class TestPublicationsAdmin(WebTest):
         self,
         mock_remove_from_index_by_uuid_delay: MagicMock,
     ):
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept
-        )
+        publication = PublicationFactory.create(revoked=True)
         reverse_url = reverse(
             "admin:publications_publication_delete",
             kwargs={"object_id": publication.id},
@@ -932,7 +930,7 @@ class TestPublicationsAdmin(WebTest):
         published_publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published
         )
-        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        PublicationFactory.create(revoked=True)
         PublicationFactory.create(publicatiestatus=PublicationStatusOptions.concept)
         changelist = self.app.get(
             reverse("admin:publications_publication_changelist"),
@@ -955,7 +953,7 @@ class TestPublicationsAdmin(WebTest):
     ):
         PublicationFactory.create(publicatiestatus=PublicationStatusOptions.published)
         PublicationFactory.create(publicatiestatus=PublicationStatusOptions.concept)
-        PublicationFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
+        PublicationFactory.create(revoked=True)
         changelist = self.app.get(
             reverse("admin:publications_publication_changelist"),
             user=self.user,
@@ -980,9 +978,7 @@ class TestPublicationsAdmin(WebTest):
         pub2 = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept
         )
-        pub3 = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
-        )
+        pub3 = PublicationFactory.create(revoked=True)
 
         DocumentFactory.create(
             publicatie=pub1, publicatiestatus=PublicationStatusOptions.published
@@ -1083,9 +1079,7 @@ class TestPublicationsAdmin(WebTest):
         concept_publication = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept
         )
-        revoked_publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
-        )
+        revoked_publication = PublicationFactory.create(revoked=True)
 
         published_document = DocumentFactory.create(
             publicatie=published_publication,

@@ -282,6 +282,13 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            assert self.publicatiestatus != PublicationStatusOptions.revoked, (
+                "Can't create revoked publications"
+            )
+        super().save(*args, **kwargs)
+
     @transition(
         field=publicatiestatus, source="", target=PublicationStatusOptions.concept
     )

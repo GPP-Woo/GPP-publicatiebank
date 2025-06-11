@@ -225,7 +225,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
 
         with self.subTest("concept (blocked)"):
             publication1 = PublicationFactory.create(
-                publicatiestatus=PublicationStatusOptions.revoked,
+                revoked=True,
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
@@ -243,7 +243,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
 
         with self.subTest("published (blocked)"):
             publication2 = PublicationFactory.create(
-                publicatiestatus=PublicationStatusOptions.revoked,
+                revoked=True,
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
@@ -437,7 +437,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
 
         with self.subTest("revoked publication"):
             revoked_publication = PublicationFactory.create(
-                publicatiestatus=PublicationStatusOptions.revoked,
+                revoked=True,
                 informatie_categorieen=[information_category],
             )
 
@@ -578,7 +578,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             publicatiestatus=PublicationStatusOptions.revoked,
         )
         revoked_document2 = DocumentFactory.create(
-            publicatie__publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__revoked=True,
             publicatie__informatie_categorieen=[information_category],
             publicatiestatus=PublicationStatusOptions.revoked,
         )
