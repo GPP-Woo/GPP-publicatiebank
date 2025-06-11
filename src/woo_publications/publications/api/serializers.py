@@ -3,7 +3,6 @@ from functools import partial
 from typing import Literal, TypedDict
 
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
@@ -12,7 +11,6 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.request import Request
-from rest_framework.settings import api_settings
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.api.drf_spectacular.headers import (
@@ -32,8 +30,9 @@ from ..models import (
     Topic,
 )
 from ..tasks import index_document, index_publication
+from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
-from .validators import PublicationStatusValidator
+from .validators import KenmerkenValidator, PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +51,18 @@ def update_or_create_organisation_member(
             "naam": request.headers[AUDIT_USER_REPRESENTATION_PARAMETER.name],
         }
     return OrganisationMember.objects.get_and_sync(**details)
+
+
+def _duplicate_nested_serializer_items(value):
+    # transforms the nested dicts into a set and checks if the length is the same as
+    # the original passed data. If the length is different that means that there were
+    # duplicated items present because sets can't contain duplicate items.
+    if (unique_value := {tuple(identifier.items()) for identifier in value}) and len(
+        unique_value
+    ) != len(value):
+        return True
+
+    return False
 
 
 class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
@@ -157,6 +168,8 @@ class DocumentIdentifierSerializer(serializers.ModelSerializer[DocumentIdentifie
             "kenmerk",
             "bron",
         )
+        parent_field_name = "document"
+        validators = [KenmerkenValidator()]
 
 
 class DocumentSerializer(serializers.ModelSerializer[Document]):
@@ -202,10 +215,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         many=True,
         source="documentidentifier_set",
         required=False,
-        # Disabling the unique constraint validator that got set by the model.
-        # This default validator clashes with the update action.
-        # The validation is picked up in the method `validate_kenmerken`.
-        validators=[],
     )
 
     class Meta:  # pyright: ignore
@@ -252,47 +261,12 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
         return fields
 
-    # This mimics the default UniqueConstraint validator with the difference
-    # that it ignores its own items. This ensures that when updating the item
-    # the current data can be passed with new items.
-    def validate_kenmerken(self, value):
+    def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
-        if (
-            unique_value := {tuple(identifier.items()) for identifier in value}
-        ) and len(unique_value) != len(value):
+        if _duplicate_nested_serializer_items(value):
             raise serializers.ValidationError(
                 _("You cannot provide identical identifiers.")
             )
-
-        # build OR query filter.
-        expression = Q()
-        for identifier in value:
-            expression |= Q(
-                **{"kenmerk": identifier["kenmerk"], "bron": identifier["bron"]}
-            )
-
-        if (
-            duplicate_identifiers := DocumentIdentifier.objects.exclude(
-                document=self.instance
-            )
-            .filter(expression)
-            .values_list("kenmerk", "bron")
-        ):
-            error_message = _(
-                "The fields {field_names} must make a unique set."
-            ).format(field_names="kenmerk, bron")
-            errors = []
-
-            # build error list to tell the user which fields the existing identifier
-            # resides in. By showing a nonFieldErrors based at the position
-            # of the existing identifier.
-            for identifier in value:
-                if tuple(identifier.values()) in duplicate_identifiers:
-                    errors.append({"nonFieldErrors": [error_message]})
-                else:
-                    errors.append({})
-
-            raise serializers.ValidationError(errors)
 
         return value
 
@@ -451,6 +425,8 @@ class PublicationIdentifierSerializer(
             "kenmerk",
             "bron",
         )
+        parent_field_name = "publicatie"
+        validators = [KenmerkenValidator()]
 
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
@@ -529,10 +505,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         source="publicationidentifier_set",
         required=False,
-        # Disabling the unique constraint validator that got set by the model.
-        # This default validator clashes with the update action.
-        # The validation is picked up in the method `validate_kenmerken`.
-        validators=[],
     )
 
     class Meta:  # pyright: ignore
@@ -630,45 +602,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
-    # This mimics the default UniqueConstraint validator with the difference
-    # that it ignores its own items. This ensures that when updating the item
-    # the current data can be passed with new items.
-    def validate_kenmerken(self, value):
+    def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
-        if (
-            unique_value := {tuple(identifier.items()) for identifier in value}
-        ) and len(unique_value) != len(value):
+        if _duplicate_nested_serializer_items(value):
             raise serializers.ValidationError(
                 _("You cannot provide identical identifiers.")
             )
-
-        # build OR query filter.
-        expression = Q()
-        for identifier in value:
-            expression |= Q(kenmerk=identifier["kenmerk"], bron=identifier["bron"])
-
-        if (
-            duplicate_identifiers := PublicationIdentifier.objects.exclude(
-                publicatie=self.instance
-            )
-            .filter(expression)
-            .values_list("kenmerk", "bron")
-        ):
-            error_message = _(
-                "The fields {field_names} must make a unique set."
-            ).format(field_names="kenmerk, bron")
-            errors = []
-
-            # build error list to tell the user which fields the existing identifier
-            # resides in. By showing a nonFieldErrors based at the position
-            # of the existing identifier.
-            for identifier in value:
-                if tuple(identifier.values()) in duplicate_identifiers:
-                    errors.append({api_settings.NON_FIELD_ERRORS_KEY: [error_message]})
-                else:
-                    errors.append({})
-
-            raise serializers.ValidationError(errors)
 
         return value
 
