@@ -29,7 +29,10 @@
             <script src="https://browser.sentry-cdn.com/5.10.1/bundle.min.js" integrity="sha384-sAOze6ZTBIpiWBF3VlUteSInM4rYpjxrejp1wMmmKqA9clRZ1vZJ36Ihmt1ilTrG" crossorigin="anonymous"></script>
             <script>Sentry.init({ dsn: '{{ dsn }}'});</script>
         {% endif %}
-        <script src="{% static 'bundles/woo-publications-js.js' %}"></script>
+
+        {% block scripts %}
+            <script src="{% static 'bundles/woo-publications-js.js' %}"></script>
+        {% endblock scripts %}
 
     </body>
 </html>

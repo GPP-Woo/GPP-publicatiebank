@@ -18,7 +18,6 @@ module.exports = {
     // Entry points locations.
     entry: {
         [`${paths.package.name}-css`]: `${__dirname}/${paths.scssEntry}`,
-        [`${paths.package.name}-js`]: `${__dirname}/${paths.jsEntry}`,
 
         'admin_overrides': `${__dirname}/${paths.scssSrcDir}/admin/admin_overrides.scss`,
     },
@@ -39,13 +38,6 @@ module.exports = {
     // Modules
     module: {
         rules: [
-            // .js
-            {
-                test: /.js?$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-            },
-
             // .scss
             {
                 test: /\.(sa|sc|c)ss$/,

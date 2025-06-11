@@ -1,60 +1,29 @@
+{% extends "maykin_common/api/includes/footer.html" %}
 {% load static i18n capture_tags %}
 
-{% capture as website_link silent %}<a class="link" href="https://www.maykinmedia.nl">Maykin</a>{% endcapture %}
-{% capture as opengem_link silent %}<a class="link" href="https://opengem.nl">Open Gemeente Initiatief</a>{% endcapture %}
+{% block footer %}
+    {% capture as issues_link silent %}<a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank/issues">issues</a>{% endcapture %}
 
-{% capture as issues_link silent %}<a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank/issues">issues</a>{% endcapture %}
-{% capture as cg_link silent %}<a class="link link--muted" href="https://commonground.nl/">Common Ground</a>{% endcapture %}
+    {% with issues_link=issues_link %}
+        {{ block.super }}
+    {% endwith %}
 
-<footer class="footer">
-    <div class="footer__row footer__row--3-cols">
-        <section>
-            <img src="{% static 'ico/favicon-96x96.png' %}" alt="Maykin logo" height="48">
-            <p class="footer__plain-content footer__plain-content--small">
-                {% blocktrans trimmed %}
-                    Developed by {{ website_link }}<br>
-                    within the {{ opengem_link }} &copy; 2024<br>
-                {% endblocktrans %}
-            </p>
-        </section>
+{% endblock %}
 
-        <section>
-            <header class="footer__column-header">{{ settings.PROJECT_NAME }}</header>
-            <ul class="footer__list">
-                <li>
-                    <a class="link link--muted" href="https://gpp-publicatiebank.readthedocs.io/">
-                        {% trans "Documentation" %}
-                    </a>
-                </li>
-                <li>
-                    <a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank/pkgs/container/gpp-publicatiebank">
-                        {% trans "Docker image" %}
-                    </a>
-                </li>
-                <li>
-                    <a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank">
-                        {% trans "Code on Github" %}
-                    </a>
-                </li>
-            </ul>
-        </section>
-
-        <section>
-            <header class="footer__column-header">{% trans "Other" %}</header>
-            <ul class="footer__list">
-                <li>
-                    {% blocktrans %}Report {{ issues_link }} for questions, bugs or wishes{% endblocktrans %}
-                </li>
-                <li>
-                    {% blocktrans %}Read more on {{ cg_link }}{% endblocktrans %}
-                </li>
-            </ul>
-        </section>
-    </div>
-
-    <div class="footer__row footer__row--2-cols">
-        <code>{{ settings.RELEASE }}</code>
-        <code class="content content--align-right">{{ settings.GIT_SHA|default:"" }}</code>
-    </div>
-
-</footer>
+{% block links %}
+    <li>
+        <a class="link link--muted" href="https://gpp-publicatiebank.readthedocs.io/">
+            {% trans "Documentation" %}
+        </a>
+    </li>
+    <li>
+        <a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank/pkgs/container/gpp-publicatiebank">
+            {% trans "Docker image" %}
+        </a>
+    </li>
+    <li>
+        <a class="link link--muted" href="https://github.com/GPP-Woo/GPP-publicatiebank">
+            {% trans "Code on Github" %}
+        </a>
+    </li>
+{% endblock %}
