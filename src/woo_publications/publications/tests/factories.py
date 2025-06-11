@@ -31,6 +31,14 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
     class Meta:  # pyright: ignore
         model = Publication
 
+    class Params:
+        revoked = factory.Trait(
+            _revoke=factory.PostGenerationMethodCall(
+                "revoke",
+                user={"identifier": "factory_boy", "display_name": "Test factory"},
+            )
+        )
+
     @factory.post_generation
     def informatie_categorieen(
         obj: Publication,  # pyright: ignore[reportGeneralTypeIssues]

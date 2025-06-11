@@ -29,8 +29,12 @@ from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
-from .forms import ChangeOwnerForm
-from .formset import DocumentAuditLogInlineformset
+from .forms import (
+    ChangeOwnerForm,
+    DocumentAdminForm,
+    PublicationAdminForm,
+)
+from .formset import DocumentInlineformset
 from .models import Document, Publication, PublicationIdentifier, Topic
 from .tasks import (
     index_document,
@@ -303,9 +307,10 @@ def revoke(
 
 
 class DocumentInlineAdmin(admin.StackedInline):
-    formset = DocumentAuditLogInlineformset
+    formset = DocumentInlineformset
     model = Document
     readonly_fields = (
+        "publicatiestatus",
         "registratiedatum",
         "laatst_gewijzigd_datum",
     )
@@ -319,6 +324,7 @@ class PublicationIdentifierInlineAdmin(admin.TabularInline):
 
 @admin.register(Publication)
 class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = PublicationAdminForm
     list_display = (
         "officiele_titel",
         "verkorte_titel",
@@ -418,33 +424,6 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         initial_data["eigenaar"] = owner
         return initial_data
 
-    def save_model(
-        self, request: HttpRequest, obj: Publication, form: forms.Form, change: bool
-    ):
-        assert is_authenticated_request(request)
-
-        new_status = obj.publicatiestatus
-        original_status = form.initial.get("publicatiestatus")
-        is_status_change = change and new_status != original_status
-        is_published = new_status == PublicationStatusOptions.published
-        is_revoked = new_status == PublicationStatusOptions.revoked
-
-        if is_revoked and is_status_change:
-            obj.revoke_own_documents(request.user)
-
-        super().save_model(request, obj, form, change)
-
-        if change and is_status_change and not is_published:
-            # remove publication itself
-            transaction.on_commit(
-                partial(remove_publication_from_index.delay, publication_id=obj.pk)
-            )
-
-        if is_published:
-            transaction.on_commit(
-                partial(index_publication.delay, publication_id=obj.pk)
-            )
-
     def delete_model(self, request: HttpRequest, obj: Publication):
         published_document_uuids = list(
             Document.objects.filter(
@@ -535,6 +514,10 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
         return kwargs
 
+    def get_form(self, request: HttpRequest, obj=None, change=False, **kwargs):  # pyright: ignore[reportIncompatibleMethodOverride]
+        form = super().get_form(request, obj, change, **kwargs)
+        return partial(form, request=request)  # pyright: ignore[reportCallIssue]
+
     @admin.display(description=_("actions"))
     def show_actions(self, obj: Publication) -> str:
         actions = [
@@ -557,6 +540,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = DocumentAdminForm
     list_display = (
         "officiele_titel",
         "verkorte_titel",
@@ -647,28 +631,24 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         initial_data["eigenaar"] = owner
         return initial_data
 
-    def save_model(
-        self, request: HttpRequest, obj: Document, form: forms.Form, change: bool
-    ):
-        super().save_model(request, obj, form, change)
+    def get_readonly_fields(self, request: HttpRequest, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
 
-        new_status = obj.publicatiestatus
-        is_published = new_status == PublicationStatusOptions.published
+        if obj is None:
+            readonly_fields += ("publicatiestatus",)
+        else:
+            readonly_fields += ("publicatie",)
 
-        if change:
-            original_status = form.initial["publicatiestatus"]
-            if new_status != original_status and not is_published:
-                transaction.on_commit(
-                    partial(remove_document_from_index.delay, document_id=obj.pk)
-                )
+        return readonly_fields
 
-        if is_published:
-            download_url = obj.absolute_document_download_uri(request)
-            transaction.on_commit(
-                partial(
-                    index_document.delay, document_id=obj.pk, download_url=download_url
-                )
-            )
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.publicatiestatus == PublicationStatusOptions.revoked:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def get_form(self, request: HttpRequest, obj=None, change=False, **kwargs):  # pyright: ignore[reportIncompatibleMethodOverride]
+        form = super().get_form(request, obj, change, **kwargs)
+        return partial(form, request=request)  # pyright: ignore[reportCallIssue]
 
     def delete_model(self, request: HttpRequest, obj: Document):
         super().delete_model(request, obj)

@@ -40,6 +40,8 @@ class TestPublicationAdminAuditLogging(WebTest):
     classes, which should cover the rest of the apps/models.
     """
 
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -606,9 +608,6 @@ class TestPublicationAdminAuditLogging(WebTest):
         form["document_set-0-identifier"] = "http://example.com/1"
         form["document_set-0-officiele_titel"] = "title"
         form["document_set-0-creatiedatum"] = "17-10-2024"
-        form["document_set-0-publicatiestatus"].select(
-            text=PublicationStatusOptions.concept.label
-        )
 
         with freeze_time("2024-09-29T00:14:00-00:00"):
             response = form.submit(name="_save")
@@ -634,7 +633,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "uuid": str(document.uuid),
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
-                    "publicatiestatus": PublicationStatusOptions.concept,
+                    "publicatiestatus": PublicationStatusOptions.published,
                     "bestandsnaam": "unknown.bin",
                     "creatiedatum": "2024-10-17",
                     "omschrijving": "",
@@ -662,6 +661,7 @@ class TestPublicationAdminAuditLogging(WebTest):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic, ic2],
                 eigenaar=self.organisation_member,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -692,9 +692,6 @@ class TestPublicationAdminAuditLogging(WebTest):
         form = response.forms["publication_form"]
 
         form["document_set-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
-        add_dynamic_field(
-            form, "document_set-0-publicatiestatus", PublicationStatusOptions.concept
-        )
         add_dynamic_field(form, "document_set-0-eigenaar", self.organisation_member.pk)
         add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
         add_dynamic_field(form, "document_set-0-officiele_titel", "title")
@@ -731,7 +728,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "identifier": "http://example.com/1",
                     "publicatie": publication.id,
                     "eigenaar": self.organisation_member.pk,
-                    "publicatiestatus": PublicationStatusOptions.concept,
+                    "publicatiestatus": PublicationStatusOptions.published,
                     "bestandsnaam": "foo.pdf",
                     "creatiedatum": "2024-10-17",
                     "omschrijving": "",
@@ -855,7 +852,9 @@ class TestDocumentAdminAuditLogging(WebTest):
         )
 
     def test_document_admin_create(self):
-        publication = PublicationFactory.create()
+        publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept
+        )
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
 
         response = self.app.get(
@@ -866,7 +865,6 @@ class TestDocumentAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["document_form"]
-        form["publicatiestatus"] = PublicationStatusOptions.concept
         form["publicatie"] = publication.id
         form["identifier"] = identifier
         form["officiele_titel"] = "The official title of this document"
@@ -922,14 +920,15 @@ class TestDocumentAdminAuditLogging(WebTest):
         self.assertEqual(log.extra_data, expected_data)
 
     def test_document_admin_update(self):
+        publication = PublicationFactory.create()
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
+                publicatie=publication,
                 eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             )
-        publication = PublicationFactory.create()
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
         reverse_url = reverse(
             "admin:publications_document_change",
@@ -941,8 +940,7 @@ class TestDocumentAdminAuditLogging(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["document_form"]
-        form["publicatiestatus"] = PublicationStatusOptions.concept
-        form["publicatie"] = publication.id
+        form["publicatiestatus"] = PublicationStatusOptions.published
         form["identifier"] = identifier
         form["officiele_titel"] = "changed official title"
         form["verkorte_titel"] = "changed short title"
@@ -986,7 +984,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "uuid": str(document.uuid),
                     "identifier": identifier,
                     "publicatie": publication.pk,
-                    "publicatiestatus": PublicationStatusOptions.concept,
+                    "publicatiestatus": PublicationStatusOptions.published,
                     "bestandsnaam": "unknown.bin",
                     "creatiedatum": "2024-11-11",
                     "omschrijving": "changed description",

@@ -282,14 +282,12 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
-    def clean(self):
-        super().clean()
-        if not self.pk and self.publicatiestatus == PublicationStatusOptions.revoked:
-            raise ValidationError(
-                _("You cannot create a {revoked} publication.").format(
-                    revoked=PublicationStatusOptions.revoked.label.lower()
-                )
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            assert self.publicatiestatus != PublicationStatusOptions.revoked, (
+                "Can't create revoked publications"
             )
+        super().save(*args, **kwargs)
 
     @transition(
         field=publicatiestatus, source="", target=PublicationStatusOptions.concept
@@ -675,15 +673,6 @@ class Document(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
-    def clean(self):
-        super().clean()
-        if not self.pk and self.publicatiestatus == PublicationStatusOptions.revoked:
-            raise ValidationError(
-                _("You cannot create a {revoked} document.").format(
-                    revoked=PublicationStatusOptions.revoked.label.lower()
-                )
-            )
-
     @property
     def documenthandelingen(self) -> DocumentActions:
         """
@@ -756,7 +745,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     @transition(
         field=publicatiestatus,
-        source=PublicationStatusOptions.concept,
+        source=("", PublicationStatusOptions.concept),  # pyright:ignore[reportArgumentType]
         target=PublicationStatusOptions.published,
         conditions=(PublicatieStatusMatch({PublicationStatusOptions.published}),),
     )

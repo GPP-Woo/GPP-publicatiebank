@@ -41,10 +41,17 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             if publication_status == PublicationStatusOptions.published:
                 continue
 
-            doc = DocumentFactory.create(
-                publicatie__publicatiestatus=publication_status,
-                publicatiestatus=publication_status,
-            )
+            if publication_status == PublicationStatusOptions.revoked:
+                doc = DocumentFactory.create(
+                    publicatie__revoked=True,
+                    publicatiestatus=publication_status,
+                )
+            else:
+                doc = DocumentFactory.create(
+                    publicatie__publicatiestatus=publication_status,
+                    publicatiestatus=publication_status,
+                )
+
             with self.subTest(publication_status=publication_status):
                 remote_task_id = index_document(document_id=doc.pk)
 

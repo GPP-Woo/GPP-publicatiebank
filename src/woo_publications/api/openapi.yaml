@@ -1841,10 +1841,11 @@ components:
           title: Status
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -1981,10 +1982,11 @@ components:
           title: Status
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2384,10 +2386,11 @@ components:
           title: Status
           description: "\nOn creation, the publicatiestatus is derived from the publication\
             \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"concept\"` -> `\"gepubliceerd\"\
-            `\n* `\"gepubliceerd\"` -> `\"ingetrokken\"`.\n\nNote that some transitions\
-            \ may be limited by business logic.\n\n* `gepubliceerd` - Gepubliceerd\n\
-            * `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
         creatiedatum:
           type: string
           format: date
@@ -2633,6 +2636,7 @@ components:
       type: string
       description: |-
         * `""` -> `"concept"`
+        * `""` -> `"gepubliceerd"`
         * `"concept"` -> `"gepubliceerd"`
         * `"gepubliceerd"` -> `"ingetrokken"`.
 

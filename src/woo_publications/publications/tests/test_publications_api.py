@@ -1028,9 +1028,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         concept = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.concept
         )
-        revoked = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.revoked
-        )
+        revoked = PublicationFactory.create(revoked=True)
         list_url = reverse("api:publication-list")
 
         with self.subTest("filter on published publications"):
@@ -1696,7 +1694,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         organisation = OrganisationFactory.create(is_actief=True)
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
-            publicatiestatus=PublicationStatusOptions.revoked,
+            revoked=True,
             publisher=organisation,
         )
         detail_url = reverse(
