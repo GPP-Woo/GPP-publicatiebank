@@ -459,7 +459,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
                 **log_extra_kwargs,  # pyright: ignore[reportArgumentType]
             )
 
-    def apply_retention_policy(self):
+    def apply_retention_policy(self, commit=True):
         if (
             self.publicatiestatus == PublicationStatusOptions.concept
             or self.publicatiestatus == ""
@@ -480,7 +480,9 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             + relativedelta(years=information_category.bewaartermijn)
         )
         self.toelichting_bewaartermijn = information_category.toelichting_bewaartermijn
-        self.save()
+
+        if commit:
+            self.save()
 
     @property
     def get_diwoo_informatie_categorieen_uuids(
