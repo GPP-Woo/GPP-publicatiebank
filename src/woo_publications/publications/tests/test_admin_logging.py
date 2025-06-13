@@ -75,7 +75,7 @@ class TestPublicationAdminAuditLogging(WebTest):
         # Force the value because the select box options get loaded in with js
         form["informatie_categorieen"].force_value([ic.pk, ic2.pk])
         form["onderwerpen"].force_value([topic.pk])
-        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
         form["publisher"] = str(organisation.pk)
         form["verantwoordelijke"] = str(organisation.pk)
         form["opsteller"] = str(organisation2.pk)
@@ -112,7 +112,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "interdum eleifend eros sed consectetur."
                 ),
                 "opsteller": organisation2.pk,
-                "publicatiestatus": PublicationStatusOptions.concept,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "publisher": organisation.pk,
                 "registratiedatum": "2024-09-25T00:14:00Z",
                 "uuid": str(added_item.uuid),

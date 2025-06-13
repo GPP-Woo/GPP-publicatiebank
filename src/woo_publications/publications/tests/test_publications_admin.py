@@ -1,4 +1,3 @@
-from datetime import date
 from unittest.mock import MagicMock, call, patch
 
 from django.urls import reverse
@@ -317,7 +316,9 @@ class TestPublicationsAdmin(WebTest):
         with self.subTest("complete data creates publication"):
             # Force the value because the select box options get loaded in with js
             form["informatie_categorieen"].force_value([ic.id, ic2.id, ic3.id])
-            form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+            form["publicatiestatus"].select(
+                text=PublicationStatusOptions.published.label
+            )
             form["publisher"] = str(organisation.pk)
             form["verantwoordelijke"] = str(organisation.pk)
             form["opsteller"] = str(organisation.pk)
@@ -339,7 +340,7 @@ class TestPublicationsAdmin(WebTest):
             added_item = Publication.objects.order_by("-pk").first()
             assert added_item is not None
             self.assertEqual(
-                added_item.publicatiestatus, PublicationStatusOptions.concept
+                added_item.publicatiestatus, PublicationStatusOptions.published
             )
             self.assertQuerySetEqual(
                 added_item.informatie_categorieen.all(), [ic, ic2, ic3], ordered=False
@@ -370,6 +371,19 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(added_item.toelichting_bewaartermijn, "toelichting")
             # Test if eigenaar field gets automatically set
             self.assertEqual(added_item.eigenaar, self.organisation_member)
+
+    def test_create_concept_with_only_officiele_titel(self):
+        reverse_url = reverse("admin:publications_publication_add")
+        response = self.app.get(reverse_url, user=self.user)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["officiele_titel"] = "test"
+
+        submit_response = form.submit(name="_save")
+
+        self.assertEqual(submit_response.status_code, 302)
+        self.assertTrue(Publication.objects.exists())
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
@@ -440,7 +454,7 @@ class TestPublicationsAdmin(WebTest):
                 verantwoordelijke=organisation,
                 opsteller=organisation,
                 informatie_categorieen=[ic, ic2],
-                publicatiestatus=PublicationStatusOptions.concept,
+                publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -556,50 +570,6 @@ class TestPublicationsAdmin(WebTest):
                 publication.toelichting_bewaartermijn,
                 "changed",
             )
-
-    def test_publications_admin_update_unchanged_ic_ignores_retention_fields(self):
-        ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory.create(is_actief=True)
-        with freeze_time("2024-09-25T00:14:00-00:00"):
-            publication = PublicationFactory.create(
-                publisher=organisation,
-                verantwoordelijke=organisation,
-                opsteller=organisation,
-                informatie_categorieen=[ic],
-                officiele_titel="title one",
-                verkorte_titel="one",
-                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            )
-
-        reverse_url = reverse(
-            "admin:publications_publication_change",
-            kwargs={"object_id": publication.id},
-        )
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["bron_bewaartermijn"] = "changed bron bewaartermijn"
-        form["selectiecategorie"] = "changed selectiecategory"
-        form["archiefnominatie"].select(text=ArchiveNominationChoices.destroy.label)
-        form["archiefactiedatum"] = "2025-01-01"
-        form["toelichting_bewaartermijn"] = "changed toelichting bewaartermijn"
-
-        with freeze_time("2024-09-27T00:14:00-00:00"):
-            response = form.submit(name="_save")
-
-        self.assertEqual(response.status_code, 302)
-
-        publication.refresh_from_db()
-        self.assertEqual(publication.bron_bewaartermijn, "changed bron bewaartermijn")
-        self.assertEqual(publication.selectiecategorie, "changed selectiecategory")
-        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
-        self.assertEqual(str(publication.archiefactiedatum), "2025-01-01")
-        self.assertEqual(
-            publication.toelichting_bewaartermijn, "changed toelichting bewaartermijn"
-        )
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_update_schedules_index_task(
@@ -1015,57 +985,6 @@ class TestPublicationsAdmin(WebTest):
                 model_name="Document", uuid=doc_uuid, force=True
             )
 
-    def test_bulk_retention_field_update_action(self):
-        ic = InformationCategoryFactory.create(
-            bron_bewaartermijn="Selectielijst gemeenten 2020",
-            selectiecategorie="20.1.2",
-            archiefnominatie=ArchiveNominationChoices.retain,
-            bewaartermijn=10,
-            toelichting_bewaartermijn="extra data",
-        )
-        with freeze_time("2025-01-01T00:00:00-00:00"):
-            PublicationFactory.create(
-                informatie_categorieen=[ic],
-                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2009",
-                selectiecategorie="1",
-                archiefnominatie=ArchiveNominationChoices.destroy,
-                archiefactiedatum="2030-01-01",
-                toelichting_bewaartermijn="bla bla bla",
-            )
-            PublicationFactory.create(
-                informatie_categorieen=[ic],
-                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2020",
-                selectiecategorie="2",
-                archiefnominatie=ArchiveNominationChoices.destroy,
-                archiefactiedatum="2025-01-01",
-                toelichting_bewaartermijn="bla bla bla",
-            )
-            PublicationFactory.create(
-                informatie_categorieen=[ic],
-                bron_bewaartermijn="SOON TO BE UPDATED LIST OF 2014",
-                selectiecategorie="1",
-                archiefnominatie=ArchiveNominationChoices.destroy,
-                archiefactiedatum="2020-01-01",
-                toelichting_bewaartermijn="bla bla bla",
-            )
-
-        changelist = self.app.get(
-            reverse("admin:publications_publication_changelist"),
-            user=self.user,
-        )
-        form = changelist.forms["changelist-form"]
-
-        form["_selected_action"] = [pub.pk for pub in Publication.objects.all()]
-        form["action"] = "reassess_retention_policy"
-        form.submit()
-
-        for pub in Publication.objects.all():
-            self.assertEqual(pub.bron_bewaartermijn, "Selectielijst gemeenten 2020")
-            self.assertEqual(pub.selectiecategorie, "20.1.2")
-            self.assertEqual(pub.archiefnominatie, ArchiveNominationChoices.retain)
-            self.assertEqual(pub.archiefactiedatum, date(2035, 1, 1))
-            self.assertEqual(pub.toelichting_bewaartermijn, "extra data")
-
     @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
     @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
     def test_publication_revoke_action(
@@ -1236,3 +1155,180 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(pub1.eigenaar, org_member_1)
             self.assertEqual(pub2.eigenaar, org_member_1)
+
+
+@disable_admin_mfa()
+class TestPublicationRequiredFields(WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
+
+    def test_create_publicatie_status_concept(self):
+        reverse_url = reverse("admin:publications_publication_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+
+        # IC and Publisher didn't contain any errors when not provided
+        self.assertFormError(
+            submit_response.context["adminform"], "informatie_categorieen", []
+        )
+        self.assertFormError(submit_response.context["adminform"], "publisher", [])
+
+    def test_create_publicatie_status_published(self):
+        reverse_url = reverse("admin:publications_publication_add")
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )
+
+    def test_update_publicatie_status_concept(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+
+        # IC and Publisher didn't contain any errors when not provided
+        self.assertFormError(
+            submit_response.context["adminform"], "informatie_categorieen", []
+        )
+        self.assertFormError(submit_response.context["adminform"], "publisher", [])
+
+    def test_update_publicatie_status_published(self):
+        publication = PublicationFactory.create(
+            publisher=None,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )
+
+    def test_update_publicatie_status_revoke(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["officiele_titel"] = None
+        form["publicatiestatus"].select(text=PublicationStatusOptions.revoked.label)
+        form["informatie_categorieen"].force_value([])
+        form["publisher"].force_value("")
+
+        submit_response = form.submit("_save")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "officiele_titel",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "informatie_categorieen",
+            _("This field is required."),
+        )
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "publisher",
+            _("This field is required."),
+        )

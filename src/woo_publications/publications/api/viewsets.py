@@ -292,7 +292,11 @@ class DocumentViewSet(
     ),
     create=extend_schema(
         summary=_("Create a publication."),
-        description=_("Create a publication."),
+        description=_(
+            "Create a publication. \n\n "
+            "When creating a publication as a concept the only required field is "
+            "`officieleTitel`."
+        ),
     ),
     partial_update=extend_schema(
         summary=_("Update a publication partially."),
@@ -300,7 +304,11 @@ class DocumentViewSet(
     ),
     update=extend_schema(
         summary=_("Update a publication entirely."),
-        description=_("Update a publication entirely."),
+        description=_(
+            "Update a publication entirely. \n\n "
+            "When updating a publication as a concept the only required field is "
+            "`officieleTitel`."
+        ),
     ),
     destroy=extend_schema(
         summary=_("Destroy a publication."),

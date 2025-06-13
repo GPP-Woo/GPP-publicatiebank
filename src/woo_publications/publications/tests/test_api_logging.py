@@ -87,7 +87,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         data = {
             "informatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
-            "publicatiestatus": PublicationStatusOptions.concept,
+            "publicatiestatus": PublicationStatusOptions.published,
             "publisher": str(organisation.uuid),
             "verantwoordelijke": str(organisation.uuid),
             "opsteller": str(organisation.uuid),
@@ -116,7 +116,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "omschrijving": "Lorem ipsum dolor sit amet, "
                 "consectetur adipiscing elit.",
                 "opsteller": organisation.pk,
-                "publicatiestatus": PublicationStatusOptions.concept,
+                "publicatiestatus": PublicationStatusOptions.published,
                 "publisher": organisation.pk,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "uuid": response.json()["uuid"],
@@ -341,7 +341,14 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
     ):
         assert not TimelineLogProxy.objects.exists()
         topic, topic2 = TopicFactory.create_batch(2)
-        ic, ic2 = InformationCategoryFactory.create_batch(2)
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            selectiecategorie="22.1.1",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=10,
+            toelichting_bewaartermijn="extra data",
+        )
         organisation = OrganisationFactory.create(is_actief=True)
         with freeze_time("2024-09-27T00:14:00-00:00"):
             publication = PublicationFactory.create(
@@ -355,11 +362,11 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                bron_bewaartermijn="Selectielijst gemeenten 2020",
-                selectiecategorie="22.1.1",
+                bron_bewaartermijn="will change",
+                selectiecategorie="will change",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum=date(2025, 1, 1),
-                toelichting_bewaartermijn="extra data",
+                toelichting_bewaartermijn="will change",
             )
             concept_document = DocumentFactory.create(
                 publicatie=publication,
@@ -416,7 +423,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "bron_bewaartermijn": "Selectielijst gemeenten 2020",
                     "selectiecategorie": "22.1.1",
                     "archiefnominatie": ArchiveNominationChoices.retain,
-                    "archiefactiedatum": "2025-01-01",
+                    "archiefactiedatum": "2034-09-27",
                     "toelichting_bewaartermijn": "extra data",
                 },
                 "_cached_object_repr": "title one",

@@ -89,6 +89,11 @@ Een *publicatie* bestaat uit een aantal gegevens met doorgaans een of meerdere *
 
     In het veld ``Omschrijving`` kan de mededeling opgenomen worden.
 
+.. tip::
+
+    Bij het aanmaken of bewerken van een *publicatie* met de `publicatiestatus` **Concept** zijn
+    de velden behalve de `officiële titel` niet verplicht.
+
 In het beheerscherm van de *publicaties* wordt een lijst getoond van alle *publicatie*-registraties, die zijn opgeslagen in het publicatiebank-component.
 Op dit scherm zijn de volgende acties mogelijk:
 
