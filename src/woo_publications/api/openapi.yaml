@@ -1825,6 +1825,11 @@ components:
           type: string
           format: uuid
           description: De unieke identificatie van de publicatie.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -1939,6 +1944,23 @@ components:
       - atTime
       - identifier
       - wasAssciatedWith
+    DocumentIdentifier:
+      type: object
+      properties:
+        kenmerk:
+          type: string
+          title: Identificatie
+          description: The identifier that (combined with bron) uniquely identifies
+            the document.
+          maxLength: 40
+        bron:
+          type: string
+          title: Source
+          description: Determines where the identifier is defined and sourced from.
+          maxLength: 40
+      required:
+      - bron
+      - kenmerk
     DocumentStatus:
       type: object
       properties:
@@ -1967,6 +1989,11 @@ components:
           format: uuid
           readOnly: true
           description: De unieke identificatie van de publicatie.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2371,6 +2398,11 @@ components:
           format: uuid
           readOnly: true
           description: De unieke identificatie van de publicatie.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
           title: Officiële titel

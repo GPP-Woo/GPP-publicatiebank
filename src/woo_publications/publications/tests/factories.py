@@ -11,7 +11,13 @@ from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
 from ..constants import PublicationStatusOptions
-from ..models import Document, Publication, PublicationIdentifier, Topic
+from ..models import (
+    Document,
+    DocumentIdentifier,
+    Publication,
+    PublicationIdentifier,
+    Topic,
+)
 
 TEST_IMG_PATH = (
     Path(settings.DJANGO_PROJECT_DIR)
@@ -131,6 +137,15 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
                     raise ValueError(
                         "'revoked' publications can only have 'revoked' documents."
                     )
+
+
+class DocumentIdentifierFactory(factory.django.DjangoModelFactory[DocumentIdentifier]):
+    document = factory.SubFactory(DocumentFactory)
+    kenmerk = factory.Sequence(lambda n: f"kenmerk-{n}")
+    bron = factory.Sequence(lambda n: f"bron-{n}")
+
+    class Meta:  # pyright: ignore
+        model = DocumentIdentifier
 
 
 class TopicFactory(factory.django.DjangoModelFactory[Topic]):
