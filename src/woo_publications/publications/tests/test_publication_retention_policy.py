@@ -5,11 +5,14 @@ from django.urls import reverse
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
 )
+from woo_publications.api.tests.mixins import APITestCaseMixin, TokenAuthMixin
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -19,6 +22,12 @@ from woo_publications.metadata.tests.factories import (
 from ..constants import PublicationStatusOptions
 from ..models import Publication
 from .factories import PublicationFactory
+
+AUDIT_HEADERS = {
+    "AUDIT_USER_REPRESENTATION": "username",
+    "AUDIT_USER_ID": "id",
+    "AUDIT_REMARKS": "remark",
+}
 
 
 @disable_admin_mfa()
@@ -347,3 +356,290 @@ class TestPublicationsAdminRetentionPolicy(WebTest):
             self.assertEqual(pub.archiefnominatie, ArchiveNominationChoices.retain)
             self.assertEqual(pub.archiefactiedatum, date(2035, 1, 1))
             self.assertEqual(pub.toelichting_bewaartermijn, "extra data")
+
+
+class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=cls.user.pk,
+            naam=cls.user.get_full_name(),
+        )
+
+    def test_create_concept_publication_retention_policy_not_applied(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        url = reverse("api:publication-list")
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid)],
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "NOT REPLACED")
+        self.assertEqual(response_data["selectiecategorie"], "NOT REPLACED")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.destroy
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+
+    def test_create_published_publication_retention_policy_applied(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        url = reverse("api:publication-list")
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid)],
+            "publicatiestatus": PublicationStatusOptions.published,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        with freeze_time("2025-01-01"):
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn")
+        self.assertEqual(response_data["selectiecategorie"], "selectiecategorie")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.retain
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
+
+    def test_update_concept_publication_retention_policy_not_applied(self):
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        publication = PublicationFactory.create(
+            eigenaar=self.organisation_member,
+            publisher=organisation,
+            informatie_categorieen=[ic],
+            publicatiestatus=PublicationStatusOptions.concept,
+            officiele_titel="title one",
+            bron_bewaartermijn="NOT REPLACED",
+            selectiecategorie="NOT REPLACED",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            archiefactiedatum=date(2000, 1, 1),
+            toelichting_bewaartermijn="NOT REPLACED",
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "NOT REPLACED")
+        self.assertEqual(response_data["selectiecategorie"], "NOT REPLACED")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.destroy
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+
+    def test_update_to_publish_retention_policy_applied(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        with freeze_time("2025-01-01"):
+            publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
+                publisher=organisation,
+                informatie_categorieen=[ic],
+                publicatiestatus=PublicationStatusOptions.concept,
+                officiele_titel="title one",
+                bron_bewaartermijn="NOT REPLACED",
+                selectiecategorie="NOT REPLACED",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum=date(2000, 1, 1),
+                toelichting_bewaartermijn="NOT REPLACED",
+            )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid)],
+            "publicatiestatus": PublicationStatusOptions.published,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn")
+        self.assertEqual(response_data["selectiecategorie"], "selectiecategorie")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.retain
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
+
+    def test_update_published_publication_retention_policy_not_applied(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        with freeze_time("2025-01-01"):
+            publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
+                publisher=organisation,
+                informatie_categorieen=[ic],
+                publicatiestatus=PublicationStatusOptions.published,
+                officiele_titel="title one",
+                bron_bewaartermijn="NOT REPLACED",
+                selectiecategorie="NOT REPLACED",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum=date(2000, 1, 1),
+                toelichting_bewaartermijn="NOT REPLACED",
+            )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid)],
+            "publicatiestatus": PublicationStatusOptions.published,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "NOT REPLACED")
+        self.assertEqual(response_data["selectiecategorie"], "NOT REPLACED")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.destroy
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+
+    def test_update_published_publication_with_new_ic_retention_policy_applied(self):
+        ic, ic2 = InformationCategoryFactory.create_batch(
+            2,
+            bron_bewaartermijn="bewaartermijn",
+            selectiecategorie="selectiecategorie",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            bewaartermijn=5,
+            toelichting_bewaartermijn="toelichting",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+        with freeze_time("2025-01-01"):
+            publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
+                publisher=organisation,
+                informatie_categorieen=[ic],
+                publicatiestatus=PublicationStatusOptions.published,
+                officiele_titel="title one",
+                bron_bewaartermijn="NOT REPLACED",
+                selectiecategorie="NOT REPLACED",
+                archiefnominatie=ArchiveNominationChoices.destroy,
+                archiefactiedatum=date(2000, 1, 1),
+                toelichting_bewaartermijn="NOT REPLACED",
+            )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
+            "publicatiestatus": PublicationStatusOptions.published,
+            "publisher": str(organisation.uuid),
+            "officieleTitel": "title one",
+            "bronBewaartermijn": "NOT REPLACED",
+            "selectiecategorie": "NOT REPLACED",
+            "archiefnominatie": ArchiveNominationChoices.destroy,
+            "archiefactiedatum": "2000-01-01",
+            "toelichtingBewaartermijn": "NOT REPLACED",
+        }
+
+        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["bronBewaartermijn"], "bewaartermijn")
+        self.assertEqual(response_data["selectiecategorie"], "selectiecategorie")
+        self.assertEqual(
+            response_data["archiefnominatie"], ArchiveNominationChoices.retain
+        )
+        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
