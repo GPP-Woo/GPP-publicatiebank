@@ -168,8 +168,7 @@ class DocumentIdentifierSerializer(serializers.ModelSerializer[DocumentIdentifie
             "kenmerk",
             "bron",
         )
-        parent_field_name = "document"
-        validators = [KenmerkenValidator()]
+        validators = [KenmerkenValidator(parent_field_name="document")]
 
 
 class DocumentSerializer(serializers.ModelSerializer[Document]):
@@ -425,8 +424,7 @@ class PublicationIdentifierSerializer(
             "kenmerk",
             "bron",
         )
-        parent_field_name = "publicatie"
-        validators = [KenmerkenValidator()]
+        validators = [KenmerkenValidator(parent_field_name="publicatie")]
 
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):

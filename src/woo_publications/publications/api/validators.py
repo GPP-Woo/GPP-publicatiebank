@@ -50,10 +50,15 @@ class PublicationStatusValidator:
 
 
 # This mimics the default UniqueConstraint validator with the difference
-# that it ignores its own items. This ensures that when updating the item
-# the current data can be passed with new items.
+# that it ignores the kenmerken of its parent. This ensures that when
+# updating a Publication or Document the current data can used without
+# it raising an error
 class KenmerkenValidator:
     requires_context = True
+
+    def __init__(self, parent_field_name):
+        self.parent_field_name = parent_field_name
+        super().__init__()
 
     def __call__(self, value: Kenmerk, field: serializers.ModelSerializer):
         model_cls = field.Meta.model  # pyright: ignore[reportGeneralTypeIssues]
@@ -61,13 +66,10 @@ class KenmerkenValidator:
             "Validator applied to unexpected model/serializer."
         )
 
-        assert hasattr(field.Meta, "parent_field_name")
-        assert field.Meta.parent_field_name in [  # pyright: ignore[reportAttributeAccessIssue]
+        assert self.parent_field_name in [
             field.name for field in model_cls._meta.fields
         ]
-        parent_field_name = field.Meta.parent_field_name  # pyright: ignore[reportAttributeAccessIssue]
 
-        # parent of this field is the field reference on the model
         assert isinstance(field.parent.parent, serializers.ModelSerializer)
         parent_instance = (
             field.parent.parent.instance or field.parent.parent.Meta.model()  # pyright: ignore[reportGeneralTypeIssues]
@@ -77,7 +79,7 @@ class KenmerkenValidator:
         query = model_cls.objects
 
         if parent_instance.pk:
-            query = query.exclude(**{parent_field_name: parent_instance})
+            query = query.exclude(**{self.parent_field_name: parent_instance})
 
         if query.filter(kenmerk=value["kenmerk"], bron=value["bron"]).exists():
             error_message = _(
