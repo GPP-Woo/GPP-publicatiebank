@@ -1,6 +1,16 @@
 from django.db.models import TextChoices
 from django.utils.translation import gettext_lazy as _
 
+INFORMATION_CATEGORY_FIXTURE_FIELDS = [
+    "order",
+    "uuid",
+    "identifier",
+    "naam",
+    "naam_meervoud",
+    "definitie",
+    "oorsprong",
+]
+
 
 class InformationCategoryOrigins(TextChoices):
     value_list = "waardelijst", _("Value list")
