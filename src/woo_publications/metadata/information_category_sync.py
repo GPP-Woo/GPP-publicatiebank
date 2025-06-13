@@ -5,7 +5,7 @@ from django.core import serializers
 import requests
 from glom import PathAccessError, T, glom
 
-from .constants import InformationCategoryOrigins
+from .constants import INFORMATION_CATEGORY_FIXTURE_FIELDS, InformationCategoryOrigins
 from .models import InformationCategory
 
 WAARDENLIJST_URL = "https://repository.officiele-overheidspublicaties.nl/waardelijsten/scw_woo_informatiecategorieen/3/json/scw_woo_informatiecategorieen_3.json"
@@ -71,15 +71,7 @@ def update_information_category(file_path: Path):
         value_list_information_categories,
         indent=4,
         use_natural_primary_keys=True,
-        fields=(
-            "order",
-            "uuid",
-            "identifier",
-            "naam",
-            "naam_meervoud",
-            "definitie",
-            "oorsprong",
-        ),
+        fields=INFORMATION_CATEGORY_FIXTURE_FIELDS,
     )
 
     with open(file_path, "w") as outfile:
