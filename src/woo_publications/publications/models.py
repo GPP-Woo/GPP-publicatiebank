@@ -460,6 +460,12 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             )
 
     def apply_retention_policy(self):
+        if (
+            self.publicatiestatus == PublicationStatusOptions.concept
+            or self.publicatiestatus == ""
+        ):
+            return
+
         information_category = get_retention_informatie_category(
             self.informatie_categorieen.all()
         )
