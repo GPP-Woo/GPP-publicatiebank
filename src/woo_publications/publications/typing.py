@@ -13,3 +13,8 @@ class DocumentAction(TypedDict):
 
 
 type DocumentActions = list[DocumentAction]
+
+
+class Kenmerk(TypedDict):
+    kenmerk: str
+    bron: str

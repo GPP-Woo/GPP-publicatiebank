@@ -496,7 +496,7 @@ class PublicationIdentifier(models.Model):
         verbose_name_plural = _("kenmerken")
         constraints = [
             models.UniqueConstraint(
-                fields=["kenmerk", "bron"], name="unique_identifier"
+                fields=["kenmerk", "bron"], name="unique_publication_identifier"
             )
         ]
 
@@ -908,3 +908,37 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 self.save(update_fields=("lock", "upload_complete"))
 
         return completed
+
+
+class DocumentIdentifier(models.Model):
+    id: int  # implicitly provided by django
+    document = models.ForeignKey(
+        Document,
+        verbose_name=_("document"),
+        help_text=_("The document that this identifier identifies."),
+        on_delete=models.CASCADE,
+    )
+    kenmerk = models.CharField(
+        _("identifier"),
+        max_length=40,
+        help_text=_(
+            "The identifier that (combined with bron) uniquely identifies the document."
+        ),
+    )
+    bron = models.CharField(
+        _("source"),
+        max_length=40,
+        help_text=_("Determines where the identifier is defined and sourced from."),
+    )
+
+    class Meta:
+        verbose_name = _("kenmerk")
+        verbose_name_plural = _("kenmerken")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kenmerk", "bron"], name="unique_document_identifier"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.bron}: {self.kenmerk}"
