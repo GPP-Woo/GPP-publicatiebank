@@ -540,6 +540,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "laatst_gewijzigd_datum": {
                 "read_only": True,
             },
+            "informatie_categorieen": {
+                "required": True,
+            },
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} publication."
@@ -611,6 +614,25 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     def get_fields(self):
         fields = super().get_fields()
+        # When the given status (with fall back on the set data) is concept
+        # Then make all fields optional.
+        if hasattr(self, "initial_data"):
+            publicatiestatus = self.initial_data.get("publicatiestatus")
+            # When publicatiestatus isn't given ensure that the default value is used
+            # unless it is a partial update, in that case use the instance.
+            if not publicatiestatus:
+                if self.partial:
+                    assert isinstance(self.instance, Publication)
+                    publicatiestatus = self.instance.publicatiestatus
+                else:
+                    publicatiestatus = fields["publicatiestatus"].default
+
+            if publicatiestatus == PublicationStatusOptions.concept:
+                for field in fields:
+                    # Ensure that officiele_titel remains required.
+                    if field != "officiele_titel":
+                        fields[field].required = False
+
         assert fields["publicatiestatus"].help_text
         fsm_field = Publication._meta.get_field("publicatiestatus")
         assert isinstance(fsm_field, FSMField)
@@ -657,15 +679,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 identifier=eigenaar["identifier"], naam=eigenaar["naam"]
             )
 
-        if informatie_categorieen := validated_data.get("informatie_categorieen"):
-            old_informatie_categorieen_set = {
-                ic.uuid for ic in instance.informatie_categorieen.all()
-            }
-            new_informatie_categorieen_set = {ic.uuid for ic in informatie_categorieen}
-
-            if old_informatie_categorieen_set != new_informatie_categorieen_set:
-                apply_retention = True
-
         request: Request = self.context["request"]
         user_id, user_repr, remarks = extract_audit_parameters(request)
 
@@ -676,7 +689,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     user={"identifier": user_id, "display_name": user_repr},
                     remarks=remarks,
                 )
-
+                apply_retention = True
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
                 instance.revoke(
                     user={"identifier": user_id, "display_name": user_repr},
@@ -697,6 +710,19 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                         "pk": instance.pk,
                     },
                 )
+                # determine if attention_policy should be applied or not.
+                if informatie_categorieen := validated_data.get(
+                    "informatie_categorieen"
+                ):
+                    old_informatie_categorieen_set = {
+                        ic.uuid for ic in instance.informatie_categorieen.all()
+                    }
+                    new_informatie_categorieen_set = {
+                        ic.uuid for ic in informatie_categorieen
+                    }
+
+                    if old_informatie_categorieen_set != new_informatie_categorieen_set:
+                        apply_retention = True
 
         publication = super().update(instance, validated_data)
 
@@ -708,7 +734,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         if apply_retention:
-            publication.apply_retention_policy()
+            publication.apply_retention_policy(commit=False)
 
         return publication
 
@@ -745,12 +771,14 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     user={"identifier": user_id, "display_name": user_repr},
                     remarks=remarks,
                 )
+                publication.apply_retention_policy(commit=False)
             case _:  # pragma: no cover
                 raise ValueError(
                     f"Unexpected creation publicatiestatus: {publicatiestatus}"
                 )
 
-        publication.apply_retention_policy()
+        publication.save()
+
         return publication
 
     @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]

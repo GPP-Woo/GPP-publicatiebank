@@ -170,6 +170,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         help_text=_("The organisation which publishes the publication."),
         limit_choices_to={"is_actief": True},
         on_delete=models.CASCADE,
+        # only allow null for concept
+        null=True,
     )
     verantwoordelijke = models.ForeignKey(
         "metadata.organisation",
@@ -278,6 +280,27 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     class Meta:  # pyright: ignore
         verbose_name = _("publication")
         verbose_name_plural = _("publications")
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    # Not allowed to be null
+                    models.Q(publisher__isnull=False)
+                    # Allowed to be null
+                    | models.Q(publicatiestatus=PublicationStatusOptions.concept)
+                    # the admin create action first saves a publication without
+                    # publicatiestatus before assigning its status. This is done
+                    # so the published method has a pk which is used to trigger
+                    # the celery task to index the data and other tasks. This means
+                    # that we need to allow the same behavior for concept and "".
+                    | models.Q(publicatiestatus="")
+                ),
+                name="publisher_null_only_for_concept_or_blank",
+                violation_error_message=_(
+                    "The publisher is only allowed to be unset if the publication "
+                    "is a concept."
+                ),
+            ),
+        ]
 
     def __str__(self):
         return self.officiele_titel
@@ -426,7 +449,13 @@ class Publication(ConcurrentTransitionMixin, models.Model):
                 **log_extra_kwargs,  # pyright: ignore[reportArgumentType]
             )
 
-    def apply_retention_policy(self):
+    def apply_retention_policy(self, commit=True):
+        if (
+            self.publicatiestatus == PublicationStatusOptions.concept
+            or self.publicatiestatus == ""
+        ):
+            return
+
         information_category = get_retention_informatie_category(
             self.informatie_categorieen.all()
         )
@@ -441,7 +470,9 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             + relativedelta(years=information_category.bewaartermijn)
         )
         self.toelichting_bewaartermijn = information_category.toelichting_bewaartermijn
-        self.save()
+
+        if commit:
+            self.save()
 
     @property
     def get_diwoo_informatie_categorieen_uuids(

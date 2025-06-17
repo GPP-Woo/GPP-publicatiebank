@@ -93,8 +93,17 @@ class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
 
 
 class PublicationAdminForm(PublicationStatusForm[Publication]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.data.get("publicatiestatus") == PublicationStatusOptions.concept:
+            for field in self.fields:
+                # Ensure that officiele_titel remains required.
+                if field != "officiele_titel":
+                    self.fields[field].required = False
+
     def save(self, commit=True):
         assert is_authenticated_request(self.request)
+        apply_retention_policy = False
         new_publication_status = self.cleaned_data.pop("publicatiestatus")
         # reset the publication status to the 'current' status - at this point the
         # instance has the newly selected status because of ModelForm._post_clean which
@@ -118,6 +127,7 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                 post_save_callback = partial(
                     self.instance.publish, request=self.request, user=self.request.user
                 )
+                apply_retention_policy = True
             # revoke published
             case (PublicationStatusOptions.published, PublicationStatusOptions.revoked):
                 post_save_callback = partial(
@@ -141,6 +151,8 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                         "pk": self.instance.pk,
                     },
                 )
+                if "informatie_categorieen" in self.changed_data:
+                    apply_retention_policy = True
 
         publication = super().save(commit=commit)
         # cannot force the commit as True because of the AttributeError:
@@ -148,9 +160,13 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
         # So we manually save it after running the super
         if not publication.pk:
             publication.save()
+            self.save_m2m()
 
         if post_save_callback is not None:
             post_save_callback()
+
+        if apply_retention_policy:
+            publication.apply_retention_policy()
 
         return publication
 

@@ -1,12 +1,21 @@
 from datetime import date
 
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
 
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
-from woo_publications.metadata.tests.factories import InformationCategoryFactory
+from woo_publications.metadata.tests.factories import (
+    InformationCategoryFactory,
+    OrganisationFactory,
+)
+from woo_publications.publications.constants import PublicationStatusOptions
 from woo_publications.publications.tests.factories import PublicationFactory
 
 
@@ -140,3 +149,46 @@ class TestPublicationModel(TestCase):
                 result,
                 "https://example.com/gpp-app/nested/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d/edit",
             )
+
+    def test_publisher_constraint(self):
+        user = UserFactory.create(superuser=True)
+        org_member = OrganisationMemberFactory.create(
+            identifier=user.pk,
+            naam=user.get_full_name(),
+        )
+        publisher = OrganisationFactory.create(is_actief=True)
+        publication = PublicationFactory.build(
+            eigenaar=org_member, publicatiestatus=PublicationStatusOptions.concept
+        )
+
+        with self.subTest("no status with no publisher"):
+            publication.publicatiestatus = ""
+            publication.publisher = None
+            publication.save()
+
+        with self.subTest("no status with publisher"):
+            publication.publicatiestatus = ""
+            publication.publisher = publisher
+            publication.save()
+
+        with self.subTest("concept with no publisher"):
+            publication.publicatiestatus = PublicationStatusOptions.concept
+            publication.publisher = None
+            publication.save()
+
+        with self.subTest("concept with publisher"):
+            publication.publicatiestatus = PublicationStatusOptions.concept
+            publication.publisher = publisher
+            publication.save()
+
+        with self.subTest("published with publisher"):
+            publication.publicatiestatus = PublicationStatusOptions.published
+            publication.publisher = publisher
+            publication.save()
+
+        with self.subTest("published with no publisher (raises errors)"):
+            publication.publicatiestatus = PublicationStatusOptions.published
+            publication.publisher = None
+
+            with self.assertRaises(IntegrityError):
+                publication.save()
