@@ -103,6 +103,10 @@ class DocumentenClient(NLXClient):
             file_parts=file_parts,
         )
 
+    def destroy_document(self, uuid: UUID) -> None:
+        response = self.delete(f"enkelvoudiginformatieobjecten/{uuid}")
+        response.raise_for_status()
+
     def proxy_file_part_upload(
         self,
         file: File,
