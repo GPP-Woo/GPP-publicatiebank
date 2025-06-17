@@ -1,0 +1,122 @@
+[
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1010,
+        "uuid": "be4e21c2-0be5-4616-945e-1f101b0c0e6d",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_139c6280",
+        "naam": "wet of algemeen verbindend voorschrift",
+        "naam_meervoud": "wetten en algemeen verbindende voorschriften",
+        "definitie": "wetten en andere algemeen verbindende voorschriften",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1020,
+        "uuid": "8f3bdef0-a926-4f67-b1f2-94c583c462ce",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_aab6bfc7",
+        "naam": "overig besluit van algemene strekking",
+        "naam_meervoud": "overige besluiten van algemene strekking",
+        "definitie": "overige besluiten van algemene strekking",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1030,
+        "uuid": "88fb1c5e-e899-456d-b077-6101a9829c11",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_759721e2",
+        "naam": "ontwerp van wet- en regelgeving met adviesaanvraag",
+        "naam_meervoud": "ontwerpen van wet- en regelgeving met adviesaanvraag",
+        "definitie": "ontwerpen van wetten, andere algemeen verbindende voorschriften en overige besluiten van algemene strekking waarover een extern advies is gevraagd, met inbegrip van de adviesaanvraag",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1040,
+        "uuid": "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_40a05794",
+        "naam": "organisatie en werkwijze",
+        "naam_meervoud": "organisatie en werkwijze",
+        "definitie": "inzicht in zijn organisatie en werkwijze, waaronder de taken en bevoegdheden van de organisatieonderdelen",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1050,
+        "uuid": "7184027d-5634-4bd4-8121-871916384f0e",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_89ee6784",
+        "naam": "bereikbaarheidsgegevens",
+        "naam_meervoud": "bereikbaarheidsgegevens",
+        "definitie": "de bereikbaarheid van het bestuursorgaan en zijn organisatieonderdelen en de wijze waarop een verzoek om informatie kan worden ingediend",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1060,
+        "uuid": "ca9a38d6-5774-43fb-acc0-04832e9fd231",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_8c840238",
+        "naam": "bij vertegenwoordigend orgaan ingekomen stuk",
+        "naam_meervoud": "bij vertegenwoordigende organen ingekomen stukken",
+        "definitie": "bij de Kamers en de verenigde vergadering der Staten-Generaal, provinciale staten, gemeenteraden en algemene besturen van waterschappen ter behandeling ingekomen stukken, tenzij deze betrekking hebben op door de regering vertrouwelijk aan de Staten-Generaal verstrekte informatie of tenzij deze betrekking hebben op individuele gevallen",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1070,
+        "uuid": "568ebb54-9e43-4c12-924f-77f7d812026d",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_c76862ab",
+        "naam": "vergaderstuk Staten-Generaal",
+        "naam_meervoud": "vergaderstukken Staten-Generaal",
+        "definitie": "vergaderstukken en verslagen van de Kamers en de verenigde vergadering der Staten-Generaal en hun commissies, tenzij deze betrekking hebben op door de regering vertrouwelijk aan de Staten-Generaal verstrekte informatie",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1080,
+        "uuid": "57e3c1e2-53aa-4d2c-888d-7232288dd425",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_db4862c3",
+        "naam": "vergaderstuk decentrale overheid",
+        "naam_meervoud": "vergaderstukken decentrale overheden",
+        "definitie": "vergaderstukken en verslagen van provinciale staten, gemeenteraden en algemene besturen van waterschappen, algemene besturen van openbare lichamen, besturen van bedrijfsvoeringsorganisaties en gemeenschappelijke organen als bedoeld in de Wet gemeenschappelijke regelingen en hun commissies",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1090,
+        "uuid": "380f49a4-8578-4317-b91e-3dfd13bab89b",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_3a248e3a",
+        "naam": "agenda of besluitenlijst bestuurscollege",
+        "naam_meervoud": "agenda’s en besluitenlijsten bestuurscolleges",
+        "definitie": "agenda’s en besluitenlijsten van vergaderingen van de ministerraad, gedeputeerde staten, colleges van burgemeester en wethouders en dagelijkse besturen van waterschappen en dagelijkse besturen van openbare lichamen als bedoeld in de Wet gemeenschappelijke regelingen",
+        "oorsprong": "waardelijst"
+    }
+},
+{
+    "model": "metadata.informationcategory",
+    "fields": {
+        "order": 1100,
+        "uuid": "5bfcb832-e940-493e-8050-699053f4f56a",
+        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_99a836c7",
+        "naam": "advies",
+        "naam_meervoud": "adviezen",
+        "definitie": "adviezen:\n1. over de ontwerpen, bedoeld in het eerste lid, onderdeel c, van adviescolleges of -commissies alsmede van andere externe partijen indien die om advies zijn verzocht;\n2. over andere onderwerpen van adviescolleges of -commissies, alsmede de op dat advies betrekking hebbende adviesaanvraag, uitgezonderd adviezen die betrekking hebben op individuele gevallen;",
+        "oorsprong": "waardelijst"
+    }
+}
+]
