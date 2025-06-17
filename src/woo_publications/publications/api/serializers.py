@@ -498,6 +498,14 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "otherwise an empty string is returned."
         ),
     )
+    url_publicatie_extern = serializers.SerializerMethodField(
+        label=_("external publication url"),
+        help_text=_(
+            "URL to the UI of the external application where the publication life "
+            "cycle is managed. Requires the global configuration parameter to be set, "
+            "otherwise an empty string is returned."
+        ),
+    )
     kenmerken = PublicationIdentifierSerializer(
         help_text=_("The publication identifiers attached to this publication."),
         many=True,
@@ -510,6 +518,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         fields = (
             "uuid",
             "url_publicatie_intern",
+            "url_publicatie_extern",
             "informatie_categorieen",
             "di_woo_informatie_categorieen",
             "onderwerpen",
@@ -784,6 +793,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
     def get_url_publicatie_intern(self, obj: Publication) -> str:
         return obj.gpp_app_url
+
+    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
+    def get_url_publicatie_extern(self, obj: Publication) -> str:
+        return obj.gpp_burgerportaal_url
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
