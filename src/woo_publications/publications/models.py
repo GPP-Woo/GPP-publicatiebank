@@ -284,17 +284,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             models.CheckConstraint(
                 check=(
                     # Not allowed to be null
-                    (
-                        models.Q(publisher__isnull=False)
-                        & (
-                            models.Q(
-                                publicatiestatus=PublicationStatusOptions.published
-                            )
-                            | models.Q(
-                                publicatiestatus=PublicationStatusOptions.revoked
-                            )
-                        )
-                    )
+                    models.Q(publisher__isnull=False)
                     # Allowed to be null
                     | models.Q(publicatiestatus=PublicationStatusOptions.concept)
                     # the admin create action first saves a publication without

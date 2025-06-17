@@ -5,6 +5,10 @@ from django.test import TestCase
 
 from freezegun import freeze_time
 
+from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
+    UserFactory,
+)
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.tests.factories import (
@@ -147,9 +151,14 @@ class TestPublicationModel(TestCase):
             )
 
     def test_publisher_constraint(self):
+        user = UserFactory.create(superuser=True)
+        org_member = OrganisationMemberFactory.create(
+            identifier=user.pk,
+            naam=user.get_full_name(),
+        )
         publisher = OrganisationFactory.create(is_actief=True)
-        publication = PublicationFactory.create(
-            publicatiestatus=PublicationStatusOptions.concept
+        publication = PublicationFactory.build(
+            eigenaar=org_member, publicatiestatus=PublicationStatusOptions.concept
         )
 
         with self.subTest("no status with no publisher"):
