@@ -150,6 +150,35 @@ class TestPublicationModel(TestCase):
                 "https://example.com/gpp-app/nested/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d/edit",
             )
 
+    def test_calculate_gpp_burgerportaal_publication_url(self):
+        config = GlobalConfiguration.get_solo()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
+        with self.subTest("no URL template configured"):
+            config.gpp_burgerportaal_publication_url_template = ""
+            config.save()
+            publication1 = PublicationFactory.build()
+
+            result = publication1.gpp_burgerportaal_url
+
+            self.assertEqual(result, "")
+
+        with self.subTest("with URL template configured"):
+            config.gpp_burgerportaal_publication_url_template = (
+                "https://example.com/gpp-burgerportaal/nested/<UUID>/edit"
+            )
+            config.save()
+            publication2 = PublicationFactory.build(
+                uuid="771b79e5-3ba7-4fdf-9a89-00a6a5227a8d"
+            )
+
+            result = publication2.gpp_burgerportaal_url
+
+            self.assertEqual(
+                result,
+                "https://example.com/gpp-burgerportaal/nested/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d/edit",
+            )
+
     def test_publisher_constraint(self):
         user = UserFactory.create(superuser=True)
         org_member = OrganisationMemberFactory.create(
