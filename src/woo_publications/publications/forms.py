@@ -160,12 +160,12 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
         # So we manually save it after running the super
         if not publication.pk:
             publication.save()
-            self.save_m2m()
 
         if post_save_callback is not None:
             post_save_callback()
 
         if apply_retention_policy:
+            self.save_m2m()
             publication.apply_retention_policy()
 
         return publication

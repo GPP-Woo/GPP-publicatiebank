@@ -571,6 +571,60 @@ class TestPublicationsAdmin(WebTest):
                 "changed",
             )
 
+    def test_publications_admin_update_concept_to_published_with_ic(self):
+        ic = InformationCategoryFactory.create(
+            bron_bewaartermijn="changed",
+            selectiecategorie="changed",
+            archiefnominatie=ArchiveNominationChoices.destroy,
+            bewaartermijn=1,
+            toelichting_bewaartermijn="changed",
+        )
+        organisation = OrganisationFactory.create(is_actief=True)
+
+        with freeze_time("2024-09-25T00:14:00-00:00"):
+            publication = PublicationFactory.create(
+                eigenaar=self.organisation_member,
+                publisher=organisation,
+                verantwoordelijke=organisation,
+                opsteller=organisation,
+                informatie_categorieen=[],
+                publicatiestatus=PublicationStatusOptions.concept,
+                officiele_titel="title one",
+                verkorte_titel="one",
+                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+
+        form["informatie_categorieen"].force_value([ic.pk])
+        form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
+
+        response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+
+        publication.refresh_from_db()
+        self.assertEqual(
+            publication.publicatiestatus, PublicationStatusOptions.published
+        )
+        self.assertQuerySetEqual(publication.informatie_categorieen.all(), [ic])
+        self.assertEqual(publication.bron_bewaartermijn, "changed")
+        self.assertEqual(publication.selectiecategorie, "changed")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
+        self.assertEqual(str(publication.archiefactiedatum), "2025-09-25")
+        self.assertEqual(
+            publication.toelichting_bewaartermijn,
+            "changed",
+        )
+
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_update_schedules_index_task(
         self, mock_index_publication_delay: MagicMock
