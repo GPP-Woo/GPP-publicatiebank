@@ -162,6 +162,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             expected_first_item_data = {
                 "uuid": str(publication.uuid),
                 "urlPublicatieIntern": "",
+                "urlPublicatieExtern": "",
                 "informatieCategorieen": [str(ic.uuid)],
                 "diWooInformatieCategorieen": [str(ic.uuid)],
                 "onderwerpen": [str(topic.uuid)],
@@ -193,6 +194,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             expected_second_item_data = {
                 "uuid": str(publication2.uuid),
                 "urlPublicatieIntern": "",
+                "urlPublicatieExtern": "",
                 "informatieCategorieen": [str(ic2.uuid)],
                 "diWooInformatieCategorieen": [str(ic2.uuid)],
                 "onderwerpen": [],
@@ -250,6 +252,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         expected_first_item_data = {
             "uuid": str(publication.uuid),
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [],
@@ -276,6 +279,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic2.uuid)],
             "diWooInformatieCategorieen": [str(ic2.uuid)],
             "onderwerpen": [],
@@ -929,6 +933,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         expected_first_item_data = {
             "uuid": str(publication.uuid),
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [],
@@ -952,6 +957,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic2.uuid)],
             "diWooInformatieCategorieen": [str(ic2.uuid)],
             "onderwerpen": [],
@@ -1126,6 +1132,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         expected_first_item_data = {
             "uuid": str(publication.uuid),
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
@@ -1184,6 +1191,40 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(
                 result["urlPublicatieIntern"],
                 "https://woo-app.example.com/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d",
+            )
+
+    def test_publication_external_url(self):
+        global_configuration = GlobalConfiguration.get_solo()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+        global_configuration.gpp_burgerportaal_publication_url_template = (
+            "https://woo-burgerportaal.example.com/<UUID>"
+        )
+        global_configuration.save()
+        publication = PublicationFactory.create(
+            uuid="771b79e5-3ba7-4fdf-9a89-00a6a5227a8d"
+        )
+
+        with self.subTest("detail endpoint"):
+            endpoint = reverse(
+                "api:publication-detail", kwargs={"uuid": publication.uuid}
+            )
+
+            response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+            self.assertEqual(
+                response.json()["urlPublicatieExtern"],
+                "https://woo-burgerportaal.example.com/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d",
+            )
+
+        with self.subTest("list endpoint"):
+            endpoint = reverse("api:publication-list")
+
+            response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+            result = response.json()["results"][0]
+            self.assertEqual(
+                result["urlPublicatieExtern"],
+                "https://woo-burgerportaal.example.com/771b79e5-3ba7-4fdf-9a89-00a6a5227a8d",
             )
 
     def test_diwoo_informatie_categories(self):
@@ -1369,6 +1410,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "uuid"
                 ],  # uuid gets generated so we are just testing that its there
                 "urlPublicatieIntern": "",
+                "urlPublicatieExtern": "",
                 "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
                 "onderwerpen": [str(topic.uuid)],
                 "publisher": str(organisation.uuid),
@@ -1554,6 +1596,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "uuid"
                 ],  # uuid gets generated so we are just testing that its there
                 "urlPublicatieIntern": "",
+                "urlPublicatieExtern": "",
                 "informatieCategorieen": [str(ic2.uuid)],
                 "diWooInformatieCategorieen": [str(ic2.uuid)],
                 "onderwerpen": [str(topic.uuid)],
@@ -1723,6 +1766,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid"
             ],  # uuid gets generated so we are just testing that its there
             "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
             "informatieCategorieen": [str(ic.uuid)],
             "diWooInformatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],

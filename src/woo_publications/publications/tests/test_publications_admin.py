@@ -74,6 +74,22 @@ class TestPublicationsAdmin(WebTest):
         self.assertContains(response, _("Open in app"))
         self.assertContains(response, f"https://example.com/{publication.uuid}")
 
+    def test_admin_shows_link_to_gpp_burgerportaal(self):
+        config = GlobalConfiguration.get_solo()
+        self.addCleanup(config.clear_cache)
+        config.gpp_burgerportaal_publication_url_template = "https://example.com/<UUID>"
+        config.save()
+        publication = PublicationFactory.create()
+
+        response = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, _("Open in burgerportaal"))
+        self.assertContains(response, f"https://example.com/{publication.uuid}")
+
     def test_publications_admin_search(self):
         org_member_1 = OrganisationMemberFactory.create(
             identifier="test-identifier",

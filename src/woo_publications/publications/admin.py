@@ -522,6 +522,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         ]
         if gpp_app_url := obj.gpp_app_url:
             actions.append((gpp_app_url, _("Open in app")))
+        if gpp_burgerportaal_url := obj.gpp_burgerportaal_url:
+            actions.append((gpp_burgerportaal_url, _("Open in burgerportaal")))
         return format_html_join(
             " | ",
             '<a href="{}">{}</a>',

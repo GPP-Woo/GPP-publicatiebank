@@ -499,6 +499,12 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         url_template = global_config.gpp_app_publication_url_template
         return url_template.replace("<UUID>", str(self.uuid))
 
+    @cached_property
+    def gpp_burgerportaal_url(self) -> str:
+        global_config = GlobalConfiguration.get_solo()
+        url_template = global_config.gpp_burgerportaal_publication_url_template
+        return url_template.replace("<UUID>", str(self.uuid))
+
 
 class PublicationIdentifier(models.Model):
     id: int  # implicitly provided by django
