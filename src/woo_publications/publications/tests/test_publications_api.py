@@ -2092,34 +2092,81 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
 
     def test_create_publication_fields_empty(self):
         url = reverse("api:publication-list")
-        data = {
-            # required:
-            "publicatiestatus": PublicationStatusOptions.concept,
-            "officieleTitel": "title one",
-            # allowed empty:
-            "informatieCategorieen": [],
-            "onderwerpen": [],
-            "publisher": "",
-            "verantwoordelijke": "",
-            "opsteller": "",
-            "kenmerken": [],
-            "verkorteTitel": "",
-            "omschrijving": "",
-            "eigenaar": None,
-            "bronBewaartermijn": "",
-            "selectiecategorie": "",
-            "archiefnominatie": "",
-            "archiefactiedatum": None,
-            "toelichtingBewaartermijn": "",
-        }
-
         with self.subTest("create concept publication doesn't raise errors"):
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "title one",
+                # allowed empty:
+                "informatieCategorieen": [],
+                "onderwerpen": [],
+                "publisher": "",
+                "verantwoordelijke": "",
+                "opsteller": "",
+                "kenmerken": [],
+                "verkorteTitel": "",
+                "omschrijving": "",
+                "eigenaar": None,
+                "bronBewaartermijn": "",
+                "selectiecategorie": "",
+                "archiefnominatie": "",
+                "archiefactiedatum": None,
+                "toelichtingBewaartermijn": "",
+            }
+
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        with self.subTest(
+            "create concept publication fully empty doesn't raise errors"
+        ):
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "title one",
+                # allowed empty:
+                "informatieCategorieen": None,
+                "onderwerpen": None,
+                "publisher": "",
+                "verantwoordelijke": "",
+                "opsteller": "",
+                "kenmerken": None,
+                "verkorteTitel": "",
+                "omschrijving": "",
+                "eigenaar": None,
+                "bronBewaartermijn": "",
+                "selectiecategorie": "",
+                "archiefnominatie": "",
+                "archiefactiedatum": None,
+                "toelichtingBewaartermijn": "",
+            }
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest("create published publication doesn't raise errors"):
-            data["publicatiestatus"] = PublicationStatusOptions.published
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.published,
+                "officieleTitel": "title one",
+                # allowed empty:
+                "informatieCategorieen": [],
+                "onderwerpen": [],
+                "publisher": "",
+                "verantwoordelijke": "",
+                "opsteller": "",
+                "kenmerken": [],
+                "verkorteTitel": "",
+                "omschrijving": "",
+                "eigenaar": None,
+                "bronBewaartermijn": "",
+                "selectiecategorie": "",
+                "archiefnominatie": "",
+                "archiefactiedatum": None,
+                "toelichtingBewaartermijn": "",
+            }
+
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

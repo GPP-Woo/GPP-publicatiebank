@@ -262,7 +262,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
 
     def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
-        if _duplicate_nested_serializer_items(value):
+        if value and _duplicate_nested_serializer_items(value):
             raise serializers.ValidationError(
                 _("You cannot provide identical identifiers.")
             )
@@ -614,7 +614,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
-        if _duplicate_nested_serializer_items(value):
+        if value and _duplicate_nested_serializer_items(value):
             raise serializers.ValidationError(
                 _("You cannot provide identical identifiers.")
             )
@@ -649,6 +649,30 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         assert isinstance(fsm_field, FSMField)
         fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
         return fields
+
+    def to_internal_value(self, data):
+        publicatiestatus = data.get("publicatiestatus")
+        # When publicatiestatus isn't given ensure that the default value is used
+        # unless it is a partial update, in that case use the instance.
+        if not publicatiestatus:
+            if self.partial:
+                assert isinstance(self.instance, Publication)
+                publicatiestatus = self.instance.publicatiestatus
+            else:
+                publicatiestatus = self.fields["publicatiestatus"].default
+
+        if publicatiestatus == PublicationStatusOptions.concept:
+            # Make sure to transform some field to the correct empty value.
+            if "informatie_categorieen" in data and not data["informatie_categorieen"]:
+                data["informatie_categorieen"] = []
+
+            if "onderwerpen" in data and not data["onderwerpen"]:
+                data["onderwerpen"] = []
+
+            if "kenmerken" in data and not data["kenmerken"]:
+                data["kenmerken"] = []
+
+        return super().to_internal_value(data)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -685,10 +709,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         publication_identifiers = validated_data.pop("publicationidentifier_set", [])
 
         if "eigenaar" in validated_data:
-            eigenaar = validated_data.pop("eigenaar")
-            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
-                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
-            )
+            if eigenaar := validated_data.pop("eigenaar"):
+                validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
+                    identifier=eigenaar["identifier"], naam=eigenaar["naam"]
+                )
 
         request: Request = self.context["request"]
         user_id, user_repr, remarks = extract_audit_parameters(request)
@@ -765,10 +789,11 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         publication = super().create(validated_data)
 
-        PublicationIdentifier.objects.bulk_create(
-            PublicationIdentifier(publicatie=publication, **identifiers)
-            for identifiers in publication_identifiers
-        )
+        if publication_identifiers:
+            PublicationIdentifier.objects.bulk_create(
+                PublicationIdentifier(publicatie=publication, **identifiers)
+                for identifiers in publication_identifiers
+            )
 
         # handle the publicatiestatus
         match publicatiestatus:
