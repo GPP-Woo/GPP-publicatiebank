@@ -1540,7 +1540,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         publication = PublicationFactory.create(
             informatie_categorieen=[],
             verantwoordelijke=organisation,
-            publicatiestatus=PublicationStatusOptions.concept
+            publicatiestatus=PublicationStatusOptions.concept,
         )
         endpoint = reverse("api:document-list")
         body = {

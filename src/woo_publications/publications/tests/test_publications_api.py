@@ -1498,17 +1498,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 ).exists()
             )
 
-    def test_create_concept_with_only_officiele_titel(self):
-        url = reverse("api:publication-list")
-        data = {
-            "publicatiestatus": PublicationStatusOptions.concept,
-            "officieleTitel": "title one",
-        }
-
-        response = self.client.post(url, data, headers=AUDIT_HEADERS)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_update_publication(self):
         topic = TopicFactory.create()
@@ -2090,6 +2079,56 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
+    def test_create_concept_with_only_officiele_titel(self):
+        url = reverse("api:publication-list")
+        data = {
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "officieleTitel": "title one",
+        }
+
+        response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_publication_fields_empty(self):
+        url = reverse("api:publication-list")
+        data = {
+            # required:
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "officieleTitel": "title one",
+            # allowed empty:
+            "informatieCategorieen": [],
+            "onderwerpen": [],
+            "publisher": "",
+            "verantwoordelijke": "",
+            "opsteller": "",
+            "kenmerken": [],
+            "verkorteTitel": "",
+            "omschrijving": "",
+            "eigenaar": None,
+            "bronBewaartermijn": "",
+            "selectiecategorie": "",
+            "archiefnominatie": "",
+            "archiefactiedatum": None,
+            "toelichtingBewaartermijn": "",
+        }
+
+        with self.subTest("create concept publication doesn't raise errors"):
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        with self.subTest("create published publication doesn't raise errors"):
+            data["publicatiestatus"] = PublicationStatusOptions.published
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                data["informatieCategorieen"], [_("This list may not be empty.")]
+            )
+            self.assertEqual(data["publisher"], [_("This field may not be null.")])
+
     def test_create_publication_status_concept(self):
         url = reverse("api:publication-list")
 
@@ -2144,7 +2183,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response.json(),
             {
-                "officieleTitel": [_("This field cannot be null.")],
+                "officieleTitel": [_("This field may not be blank.")],
             },
         )
 
@@ -2169,7 +2208,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response.json(),
             {
-                "officieleTitel": [_("This field cannot be null.")],
+                "officieleTitel": [_("This field may not be blank.")],
                 "informatieCategorieen": [_("This field is required.")],
                 "publisher": [_("This field is required.")],
             },
@@ -2199,8 +2238,8 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response.json(),
             {
-                "officieleTitel": [_("This field cannot be null.")],
+                "officieleTitel": [_("This field may not be blank.")],
                 "informatieCategorieen": [_("This list may not be empty.")],
-                "publisher": [_("This field cannot be null.")],
+                "publisher": [_("This field may not be null.")],
             },
         )

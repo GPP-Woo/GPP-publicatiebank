@@ -641,6 +641,8 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     # Ensure that officiele_titel remains required.
                     if field != "officiele_titel":
                         fields[field].required = False
+                        fields[field].allow_null = True
+                        fields[field].allow_empty = True  # pyright: ignore[reportAttributeAccessIssue]
 
         assert fields["publicatiestatus"].help_text
         fsm_field = Publication._meta.get_field("publicatiestatus")
