@@ -237,6 +237,38 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    gepubliceerd_op = models.DateTimeField(
+        _("published on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was published."),
+        null=True,
+        blank=True,
+    )
+    ingetrokken_op = models.DateTimeField(
+        _("revoked on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was revoked."),
+        null=True,
+        blank=True,
+    )
+    datum_begin_geldigheid = models.DateField(
+        _("start date"),
+        help_text=_(
+            "The date when the rights and obligations of the attached "
+            "documents come into effect."
+        ),
+        null=True,
+        blank=True,
+    )
+    datum_einde_geldigheid = models.DateField(
+        _("end date"),
+        help_text=_(
+            "The date when the rights and obligations of the attached "
+            "documents stops being in effect."
+        ),
+        null=True,
+        blank=True,
+    )
 
     # Retention fields:
     bron_bewaartermijn = models.CharField(
@@ -644,6 +676,32 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "System timestamp reflecting when the document was last modified in the "
             "database."
         ),
+    )
+    ontvangstdatum = models.DateTimeField(
+        _("date of reception"),
+        help_text=_("The timestamp when the document is received by the organisatie."),
+        null=True,
+        blank=True,
+    )
+    datum_ondertekend = models.DateTimeField(
+        _("signed date"),
+        help_text=_("The timestamp when the document is signed by the organisatie."),
+        null=True,
+        blank=True,
+    )
+    gepubliceerd_op = models.DateTimeField(
+        _("published on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was published."),
+        null=True,
+        blank=True,
+    )
+    ingetrokken_op = models.DateTimeField(
+        _("revoked on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was revoked."),
+        null=True,
+        blank=True,
     )
 
     # documenthandeling fields
