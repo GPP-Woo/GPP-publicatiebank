@@ -376,6 +376,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         """
         from .tasks import index_publication
 
+        self.gepubliceerd_op = timezone.now()
+
         # schedule indexing to the search API
         transaction.on_commit(partial(index_publication.delay, publication_id=self.pk))
 
@@ -413,6 +415,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         the publication from the search index.
         """
         from .tasks import remove_publication_from_index
+
+        self.ingetrokken_op = timezone.now()
 
         # schedule index removal to the search API
         transaction.on_commit(
@@ -460,6 +464,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         documents.update(
             publicatiestatus=PublicationStatusOptions.revoked,
             laatst_gewijzigd_datum=timezone.now(),
+            ingetrokken_op=timezone.now(),
         )
 
         # audit log actions
@@ -856,6 +861,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         """
         from .tasks import index_document
 
+        self.gepubliceerd_op = timezone.now()
+
         # schedule indexing to the search API
         download_url = self.absolute_document_download_uri(request=request)
         transaction.on_commit(
@@ -888,6 +895,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Revocation sends an update to the search API to remove it from the index.
         """
         from .tasks import remove_document_from_index
+
+        self.ingetrokken_op = timezone.now()
 
         transaction.on_commit(
             partial(remove_document_from_index.delay, document_id=self.pk)
