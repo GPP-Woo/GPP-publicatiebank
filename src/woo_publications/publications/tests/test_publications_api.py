@@ -2090,6 +2090,24 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_update_concept_with_only_officiele_titel(self):
+        publication = PublicationFactory.create(
+            officiele_titel="title one",
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+        data = {
+            "publicatiestatus": PublicationStatusOptions.concept,
+            "officieleTitel": "update",
+        }
+
+        response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_create_publication_fields_empty(self):
         url = reverse("api:publication-list")
         with self.subTest("create concept publication doesn't raise errors"):
@@ -2175,6 +2193,97 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 data["informatieCategorieen"], [_("This list may not be empty.")]
             )
             self.assertEqual(data["publisher"], [_("This field may not be null.")])
+
+    def test_update_publication_fields_empty(self):
+        organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+        with self.subTest("update with empty values doesn't raise errors"):
+            publication = PublicationFactory.create(
+                officiele_titel="title one",
+                publicatiestatus=PublicationStatusOptions.concept,
+                eigenaar=organisation_member,
+            )
+            url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(publication.uuid)},
+            )
+
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "update",
+                # allowed empty:
+                "informatieCategorieen": [],
+                "onderwerpen": [],
+                "publisher": "",
+                "verantwoordelijke": "",
+                "opsteller": "",
+                "kenmerken": [],
+                "verkorteTitel": "",
+                "omschrijving": "",
+                "eigenaar": None,
+                "bronBewaartermijn": "",
+                "selectiecategorie": "",
+                "archiefnominatie": "",
+                "archiefactiedatum": None,
+                "toelichtingBewaartermijn": "",
+            }
+
+            response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(
+                response.json()["eigenaar"],
+                {
+                    "identifier": "id",
+                    "weergaveNaam": "username",
+                },
+            )
+
+        with self.subTest("update fully empty values doesn't raise errors"):
+            publication = PublicationFactory.create(
+                officiele_titel="title one",
+                publicatiestatus=PublicationStatusOptions.concept,
+                eigenaar=organisation_member,
+            )
+            url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(publication.uuid)},
+            )
+
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "update",
+                # allowed empty:
+                "informatieCategorieen": None,
+                "onderwerpen": None,
+                "publisher": "",
+                "verantwoordelijke": "",
+                "opsteller": "",
+                "kenmerken": None,
+                "verkorteTitel": "",
+                "omschrijving": "",
+                "eigenaar": None,
+                "bronBewaartermijn": "",
+                "selectiecategorie": "",
+                "archiefnominatie": "",
+                "archiefactiedatum": None,
+                "toelichtingBewaartermijn": "",
+            }
+
+            response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(
+                response.json()["eigenaar"],
+                {
+                    "identifier": "id",
+                    "weergaveNaam": "username",
+                },
+            )
 
     def test_create_publication_status_concept(self):
         url = reverse("api:publication-list")
