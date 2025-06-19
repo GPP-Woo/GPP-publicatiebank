@@ -882,6 +882,13 @@ class Document(ConcurrentTransitionMixin, models.Model):
         # Resolve the 'informatieobjecttype' for the Documents API to use.
         # XXX: if there are multiple, which to pick?
         information_category = self.publicatie.informatie_categorieen.first()
+        # TODO: remove this hotfix #315
+        if not information_category:
+            # Now that IC's can be empty because of concept publications.
+            # select a dummy IC to be selected as the informatieobjecttype
+            # within open-zaak.
+            information_category = InformationCategory.objects.first()
+
         assert isinstance(information_category, InformationCategory)
         iot_path = reverse(
             "catalogi-informatieobjecttypen-detail",

@@ -1535,6 +1535,42 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             detail_data = detail.json()
             self.assertTrue(detail_data["locked"])
 
+    def test_create_concept_document_with_a_publication_with_no_ic(self):
+        organisation = OrganisationFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[],
+            verantwoordelijke=organisation,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        endpoint = reverse("api:document-list")
+        body = {
+            "identifier": "WOO-P/0042",
+            "publicatie": publication.uuid,
+            "officieleTitel": "Testdocument WOO-P + Open Zaak",
+            "verkorteTitel": "Testdocument",
+            "omschrijving": "Testing 123",
+            "creatiedatum": "2024-11-05",
+            "bestandsformaat": "unknown",
+            "bestandsnaam": "unknown.bin",
+            "bestandsomvang": 10,
+            "documenthandelingen": [
+                {
+                    "soortHandeling": DocumentActionTypeOptions.signed,
+                }
+            ],
+        }
+
+        response = self.client.post(
+            endpoint,
+            data=body,
+            headers={
+                **AUDIT_HEADERS,
+                "Host": "host.docker.internal:8000",
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_create_document_without_document_handelingen_saves_with_default_options(
         self,
     ):
