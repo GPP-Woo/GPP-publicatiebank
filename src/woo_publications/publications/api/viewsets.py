@@ -18,7 +18,7 @@ from drf_spectacular.utils import (
 from requests import RequestException
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import APIException
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -126,7 +126,7 @@ class DocumentViewSet(
         try:
             instance.destroy_document()
         except RequestException as err:
-            raise ParseError(
+            raise APIException(
                 detail=_("Something went wrong while deleting the document.")
             ) from err
 

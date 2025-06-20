@@ -932,6 +932,10 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         from .tasks import remove_document_from_index
 
+        # Always remove from index so the doc isn't publicly available
+        # even in the case of errors
+        remove_document_from_index.delay(document_id=self.pk)
+
         # Both should be either set or unset because of the constraint
         # but just to be sure lets check on both.
         if not self.document_service or not self.document_uuid:
@@ -941,11 +945,12 @@ class Document(ConcurrentTransitionMixin, models.Model):
             try:
                 client.destroy_document(uuid=self.document_uuid)
             except RequestException as err:
+                if (
+                    hasattr(err.response, "status_code")
+                    and err.response.status_code == 404  # pyright: ignore[reportOptionalMemberAccess]
+                ):
+                    return
                 raise err
-
-        transaction.on_commit(
-            partial(remove_document_from_index.delay, document_id=self.pk)
-        )
 
     def upload_part_data(self, uuid: UUID, file: File) -> bool:
         assert self.document_service, "A Documents API service must be recorded"
