@@ -8,6 +8,7 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 from django_webtest import WebTest
+from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -80,12 +81,16 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         with self.subTest("initial status: published"):
             body = {**base, "publicatiestatus": PublicationStatusOptions.published}
 
-            response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
+            with freeze_time("2024-09-25T14:00:00"):
+                response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            data = response.json()
             self.assertEqual(
-                response.json()["publicatiestatus"], PublicationStatusOptions.published
+                data["publicatiestatus"], PublicationStatusOptions.published
             )
+            self.assertEqual(data["gepubliceerdOp"], "2024-09-25T16:00:00+02:00")
+            self.assertEqual(data["ingetrokkenOp"], None)
 
         with self.subTest("blocked status: revoked"):
             body = {**base, "publicatiestatus": PublicationStatusOptions.revoked}
@@ -110,17 +115,22 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 "api:publication-detail", kwargs={"uuid": publication1.uuid}
             )
 
-            response = self.client.patch(
-                endpoint,
-                {"publicatiestatus": PublicationStatusOptions.published},
-                headers=AUDIT_HEADERS,
-            )
+            with freeze_time("2024-09-25T14:00:00-00:00"):
+                response = self.client.patch(
+                    endpoint,
+                    {"publicatiestatus": PublicationStatusOptions.published},
+                    headers=AUDIT_HEADERS,
+                )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             publication1.refresh_from_db()
             self.assertEqual(
                 publication1.publicatiestatus, PublicationStatusOptions.published
             )
+            self.assertEqual(
+                str(publication1.gepubliceerd_op), "2024-09-25 14:00:00+00:00"
+            )
+            self.assertEqual(publication1.ingetrokken_op, None)
 
         with self.subTest("revoke (blocked)"):
             publication2 = PublicationFactory.create(
@@ -155,6 +165,8 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json()["gepubliceerdOp"], None)
+            self.assertEqual(response.json()["gepubliceerdOp"], None)
 
     def test_published_publication(self):
         """
@@ -216,6 +228,8 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json()["gepubliceerdOp"], None)
+            self.assertEqual(response.json()["ingetrokkenOp"], None)
 
     def test_revoked_publication(self):
         """
@@ -284,7 +298,10 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         )
         endpoint = reverse("api:publication-detail", kwargs={"uuid": publication.uuid})
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with (
+            self.captureOnCommitCallbacks(execute=True),
+            freeze_time("2024-09-25T14:00:00"),
+        ):
             response = self.client.patch(
                 endpoint,
                 {"publicatiestatus": PublicationStatusOptions.published},
@@ -292,6 +309,8 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["gepubliceerdOp"], "2024-09-25T16:00:00+02:00")
+        self.assertEqual(response.json()["ingetrokkenOp"], None)
         document.refresh_from_db()
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         mock_index_publication.assert_called_once_with(publication_id=publication.pk)
@@ -331,7 +350,10 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         )
         endpoint = reverse("api:publication-detail", kwargs={"uuid": publication.uuid})
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with (
+            self.captureOnCommitCallbacks(execute=True),
+            freeze_time("2024-09-25T14:00:00"),
+        ):
             response = self.client.patch(
                 endpoint,
                 {"publicatiestatus": PublicationStatusOptions.revoked},
@@ -339,6 +361,8 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["gepubliceerdOp"], None)
+        self.assertEqual(response.json()["ingetrokkenOp"], "2024-09-25T16:00:00+02:00")
         # the already revoked document should not have been touched at all
         original_last_modified_revoked_document = (
             revoked_document.laatst_gewijzigd_datum
@@ -377,6 +401,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
         patcher.start()
         self.addCleanup(patcher.stop)
 
+    @freeze_time("2024-09-25T14:00:00")
     def test_create_ignores_publicatiestatus(self):
         """
         Assert that the publicatiestatus field is **ignored** for new documents.
@@ -408,10 +433,13 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                     response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
 
                     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+                    data = response.json()
                     self.assertEqual(
-                        response.json()["publicatiestatus"],
+                        data["publicatiestatus"],
                         PublicationStatusOptions.concept,
                     )
+                    self.assertEqual(data["gepubliceerdOp"], None)
+                    self.assertEqual(data["ingetrokkenOp"], None)
 
         with self.subTest("published publication"):
             published_publication = PublicationFactory.create(
@@ -430,10 +458,15 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                     response = self.client.post(endpoint, body, headers=AUDIT_HEADERS)
 
                     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+                    data = response.json()
                     self.assertEqual(
-                        response.json()["publicatiestatus"],
+                        data["publicatiestatus"],
                         PublicationStatusOptions.published,
                     )
+                    self.assertEqual(
+                        data["gepubliceerdOp"], "2024-09-25T16:00:00+02:00"
+                    )
+                    self.assertEqual(data["ingetrokkenOp"], None)
 
         with self.subTest("revoked publication"):
             revoked_publication = PublicationFactory.create(
@@ -454,6 +487,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
                     self.assertEqual(list(response.data.keys()), ["non_field_errors"])
 
+    @freeze_time("2024-09-25T14:00:00")
     def test_concept_document(self):
         """
         Assert that the status cannot be set via the API.
@@ -498,7 +532,11 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["gepubliceerdOp"], None)
+            self.assertEqual(data["ingetrokkenOp"], None)
 
+    @freeze_time("2024-09-25T14:00:00")
     def test_published_document(self):
         """
         Check the valid state transitions for published documents.
@@ -543,10 +581,13 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
             self.assertEqual(
-                response.json()["publicatiestatus"],
+                data["publicatiestatus"],
                 PublicationStatusOptions.revoked,
             )
+            self.assertEqual(data["gepubliceerdOp"], None)
+            self.assertEqual(data["ingetrokkenOp"], "2024-09-25T16:00:00+02:00")
 
         # updating with the same status must be possible (since other metadata fields
         # can change)
@@ -564,6 +605,9 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             response = self.client.put(endpoint, body, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["gepubliceerdOp"], None)
+            self.assertEqual(data["ingetrokkenOp"], None)
 
     def test_revoked_document(self):
         """
@@ -636,7 +680,10 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
         )
         endpoint = reverse("api:document-detail", kwargs={"uuid": document.uuid})
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with (
+            self.captureOnCommitCallbacks(execute=True),
+            freeze_time("2024-09-25T14:00:00"),
+        ):
             response = self.client.patch(
                 endpoint,
                 {"publicatiestatus": PublicationStatusOptions.revoked},
@@ -645,6 +692,8 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         document.refresh_from_db()
+        self.assertEqual(response.json()["gepubliceerdOp"], None)
+        self.assertEqual(response.json()["ingetrokkenOp"], "2024-09-25T16:00:00+02:00")
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
         mock_remove_document_from_index_delay.assert_called_once_with(
             document_id=document.pk
@@ -652,6 +701,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
 
 
 @disable_admin_mfa()
+@freeze_time("2024-09-25T14:00:00")
 class PublicationStateTransitionAdminTests(WebTest):
     @classmethod
     def setUpTestData(cls):
@@ -729,6 +779,8 @@ class PublicationStateTransitionAdminTests(WebTest):
         self.assertEqual(
             added_item.publicatiestatus, PublicationStatusOptions.published
         )
+        self.assertEqual(str(added_item.gepubliceerd_op), "2024-09-25 14:00:00+00:00")
+        self.assertEqual(added_item.ingetrokken_op, None)
         mock_index_publication_delay.assert_called_once_with(
             publication_id=added_item.pk
         )
@@ -797,6 +849,10 @@ class PublicationStateTransitionAdminTests(WebTest):
             publication.publicatiestatus, PublicationStatusOptions.published
         )
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
+        self.assertEqual(str(document.gepubliceerd_op), "2024-09-25 14:00:00+00:00")
+        self.assertEqual(document.ingetrokken_op, None)
+        self.assertEqual(str(publication.gepubliceerd_op), "2024-09-25 14:00:00+00:00")
+        self.assertEqual(publication.ingetrokken_op, None)
         mock_index_publication_delay.assert_called_once_with(
             publication_id=publication.pk
         )
@@ -878,6 +934,10 @@ class PublicationStateTransitionAdminTests(WebTest):
         document.refresh_from_db()
         self.assertEqual(publication.publicatiestatus, PublicationStatusOptions.revoked)
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
+        self.assertEqual(publication.gepubliceerd_op, None)
+        self.assertEqual(str(publication.ingetrokken_op), "2024-09-25 14:00:00+00:00")
+        self.assertEqual(document.gepubliceerd_op, None)
+        self.assertEqual(str(document.ingetrokken_op), "2024-09-25 14:00:00+00:00")
         mock_remove_publication_from_index_delay.assert_called_once_with(
             publication_id=publication.pk
         )
@@ -924,6 +984,8 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         self.assertEqual(add_response.status_code, 302)
         added_item = Document.objects.get()
+        self.assertEqual(added_item.gepubliceerd_op, None)
+        self.assertEqual(added_item.ingetrokken_op, None)
         self.assertEqual(added_item.publicatiestatus, PublicationStatusOptions.concept)
 
     @patch("woo_publications.publications.admin.index_document.delay")
@@ -957,6 +1019,8 @@ class PublicationStateTransitionAdminTests(WebTest):
         self.assertEqual(
             added_item.publicatiestatus, PublicationStatusOptions.published
         )
+        self.assertEqual(str(added_item.gepubliceerd_op), "2024-09-25 14:00:00+00:00")
+        self.assertEqual(added_item.ingetrokken_op, None)
         mock_index_document_delay.assert_called_once_with(
             document_id=added_item.pk,
             download_url=f"http://testserver{download_url}",
@@ -1009,7 +1073,12 @@ class PublicationStateTransitionAdminTests(WebTest):
             add_response = form.submit(name="_save")
 
         self.assertEqual(add_response.status_code, 302)
+        publication.refresh_from_db()
         document.refresh_from_db()
+        self.assertEqual(publication.gepubliceerd_op, None)
+        self.assertEqual(publication.ingetrokken_op, None)
+        self.assertEqual(document.gepubliceerd_op, None)
+        self.assertEqual(document.ingetrokken_op, None)
         download_url = reverse(
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
@@ -1047,6 +1116,8 @@ class PublicationStateTransitionAdminTests(WebTest):
 
         self.assertEqual(add_response.status_code, 302)
         document.refresh_from_db()
+        self.assertEqual(document.gepubliceerd_op, None)
+        self.assertEqual(str(document.ingetrokken_op), "2024-09-25 14:00:00+00:00")
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.revoked)
         mock_remove_document_from_index_delay.assert_called_once_with(
             document_id=document.pk,

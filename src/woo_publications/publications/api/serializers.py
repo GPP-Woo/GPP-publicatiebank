@@ -227,7 +227,11 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "verkorte_titel",
             "omschrijving",
             "publicatiestatus",
+            "gepubliceerd_op",
+            "ingetrokken_op",
             "creatiedatum",
+            "ontvangstdatum",
+            "datum_ondertekend",
             "bestandsformaat",
             "bestandsnaam",
             "bestandsomvang",
@@ -364,6 +368,10 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         )
         document = super().create(validated_data)
 
+        if document.publicatiestatus == PublicationStatusOptions.published:
+            document.gepubliceerd_op = document.laatst_gewijzigd_datum
+            document.save()
+
         DocumentIdentifier.objects.bulk_create(
             DocumentIdentifier(document=document, **identifiers)
             for identifiers in document_identifiers
@@ -399,6 +407,8 @@ class DocumentUpdateSerializer(DocumentSerializer):
                 "publicatiestatus",
                 "eigenaar",
                 "creatiedatum",
+                "ontvangstdatum",
+                "datum_ondertekend",
             )
         ]
         extra_kwargs = {
@@ -531,8 +541,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "omschrijving",
             "eigenaar",
             "publicatiestatus",
+            "gepubliceerd_op",
+            "ingetrokken_op",
             "registratiedatum",
             "laatst_gewijzigd_datum",
+            "datum_begin_geldigheid",
+            "datum_einde_geldigheid",
             "bron_bewaartermijn",
             "selectiecategorie",
             "archiefnominatie",

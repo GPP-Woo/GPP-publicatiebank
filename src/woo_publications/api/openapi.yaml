@@ -1853,11 +1853,37 @@ components:
             `.\n\nNote that some transitions may be limited by business logic.\n\n\
             * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
             \ - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
         creatiedatum:
           type: string
           format: date
           description: De datum waarop het document ontstaan is. Niet te verwarren
             met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date of reception
+          description: The timestamp when the document is received by the organisatie.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Signed date
+          description: The timestamp when the document is signed by the organisatie.
         bestandsformaat:
           type: string
           description: TODO - placeholder accepting anything, in the future this will
@@ -1916,6 +1942,8 @@ components:
       required:
       - bestandsdelen
       - creatiedatum
+      - gepubliceerdOp
+      - ingetrokkenOp
       - laatstGewijzigdDatum
       - officieleTitel
       - publicatie
@@ -2016,11 +2044,37 @@ components:
             `.\n\nNote that some transitions may be limited by business logic.\n\n\
             * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
             \ - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
         creatiedatum:
           type: string
           format: date
           description: De datum waarop het document ontstaan is. Niet te verwarren
             met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date of reception
+          description: The timestamp when the document is received by the organisatie.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Signed date
+          description: The timestamp when the document is signed by the organisatie.
         bestandsformaat:
           type: string
           readOnly: true
@@ -2080,7 +2134,9 @@ components:
       - bestandsnaam
       - bestandsomvang
       - documenthandelingen
+      - gepubliceerdOp
       - identifier
+      - ingetrokkenOp
       - laatstGewijzigdDatum
       - publicatie
       - publicatiestatus
@@ -2425,11 +2481,37 @@ components:
             `.\n\nNote that some transitions may be limited by business logic.\n\n\
             * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
             \ - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
         creatiedatum:
           type: string
           format: date
           description: De datum waarop het document ontstaan is. Niet te verwarren
             met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date of reception
+          description: The timestamp when the document is received by the organisatie.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Signed date
+          description: The timestamp when the document is signed by the organisatie.
         bestandsformaat:
           type: string
           readOnly: true
@@ -2621,6 +2703,20 @@ components:
             ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
             \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
             * `ingetrokken` - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
         registratiedatum:
           type: string
           format: date-time
@@ -2636,6 +2732,20 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        datumBeginGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: Start date
+          description: The date when the rights and obligations of the attached documents
+            come into effect.
+        datumEindeGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: End date
+          description: The date when the rights and obligations of the attached documents
+            stops being in effect.
         bronBewaartermijn:
           type: string
           description: |-
@@ -2794,6 +2904,20 @@ components:
             ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
             \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
             * `ingetrokken` - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
         registratiedatum:
           type: string
           format: date-time
@@ -2809,6 +2933,20 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
             is in de database.
+        datumBeginGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: Start date
+          description: The date when the rights and obligations of the attached documents
+            come into effect.
+        datumEindeGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: End date
+          description: The date when the rights and obligations of the attached documents
+            stops being in effect.
         bronBewaartermijn:
           type: string
           description: |-
@@ -2849,7 +2987,9 @@ components:
             de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
+      - gepubliceerdOp
       - informatieCategorieen
+      - ingetrokkenOp
       - laatstGewijzigdDatum
       - officieleTitel
       - publisher

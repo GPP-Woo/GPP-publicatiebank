@@ -15,6 +15,7 @@ from django.http import HttpRequest
 from django.template.defaultfilters import filesizeformat
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, ngettext
 
@@ -277,6 +278,9 @@ def revoke(
         raise ValueError("Unsupported model: %r", model)
 
     for obj in queryset.iterator():
+        if model in (Document, Publication):
+            obj.ingetrokken_op = timezone.now()  # pyright: ignore[reportAttributeAccessIssue]
+
         obj.publicatiestatus = PublicationStatusOptions.revoked
         obj.save()
 
@@ -351,8 +355,12 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "verkorte_titel",
                     "omschrijving",
                     "publicatiestatus",
+                    "gepubliceerd_op",
+                    "ingetrokken_op",
                     "registratiedatum",
                     "laatst_gewijzigd_datum",
+                    "datum_begin_geldigheid",
+                    "datum_einde_geldigheid",
                     "eigenaar",
                     "uuid",
                 )
@@ -385,6 +393,8 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "uuid",
         "registratiedatum",
         "laatst_gewijzigd_datum",
+        "gepubliceerd_op",
+        "ingetrokken_op",
     )
     search_fields = (
         "uuid",
@@ -565,6 +575,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "bestandsnaam",
                     "bestandsomvang",
                     "publicatiestatus",
+                    "gepubliceerd_op",
+                    "ingetrokken_op",
                     "registratiedatum",
                     "laatst_gewijzigd_datum",
                     "eigenaar",
@@ -578,6 +590,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 "fields": (
                     "soort_handeling",
                     "at_time",
+                    "ontvangstdatum",
+                    "datum_ondertekend",
                     "was_assciated_with",
                 )
             },
@@ -598,6 +612,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "uuid",
         "registratiedatum",
         "laatst_gewijzigd_datum",
+        "gepubliceerd_op",
+        "ingetrokken_op",
         "at_time",
         "was_assciated_with",
     )

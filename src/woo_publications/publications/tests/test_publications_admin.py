@@ -350,6 +350,8 @@ class TestPublicationsAdmin(WebTest):
             form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
             form["archiefactiedatum"] = ("2025-01-01",)
             form["toelichting_bewaartermijn"] = ("extra data",)
+            form["datum_begin_geldigheid"] = "2024-09-24"
+            form["datum_einde_geldigheid"] = "2024-09-24"
 
             form.submit(name="_save")
 
@@ -371,6 +373,8 @@ class TestPublicationsAdmin(WebTest):
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
                 "eleifend eros sed consectetur.",
             )
+            self.assertEqual(str(added_item.datum_begin_geldigheid), "2024-09-24")
+            self.assertEqual(str(added_item.datum_einde_geldigheid), "2024-09-24")
             self.assertEqual(
                 str(added_item.registratiedatum), "2024-09-25 00:14:00+00:00"
             )

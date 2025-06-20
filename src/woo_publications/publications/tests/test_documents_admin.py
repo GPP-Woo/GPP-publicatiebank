@@ -263,6 +263,10 @@ class TestDocumentAdmin(WebTest):
             form["officiele_titel"] = "The official title of this document"
             form["verkorte_titel"] = "The title"
             form["creatiedatum"] = "2024-01-01"
+            form["ontvangstdatum_0"] = "2024-09-24"
+            form["ontvangstdatum_1"] = "14:00:00"
+            form["datum_ondertekend_0"] = "2024-09-24"
+            form["datum_ondertekend_1"] = "14:00:00"
             form["omschrijving"] = (
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
@@ -295,6 +299,12 @@ class TestDocumentAdmin(WebTest):
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
                 "eleifend eros sed consectetur.",
+            )
+            self.assertEqual(
+                str(added_item.ontvangstdatum), "2024-09-24 12:00:00+00:00"
+            )
+            self.assertEqual(
+                str(added_item.datum_ondertekend), "2024-09-24 12:00:00+00:00"
             )
             self.assertEqual(
                 str(added_item.registratiedatum), "2024-09-24 12:00:00+00:00"
