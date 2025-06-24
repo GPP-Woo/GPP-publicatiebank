@@ -13,12 +13,12 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.4
     method: DELETE
     uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"5e21f3ec-5181-4bbb-8bf8-ab2fdc6c8caf"}'
+      string: '{"taskId":"34fbe6bd-84a2-431e-a736-6a6a8a227697"}'
     headers:
       Allow:
       - DELETE, OPTIONS
@@ -51,12 +51,12 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.4
     method: DELETE
     uri: http://localhost:8002/api/v1/documenten/5e033c6c-6430-46c1-9efd-05899ec63382
   response:
     body:
-      string: '{"taskId":"501aff17-27ef-490b-957c-ec917830b0e4"}'
+      string: '{"taskId":"78b097b0-6014-4656-98c8-5f79381a73aa"}'
     headers:
       Allow:
       - DELETE, OPTIONS

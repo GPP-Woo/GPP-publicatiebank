@@ -1,11 +1,11 @@
 interactions:
 - request:
-    body: '{"uuid": "c3d72e1c-b04e-48ac-97ec-e6918ae5b070", "publicatie": "9489df34-918d-40df-845f-0c37fbf03d9e",
-      "publisher": {"uuid": "e5113998-4081-4561-b7ba-14418375b5c3", "naam": "professional"},
-      "onderwerpen": [], "informatieCategorieen": [], "identifier": "", "officieleTitel":
-      "decade", "verkorteTitel": "", "omschrijving": "", "creatiedatum": "2025-04-04",
-      "registratiedatum": "2025-04-10T09:28:44.337196+00:00", "laatstGewijzigdDatum":
-      "2025-04-10T09:28:44.337204+00:00", "fileSize": 0, "downloadUrl": ""}'
+    body: '{"uuid": "b62063b5-d9dc-47ef-8f1a-6a9f0ba15707", "publicatie": "f1a4568b-8bc6-42d7-8e25-d15cb1cba97c",
+      "publisher": {"uuid": "3d4c7ac9-4855-4ef8-92ed-4b86958c49c6", "naam": "because"},
+      "onderwerpen": [], "informatieCategorieen": [], "identifiers": [], "officieleTitel":
+      "head", "verkorteTitel": "", "omschrijving": "", "creatiedatum": "2025-06-23",
+      "registratiedatum": "2025-06-26T13:33:09.601773+00:00", "laatstGewijzigdDatum":
+      "2025-06-26T13:33:09.603349+00:00", "fileSize": 0, "downloadUrl": ""}'
     headers:
       Accept:
       - '*/*'
@@ -16,16 +16,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '504'
+      - '498'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.4
     method: POST
     uri: http://localhost:8002/api/v1/documenten
   response:
     body:
-      string: '{"taskId":"ace1a8cf-1845-49cf-bfbe-cc2c2ff1f4d9"}'
+      string: '{"taskId":"d8297e67-fd21-4528-8aca-5773bed778f3"}'
     headers:
       Allow:
       - POST, OPTIONS
