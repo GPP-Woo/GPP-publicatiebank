@@ -1,8 +1,11 @@
 from collections.abc import Iterator
+from datetime import date
+from io import BytesIO
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import StreamingHttpResponse
 from django.test import override_settings
@@ -10,7 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from freezegun import freeze_time
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import ConnectionError, HTTPError, RequestException
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -2045,3 +2048,159 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_502_BAD_GATEWAY)
+
+
+@override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
+class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
+    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Set up global configuration
+        cls.service = service = ServiceFactory.create(
+            for_documents_api_docker_compose=True
+        )
+        config = GlobalConfiguration.get_solo()
+        config.documents_api_service = service
+        config.organisation_rsin = "000000000"
+        config.save()
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_delete_document_no_document_connected(
+        self,
+        mock_remove_document_from_index: MagicMock,
+    ):
+        document = DocumentFactory.create(document_service=None, document_uuid=None)
+        url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.delete(url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Document.objects.filter(uuid=document.uuid).exists())
+        self.assertEqual(len(self.cassette), 0)
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_delete_document_open_zaak_error(
+        self,
+        mock_remove_document_from_index: MagicMock,
+    ):
+        document = DocumentFactory.create(
+            document_service=self.service, document_uuid=self.DOCUMENT_TYPE_UUID
+        )
+        url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with patch(
+            "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
+            side_effect=RequestException(),
+        ):
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.delete(url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(
+            response.json(),
+            {"detail": _("Something went wrong while deleting the document.")},
+        )
+        self.assertTrue(Document.objects.filter(uuid=document.uuid).exists())
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_destroy_document_with_no_doc_in_openzaak(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        none_existing_openzaak_document_uuid = "88d4c4a5-4dd9-454a-9b66-9ad46074012f"
+        document = DocumentFactory(
+            document_service=self.service,
+            document_uuid=none_existing_openzaak_document_uuid,
+        )
+        url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.delete(url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Document.objects.filter(uuid=document.uuid).exists())
+        self.assertEqual(len(self.cassette), 1)
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+
+    @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
+    def test_destroy_document_full_flow(
+        self, mock_remove_document_from_index: MagicMock
+    ):
+        uploaded_file = File(BytesIO(b"1234567890"))
+        DOCUMENT_TYPE_URL = (
+            "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
+            "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"  # this UUID is in the fixture
+        )
+
+        with get_client(self.service) as client:
+            openzaak_document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="File part test",
+                filesize=10,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+            part = openzaak_document.file_parts[0]
+
+            # "upload" the part
+            client.proxy_file_part_upload(
+                uploaded_file,
+                file_part_uuid=part.uuid,
+                lock=openzaak_document.lock,
+            )
+
+            # and unlock the document
+            client.unlock_document(
+                uuid=openzaak_document.uuid, lock=openzaak_document.lock
+            )
+
+            # Ensure that this api call retrieves the document from openzaak
+            # so we can see that it returns a 404 after deletion.
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
+            )
+            self.assertEqual(openzaak_response.status_code, status.HTTP_200_OK)
+
+        document = DocumentFactory(
+            document_service=self.service, document_uuid=openzaak_document.uuid
+        )
+        url = reverse(
+            "api:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.delete(url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Document.objects.filter(uuid=document.uuid).exists())
+
+        with get_client(self.service) as client:
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
+            )
+            self.assertEqual(openzaak_response.status_code, status.HTTP_404_NOT_FOUND)
+
+        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)

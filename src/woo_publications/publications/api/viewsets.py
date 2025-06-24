@@ -16,8 +16,9 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from requests import RequestException
-from rest_framework import mixins, serializers, status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import APIException
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -87,12 +88,14 @@ DOWNLOAD_CHUNK_SIZE = (
             "* specify the organisation RSIN for the created documents"
         ),
     ),
+    destroy=extend_schema(
+        summary=_("Delete a specific document."),
+        description=_("Delete a specific document."),
+    ),
 )
 class DocumentViewSet(
     AuditTrailViewSetMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.ReadOnlyModelViewSet,
+    viewsets.ModelViewSet,
 ):
     queryset = Document.objects.order_by("-creatiedatum")
     serializer_class = DocumentSerializer
@@ -114,6 +117,20 @@ class DocumentViewSet(
         woo_document.register_in_documents_api(
             build_absolute_uri=self.request.build_absolute_uri,
         )
+
+    @override
+    @transaction.atomic()
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        assert isinstance(instance, Document)
+        try:
+            instance.destroy_document()
+        except RequestException as err:
+            raise APIException(
+                detail=_("Something went wrong while deleting the document.")
+            ) from err
+
+        return super().destroy(request, *args, **kwargs)
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
