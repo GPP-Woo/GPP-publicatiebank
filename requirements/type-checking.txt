@@ -897,7 +897,7 @@ uritemplate==4.1.1
     #   -r requirements/ci.txt
     #   coreapi
     #   drf-spectacular
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -905,12 +905,13 @@ urllib3==2.2.2
     #   requests
     #   sentry-sdk
     #   types-requests
+    #   vcrpy
 uwsgi==2.0.26
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-vcrpy==6.0.1
+vcrpy==7.0.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
