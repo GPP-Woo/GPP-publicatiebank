@@ -319,6 +319,8 @@ class DocumentInlineAdmin(admin.StackedInline):
         "publicatiestatus",
         "registratiedatum",
         "laatst_gewijzigd_datum",
+        "gepubliceerd_op",
+        "ingetrokken_op",
     )
     extra = 0
 

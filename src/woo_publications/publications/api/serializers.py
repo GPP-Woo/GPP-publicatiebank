@@ -4,6 +4,7 @@ from typing import Literal, TypedDict
 
 from django.db import transaction
 from django.http import HttpRequest
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_fsm import FSMField
@@ -366,11 +367,11 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
-        document = super().create(validated_data)
 
-        if document.publicatiestatus == PublicationStatusOptions.published:
-            document.gepubliceerd_op = document.laatst_gewijzigd_datum
-            document.save()
+        if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
+            validated_data["gepubliceerd_op"] = timezone.now()
+
+        document = super().create(validated_data)
 
         DocumentIdentifier.objects.bulk_create(
             DocumentIdentifier(document=document, **identifiers)

@@ -183,7 +183,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
                 "datumBeginGeldigheid": None,
                 "datumEindeGeldigheid": None,
-                "gepubliceerdOp": None,
+                "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
                 "ingetrokkenOp": None,
                 "bronBewaartermijn": "Selectielijst gemeenten 2020",
                 "selectiecategorie": "",
@@ -281,7 +281,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
             "datumBeginGeldigheid": None,
             "datumEindeGeldigheid": None,
-            "gepubliceerdOp": None,
+            "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
             "ingetrokkenOp": None,
             "selectiecategorie": "",
             "archiefnominatie": ArchiveNominationChoices.retain,
@@ -312,7 +312,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "datumBeginGeldigheid": None,
             "datumEindeGeldigheid": None,
-            "gepubliceerdOp": None,
+            "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
             "selectiecategorie": "",
@@ -913,7 +913,6 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
 
     def test_list_publications_filter_owner(self):
-        self.maxDiff = None
         ic, ic2 = InformationCategoryFactory.create_batch(
             2, oorsprong=InformationCategoryOrigins.value_list
         )
@@ -971,7 +970,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefactiedatum": "2025-01-01",
             "datumBeginGeldigheid": None,
             "datumEindeGeldigheid": None,
-            "gepubliceerdOp": None,
+            "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
             "ingetrokkenOp": None,
             "toelichtingBewaartermijn": "",
         }
@@ -1000,7 +999,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefactiedatum": "2025-01-01",
             "datumBeginGeldigheid": None,
             "datumEindeGeldigheid": None,
-            "gepubliceerdOp": None,
+            "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
             "toelichtingBewaartermijn": "",
         }
@@ -1656,7 +1655,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "datumBeginGeldigheid": "2025-06-19",
                 "datumEindeGeldigheid": "2025-06-19",
-                "gepubliceerdOp": None,
+                "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
                 "ingetrokkenOp": None,
                 "bronBewaartermijn": "changed",
                 "selectiecategorie": "changed",
@@ -1826,7 +1825,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "datumBeginGeldigheid": None,
             "datumEindeGeldigheid": None,
-            "gepubliceerdOp": None,
+            "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
             "ingetrokkenOp": None,
             "bronBewaartermijn": publication.bron_bewaartermijn,
             "selectiecategorie": "",
