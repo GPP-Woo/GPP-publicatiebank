@@ -2,7 +2,7 @@
 {
     "model": "auth.group",
     "fields": {
-        "name": "Technisch beheer",
+        "name": "TechnischBeheer",
         "permissions": [
             [
                 "add_user",
@@ -355,7 +355,7 @@
 {
     "model": "auth.group",
     "fields": {
-        "name": "Functioneel beheer",
+        "name": "FunctioneelBeheer",
         "permissions": [
             [
                 "view_user",
