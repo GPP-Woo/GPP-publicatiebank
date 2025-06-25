@@ -38,6 +38,7 @@ from ..tasks import (
 )
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
+    DocumentCreateSerializer,
     DocumentSerializer,
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
@@ -134,9 +135,13 @@ class DocumentViewSet(
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
-        if action in ["update", "partial_update"]:
-            return DocumentUpdateSerializer
-        return super().get_serializer_class()
+        match action:
+            case "create":
+                return DocumentCreateSerializer
+            case "update" | "partial_update":
+                return DocumentUpdateSerializer
+            case _:
+                return super().get_serializer_class()
 
     @extend_schema(
         summary=_("Upload file part"),
