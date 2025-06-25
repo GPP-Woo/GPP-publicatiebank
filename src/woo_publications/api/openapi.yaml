@@ -292,7 +292,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Document'
+              $ref: '#/components/schemas/DocumentCreate'
         required: true
       security:
       - tokenAuth: []
@@ -301,7 +301,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Document'
+                $ref: '#/components/schemas/DocumentCreate'
           description: ''
   /api/v1/documenten/{uuid}:
     get:
@@ -1959,15 +1959,6 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
-        bestandsdelen:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilePart'
-          readOnly: true
-          nullable: true
-          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
-            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
         documenthandelingen:
           type: array
           items:
@@ -1982,7 +1973,6 @@ components:
           description: Indicates if the file has been uploaded and made 'ready for
             use' in the upstream Documents API.
       required:
-      - bestandsdelen
       - creatiedatum
       - gepubliceerdOp
       - ingetrokkenOp
@@ -2017,6 +2007,153 @@ components:
       - atTime
       - identifier
       - wasAssciatedWith
+    DocumentCreate:
+      type: object
+      description: Manage the creation of new Documents.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier:
+          type: string
+          title: Identificatie
+          description: De (primaire) unieke identificatie.
+          maxLength: 255
+        publicatie:
+          type: string
+          format: uuid
+          description: De unieke identificatie van de publicatie.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: The publication identifiers attached to this publication.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          readOnly: true
+          title: Status
+          description: "\nOn creation, the publicatiestatus is derived from the publication\
+            \ and cannot be specified directly.\n\nThe possible state transitions\
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
+        creatiedatum:
+          type: string
+          format: date
+          description: De datum waarop het document ontstaan is. Niet te verwarren
+            met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date of reception
+          description: The timestamp when the document is received by the organisatie.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Signed date
+          description: The timestamp when the document is signed by the organisatie.
+        bestandsformaat:
+          type: string
+          description: TODO - placeholder accepting anything, in the future this will
+            be validated against a reference value list.
+          maxLength: 255
+        bestandsnaam:
+          type: string
+          description: Bestandsnaam 'op de harde schijf' van het document, bijvoorbeeld
+            'gelakt-verslag.pdf'.
+          maxLength: 255
+        bestandsomvang:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          nullable: true
+          description: |-
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        registratiedatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Geregistreerd op
+          description: Systeemdatum en -tijd wanneer het document in de databank opgeslagen
+            is. Niet te verwarren met de creatiedatum van de publicatie, die typisch
+            *voor* de registratiedatum valt.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
+            is in de database.
+        documenthandelingen:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentAction'
+          description: De documenthandelingen voor dit document. Op dit moment kan
+            je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
+            standaardwaarden gebruikt.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
+        bestandsdelen:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilePart'
+          readOnly: true
+          nullable: true
+          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
+            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
+            in de body van de document create operatie.
+      required:
+      - bestandsdelen
+      - creatiedatum
+      - gepubliceerdOp
+      - ingetrokkenOp
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publicatie
+      - publicatiestatus
+      - registratiedatum
+      - uploadVoltooid
+      - uuid
     DocumentIdentifier:
       type: object
       properties:
@@ -2047,6 +2184,7 @@ components:
       - documentUploadVoltooid
     DocumentUpdate:
       type: object
+      description: Manage updates to metadata of Documents.
       properties:
         uuid:
           type: string
@@ -2155,15 +2293,6 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
-        bestandsdelen:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilePart'
-          readOnly: true
-          nullable: true
-          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
-            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
         documenthandelingen:
           allOf:
           - $ref: '#/components/schemas/DocumentAction'
@@ -2178,7 +2307,6 @@ components:
           description: Indicates if the file has been uploaded and made 'ready for
             use' in the upstream Documents API.
       required:
-      - bestandsdelen
       - bestandsformaat
       - bestandsnaam
       - bestandsomvang
@@ -2491,6 +2619,7 @@ components:
             $ref: '#/components/schemas/Topic'
     PatchedDocumentUpdate:
       type: object
+      description: Manage updates to metadata of Documents.
       properties:
         uuid:
           type: string
@@ -2599,15 +2728,6 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
-        bestandsdelen:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilePart'
-          readOnly: true
-          nullable: true
-          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
-            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
         documenthandelingen:
           allOf:
           - $ref: '#/components/schemas/DocumentAction'
