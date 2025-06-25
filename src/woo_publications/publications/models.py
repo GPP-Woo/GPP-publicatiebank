@@ -656,6 +656,15 @@ class Document(ConcurrentTransitionMixin, models.Model):
         default=0,
         help_text=_("Size of the file on disk, in bytes."),
     )
+    source_url = models.URLField(
+        _("source URL"),
+        max_length=1000,
+        blank=True,
+        help_text=_(
+            "If the document originates from a Documenten API, this URL uniquely "
+            "identifies the matching resource. The value is empty for manual uploads."
+        ),
+    )
     publicatiestatus = FSMField(
         _("status"),
         max_length=12,
