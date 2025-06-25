@@ -46,6 +46,19 @@ class PublicationFactory(factory.django.DjangoModelFactory[Publication]):
         )
 
     @factory.post_generation
+    def publicatiestatus_dates(
+        obj: Publication,  # pyright: ignore[reportGeneralTypeIssues]
+        create: bool,
+        extracted: Sequence[InformationCategory],
+        **kwargs,
+    ):
+        if not create:
+            return
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            obj.gepubliceerd_op = obj.registratiedatum
+
+    @factory.post_generation
     def informatie_categorieen(
         obj: Publication,  # pyright: ignore[reportGeneralTypeIssues]
         create: bool,
@@ -137,6 +150,19 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
                     raise ValueError(
                         "'revoked' publications can only have 'revoked' documents."
                     )
+
+    @factory.post_generation
+    def publicatiestatus_dates(
+        obj: Document,  # pyright: ignore[reportGeneralTypeIssues]
+        create: bool,
+        extracted: Sequence[InformationCategory],
+        **kwargs,
+    ):
+        if not create:
+            return
+
+        if obj.publicatiestatus == PublicationStatusOptions.published:
+            obj.gepubliceerd_op = obj.registratiedatum
 
 
 class DocumentIdentifierFactory(factory.django.DjangoModelFactory[DocumentIdentifier]):

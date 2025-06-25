@@ -10,6 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import StreamingHttpResponse
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from freezegun import freeze_time
@@ -118,6 +119,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 creatiedatum="2024-01-01",
+                datum_ondertekend=None,
+                ontvangstdatum=timezone.now(),
             )
         with freeze_time("2024-09-24T12:00:00-00:00"):
             document2 = DocumentFactory.create(
@@ -130,6 +133,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
                 "facilisis mollis urna.",
                 creatiedatum="2024-02-02",
+                datum_ondertekend=timezone.now(),
+                ontvangstdatum=None,
             )
 
         response = self.client.get(reverse("api:document-list"), headers=AUDIT_HEADERS)
@@ -167,6 +172,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
+                "ontvangstdatum": None,
+                "datumOndertekend": "2024-09-24T14:00:00+02:00",
+                "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
+                "ingetrokkenOp": None,
                 "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
             }
@@ -202,6 +211,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 },
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
+                "ontvangstdatum": "2024-09-25T14:30:00+02:00",
+                "datumOndertekend": None,
+                "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
+                "ingetrokkenOp": None,
                 "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
             }
@@ -1050,6 +1063,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             },
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
+            "ontvangstdatum": None,
+            "datumOndertekend": None,
+            "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
+            "ingetrokkenOp": None,
             "bestandsdelen": None,
             "documenthandelingen": documenthandelingen,
         }
@@ -1103,6 +1120,8 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             "omschrijving": "changed omschrijving",
             "publicatiestatus": PublicationStatusOptions.published,
             "creatiedatum": "2008-02-23",
+            "ontvangstdatum": "2024-09-25T14:30:00+02:00",
+            "datumOndertekend": "2024-09-25T14:30:00+02:00",
         }
 
         detail_url = reverse(
@@ -1119,6 +1138,8 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         self.assertEqual(response_data["officieleTitel"], "changed officiele_title")
         self.assertEqual(response_data["verkorteTitel"], "changed verkorte_title")
         self.assertEqual(response_data["omschrijving"], "changed omschrijving")
+        self.assertEqual(response_data["ontvangstdatum"], "2024-09-25T14:30:00+02:00")
+        self.assertEqual(response_data["datumOndertekend"], "2024-09-25T14:30:00+02:00")
         self.assertEqual(
             response_data["publicatiestatus"], PublicationStatusOptions.published
         )

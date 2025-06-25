@@ -40,8 +40,6 @@ class TestPublicationAdminAuditLogging(WebTest):
     classes, which should cover the rest of the apps/models.
     """
 
-    maxDiff = None
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -123,6 +121,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "archiefnominatie": ArchiveNominationChoices.retain,
                 "archiefactiedatum": "2026-09-25",
                 "toelichting_bewaartermijn": "extra data",
+                "datum_begin_geldigheid": None,
+                "datum_einde_geldigheid": None,
+                "gepubliceerd_op": "2024-09-25T00:14:00Z",
+                "ingetrokken_op": None,
             },
             "_cached_object_repr": "The official title of this publication",
         }
@@ -223,6 +225,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "archiefnominatie": ArchiveNominationChoices.retain,
                     "archiefactiedatum": "2034-09-27",
                     "toelichting_bewaartermijn": "extra data",
+                    "datum_begin_geldigheid": None,
+                    "datum_einde_geldigheid": None,
+                    "gepubliceerd_op": "2024-09-28T00:14:00Z",
+                    "ingetrokken_op": None,
                 },
                 "_cached_object_repr": "changed official title",
             }
@@ -327,6 +333,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "archiefnominatie": ArchiveNominationChoices.retain,
                     "archiefactiedatum": "2025-01-01",
                     "toelichting_bewaartermijn": "",
+                    "datum_begin_geldigheid": None,
+                    "datum_einde_geldigheid": None,
+                    "gepubliceerd_op": "2024-09-27T00:14:00Z",
+                    "ingetrokken_op": "2024-09-28T00:14:00Z",
                 },
                 "_cached_object_repr": "title one",
             }
@@ -365,6 +375,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-27T00:14:00Z",
+                    "ingetrokken_op": "2024-09-28T00:14:00Z",
                 },
                 "_cached_object_repr": "title",
             }
@@ -441,6 +455,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "publicatiestatus": PublicationStatusOptions.revoked,
                     "publisher": organisation.pk,
                     "registratiedatum": "2024-09-27T00:14:00Z",
+                    "datum_begin_geldigheid": None,
+                    "datum_einde_geldigheid": None,
+                    "gepubliceerd_op": "2024-09-27T00:14:00Z",
+                    "ingetrokken_op": "2024-09-28T00:14:00Z",
                     "uuid": str(publication.uuid),
                     "verantwoordelijke": organisation.pk,
                     "verkorte_titel": "one",
@@ -487,6 +505,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-27T00:14:00Z",
+                    "ingetrokken_op": "2024-09-28T00:14:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
                 },
                 "_cached_object_repr": "title",
@@ -558,6 +580,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "archiefnominatie": ArchiveNominationChoices.retain,
                 "archiefactiedatum": "2025-01-01",
                 "toelichting_bewaartermijn": "",
+                "datum_begin_geldigheid": None,
+                "datum_einde_geldigheid": None,
+                "gepubliceerd_op": None,
+                "ingetrokken_op": None,
             },
             "_cached_object_repr": "title one",
         }
@@ -646,6 +672,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "registratiedatum": "2024-09-25T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-25T00:14:00Z",
+                    "ingetrokken_op": None,
                 },
                 "_cached_object_repr": "title",
             }
@@ -743,6 +773,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_uuid": None,
                     "lock": "",
                     "upload_complete": False,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-26T00:14:00Z",
+                    "ingetrokken_op": None,
                 },
                 "_cached_object_repr": "title",
             }
@@ -833,6 +867,10 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "registratiedatum": "2024-09-25T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-25T00:14:00Z",
+                    "ingetrokken_op": None,
                 },
                 "_cached_object_repr": "DELETE THIS ITEM",
             }
@@ -913,6 +951,10 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "soort_handeling": DocumentActionTypeOptions.declared,
+                "ontvangstdatum": None,
+                "datum_ondertekend": None,
+                "gepubliceerd_op": None,
+                "ingetrokken_op": None,
             },
             "_cached_object_repr": "The official title of this document",
         }
@@ -997,6 +1039,10 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "registratiedatum": "2024-09-25T14:00:00Z",
                     "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-25T14:00:00Z",
+                    "ingetrokken_op": None,
                 },
                 "_cached_object_repr": "changed official title",
             }
@@ -1060,6 +1106,10 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "registratiedatum": "2024-09-25T14:00:00Z",
                     "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
                     "soort_handeling": DocumentActionTypeOptions.declared,
+                    "ontvangstdatum": None,
+                    "datum_ondertekend": None,
+                    "gepubliceerd_op": "2024-09-25T14:00:00Z",
+                    "ingetrokken_op": "2024-09-29T14:00:00Z",
                 },
                 "_cached_object_repr": "title one",
             }
@@ -1130,10 +1180,13 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "registratiedatum": "2024-09-25T14:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
                 "soort_handeling": DocumentActionTypeOptions.declared,
+                "ontvangstdatum": None,
+                "datum_ondertekend": None,
+                "gepubliceerd_op": "2024-09-25T14:00:00Z",
+                "ingetrokken_op": None,
             },
             "_cached_object_repr": "title one",
         }
-        self.maxDiff = None
         self.assertEqual(update_log.extra_data, expected_data)
 
     def test_document_admin_delete(self):
@@ -1195,10 +1248,13 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "registratiedatum": "2024-09-25T14:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
                 "soort_handeling": DocumentActionTypeOptions.declared,
+                "datum_ondertekend": None,
+                "ontvangstdatum": None,
+                "ingetrokken_op": None,
+                "gepubliceerd_op": "2024-09-25T14:00:00Z",
             },
             "_cached_object_repr": "title one",
         }
-
         self.assertEqual(log.extra_data, expected_data)
 
 

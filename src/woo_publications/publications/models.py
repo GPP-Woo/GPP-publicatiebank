@@ -238,6 +238,38 @@ class Publication(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    gepubliceerd_op = models.DateTimeField(
+        _("published on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was published."),
+        null=True,
+        blank=True,
+    )
+    ingetrokken_op = models.DateTimeField(
+        _("revoked on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was revoked."),
+        null=True,
+        blank=True,
+    )
+    datum_begin_geldigheid = models.DateField(
+        _("start date"),
+        help_text=_(
+            "The date when the rights and obligations of the attached "
+            "documents come into effect."
+        ),
+        null=True,
+        blank=True,
+    )
+    datum_einde_geldigheid = models.DateField(
+        _("end date"),
+        help_text=_(
+            "The date when the rights and obligations of the attached "
+            "documents stops being in effect."
+        ),
+        null=True,
+        blank=True,
+    )
 
     # Retention fields:
     bron_bewaartermijn = models.CharField(
@@ -345,6 +377,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         """
         from .tasks import index_publication
 
+        self.gepubliceerd_op = timezone.now()
+
         # schedule indexing to the search API
         transaction.on_commit(partial(index_publication.delay, publication_id=self.pk))
 
@@ -382,6 +416,8 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         the publication from the search index.
         """
         from .tasks import remove_publication_from_index
+
+        self.ingetrokken_op = timezone.now()
 
         # schedule index removal to the search API
         transaction.on_commit(
@@ -429,6 +465,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         documents.update(
             publicatiestatus=PublicationStatusOptions.revoked,
             laatst_gewijzigd_datum=timezone.now(),
+            ingetrokken_op=timezone.now(),
         )
 
         # audit log actions
@@ -646,6 +683,32 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    ontvangstdatum = models.DateTimeField(
+        _("date of reception"),
+        help_text=_("The timestamp when the document is received by the organisatie."),
+        null=True,
+        blank=True,
+    )
+    datum_ondertekend = models.DateTimeField(
+        _("signed date"),
+        help_text=_("The timestamp when the document is signed by the organisatie."),
+        null=True,
+        blank=True,
+    )
+    gepubliceerd_op = models.DateTimeField(
+        _("published on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was published."),
+        null=True,
+        blank=True,
+    )
+    ingetrokken_op = models.DateTimeField(
+        _("revoked on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the publication was revoked."),
+        null=True,
+        blank=True,
+    )
 
     # documenthandeling fields
     soort_handeling = models.CharField(
@@ -799,6 +862,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         """
         from .tasks import index_document
 
+        self.gepubliceerd_op = timezone.now()
+
         # schedule indexing to the search API
         download_url = self.absolute_document_download_uri(request=request)
         transaction.on_commit(
@@ -831,6 +896,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Revocation sends an update to the search API to remove it from the index.
         """
         from .tasks import remove_document_from_index
+
+        self.ingetrokken_op = timezone.now()
 
         transaction.on_commit(
             partial(remove_document_from_index.delay, document_id=self.pk)

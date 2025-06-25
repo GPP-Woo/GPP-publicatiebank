@@ -53,6 +53,10 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 * ``Status``. De publicatiestatus van het document. "Gepubliceerd" betekent dat het document online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het document voor het laatst gewijzigd is.
+* ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop het document is gepubliceerd.
+* ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop het document is ingetrokken.
+* ``Datum Begin Geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten in werking treden.
+* ``Datum Einde Geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten (zijn) komen te vervallen.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 
 **Documenthandelingen**
@@ -135,11 +139,15 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop de publicatie nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
+* ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop de publicatie is gepubliceerd.
+* ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop de publicatie is ingetrokken.
 
 **Bewaartermijn**
 
 * ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn. Doorgaans zal dit een selectielijst c.q. selectiebesluit zijn, welke conform de vigerende Archiefwet is vastgesteld.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
+* ``Ontvangstdatum``. Indien van toepassing, datum wanneer het document door of namens de organisatie in ontvangst is genomen.
+* ``Datum Ondertekening``. Indien van toepassing, datum waarop het document (door alle partijen) ondertekend is.
 * ``Archiefnominatie``. Een radioknop die aangeeft of de publicaties op termijn vernietigd of permanent bewaard moet worden. Permanent te bewaren publicaties moeten conform de vigerende Archiefwet op termijn overgebracht worden naar een archiefbewaarplaats c.q. plusdepot / e-depot.
 * ``Archiefactiedatum``. De datum wanneer er actie (vernietiging dan wel overbrenging) genomen moet worden op de *publicatie*.
 * ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
