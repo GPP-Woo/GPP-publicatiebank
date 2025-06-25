@@ -38,7 +38,11 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import (
+    DocumentActionTypeOptions,
+    DocumentDeliveryMethods,
+    PublicationStatusOptions,
+)
 from ..models import Document, DocumentIdentifier
 from .factories import DocumentFactory, DocumentIdentifierFactory, PublicationFactory
 
@@ -176,8 +180,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "datumOndertekend": "2024-09-24T14:00:00+02:00",
                 "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
                 "ingetrokkenOp": None,
-                "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
+                "uploadVoltooid": False,
             }
 
             self.assertEqual(data["results"][0], expected_second_item_data)
@@ -215,8 +219,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "datumOndertekend": None,
                 "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
                 "ingetrokkenOp": None,
-                "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
+                "uploadVoltooid": False,
             }
 
             self.assertEqual(data["results"][1], expected_first_item_data)
@@ -1067,8 +1071,8 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "datumOndertekend": None,
             "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
-            "bestandsdelen": None,
             "documenthandelingen": documenthandelingen,
+            "uploadVoltooid": False,
         }
 
         self.assertEqual(data, expected_data)
@@ -1083,7 +1087,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # avoid hitting the documenten API for list endpoints
-            self.assertIsNone(response.json()["results"][0]["bestandsdelen"])
+            self.assertNotIn("bestandsdelen", response.json()["results"][0])
 
         with self.subTest("detail endpoint"):
             detail_url = reverse(
@@ -1095,7 +1099,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # avoid hitting the documenten API for retrieve operations
-            self.assertIsNone(response.json()["bestandsdelen"])
+            self.assertNotIn("bestandsdelen", response.json())
 
 
 class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
@@ -1981,6 +1985,66 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 },
             )
 
+    def test_create_document_with_external_document_url(self):
+        # create an actual document in the remote Open Zaak that we can point to
+        with get_client(self.service) as client:
+            openzaak_document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=self.DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="File part test",
+                filesize=10,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+        document_url = (
+            "http://openzaak.docker.internal:8001/documenten/api/v1/"
+            f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
+            "?versie=999"
+        )
+        organisation = OrganisationFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[self.information_category],
+            verantwoordelijke=organisation,
+        )
+        endpoint = reverse("api:document-list")
+        body = {
+            "identifier": "WOO-P/0042",
+            "publicatie": publication.uuid,
+            "officieleTitel": "Test document external URL",
+            "creatiedatum": "2024-11-05",
+            "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+            # dummy URL, doesn't actually exist, but this host/service is configured
+            # correctly and will thus pass validation
+            "documentUrl": document_url,
+        }
+
+        with self.subTest("successful creation"):
+            response = self.client.post(
+                endpoint,
+                data=body,
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, response.json()
+            )
+            data = response.json()
+            self.assertIsNone(data["bestandsdelen"])
+            self.assertFalse(data["uploadVoltooid"])
+
+            # check database state - we expect nothing to be done yet because a
+            # background task will do the actual processing
+            document = Document.objects.get(uuid=data["uuid"])
+            self.assertIsNone(document.document_service)
+            self.assertIsNone(document.document_uuid)
+            self.assertEqual(document.source_url, document_url)
+            self.assertFalse(document.upload_complete)
+            self.assertEqual(document.bestandsomvang, 0)  # will be set via Celery!
+
 
 class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
     """
@@ -2059,6 +2123,8 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=5,
+            # a lie, but this mimicks a problem on the Documents API side
+            upload_complete=True,
         )
         document.register_in_documents_api(
             build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
@@ -2069,6 +2135,19 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_502_BAD_GATEWAY)
+
+    def test_download_document_unfinished_upload(self):
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            bestandsomvang=5,
+        )
+        assert document.document_service is None
+        assert document.document_uuid is None
+        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])

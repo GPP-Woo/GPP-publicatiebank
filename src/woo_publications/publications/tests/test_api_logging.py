@@ -335,6 +335,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "omschrijving": "",
                     "document_uuid": None,
                     "bestandsomvang": 0,
+                    "source_url": "",
                     "verkorte_titel": "",
                     "bestandsformaat": "unknown",
                     "officiele_titel": "title",
@@ -473,6 +474,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "omschrijving": "",
                     "document_uuid": None,
                     "bestandsomvang": 0,
+                    "source_url": "",
                     "verkorte_titel": "",
                     "bestandsformaat": "unknown",
                     "officiele_titel": "title two",
@@ -632,6 +634,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
+                "source_url": "",
                 "creatiedatum": "2024-01-01",
                 "document_service": None,
                 "document_uuid": None,
@@ -670,6 +673,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             publicatie__informatie_categorieen=[information_category],
             bestandsomvang=5,
             with_registered_document=True,
+            upload_complete=True,
         )
         endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
 

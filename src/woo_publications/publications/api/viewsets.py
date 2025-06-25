@@ -23,7 +23,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from woo_publications.api.exceptions import BadGateway
+from woo_publications.api.exceptions import BadGateway, Conflict
 from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.logging.service import (
     AuditTrailViewSetMixin,
@@ -38,6 +38,7 @@ from ..tasks import (
 )
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
+    DocumentCreateSerializer,
     DocumentSerializer,
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
@@ -134,9 +135,13 @@ class DocumentViewSet(
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
-        if action in ["update", "partial_update"]:
-            return DocumentUpdateSerializer
-        return super().get_serializer_class()
+        match action:
+            case "create":
+                return DocumentCreateSerializer
+            case "update" | "partial_update":
+                return DocumentUpdateSerializer
+            case _:
+                return super().get_serializer_class()
 
     @extend_schema(
         summary=_("Upload file part"),
@@ -210,6 +215,11 @@ class DocumentViewSet(
                 description=_("The binary file contents."),
                 response=bytes,
             ),
+            status.HTTP_409_CONFLICT: OpenApiResponse(
+                description=_(
+                    "Conflict - the document is not (yet) available for download."
+                ),
+            ),
             status.HTTP_502_BAD_GATEWAY: OpenApiResponse(
                 description=_("Bad gateway - failure to stream content."),
             ),
@@ -220,7 +230,7 @@ class DocumentViewSet(
                 type=str,
                 location=OpenApiParameter.HEADER,
                 description=_("Total size in bytes of the download."),
-                response=(200,),
+                response=[200],
             ),
             OpenApiParameter(
                 name="Content-Disposition",
@@ -229,7 +239,7 @@ class DocumentViewSet(
                 description=_(
                     "Marks the file as attachment and includes the filename."
                 ),
-                response=(200,),
+                response=[200],
             ),
         ],
     )
@@ -237,6 +247,9 @@ class DocumentViewSet(
     def download(self, request: Request, *args, **kwargs) -> StreamingHttpResponse:
         document = self.get_object()
         assert isinstance(document, Document)
+
+        if not document.upload_complete:
+            raise Conflict(detail=_("The document upload is not yet completed."))
 
         assert document.document_service is not None, (
             "Document must exist in upstream API"
