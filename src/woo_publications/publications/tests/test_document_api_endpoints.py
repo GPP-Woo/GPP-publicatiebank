@@ -168,7 +168,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "datumOndertekend": "2024-09-24T14:00:00+02:00",
                 "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
                 "ingetrokkenOp": None,
-                "bestandsdelen": None,
                 "uploadVoltooid": False,
             }
 
@@ -199,7 +198,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "datumOndertekend": None,
                 "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
                 "ingetrokkenOp": None,
-                "bestandsdelen": None,
                 "uploadVoltooid": False,
             }
 
@@ -1043,7 +1041,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "datumOndertekend": None,
             "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
-            "bestandsdelen": None,
             "uploadVoltooid": False,
         }
 
@@ -1059,7 +1056,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # avoid hitting the documenten API for list endpoints
-            self.assertIsNone(response.json()["results"][0]["bestandsdelen"])
+            self.assertNotIn("bestandsdelen", response.json()["results"][0])
 
         with self.subTest("detail endpoint"):
             detail_url = reverse(
@@ -1071,7 +1068,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # avoid hitting the documenten API for retrieve operations
-            self.assertIsNone(response.json()["bestandsdelen"])
+            self.assertNotIn("bestandsdelen", response.json())
 
 
 class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):

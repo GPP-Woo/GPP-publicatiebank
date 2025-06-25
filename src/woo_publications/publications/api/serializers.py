@@ -162,18 +162,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )
-    bestandsdelen = FilePartSerializer(
-        label=_("file parts"),
-        help_text=_(
-            "The expected file parts/chunks to upload the file contents. These are "
-            "derived from the specified total file size (`bestandsomvang`) in the "
-            "document create body."
-        ),
-        source="zgw_document.file_parts",
-        many=True,
-        read_only=True,
-        allow_null=True,
-    )
     eigenaar = EigenaarSerializer(
         label=_("owner"),
         help_text=_(
@@ -222,7 +210,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "eigenaar",
             "registratiedatum",
             "laatst_gewijzigd_datum",
-            "bestandsdelen",
             "upload_voltooid",
         )
         extra_kwargs = {
@@ -283,6 +270,94 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
 
         return attrs
 
+
+class DocumentCreateSerializer(DocumentSerializer):
+    """
+    Manage the creation of new Documents.
+    """
+
+    bestandsdelen = FilePartSerializer(
+        label=_("file parts"),
+        help_text=_(
+            "The expected file parts/chunks to upload the file contents. These are "
+            "derived from the specified total file size (`bestandsomvang`) in the "
+            "document create body."
+        ),
+        source="zgw_document.file_parts",
+        many=True,
+        read_only=True,
+        allow_null=True,
+    )
+
+    class Meta(DocumentSerializer.Meta):
+        fields = DocumentSerializer.Meta.fields + ("bestandsdelen",)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        document_identifiers = validated_data.pop("documentidentifier_set", [])
+        # on create, the status is always derived from the publication. Anything
+        # submitted by the client is ignored.
+        publication: Publication = validated_data["publicatie"]
+        validated_data["publicatiestatus"] = publication.publicatiestatus
+
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
+        )
+
+        if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
+            validated_data["gepubliceerd_op"] = timezone.now()
+
+        document = super().create(validated_data)
+
+        DocumentIdentifier.objects.bulk_create(
+            DocumentIdentifier(document=document, **identifiers)
+            for identifiers in document_identifiers
+        )
+
+        return document
+
+
+class DocumentUpdateSerializer(DocumentSerializer):
+    """
+    Manage updates to metadata of Documents.
+    """
+
+    publicatie = serializers.SlugRelatedField(
+        slug_field="uuid",
+        help_text=_("The unique identifier of the publication."),
+        read_only=True,
+    )
+
+    class Meta(DocumentSerializer.Meta):
+        fields = DocumentSerializer.Meta.fields
+        read_only_fields = [
+            field
+            for field in DocumentSerializer.Meta.fields
+            if field
+            not in (
+                "officiele_titel",
+                "verkorte_titel",
+                "omschrijving",
+                "publicatiestatus",
+                "eigenaar",
+                "creatiedatum",
+                "ontvangstdatum",
+                "datum_ondertekend",
+            )
+        ]
+        extra_kwargs = {
+            "officiele_titel": {
+                "required": False,
+            },
+            "creatiedatum": {
+                "required": False,
+            },
+            "publicatiestatus": {
+                **DocumentSerializer.Meta.extra_kwargs["publicatiestatus"],
+                "read_only": False,
+            },
+        }
+
     @transaction.atomic
     def update(self, instance, validated_data):
         update_document_identifiers = "documentidentifier_set" in validated_data
@@ -338,68 +413,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             )
 
         return document
-
-    @transaction.atomic
-    def create(self, validated_data):
-        document_identifiers = validated_data.pop("documentidentifier_set", [])
-        # on create, the status is always derived from the publication. Anything
-        # submitted by the client is ignored.
-        publication: Publication = validated_data["publicatie"]
-        validated_data["publicatiestatus"] = publication.publicatiestatus
-
-        validated_data["eigenaar"] = update_or_create_organisation_member(
-            self.context["request"], validated_data.get("eigenaar")
-        )
-
-        if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
-            validated_data["gepubliceerd_op"] = timezone.now()
-
-        document = super().create(validated_data)
-
-        DocumentIdentifier.objects.bulk_create(
-            DocumentIdentifier(document=document, **identifiers)
-            for identifiers in document_identifiers
-        )
-
-        return document
-
-
-class DocumentUpdateSerializer(DocumentSerializer):
-    publicatie = serializers.SlugRelatedField(
-        slug_field="uuid",
-        help_text=_("The unique identifier of the publication."),
-        read_only=True,
-    )
-
-    class Meta(DocumentSerializer.Meta):
-        fields = DocumentSerializer.Meta.fields
-        read_only_fields = [
-            field
-            for field in DocumentSerializer.Meta.fields
-            if field
-            not in (
-                "officiele_titel",
-                "verkorte_titel",
-                "omschrijving",
-                "publicatiestatus",
-                "eigenaar",
-                "creatiedatum",
-                "ontvangstdatum",
-                "datum_ondertekend",
-            )
-        ]
-        extra_kwargs = {
-            "officiele_titel": {
-                "required": False,
-            },
-            "creatiedatum": {
-                "required": False,
-            },
-            "publicatiestatus": {
-                **DocumentSerializer.Meta.extra_kwargs["publicatiestatus"],
-                "read_only": False,
-            },
-        }
 
 
 class PublicationIdentifierSerializer(
