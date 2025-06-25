@@ -178,6 +178,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "ingetrokkenOp": None,
                 "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
+                "uploadVoltooid": False,
             }
 
             self.assertEqual(data["results"][0], expected_second_item_data)
@@ -217,6 +218,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "ingetrokkenOp": None,
                 "bestandsdelen": None,
                 "documenthandelingen": documenthandelingen,
+                "uploadVoltooid": False,
             }
 
             self.assertEqual(data["results"][1], expected_first_item_data)
@@ -1069,6 +1071,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "ingetrokkenOp": None,
             "bestandsdelen": None,
             "documenthandelingen": documenthandelingen,
+            "uploadVoltooid": False,
         }
 
         self.assertEqual(data, expected_data)
@@ -2059,6 +2062,8 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=5,
+            # a lie, but this mimicks a problem on the Documents API side
+            upload_complete=True,
         )
         document.register_in_documents_api(
             build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
@@ -2069,6 +2074,19 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_502_BAD_GATEWAY)
+
+    def test_download_document_unfinished_upload(self):
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            bestandsomvang=5,
+        )
+        assert document.document_service is None
+        assert document.document_uuid is None
+        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])

@@ -632,17 +632,9 @@ paths:
                 type: string
                 format: binary
           description: De binaire bestandsinhoud.
+        '409':
+          description: Conflict - the document is not (yet) available for download.
         '502':
-          headers:
-            Content-Length:
-              schema:
-                type: string
-              description: Totale grootte (in bytes) van de download.
-            Content-Disposition:
-              schema:
-                type: string
-              description: Markeert het bestand als 'bijlage' en bevat de bestandsnaam
-                van het document.
           description: Bad gateway - kon de inhoud niet streamen.
   /api/v1/informatiecategorieen:
     get:
@@ -1983,6 +1975,12 @@ components:
           description: De documenthandelingen voor dit document. Op dit moment kan
             je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
             standaardwaarden gebruikt.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
       required:
       - bestandsdelen
       - creatiedatum
@@ -1993,6 +1991,7 @@ components:
       - publicatie
       - publicatiestatus
       - registratiedatum
+      - uploadVoltooid
       - uuid
     DocumentAction:
       type: object
@@ -2172,6 +2171,12 @@ components:
           description: De documenthandelingen voor dit document. Op dit moment kan
             je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
             standaardwaarden gebruikt.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
       required:
       - bestandsdelen
       - bestandsformaat
@@ -2185,6 +2190,7 @@ components:
       - publicatie
       - publicatiestatus
       - registratiedatum
+      - uploadVoltooid
       - uuid
     Eigenaar:
       type: object
@@ -2609,6 +2615,12 @@ components:
           description: De documenthandelingen voor dit document. Op dit moment kan
             je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
             standaardwaarden gebruikt.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
     PatchedOrganisation:
       type: object
       properties:
