@@ -798,19 +798,20 @@ uritemplate==4.1.1
     #   -r requirements/base.txt
     #   coreapi
     #   drf-spectacular
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   elastic-apm
     #   requests
     #   sentry-sdk
+    #   vcrpy
 uwsgi==2.0.26
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   open-api-framework
-vcrpy==6.0.1
+vcrpy==7.0.0
     # via -r requirements/test-tools.in
 vine==5.1.0
     # via
