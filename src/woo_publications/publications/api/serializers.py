@@ -190,6 +190,15 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         source="documentidentifier_set",
         required=False,
     )
+    upload_voltooid = serializers.BooleanField(
+        source="upload_complete",
+        read_only=True,
+        label=_("document upload completed"),
+        help_text=_(
+            "Indicates if the file has been uploaded and made 'ready for use' in the "
+            "upstream Documents API."
+        ),
+    )
 
     class Meta:  # pyright: ignore
         model = Document
@@ -214,6 +223,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "registratiedatum",
             "laatst_gewijzigd_datum",
             "bestandsdelen",
+            "upload_voltooid",
         )
         extra_kwargs = {
             "uuid": {

@@ -667,6 +667,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             publicatie__informatie_categorieen=[information_category],
             bestandsomvang=5,
             with_registered_document=True,
+            upload_complete=True,
         )
         endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
 
