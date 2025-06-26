@@ -1,11 +1,9 @@
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.settings import api_settings
 
 from ..constants import PublicationStatusOptions
-from ..models import Document, DocumentIdentifier, Publication, PublicationIdentifier
-from ..typing import Kenmerk
+from ..models import Document, Publication
 
 
 class PublicationStatusValidator:
@@ -45,49 +43,5 @@ class PublicationStatusValidator:
                 "Changing the state from '{current}' to '{value}' is not allowed."
             ).format(current=current_state, value=value)
             raise serializers.ValidationError(message, code="invalid_state")
-
-        return value
-
-
-# This mimics the default UniqueConstraint validator with the difference
-# that it ignores the kenmerken of its parent. This ensures that when
-# updating a Publication or Document the current data can used without
-# it raising an error
-class KenmerkenValidator:
-    requires_context = True
-
-    def __init__(self, parent_field_name):
-        self.parent_field_name = parent_field_name
-        super().__init__()
-
-    def __call__(self, value: Kenmerk, field: serializers.ModelSerializer):
-        model_cls = field.Meta.model  # pyright: ignore[reportGeneralTypeIssues]
-        assert model_cls in (DocumentIdentifier, PublicationIdentifier), (
-            "Validator applied to unexpected model/serializer."
-        )
-
-        assert self.parent_field_name in [
-            field.name for field in model_cls._meta.fields
-        ]
-
-        assert isinstance(field.parent.parent, serializers.ModelSerializer)
-        parent_instance = (
-            field.parent.parent.instance or field.parent.parent.Meta.model()  # pyright: ignore[reportGeneralTypeIssues]
-        )
-        assert isinstance(parent_instance, Document | Publication)
-
-        query = model_cls.objects
-
-        if parent_instance.pk:
-            query = query.exclude(**{self.parent_field_name: parent_instance})
-
-        if query.filter(kenmerk=value["kenmerk"], bron=value["bron"]).exists():
-            error_message = _(
-                "The fields {field_names} must make a unique set."
-            ).format(field_names=", ".join(value))
-
-            raise serializers.ValidationError(
-                {api_settings.NON_FIELD_ERRORS_KEY: [error_message]}
-            )
 
         return value

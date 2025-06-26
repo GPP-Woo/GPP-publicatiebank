@@ -1367,43 +1367,19 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
                 [_("You cannot provide identical identifiers.")],
             )
 
-        with self.subTest("validate unique constraint"):
+        with self.subTest("other publication is allowed to have same item"):
             url = reverse(
                 "api:document-detail",
                 kwargs={"uuid": str(document2.uuid)},
             )
             data = {
                 "kenmerken": [
-                    {"kenmerk": "kenmerk 1", "bron": "bron 1"},
-                    {"kenmerk": "new kenmerk", "bron": "new bron"},
-                    {"kenmerk": "kenmerk 2", "bron": "bron 2"},
+                    {"kenmerk": "kenmerk 1", "bron": "kenmerk 1"},
                 ]
             }
 
             response = self.client.patch(url, data, headers=AUDIT_HEADERS)
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-            self.assertEqual(
-                response.json()["kenmerken"],
-                [
-                    {
-                        "nonFieldErrors": [
-                            _(
-                                "The fields {field_names} must make a unique set."
-                            ).format(field_names="kenmerk, bron")
-                        ]
-                    },
-                    # indicates that there is no problem with the second item given.
-                    {},
-                    {
-                        "nonFieldErrors": [
-                            _(
-                                "The fields {field_names} must make a unique set."
-                            ).format(field_names="kenmerk, bron")
-                        ]
-                    },
-                ],
-            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])

@@ -33,7 +33,7 @@ from ..models import (
 from ..tasks import index_document, index_publication
 from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
-from .validators import KenmerkenValidator, PublicationStatusValidator
+from .validators import PublicationStatusValidator
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,6 @@ class DocumentIdentifierSerializer(serializers.ModelSerializer[DocumentIdentifie
             "kenmerk",
             "bron",
         )
-        validators = [KenmerkenValidator(parent_field_name="document")]
 
 
 class DocumentSerializer(serializers.ModelSerializer[Document]):
@@ -435,7 +434,6 @@ class PublicationIdentifierSerializer(
             "kenmerk",
             "bron",
         )
-        validators = [KenmerkenValidator(parent_field_name="publicatie")]
 
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
