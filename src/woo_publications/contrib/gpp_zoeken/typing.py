@@ -22,7 +22,7 @@ class IndexDocumentBody(TypedDict):
     publisher: PublicationPublisher
     onderwerpen: list[PublicationTopic]
     informatieCategorieen: list[PublicationInformatieCategorie]
-    identifier: str
+    identifiers: list[str]
     officieleTitel: str
     verkorteTitel: str
     omschrijving: str
@@ -38,6 +38,7 @@ class IndexPublicationBody(TypedDict):
     publisher: PublicationPublisher
     onderwerpen: list[PublicationTopic]
     informatieCategorieen: list[PublicationInformatieCategorie]
+    identifiers: list[str]
     officieleTitel: str
     verkorteTitel: str
     omschrijving: str

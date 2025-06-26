@@ -1,10 +1,10 @@
 interactions:
 - request:
-    body: '{"uuid": "c006b6c9-bf0a-46fa-bab6-a9f7ec7eb7b4", "publisher": {"uuid":
-      "c9a0eb78-7abc-4b76-bfe9-de880788eee5", "naam": "street"}, "onderwerpen": [],
-      "informatieCategorieen": [], "officieleTitel": "fast", "verkorteTitel": "",
-      "omschrijving": "", "registratiedatum": "2025-04-10T09:28:45.447401+00:00",
-      "laatstGewijzigdDatum": "2025-04-10T09:28:45.447933+00:00"}'
+    body: '{"uuid": "5316c717-f449-4311-8038-59bc75a34602", "publisher": {"uuid":
+      "e1921720-13bf-4995-854a-cc051bcf89e9", "naam": "specific"}, "onderwerpen":
+      [], "informatieCategorieen": [], "identifiers": [], "officieleTitel": "election",
+      "verkorteTitel": "", "omschrijving": "", "registratiedatum": "2025-06-26T13:33:11.099619+00:00",
+      "laatstGewijzigdDatum": "2025-06-26T13:33:11.100226+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -15,16 +15,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '360'
+      - '385'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.4
     method: POST
     uri: http://localhost:8002/api/v1/publicaties
   response:
     body:
-      string: '{"taskId":"e21a3d23-03f3-4d39-b8b0-63eae0fb162f"}'
+      string: '{"taskId":"f2886f5f-5b58-4b47-882f-712444de5742"}'
     headers:
       Allow:
       - POST, OPTIONS

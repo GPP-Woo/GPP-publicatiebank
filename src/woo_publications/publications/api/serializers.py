@@ -210,7 +210,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         required=False,
     )
     kenmerken = DocumentIdentifierSerializer(
-        help_text=_("The publication identifiers attached to this publication."),
+        help_text=_("The document identifiers attached to this document."),
         many=True,
         source="documentidentifier_set",
         required=False,

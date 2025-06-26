@@ -11,7 +11,11 @@ from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
 
 from woo_publications.publications.constants import PublicationStatusOptions
-from woo_publications.publications.models import Document, Publication, Topic
+from woo_publications.publications.models import (
+    Document,
+    Publication,
+    Topic,
+)
 
 from .typing import (
     IndexDocumentBody,
@@ -53,6 +57,19 @@ def get_publication_onderwerpen(
     ]
 
 
+def get_publication_identifiers(publication: Publication) -> list[str]:
+    return list(publication.publicationidentifier_set.values_list("kenmerk", flat=True))
+
+
+def get_document_identifiers(document: Document) -> list[str]:
+    identifiers = list(
+        document.documentidentifier_set.values_list("kenmerk", flat=True)
+    )
+    if primary_identifier := document.identifier:
+        identifiers.insert(0, primary_identifier)
+    return identifiers
+
+
 class GPPSearchClient(NLXClient):
     def index_document(self, document: Document, download_url: str = "") -> str:
         """
@@ -72,7 +89,7 @@ class GPPSearchClient(NLXClient):
             "informatieCategorieen": get_publication_information_categories(
                 document.publicatie
             ),
-            "identifier": document.identifier,
+            "identifiers": get_document_identifiers(document),
             "officieleTitel": document.officiele_titel,
             "verkorteTitel": document.verkorte_titel,
             "omschrijving": document.omschrijving,
@@ -122,6 +139,7 @@ class GPPSearchClient(NLXClient):
             "informatieCategorieen": get_publication_information_categories(
                 publication
             ),
+            "identifiers": get_publication_identifiers(publication),
             "officieleTitel": publication.officiele_titel,
             "verkorteTitel": publication.verkorte_titel,
             "omschrijving": publication.omschrijving,

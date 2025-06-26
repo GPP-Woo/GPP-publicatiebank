@@ -1,8 +1,8 @@
 interactions:
 - request:
-    body: '{"uuid": "db047b50-6290-469f-9d91-57c28ba97701", "officieleTitel": "radio",
-      "omschrijving": "", "registratiedatum": "2025-04-18T09:46:14.564342+00:00",
-      "laatstGewijzigdDatum": "2025-04-18T09:46:14.564348+00:00"}'
+    body: '{"uuid": "cd4af834-08e3-482b-98da-48283cc35092", "officieleTitel": "military",
+      "omschrijving": "", "registratiedatum": "2025-06-26T13:33:12.455668+00:00",
+      "laatstGewijzigdDatum": "2025-06-26T13:33:12.455688+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -13,16 +13,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '211'
+      - '214'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.4
     method: POST
     uri: http://localhost:8002/api/v1/onderwerpen
   response:
     body:
-      string: '{"taskId":"692da0af-7bdb-4f2b-8fee-4188a6cf3ef4"}'
+      string: '{"taskId":"8cf2c15f-820b-4987-90a2-80e41494ee5e"}'
     headers:
       Allow:
       - POST, OPTIONS

@@ -1875,7 +1875,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: The document identifiers attached to this document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2067,7 +2067,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: The document identifiers attached to this document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2504,7 +2504,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: The document identifiers attached to this document.
         officieleTitel:
           type: string
           title: Officiële titel
