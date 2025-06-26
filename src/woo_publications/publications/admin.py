@@ -581,6 +581,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "ingetrokken_op",
                     "registratiedatum",
                     "laatst_gewijzigd_datum",
+                    "ontvangstdatum",
+                    "datum_ondertekend",
                     "eigenaar",
                     "uuid",
                 )
@@ -592,8 +594,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 "fields": (
                     "soort_handeling",
                     "at_time",
-                    "ontvangstdatum",
-                    "datum_ondertekend",
                     "was_assciated_with",
                 )
             },
