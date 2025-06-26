@@ -28,9 +28,9 @@ python src/manage.py migrate
 
 # Load fixtures distributed in the image
 echo "Loading required fixtures"
-python src/manage.py loaddata \
-    information_categories \
-    themes
+python src/manage.py loaddata themes
+python src/manage.py load_information_categories \
+    information_categories
 python src/manage.py load_organisations \
     organisations
 

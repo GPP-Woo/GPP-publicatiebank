@@ -10,8 +10,7 @@ from .models import InformationCategory
 @contextmanager
 @transaction.atomic
 def keep_none_retention_policy_field_values():
-    ignore_fields = INFORMATION_CATEGORY_FIXTURE_FIELDS
-    ignore_fields.append("id")
+    ignore_fields = INFORMATION_CATEGORY_FIXTURE_FIELDS + ["id"]
 
     # filter out the IC fixture fields and id from the local fields of
     # the InformationCategory to dynamically determine which fields
