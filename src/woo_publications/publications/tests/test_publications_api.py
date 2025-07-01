@@ -1,5 +1,5 @@
 import tempfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -32,7 +32,12 @@ from woo_publications.metadata.tests.factories import (
 
 from ..constants import PublicationStatusOptions
 from ..models import Publication, PublicationIdentifier
-from .factories import PublicationFactory, PublicationIdentifierFactory, TopicFactory
+from .factories import (
+    DocumentFactory,
+    PublicationFactory,
+    PublicationIdentifierFactory,
+    TopicFactory,
+)
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -2095,6 +2100,72 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 mock_index_publication_delay.assert_called_once_with(
                     publication_id=publication.pk
                 )
+
+    @patch("woo_publications.publications.tasks.index_document.delay")
+    def test_publication_update_publisher_or_ic_schedules_document_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        ic_1, ic_2 = InformationCategoryFactory.create_batch(2)
+        publisher_1, publisher_2 = OrganisationFactory.create_batch(2, is_actief=True)
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic_1],
+            publisher=publisher_1,
+            officiele_titel="title one",
+        )
+        document_1, document_2 = DocumentFactory.create_batch(2, publicatie=publication)
+        endpoint = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        with self.subTest(
+            "update value other than publisher or ic doesn't trigger schedule"
+        ):
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    endpoint, {"officieleTitel": "changed titel"}, headers=AUDIT_HEADERS
+                )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_index_document_delay.assert_not_called()
+
+        with self.subTest("update publisher triggers schedule"):
+            mock_index_document_delay.reset_mock()
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    endpoint,
+                    {"publisher": str(publisher_2.uuid)},
+                    headers=AUDIT_HEADERS,
+                )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_index_document_delay.assert_has_calls(
+                [
+                    call(document_id=document_1.pk),
+                    call(document_id=document_2.pk),
+                ],
+                any_order=True,
+            )
+
+        with self.subTest("update information category triggers schedule"):
+            mock_index_document_delay.reset_mock()
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    endpoint,
+                    {"informatieCategorieen": [str(ic_2.uuid)]},
+                    headers=AUDIT_HEADERS,
+                )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_index_document_delay.assert_has_calls(
+                [
+                    call(document_id=document_1.pk),
+                    call(document_id=document_2.pk),
+                ],
+                any_order=True,
+            )
 
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):

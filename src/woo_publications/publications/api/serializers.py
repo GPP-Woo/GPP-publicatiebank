@@ -780,7 +780,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     and instance.publisher != validated_data["publisher"]
                 ) or (
                     "informatie_categorieen" in validated_data
-                    and instance.informatie_categorieen
+                    and instance.informatie_categorieen.all()
                     != validated_data["informatie_categorieen"]
                 ):
                     reindex_documents = True
