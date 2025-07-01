@@ -104,6 +104,7 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
     def save(self, commit=True):
         assert is_authenticated_request(self.request)
         apply_retention_policy = False
+        reindex_documents = False
         new_publication_status = self.cleaned_data.pop("publicatiestatus")
         # reset the publication status to the 'current' status - at this point the
         # instance has the newly selected status because of ModelForm._post_clean which
@@ -153,6 +154,13 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                 )
                 if "informatie_categorieen" in self.changed_data:
                     apply_retention_policy = True
+                # According ticket #309 the document data must re-index when
+                # publication updates `publisher` or `informatie_categorieen`.
+                if any(
+                    match in self.changed_data
+                    for match in ["publisher", "informatie_categorieen"]
+                ):
+                    reindex_documents = True
 
         publication = super().save(commit=commit)
         # cannot force the commit as True because of the AttributeError:
@@ -167,6 +175,12 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
         if apply_retention_policy:
             self.save_m2m()
             publication.apply_retention_policy()
+
+        if reindex_documents:
+            for document in self.instance.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
+                transaction.on_commit(
+                    partial(index_document.delay, document_id=document.pk)
+                )
 
         return publication
 

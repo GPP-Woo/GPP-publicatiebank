@@ -709,6 +709,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     @transaction.atomic
     def update(self, instance, validated_data):
         apply_retention = False
+        reindex_documents = False
 
         # pop the target state from the validate data to avoid setting it directly,
         # instead apply the state transitions based on old -> new state
@@ -772,6 +773,18 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                     if old_informatie_categorieen_set != new_informatie_categorieen_set:
                         apply_retention = True
 
+                # According ticket #309 the document data must re-index when
+                # publication updates `publisher` or `informatie_categorieen`.
+                if (
+                    "publisher" in validated_data
+                    and instance.publisher != validated_data["publisher"]
+                ) or (
+                    "informatie_categorieen" in validated_data
+                    and instance.informatie_categorieen
+                    != validated_data["informatie_categorieen"]
+                ):
+                    reindex_documents = True
+
         publication = super().update(instance, validated_data)
 
         if update_publicatie_identifiers:
@@ -783,6 +796,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         if apply_retention:
             publication.apply_retention_policy(commit=False)
+
+        if reindex_documents:
+            for document in instance.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
+                transaction.on_commit(
+                    partial(index_document.delay, document_id=document.pk)
+                )
 
         return publication
 
