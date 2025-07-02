@@ -10,3 +10,4 @@ class Events(models.TextChoices):
     delete = "delete", _("Record deleted")
     # Specific events
     download = "download", _("Downloaded")
+    delete_document = "delete_document", _("Document deleted")
