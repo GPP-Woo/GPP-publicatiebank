@@ -5,8 +5,11 @@ from datetime import date
 from uuid import UUID
 
 from django.core.files import File
+from django.utils.translation import gettext_lazy as _
 
+import sentry_sdk
 from furl import furl
+from requests import RequestException
 from zgw_consumers.client import build_client
 from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
@@ -15,11 +18,17 @@ from woo_publications.utils.multipart_encoder import MultipartEncoder
 
 from .typing import EIOCreateBody, EIOCreateResponseBody, EIORetrieveBody
 
-__all__ = ["get_client"]
+__all__ = ["OpenZaakError", "get_client"]
 
 
 def get_client(service: Service) -> DocumentenClient:
     return build_client(service, client_factory=DocumentenClient)
+
+
+class OpenZaakError(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
 
 @dataclass
@@ -104,8 +113,19 @@ class DocumentenClient(NLXClient):
         )
 
     def destroy_document(self, uuid: UUID) -> None:
-        response = self.delete(f"enkelvoudiginformatieobjecten/{uuid}")
-        response.raise_for_status()
+        try:
+            response = self.delete(f"enkelvoudiginformatieobjecten/{uuid}")
+            response.raise_for_status()
+        except RequestException as err:
+            if (
+                hasattr(err.response, "status_code") and err.response.status_code == 404  # pyright: ignore[reportOptionalMemberAccess]
+            ):
+                return
+
+            sentry_sdk.capture_exception(err)
+            raise OpenZaakError(
+                message=_("Something went wrong while deleting the document.")
+            ) from err
 
     def proxy_file_part_upload(
         self,

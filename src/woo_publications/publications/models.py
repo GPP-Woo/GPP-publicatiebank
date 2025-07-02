@@ -24,7 +24,6 @@ from django_fsm import (
     Transition,
     transition,
 )
-from requests import RequestException
 from rest_framework.reverse import reverse
 from typing_extensions import deprecated
 from zgw_consumers.constants import APITypes
@@ -34,6 +33,7 @@ from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
+    OpenZaakError,
     get_client,
 )
 from woo_publications.logging.serializing import serialize_instance
@@ -1027,12 +1027,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
         with get_client(self.document_service) as client:
             try:
                 client.destroy_document(uuid=self.document_uuid)
-            except RequestException as err:
-                if (
-                    hasattr(err.response, "status_code")
-                    and err.response.status_code == 404  # pyright: ignore[reportOptionalMemberAccess]
-                ):
-                    return
+            except OpenZaakError as err:
                 raise err
 
     def upload_part_data(self, uuid: UUID, file: File) -> bool:
