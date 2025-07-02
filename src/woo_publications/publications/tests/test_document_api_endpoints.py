@@ -1462,7 +1462,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         kwargs.setdefault("ignore_hosts", ("invalid-domain",))
         return super()._get_vcr_kwargs(**kwargs)
 
-    def test_create_document_results_in_document_in_external_api(self):
+    @patch("woo_publications.publications.api.viewsets.process_source_document.delay")
+    def test_create_document_results_in_document_in_external_api(
+        self, mock_process_source_document_delay: MagicMock
+    ):
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[self.information_category],
@@ -1486,7 +1489,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ],
         }
 
-        with freeze_time("2024-11-13T15:00:00-00:00"):
+        with (
+            freeze_time("2024-11-13T15:00:00-00:00"),
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             response = self.client.post(
                 endpoint,
                 data=body,
@@ -1497,6 +1503,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        mock_process_source_document_delay.assert_not_called()
 
         with self.subTest("documenthandelingen is succesfully created."):
             self.assertEqual(
@@ -1961,7 +1968,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 },
             )
 
-    def test_create_document_with_external_document_url(self):
+    @patch("woo_publications.publications.api.viewsets.process_source_document.delay")
+    def test_create_document_with_external_document_url(
+        self, mock_process_source_document_delay: MagicMock
+    ):
         # create an actual document in the remote Open Zaak that we can point to
         with get_client(self.service) as client:
             openzaak_document = client.create_document(
@@ -1993,17 +2003,16 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             "officieleTitel": "Test document external URL",
             "creatiedatum": "2024-11-05",
             "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
-            # dummy URL, doesn't actually exist, but this host/service is configured
-            # correctly and will thus pass validation
             "documentUrl": document_url,
         }
 
         with self.subTest("successful creation"):
-            response = self.client.post(
-                endpoint,
-                data=body,
-                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
-            )
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(
+                    endpoint,
+                    data=body,
+                    headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+                )
 
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, response.json()
@@ -2012,9 +2021,14 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertIsNone(data["bestandsdelen"])
             self.assertFalse(data["uploadVoltooid"])
 
+            document = Document.objects.get(uuid=data["uuid"])
+            mock_process_source_document_delay.assert_called_once_with(
+                document_id=document.id,
+                base_url="http://host.docker.internal:8000/",
+            )
+
             # check database state - we expect nothing to be done yet because a
             # background task will do the actual processing
-            document = Document.objects.get(uuid=data["uuid"])
             self.assertIsNone(document.document_service)
             self.assertIsNone(document.document_uuid)
             self.assertEqual(document.source_url, document_url)

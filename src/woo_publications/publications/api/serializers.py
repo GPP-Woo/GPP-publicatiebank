@@ -22,7 +22,11 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import (
+    DocumentActionTypeOptions,
+    DocumentDeliveryMethods,
+    PublicationStatusOptions,
+)
 from ..models import (
     Document,
     DocumentIdentifier,
@@ -302,6 +306,32 @@ class DocumentCreateSerializer(DocumentSerializer):
     Manage the creation of new Documents.
     """
 
+    aanlevering_bestand = serializers.ChoiceField(
+        label=_("delivery method"),
+        choices=DocumentDeliveryMethods.choices,
+        default=DocumentDeliveryMethods.receive_upload,
+        help_text=_(
+            "When the delivery method is set to retrieve a provided document "
+            "URL pointing to a Documents API, then this will be processed in the "
+            "background and no `bestandsdelen` will be returned. Otherwise for "
+            "direct uploads, an array of expected file parts is returned."
+        ),
+    )
+    document_url = serializers.URLField(
+        source="source_url",
+        label=_("document URL"),
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text=_(
+            "The resource URL of the document in an (external) Documents API. Must be "
+            "the detail endpoint - we'll construct the download URL ourselves. Must be "
+            "provided when the `aanleveringBestand` is set to `ophalen`, and must be "
+            "empty/absent when `aanleveringBestand` is `ontvangen`. Note that you may "
+            "include the `versie` query parameter to point to a particular document "
+            "version."
+        ),
+    )
     bestandsdelen = FilePartSerializer(
         label=_("file parts"),
         help_text=_(
@@ -316,10 +346,16 @@ class DocumentCreateSerializer(DocumentSerializer):
     )
 
     class Meta(DocumentSerializer.Meta):
-        fields = DocumentSerializer.Meta.fields + ("bestandsdelen",)
+        fields = DocumentSerializer.Meta.fields + (
+            "aanlevering_bestand",
+            "document_url",
+            "bestandsdelen",
+        )
 
     @transaction.atomic
     def create(self, validated_data):
+        # not a model field, drop it. This is used for validation to check source_url.
+        validated_data.pop("aanlevering_bestand")
         document_identifiers = validated_data.pop("documentidentifier_set", [])
         # on create, the status is always derived from the publication. Anything
         # submitted by the client is ignored.

@@ -13,6 +13,22 @@ logger = logging.getLogger(__name__)
 
 
 @app.task
+def process_source_document(*, document_id: int, base_url: str) -> None:
+    """
+    Retrieve and process the source document for the given Document instance.
+
+    The source URL stored in the document instance is retrieved and the metadata
+    processed. We create a matching document in our own Documents API persistence
+    layer. Finally, we download the binary content of the specified document and upload
+    it + mark the document upload as completed.
+
+    Any intermediate stage/checkpoint is persisted to the database so that we can
+    recover from errors if needed.
+    """
+    raise NotImplementedError()
+
+
+@app.task
 def index_document(*, document_id: int, download_url: str = "") -> str | None:
     """
     Offer the document data to the gpp-zoeken service for indexing.
