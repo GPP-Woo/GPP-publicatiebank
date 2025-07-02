@@ -678,6 +678,82 @@ class TestPublicationsAdmin(WebTest):
             publication_id=publication.pk
         )
 
+    @patch("woo_publications.publications.admin.index_document.delay")
+    def test_publication_update_publisher_or_ic_schedules_document_index_task(
+        self, mock_index_document_delay: MagicMock
+    ):
+        ic_1, ic_2 = InformationCategoryFactory.create_batch(2)
+        publisher_1, publisher_2 = OrganisationFactory.create_batch(2, is_actief=True)
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic_1],
+            publisher=publisher_1,
+            officiele_titel="title one",
+        )
+        document_1, document_2 = DocumentFactory.create_batch(2, publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+
+        with self.subTest(
+            "update value other than publisher or ic doesn't trigger schedule"
+        ):
+            form["officiele_titel"] = "changed official title"
+
+            with self.captureOnCommitCallbacks(execute=True):
+                update_response = form.submit(name="_save")
+
+            self.assertRedirects(
+                update_response,
+                reverse("admin:publications_publication_changelist"),
+            )
+
+            mock_index_document_delay.assert_not_called()
+
+        with self.subTest("update publisher triggers schedule"):
+            mock_index_document_delay.reset_mock()
+            form["publisher"] = str(publisher_2.pk)
+
+            with self.captureOnCommitCallbacks(execute=True):
+                update_response = form.submit(name="_save")
+
+            self.assertRedirects(
+                update_response,
+                reverse("admin:publications_publication_changelist"),
+            )
+            mock_index_document_delay.assert_has_calls(
+                [
+                    call(document_id=document_1.pk),
+                    call(document_id=document_2.pk),
+                ],
+                any_order=True,
+            )
+
+        with self.subTest("update information category triggers schedule"):
+            mock_index_document_delay.reset_mock()
+            form["informatie_categorieen"].force_value([ic_1.pk, ic_2.pk])
+
+            with self.captureOnCommitCallbacks(execute=True):
+                update_response = form.submit(name="_save")
+
+            self.assertRedirects(
+                update_response,
+                reverse("admin:publications_publication_changelist"),
+            )
+            mock_index_document_delay.assert_has_calls(
+                [
+                    call(document_id=document_1.pk),
+                    call(document_id=document_2.pk),
+                ],
+                any_order=True,
+            )
+
     @patch("woo_publications.publications.admin.remove_publication_from_index.delay")
     def test_publication_update_schedules_remove_from_index_task(
         self, mock_remove_publication_from_index_delay: MagicMock
@@ -1127,8 +1203,6 @@ class TestPublicationsAdmin(WebTest):
         self.assertEqual(
             published_document.publicatiestatus, PublicationStatusOptions.revoked
         )
-        mock_remove_document_from_index_delay(document_id=published_document.pk)
-        mock_remove_document_from_index_delay(document_id=concept_document.pk)
         mock_remove_document_from_index_delay.assert_has_calls(
             [
                 call(document_id=published_document.pk),
