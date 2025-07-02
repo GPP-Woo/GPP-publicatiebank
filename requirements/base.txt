@@ -291,7 +291,7 @@ oyaml==1.0
     # via commonground-api-common
 phonenumberslite==8.13.45
     # via django-two-factor-auth
-pillow==11.2.1
+pillow==11.3.0
     # via -r requirements/base.in
 polib==1.2.0
     # via django-rosetta
