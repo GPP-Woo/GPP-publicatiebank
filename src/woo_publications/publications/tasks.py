@@ -1,15 +1,32 @@
 import logging
+from io import BytesIO
 from typing import Literal, assert_never
+from urllib.parse import urljoin
 from uuid import UUID
+
+from django.core.files.uploadedfile import (
+    InMemoryUploadedFile,
+    TemporaryUploadedFile,
+    UploadedFile,
+)
+
+from furl import furl
+from zgw_consumers.models import Service
 
 from woo_publications.celery import app
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.contrib.gpp_zoeken.client import get_client
+from woo_publications.contrib.documents_api.client import (
+    FilePart,
+    get_client as get_documents_client,
+)
+from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_client
 from woo_publications.publications.constants import PublicationStatusOptions
 
 from .models import Document, Publication, Topic
 
 logger = logging.getLogger(__name__)
+
+TEN_MB = 10 * 1024 * 1024
 
 
 @app.task
@@ -25,7 +42,144 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
     Any intermediate stage/checkpoint is persisted to the database so that we can
     recover from errors if needed.
     """
-    raise NotImplementedError()
+    document = Document.objects.get(pk=document_id)
+    if document.upload_complete:
+        return
+
+    assert (document_url := document.source_url), (
+        "The document must have a source URL to retrieve"
+    )
+
+    # always look up the source document - if we get here, it means that we at least
+    # have some more file part upload work to do
+    service = Service.get_service(document_url)
+    assert service is not None
+    with get_documents_client(service) as source_documents_client:
+        source_document = source_documents_client.retrieve_document(url=document_url)
+
+        # Make sure that we have a persisted version of the source document metadata
+        if document.document_uuid is None:
+            assert document.document_service is None
+
+            update_fields = []
+            if (cd := source_document.creation_date) != document.creatiedatum:
+                document.creatiedatum = cd
+                update_fields.append("creatiedatum")
+
+            if (ct := source_document.content_type) != document.bestandsformaat:
+                document.bestandsformaat = ct
+                update_fields.append("bestandsformaat")
+
+            if (fn := source_document.file_name) != document.bestandsnaam:
+                document.bestandsnaam = fn
+                update_fields.append("bestandsnaam")
+
+            if (
+                fs := source_document.file_size
+            ) is not None and fs != document.bestandsomvang:
+                document.bestandsomvang = fs
+                update_fields.append("bestandsomvang")
+
+            if update_fields:
+                document.save(update_fields=update_fields)
+
+            # now, create the metadata document for our own storage needs. This is
+            # almost a copy of the source document.
+            document.register_in_documents_api(
+                build_absolute_uri=lambda abs_path: urljoin(base_url, abs_path[1:])
+            )
+            assert document.zgw_document is not None
+        else:
+            assert document.zgw_document is None
+            raise NotImplementedError
+
+        # Check if we have file parts to upload/complete. If there are, download the
+        # source document first.
+        if parts := document.zgw_document.file_parts:
+            file_size = source_document.file_size
+            assert file_size is not None
+
+            def _file_factory(index: int, part_size: int) -> UploadedFile:
+                name = f"{document.bestandsnaam}_part{index}.bin"
+                assert file_size is not None
+                # use in-memory files for files smaller than 10MB
+                if file_size <= TEN_MB:  # 10 MB
+                    return InMemoryUploadedFile(
+                        file=BytesIO(),
+                        field_name=None,
+                        name=name,
+                        content_type=None,
+                        size=part_size,
+                        charset=None,
+                    )
+                else:
+                    return TemporaryUploadedFile(
+                        name=name,
+                        content_type=None,
+                        size=file_size,
+                        charset=None,
+                    )
+
+            # furl keeps the query string parameters when modifying the URL path like
+            # this
+            download_url = furl(document.source_url) / "download"
+            download_response = source_documents_client.get(
+                str(download_url),
+                stream=True,
+            )
+            download_response.raise_for_status()
+
+            _part: FilePart = parts[0]
+            _files: list[UploadedFile] = [_file_factory(index=0, part_size=_part.size)]
+            _part_bytes_written = 0
+
+            for chunk in download_response.iter_content(chunk_size=8_192):  # 8kb chunks
+                _part_index = parts.index(_part)
+                _file = _files[_part_index]
+
+                # _num_bytes_left_to_write may be larger than chunk size, but that's
+                # okay, it just means that the bytes for next part is empty and we don't
+                # prepare the next file yet.
+                _num_bytes_left_to_write = _part.size - _part_bytes_written
+                for_current_part = chunk[:_num_bytes_left_to_write]
+                # we only need to write to the part if we need to actually process it
+                if not _part.completed:
+                    _file.write(for_current_part)
+                _part_bytes_written += len(for_current_part)
+
+                # if this chunk has data for the next part, prepare the next file
+                for_next_part = chunk[_num_bytes_left_to_write:]
+                if next_part_size := len(for_next_part):
+                    _next_part_index = _part_index + 1
+                    _part = parts[_next_part_index]
+                    _file = _file_factory(index=_next_part_index, part_size=_part.size)
+                    _files.append(_file)
+                    _part_bytes_written = next_part_size
+                # this chunk finishes the part exactly, initialize the next part
+                elif _part_bytes_written == _part.size and _part is not parts[-1]:
+                    _next_part_index = _part_index + 1
+                    _part = parts[_next_part_index]
+                    _file = _file_factory(index=_next_part_index, part_size=_part.size)
+                    _files.append(_file)
+                    _part_bytes_written = 0
+
+            assert len(_files) == len(parts)
+
+            # we now have part metadata and actual file-like objects for each part that
+            # we can upload
+            with get_documents_client(document.document_service) as client:
+                for part, part_file in zip(parts, _files, strict=True):
+                    if part.completed:
+                        continue
+
+                    part_file.seek(0)
+                    client.proxy_file_part_upload(
+                        part_file,
+                        file_part_uuid=part.uuid,
+                        lock=document.lock,
+                    )
+
+                document.check_and_mark_completed(client)
 
 
 @app.task
@@ -69,7 +223,7 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
         )
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.index_document(document=document, download_url=download_url)
 
 
@@ -102,7 +256,7 @@ def remove_document_from_index(*, document_id: int, force: bool = False) -> str 
         )
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.remove_document_from_index(document, force)
 
 
@@ -128,7 +282,7 @@ def index_publication(*, publication_id: int) -> str | None:
         logger.info("Publication has publication status %s, skipping.", current_status)
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.index_publication(publication)
 
 
@@ -163,7 +317,7 @@ def remove_publication_from_index(
         )
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.remove_publication_from_index(publication, force)
 
 
@@ -187,7 +341,7 @@ def index_topic(*, topic_id: int) -> str | None:
         logger.info("Topic has publication status %s, skipping.", current_status)
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.index_topic(topic=topic)
 
 
@@ -220,7 +374,7 @@ def remove_topic_from_index(*, topic_id: int, force: bool = False) -> str | None
         )
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         return client.remove_topic_from_index(topic, force)
 
 
@@ -244,7 +398,7 @@ def remove_from_index_by_uuid(
         )
         return
 
-    with get_client(service) as client:
+    with get_zoeken_client(service) as client:
         match model_name:
             case "Document":
                 document = Document(
