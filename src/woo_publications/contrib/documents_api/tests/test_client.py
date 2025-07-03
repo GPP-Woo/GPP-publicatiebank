@@ -22,15 +22,17 @@ for the reference.
 
 from datetime import date
 from io import BytesIO
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from django.core.files import File
-from django.test import TestCase
+from django.test import TestCase, override_settings
+
+import requests_mock
 
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ..client import get_client
+from ..client import OpenZaakError, get_client
 
 DOCUMENT_TYPE_URL = (
     "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
@@ -152,3 +154,17 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
         self.assertFalse(detail_data["locked"])
         bestandsdelen = detail_data["bestandsdelen"]
         self.assertEqual(len(bestandsdelen), 0)
+
+    @requests_mock.Mocker()
+    @override_settings(LANGUAGE_CODE="en-en")
+    def test_destroy_document_error(self, m):
+        m.register_uri(requests_mock.ANY, requests_mock.ANY, status_code=400)
+        service = ServiceFactory.build(for_documents_api_docker_compose=True)
+
+        with get_client(service) as client:
+            with self.assertRaisesMessage(
+                OpenZaakError, "Something went wrong while deleting the document."
+            ):
+                client.destroy_document(
+                    uuid=UUID("3fae4cd5-b122-4b34-bfd9-4617909d3f22")
+                )

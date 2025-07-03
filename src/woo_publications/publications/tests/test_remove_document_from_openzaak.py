@@ -110,6 +110,20 @@ class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
             document_uuid=UUID("f83a9443-b667-4b5d-8131-7953cc7b9bc1"),
         )
 
+    def test_no_error_raised_when_OZ_returns_404(self):
+        remove_document_from_openzaak(
+            document_id=self.document.pk,
+            user_id=self.user.pk,
+            service_uuid=self.service.uuid,
+            document_uuid=UUID("f83a9443-b667-4b5d-8131-7953cc7b9bc1"),
+        )
+
+        self.assertFalse(
+            TimelineLogProxy.objects.for_object(self.document)  # pyright: ignore[reportAttributeAccessIssue]
+            .filter(extra_data__event=Events.delete_document)
+            .exists()
+        )
+
     @patch(
         "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
         side_effect=OpenZaakError(message="error"),
