@@ -1269,6 +1269,11 @@ paths:
         explode: true
         style: form
       - in: query
+        name: bron
+        schema:
+          type: string
+        description: Filter publications based on the given identifier source.
+      - in: query
         name: eigenaar
         schema:
           type: string
@@ -1285,6 +1290,11 @@ paths:
           De filterwaarden zijn UUIDs van de categorieën. Gebruik komma's om meerdere waarden van elkaar te scheiden.
         explode: true
         style: form
+      - in: query
+        name: kenmerk
+        schema:
+          type: string
+        description: Filter publications based on the given identifier.
       - in: query
         name: onderwerpen
         schema:
