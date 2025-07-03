@@ -3,7 +3,7 @@ interactions:
     body: '{"identificatie": "4e620717-9e82-4907-bbaf-96e3e8f580f2", "bronorganisatie":
       "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
       "creatiedatum": "2024-11-05", "titel": "Testdocument WOO-P + Open Zaak", "auteur":
-      "GPP-Woo/ODRC", "status": "definitief", "formaat": "application/octet-stream",
+      "GPP-Woo/GPP-publicatiebank", "status": "definitief", "formaat": "application/octet-stream",
       "taal": "dut", "bestandsnaam": "unknown.bin", "inhoud": null, "bestandsomvang":
       10, "beschrijving": "Testing 123", "indicatieGebruiksrecht": false}'
     headers:
@@ -26,7 +26,7 @@ interactions:
   response:
     body:
       string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/a3fd23f5-1927-4d42-8ddb-9dcd52353bb7","identificatie":"4e620717-9e82-4907-bbaf-96e3e8f580f2","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
-        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-13T18:43:45.883422Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
+        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-13T18:43:45.883422Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
         123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/cf1a0f79-2bbd-40a6-9118-a0f276e0c17c","volgnummer":1,"omvang":10,"voltooid":false,"lock":"ee64528092e84e15b73fc2cad93df3f7"}],"trefwoorden":[],"lock":"ee64528092e84e15b73fc2cad93df3f7"}'
     headers:
       API-version:

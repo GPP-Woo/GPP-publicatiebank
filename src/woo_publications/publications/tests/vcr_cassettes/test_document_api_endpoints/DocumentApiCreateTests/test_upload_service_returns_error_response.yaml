@@ -2,7 +2,7 @@ interactions:
 - request:
     body: '{"identificatie": "e555d1a7-d202-4005-a8a0-a59a31cdefa8", "bronorganisatie":
       "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
-      "creatiedatum": "2024-10-16", "titel": "may", "auteur": "GPP-Woo/ODRC", "status":
+      "creatiedatum": "2024-10-16", "titel": "may", "auteur": "GPP-Woo/GPP-publicatiebank", "status":
       "definitief", "formaat": "application/octet-stream", "taal": "dut", "bestandsnaam":
       "unknown.bin", "inhoud": null, "bestandsomvang": 5, "beschrijving": "", "indicatieGebruiksrecht":
       false}'
@@ -25,7 +25,7 @@ interactions:
     uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/e25d6e2b-07d4-4afb-bbee-d40e6350621c","identificatie":"e555d1a7-d202-4005-a8a0-a59a31cdefa8","bronorganisatie":"000000000","creatiedatum":"2024-10-16","titel":"may","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T09:35:47.982525Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/7139c8f7-d721-4dcf-8f53-5bc0ec1cd69f","volgnummer":1,"omvang":5,"voltooid":false,"lock":"a449e89c8c3e4654b39acc158f5d2abf"}],"trefwoorden":[],"lock":"a449e89c8c3e4654b39acc158f5d2abf"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/e25d6e2b-07d4-4afb-bbee-d40e6350621c","identificatie":"e555d1a7-d202-4005-a8a0-a59a31cdefa8","bronorganisatie":"000000000","creatiedatum":"2024-10-16","titel":"may","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T09:35:47.982525Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/7139c8f7-d721-4dcf-8f53-5bc0ec1cd69f","volgnummer":1,"omvang":5,"voltooid":false,"lock":"a449e89c8c3e4654b39acc158f5d2abf"}],"trefwoorden":[],"lock":"a449e89c8c3e4654b39acc158f5d2abf"}'
     headers:
       API-version:
       - 1.4.2

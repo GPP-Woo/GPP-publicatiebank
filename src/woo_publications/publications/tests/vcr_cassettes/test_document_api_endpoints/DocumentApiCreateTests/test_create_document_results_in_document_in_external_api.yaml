@@ -3,7 +3,7 @@ interactions:
     body: '{"identificatie": "0934dd86-32df-447f-8f17-fee64633a514", "bronorganisatie":
       "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
       "creatiedatum": "2024-11-05", "titel": "Testdocument WOO-P + Open Zaak", "auteur":
-      "GPP-Woo/ODRC", "status": "definitief", "formaat": "application/octet-stream",
+      "GPP-Woo/GPP-publicatiebank", "status": "definitief", "formaat": "application/octet-stream",
       "taal": "dut", "bestandsnaam": "unknown.bin", "inhoud": null, "bestandsomvang":
       10, "beschrijving": "Testing 123", "indicatieGebruiksrecht": false}'
     headers:
@@ -26,7 +26,7 @@ interactions:
   response:
     body:
       string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/5e3642bc-60a0-47b5-898d-6ecbc3a4735b","identificatie":"0934dd86-32df-447f-8f17-fee64633a514","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
-        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T06:54:01.714716Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
+        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T06:54:01.714716Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
         123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/3fa56422-a4ee-4817-b4b4-00466510c9c7","volgnummer":1,"omvang":10,"voltooid":false,"lock":"9c08e59677014e53a36081c36339ecf8"}],"trefwoorden":[],"lock":"9c08e59677014e53a36081c36339ecf8"}'
     headers:
       API-version:
@@ -74,7 +74,7 @@ interactions:
   response:
     body:
       string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/5e3642bc-60a0-47b5-898d-6ecbc3a4735b","identificatie":"0934dd86-32df-447f-8f17-fee64633a514","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
-        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T06:54:01.714716Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
+        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T06:54:01.714716Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
         123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/3fa56422-a4ee-4817-b4b4-00466510c9c7","volgnummer":1,"omvang":10,"voltooid":false,"lock":"9c08e59677014e53a36081c36339ecf8"}],"trefwoorden":[]}'
     headers:
       API-version:

@@ -977,7 +977,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 title=self.officiele_titel[:200],
                 filesize=self.bestandsomvang,
                 filename=self.bestandsnaam,
-                author="GPP-Woo/ODRC",  # FIXME
+                author="GPP-Woo/GPP-publicatiebank",  # FIXME
                 # content_type=,  # TODO, later
                 description=self.omschrijving[:1000],
             )
