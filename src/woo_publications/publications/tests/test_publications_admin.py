@@ -627,7 +627,9 @@ class TestPublicationsAdmin(WebTest):
         form["informatie_categorieen"].force_value([ic.pk])
         form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
 
-        response = form.submit(name="_save")
+        # use different time when the publication was published
+        with freeze_time("2024-09-30T00:14:00-00:00"):
+            response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
 
@@ -639,7 +641,7 @@ class TestPublicationsAdmin(WebTest):
         self.assertEqual(publication.bron_bewaartermijn, "changed")
         self.assertEqual(publication.selectiecategorie, "changed")
         self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
-        self.assertEqual(str(publication.archiefactiedatum), "2025-09-25")
+        self.assertEqual(str(publication.archiefactiedatum), "2025-09-30")
         self.assertEqual(
             publication.toelichting_bewaartermijn,
             "changed",

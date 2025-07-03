@@ -223,7 +223,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "bron_bewaartermijn": "Selectielijst gemeenten 2020",
                     "selectiecategorie": "20.1.2",
                     "archiefnominatie": ArchiveNominationChoices.retain,
-                    "archiefactiedatum": "2034-09-27",
+                    "archiefactiedatum": "2034-09-28",
                     "toelichting_bewaartermijn": "extra data",
                     "datum_begin_geldigheid": None,
                     "datum_einde_geldigheid": None,
