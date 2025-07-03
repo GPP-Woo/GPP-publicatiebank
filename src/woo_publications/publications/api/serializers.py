@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_fsm import FSMField
+from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -40,6 +41,10 @@ from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
 logger = logging.getLogger(__name__)
+
+
+class DummySerializer(serializers.Serializer):
+    pass
 
 
 class OwnerData(TypedDict):
@@ -301,7 +306,29 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         return attrs
 
 
-class DocumentCreateSerializer(DocumentSerializer):
+class RetrieveUrlDocumentCreateSerializer(serializers.ModelSerializer):
+    document_url = serializers.URLField(
+        source="source_url",
+        label=_("document URL"),
+        required=True,
+        allow_blank=False,
+        help_text=_(
+            "The resource URL of the document in an (external) Documents API. Must be "
+            "the detail endpoint - we'll construct the download URL ourselves. Must be "
+            "provided when the `aanleveringBestand` is set to `ophalen`, and must be "
+            "empty/absent when `aanleveringBestand` is `ontvangen`. Note that you may "
+            "include the `versie` query parameter to point to a particular document "
+            "version."
+        ),
+        validators=[SourceDocumentURLValidator()],
+    )
+
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = Document
+        fields = ("document_url",)
+
+
+class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
     """
     Manage the creation of new Documents.
     """
@@ -317,22 +344,6 @@ class DocumentCreateSerializer(DocumentSerializer):
             "direct uploads, an array of expected file parts is returned."
         ),
     )
-    document_url = serializers.URLField(
-        source="source_url",
-        label=_("document URL"),
-        required=False,
-        allow_blank=True,
-        default="",
-        help_text=_(
-            "The resource URL of the document in an (external) Documents API. Must be "
-            "the detail endpoint - we'll construct the download URL ourselves. Must be "
-            "provided when the `aanleveringBestand` is set to `ophalen`, and must be "
-            "empty/absent when `aanleveringBestand` is `ontvangen`. Note that you may "
-            "include the `versie` query parameter to point to a particular document "
-            "version."
-        ),
-        validators=[SourceDocumentURLValidator()],
-    )
     bestandsdelen = FilePartSerializer(
         label=_("file parts"),
         help_text=_(
@@ -346,17 +357,22 @@ class DocumentCreateSerializer(DocumentSerializer):
         allow_null=True,
     )
 
+    discriminator_field = "aanlevering_bestand"
+    serializer_mapping = {
+        DocumentDeliveryMethods.receive_upload: DummySerializer,
+        DocumentDeliveryMethods.retrieve_url: RetrieveUrlDocumentCreateSerializer,
+    }
+
     class Meta(DocumentSerializer.Meta):
         fields = DocumentSerializer.Meta.fields + (
             "aanlevering_bestand",
-            "document_url",
             "bestandsdelen",
         )
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
 
-        source_url = attrs["source_url"]
+        source_url = attrs.get("source_url", "")
         match attrs["aanlevering_bestand"]:
             case DocumentDeliveryMethods.receive_upload if source_url:
                 raise serializers.ValidationError(

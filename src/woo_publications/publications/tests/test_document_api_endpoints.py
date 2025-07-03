@@ -1975,9 +1975,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         # create an actual document in the remote Open Zaak that we can point to
         with get_client(self.service) as client:
             openzaak_document = client.create_document(
-                identification=str(
-                    uuid4()
-                ),  # must be unique for the source organisation
+                # must be unique for the source organisation
+                identification=str(uuid4()),
                 source_organisation="123456782",
                 document_type_url=self.DOCUMENT_TYPE_URL,
                 creation_date=date.today(),
@@ -2076,7 +2075,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn("document_url", response.data)
-            self.assertEqual(response.data["document_url"][0].code, "blank")
+            self.assertEqual(response.data["document_url"][0].code, "required")
 
         with self.subTest("validate document_url is not empty"):
             response = self.client.post(
