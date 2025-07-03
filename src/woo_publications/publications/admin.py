@@ -684,6 +684,13 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
             )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "publicatie":
+            kwargs["queryset"] = Publication.objects.filter(
+                ~models.Q(publicatiestatus=PublicationStatusOptions.revoked)
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     @admin.display(description=_("file size"), ordering="bestandsomvang")
     def show_filesize(self, obj: Document) -> str:
         return filesizeformat(obj.bestandsomvang)
