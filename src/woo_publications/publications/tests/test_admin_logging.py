@@ -22,7 +22,7 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Document, Publication, Topic
 from .factories import TEST_IMG_PATH, DocumentFactory, PublicationFactory, TopicFactory
 
@@ -374,7 +374,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
@@ -509,7 +508,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
                     "ingetrokken_op": "2024-09-28T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                 },
                 "_cached_object_repr": "title",
             }
@@ -671,7 +669,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-25T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T00:14:00Z",
@@ -729,11 +726,6 @@ class TestPublicationAdminAuditLogging(WebTest):
         add_dynamic_field(form, "document_set-0-bestandsformaat", "application/pdf")
         add_dynamic_field(form, "document_set-0-bestandsnaam", "foo.pdf")
         add_dynamic_field(form, "document_set-0-bestandsomvang", "0")
-        add_dynamic_field(
-            form,
-            "document_set-0-soort_handeling",
-            DocumentActionTypeOptions.declared.value,
-        )
 
         with freeze_time("2024-09-26T00:14:00-00:00"):
             response = form.submit(name="_save")
@@ -768,7 +760,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "officiele_titel": "title",
                     "registratiedatum": "2024-09-26T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-26T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "document_service": None,
                     "document_uuid": None,
                     "lock": "",
@@ -866,7 +857,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-25T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T00:14:00Z",
@@ -950,7 +940,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "document_service": None,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
-                "soort_handeling": DocumentActionTypeOptions.declared,
                 "ontvangstdatum": None,
                 "datum_ondertekend": None,
                 "gepubliceerd_op": None,
@@ -1038,7 +1027,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-25T14:00:00Z",
                     "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T14:00:00Z",
@@ -1105,7 +1093,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "document_service": None,
                     "registratiedatum": "2024-09-25T14:00:00Z",
                     "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T14:00:00Z",
@@ -1179,7 +1166,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "document_service": None,
                 "registratiedatum": "2024-09-25T14:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
-                "soort_handeling": DocumentActionTypeOptions.declared,
                 "ontvangstdatum": None,
                 "datum_ondertekend": None,
                 "gepubliceerd_op": "2024-09-25T14:00:00Z",
@@ -1247,7 +1233,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "document_service": None,
                 "registratiedatum": "2024-09-25T14:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-25T14:00:00Z",
-                "soort_handeling": DocumentActionTypeOptions.declared,
                 "datum_ondertekend": None,
                 "ontvangstdatum": None,
                 "ingetrokken_op": None,

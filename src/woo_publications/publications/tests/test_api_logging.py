@@ -19,7 +19,7 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Publication
 from .factories import DocumentFactory, PublicationFactory, TopicFactory
 
@@ -345,7 +345,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
                     "ingetrokken_op": "2024-09-28T00:14:00Z",
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                 },
                 "_cached_object_repr": "title",
             }
@@ -483,7 +482,6 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-28T00:14:00Z",
                     "ingetrokken_op": None,
-                    "soort_handeling": DocumentActionTypeOptions.declared,
                 },
                 "_cached_object_repr": "title two",
             }
@@ -645,7 +643,6 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
                 "publicatie": publication.pk,
                 "publicatiestatus": PublicationStatusOptions.published,
                 "registratiedatum": "2024-09-27T12:00:00Z",
-                "soort_handeling": DocumentActionTypeOptions.declared,
                 "uuid": str(document.uuid),
                 "verkorte_titel": "changed verkorte_title",
                 "ontvangstdatum": None,

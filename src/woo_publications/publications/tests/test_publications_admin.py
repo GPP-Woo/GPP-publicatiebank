@@ -20,7 +20,7 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
 from .factories import DocumentFactory, PublicationFactory
 
@@ -943,11 +943,6 @@ class TestPublicationsAdmin(WebTest):
         add_dynamic_field(form, "document_set-0-bestandsformaat", "application/pdf")
         add_dynamic_field(form, "document_set-0-bestandsnaam", "foo.pdf")
         add_dynamic_field(form, "document_set-0-bestandsomvang", "0")
-        add_dynamic_field(
-            form,
-            "document_set-0-soort_handeling",
-            DocumentActionTypeOptions.declared.value,
-        )
 
         with self.captureOnCommitCallbacks(execute=True):
             update_response = form.submit(name="_save")

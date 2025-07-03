@@ -22,7 +22,7 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import (
     Document,
     DocumentIdentifier,
@@ -137,21 +137,6 @@ class FilePartSerializer(serializers.Serializer[FilePart]):
     )
 
 
-class DocumentActionSerializer(serializers.Serializer):
-    soort_handeling = serializers.ChoiceField(
-        choices=DocumentActionTypeOptions.choices,
-        default=DocumentActionTypeOptions.declared,
-    )
-    identifier = serializers.URLField(read_only=True)
-    at_time = serializers.DateTimeField(
-        read_only=True,
-    )
-    was_assciated_with = serializers.UUIDField(
-        help_text=_("The unique identifier of the organisation."),
-        read_only=True,
-    )
-
-
 class DocumentStatusSerializer(serializers.Serializer):
     document_upload_voltooid = serializers.BooleanField(
         label=_("document upload completed"),
@@ -188,16 +173,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         many=True,
         read_only=True,
         allow_null=True,
-    )
-    documenthandelingen = DocumentActionSerializer(
-        help_text=_(
-            "The document actions of this document, currently only one action will be "
-            "used per document."
-        ),
-        required=False,
-        many=True,
-        min_length=1,  # pyright: ignore[reportCallIssue]
-        max_length=1,  # pyright: ignore[reportCallIssue]
     )
     eigenaar = EigenaarSerializer(
         label=_("owner"),
@@ -239,7 +214,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "registratiedatum",
             "laatst_gewijzigd_datum",
             "bestandsdelen",
-            "documenthandelingen",
         )
         extra_kwargs = {
             "uuid": {
@@ -384,13 +358,6 @@ class DocumentUpdateSerializer(DocumentSerializer):
     publicatie = serializers.SlugRelatedField(
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
-        read_only=True,
-    )
-    documenthandelingen = DocumentActionSerializer(
-        help_text=_(
-            "The document actions of this document, currently only one action will be "
-            "used per document."
-        ),
         read_only=True,
     )
 

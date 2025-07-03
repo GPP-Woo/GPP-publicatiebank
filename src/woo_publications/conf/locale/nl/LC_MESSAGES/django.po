@@ -734,10 +734,6 @@ msgstr "Toon documenten"
 msgid "Open in app"
 msgstr ""
 
-#: woo_publications/publications/admin.py:586
-msgid "Document actions"
-msgstr "Documenthandelingen"
-
 #: woo_publications/publications/admin.py:596
 msgid "Documents API integration"
 msgstr "Documenten-API-koppeling"
@@ -1010,16 +1006,6 @@ msgstr ""
 "De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden. Deze "
 "zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`) in "
 "de body van de document create operatie."
-
-#: woo_publications/publications/api/serializers.py:165
-#: woo_publications/publications/api/serializers.py:318
-msgid ""
-"The document actions of this document, currently only one action will be "
-"used per document."
-msgstr ""
-"De documenthandelingen voor dit document. Op dit moment kan je slechts één "
-"handeling opgeven. Als je dit niet opgeeft, dan worden standaardwaarden "
-"gebruikt."
 
 #: woo_publications/publications/api/serializers.py:174
 #: woo_publications/publications/api/serializers.py:355

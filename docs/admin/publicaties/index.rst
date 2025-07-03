@@ -59,15 +59,6 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 * ``Datum Einde Geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten (zijn) komen te vervallen.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 
-**Documenthandelingen**
-
-Documenthandelingen zijn verplichte gegevens in de DiWoo-standaard.
-
-* ``Soort handeling``. De soort documenthandeling die op dit document plaatsgevonden heeft. Dit wordt voorlopig automatisch gezet.
-* ``Vanaf``. Het gerapporteerde moment van de documenthandeling. Deze wordt voorlopig gelijk gesteld aan de documentregistratiedatum.
-* ``Was geassocieerd met``. De organisatie die deze handeling heeft uitgevoerd. Deze wordt voorlopig afgeleid uit de verantwoordelijke
-  organisatie van de gerelateerde publicatie.
-
 **Documenten-API-koppeling**
 
 * ``Documents API Service``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.

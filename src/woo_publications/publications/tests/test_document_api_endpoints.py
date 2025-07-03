@@ -38,7 +38,7 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Document, DocumentIdentifier
 from .factories import DocumentFactory, DocumentIdentifierFactory, PublicationFactory
 
@@ -144,14 +144,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         self.assertEqual(data["count"], 2)
 
         with self.subTest("first_item_in_response_with_expected_data"):
-            documenthandelingen = [
-                {
-                    "soortHandeling": DocumentActionTypeOptions.declared,
-                    "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
-                    "atTime": "2024-09-24T14:00:00+02:00",
-                    "wasAssciatedWith": None,
-                }
-            ]
             expected_second_item_data = {
                 "uuid": str(document2.uuid),
                 "identifier": "document-2",
@@ -177,20 +169,11 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
                 "ingetrokkenOp": None,
                 "bestandsdelen": None,
-                "documenthandelingen": documenthandelingen,
             }
 
             self.assertEqual(data["results"][0], expected_second_item_data)
 
         with self.subTest("second_item_in_response_with_expected_data"):
-            documenthandelingen = [
-                {
-                    "soortHandeling": DocumentActionTypeOptions.declared,
-                    "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
-                    "atTime": "2024-09-25T14:30:00+02:00",
-                    "wasAssciatedWith": str(organisation.uuid),
-                }
-            ]
             expected_first_item_data = {
                 "uuid": str(document.uuid),
                 "identifier": "document-1",
@@ -216,7 +199,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
                 "ingetrokkenOp": None,
                 "bestandsdelen": None,
-                "documenthandelingen": documenthandelingen,
             }
 
             self.assertEqual(data["results"][1], expected_first_item_data)
@@ -1036,14 +1018,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         data = response.json()
 
-        documenthandelingen = [
-            {
-                "soortHandeling": DocumentActionTypeOptions.declared,
-                "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
-                "atTime": "2024-09-25T14:30:00+02:00",
-                "wasAssciatedWith": None,
-            }
-        ]
         expected_data = {
             "uuid": str(document.uuid),
             "identifier": "document-1",
@@ -1068,7 +1042,6 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
             "bestandsdelen": None,
-            "documenthandelingen": documenthandelingen,
         }
 
         self.assertEqual(data, expected_data)
@@ -1475,11 +1448,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             "bestandsformaat": "unknown",
             "bestandsnaam": "unknown.bin",
             "bestandsomvang": 10,
-            "documenthandelingen": [
-                {
-                    "soortHandeling": DocumentActionTypeOptions.signed,
-                }
-            ],
         }
 
         with freeze_time("2024-11-13T15:00:00-00:00"):
@@ -1493,19 +1461,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        with self.subTest("documenthandelingen is succesfully created."):
-            self.assertEqual(
-                response.json()["documenthandelingen"],
-                [
-                    {
-                        "soortHandeling": DocumentActionTypeOptions.signed,
-                        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_e1ec050e",
-                        "atTime": "2024-11-13T16:00:00+01:00",
-                        "wasAssciatedWith": str(organisation.uuid),
-                    }
-                ],
-            )
 
         with self.subTest("expected woo-publications state"):
             document = Document.objects.get()
@@ -1553,11 +1508,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             "bestandsformaat": "unknown",
             "bestandsnaam": "unknown.bin",
             "bestandsomvang": 10,
-            "documenthandelingen": [
-                {
-                    "soortHandeling": DocumentActionTypeOptions.signed,
-                }
-            ],
         }
 
         response = self.client.post(
@@ -1570,54 +1520,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_create_document_without_document_handelingen_saves_with_default_options(
-        self,
-    ):
-        organisation = OrganisationFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[self.information_category],
-            verantwoordelijke=organisation,
-        )
-        endpoint = reverse("api:document-list")
-        body = {
-            "identifier": "WOO-P/0042",
-            "publicatie": publication.uuid,
-            "officieleTitel": "Testdocument WOO-P + Open Zaak",
-            "verkorteTitel": "Testdocument",
-            "omschrijving": "Testing 123",
-            "creatiedatum": "2024-11-05",
-            "bestandsformaat": "unknown",
-            "bestandsnaam": "unknown.bin",
-            "bestandsomvang": 10,
-        }
-
-        with freeze_time("2024-11-13T14:00:00+01:00"):
-            response = self.client.post(
-                endpoint,
-                data=body,
-                headers={
-                    **AUDIT_HEADERS,
-                    "Host": "host.docker.internal:8000",
-                },
-            )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        data = response.json()
-
-        with self.subTest("documenthandelingen is succesfully created."):
-            self.assertEqual(
-                data["documenthandelingen"],
-                [
-                    {
-                        "soortHandeling": DocumentActionTypeOptions.declared,
-                        "identifier": "https://identifier.overheid.nl/tooi/def/thes/kern/c_641ecd76",
-                        "atTime": data["registratiedatum"],
-                        "wasAssciatedWith": str(organisation.uuid),
-                    }
-                ],
-            )
 
     @patch("woo_publications.publications.models.Document.register_in_documents_api")
     def test_create_document_with_custom_owner(
@@ -1705,53 +1607,6 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             DocumentIdentifier.objects.filter(
                 document=created_document, kenmerk="kenmerk 2", bron="bron 2"
             ).exists()
-        )
-
-    def test_create_document_with_multiple_handelingen_results_in_error(self):
-        organisation = OrganisationFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[self.information_category],
-            verantwoordelijke=organisation,
-        )
-        endpoint = reverse("api:document-list")
-        body = {
-            "identifier": "WOO-P/0042",
-            "publicatie": publication.uuid,
-            "officieleTitel": "Testdocument WOO-P + Open Zaak",
-            "verkorteTitel": "Testdocument",
-            "omschrijving": "Testing 123",
-            "creatiedatum": "2024-11-05",
-            "bestandsformaat": "unknown",
-            "bestandsnaam": "unknown.bin",
-            "bestandsomvang": 10,
-            "documenthandelingen": [
-                {
-                    "soortHandeling": DocumentActionTypeOptions.signed,
-                    "atTime": "2024-11-13T14:00:00+01:00",
-                },
-                {
-                    "soortHandeling": DocumentActionTypeOptions.signed,
-                    "atTime": "2024-11-13T14:00:00+01:00",
-                },
-            ],
-        }
-
-        response = self.client.post(
-            endpoint,
-            data=body,
-            headers={
-                **AUDIT_HEADERS,
-                "Host": "host.docker.internal:8000",
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        data = response.json()
-
-        self.assertEqual(
-            data["documenthandelingen"]["nonFieldErrors"],
-            ["Ensure this field has no more than 1 elements."],
         )
 
     @patch("woo_publications.publications.api.viewsets.index_document.delay")

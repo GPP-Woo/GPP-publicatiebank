@@ -1976,13 +1976,6 @@ components:
           description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
             Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
             in de body van de document create operatie.
-        documenthandelingen:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentAction'
-          description: De documenthandelingen voor dit document. Op dit moment kan
-            je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
-            standaardwaarden gebruikt.
       required:
       - bestandsdelen
       - creatiedatum
@@ -1994,30 +1987,6 @@ components:
       - publicatiestatus
       - registratiedatum
       - uuid
-    DocumentAction:
-      type: object
-      properties:
-        soortHandeling:
-          allOf:
-          - $ref: '#/components/schemas/SoortHandelingEnum'
-          default: vaststelling
-        identifier:
-          type: string
-          format: uri
-          readOnly: true
-        atTime:
-          type: string
-          format: date-time
-          readOnly: true
-        wasAssciatedWith:
-          type: string
-          format: uuid
-          readOnly: true
-          description: De unieke identificatie van de organisatie.
-      required:
-      - atTime
-      - identifier
-      - wasAssciatedWith
     DocumentIdentifier:
       type: object
       properties:
@@ -2165,19 +2134,11 @@ components:
           description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
             Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
             in de body van de document create operatie.
-        documenthandelingen:
-          allOf:
-          - $ref: '#/components/schemas/DocumentAction'
-          readOnly: true
-          description: De documenthandelingen voor dit document. Op dit moment kan
-            je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
-            standaardwaarden gebruikt.
       required:
       - bestandsdelen
       - bestandsformaat
       - bestandsnaam
       - bestandsomvang
-      - documenthandelingen
       - gepubliceerdOp
       - identifier
       - ingetrokkenOp
@@ -2602,13 +2563,6 @@ components:
           description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
             Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
             in de body van de document create operatie.
-        documenthandelingen:
-          allOf:
-          - $ref: '#/components/schemas/DocumentAction'
-          readOnly: true
-          description: De documenthandelingen voor dit document. Op dit moment kan
-            je slechts één handeling opgeven. Als je dit niet opgeeft, dan worden
-            standaardwaarden gebruikt.
     PatchedOrganisation:
       type: object
       properties:
@@ -3058,16 +3012,6 @@ components:
       required:
       - bron
       - kenmerk
-    SoortHandelingEnum:
-      enum:
-      - ondertekening
-      - ontvangst
-      - vaststelling
-      type: string
-      description: |-
-        * `ondertekening` - Ondertekend
-        * `ontvangst` - Ontvangen
-        * `vaststelling` - Vastgesteld
     Theme:
       type: object
       properties:
