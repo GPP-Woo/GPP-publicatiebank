@@ -1,3 +1,4 @@
+import base64
 from datetime import date
 from io import BytesIO
 from uuid import uuid4
@@ -125,7 +126,72 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
             self.assertEqual(download.content, b"aaaaaaaaaa")
 
     def test_copies_document_data_of_specified_version(self):
-        raise NotImplementedError
+        # create a document and make multiple versions of the content
+        with get_client(self.service) as client:
+            # metadata + initial upload
+            oz_document = client.create_document(
+                # must be unique for the source organisation
+                identification=str(uuid4()),
+                source_organisation="123456782",
+                document_type_url=DOCUMENT_TYPE_URL,
+                creation_date=date(2025, 1, 1),
+                title="File part test",
+                filesize=10,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+            part = oz_document.file_parts[0]
+            client.proxy_file_part_upload(
+                File(BytesIO(b"a" * 10)),
+                file_part_uuid=part.uuid,
+                lock=oz_document.lock,
+            )
+            client.unlock_document(uuid=oz_document.uuid, lock=oz_document.lock)
+
+            # lock to create a new version
+            lock = client.post(
+                f"enkelvoudiginformatieobjecten/{oz_document.uuid}/lock"
+            ).json()["lock"]
+            patch_response = client.patch(
+                f"enkelvoudiginformatieobjecten/{oz_document.uuid}",
+                json={
+                    "inhoud": base64.b64encode(b"12345").decode("ascii"),
+                    "bestandsnaam": "updated.txt",
+                    "bestandsomvang": 5,
+                    "lock": lock,
+                },
+            )
+            patch_response.raise_for_status()
+            client.unlock_document(uuid=oz_document.uuid, lock=lock)
+
+        source_url = (
+            "http://openzaak.docker.internal:8001/documenten/api/v1/"
+            f"enkelvoudiginformatieobjecten/{oz_document.uuid}?versie=1"
+        )
+        woo_document = DocumentFactory.create(source_url=source_url)
+
+        process_source_document(
+            document_id=woo_document.id, base_url="http://host.docker.internal:8000/"
+        )
+
+        woo_document.refresh_from_db()
+        self.assertTrue(woo_document.upload_complete)
+        # values from version 1
+        self.assertEqual(woo_document.creatiedatum, date(2025, 1, 1))
+        self.assertEqual(woo_document.bestandsformaat, "text/plain")
+        self.assertEqual(woo_document.bestandsnaam, "data.txt")
+        self.assertEqual(woo_document.bestandsomvang, 10)
+
+        with (
+            self.subTest("verify content from version 1 is copied"),
+            get_client(self.service) as client,
+        ):
+            download = client.get(
+                f"enkelvoudiginformatieobjecten/{woo_document.document_uuid}/download"
+            )
+
+            assert download.status_code == 200
+            self.assertEqual(download.content, b"aaaaaaaaaa")
 
     def test_document_creation_is_idempotent(self):
         raise NotImplementedError
