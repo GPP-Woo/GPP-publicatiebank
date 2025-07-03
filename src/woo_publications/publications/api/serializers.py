@@ -37,7 +37,7 @@ from ..models import (
 from ..tasks import index_document, index_publication
 from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
-from .validators import PublicationStatusValidator
+from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
 logger = logging.getLogger(__name__)
 
@@ -331,6 +331,7 @@ class DocumentCreateSerializer(DocumentSerializer):
             "include the `versie` query parameter to point to a particular document "
             "version."
         ),
+        validators=[SourceDocumentURLValidator()],
     )
     bestandsdelen = FilePartSerializer(
         label=_("file parts"),

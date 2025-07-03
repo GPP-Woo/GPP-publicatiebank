@@ -1989,7 +1989,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         document_url = (
             "http://openzaak.docker.internal:8001/documenten/api/v1/"
             f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
-            "?versie=999"
+            "?versie=1"
         )
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(
@@ -2075,6 +2075,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("document_url", response.data)
+            self.assertEqual(response.data["document_url"][0].code, "blank")
 
         with self.subTest("validate document_url is not empty"):
             response = self.client.post(
@@ -2091,6 +2093,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("document_url", response.data)
+            self.assertEqual(response.data["document_url"][0].code, "blank")
 
         with self.subTest("validate document_url points to known service"):
             response = self.client.post(
@@ -2107,6 +2111,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("document_url", response.data)
+            self.assertEqual(response.data["document_url"][0].code, "unknown_service")
 
         with self.subTest("validate document_url points to document resource"):
             response = self.client.post(
@@ -2123,6 +2129,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("document_url", response.data)
+            self.assertEqual(response.data["document_url"][0].code, "invalid")
 
         with self.subTest("validate document_url points to existing version"):
             response = self.client.post(
@@ -2139,6 +2147,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("document_url", response.data)
+            self.assertEqual(response.data["document_url"][0].code, "does_not_exist")
 
 
 class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
