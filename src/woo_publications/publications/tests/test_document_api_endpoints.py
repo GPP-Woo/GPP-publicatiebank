@@ -2035,6 +2035,111 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertFalse(document.upload_complete)
             self.assertEqual(document.bestandsomvang, 0)  # will be set via Celery!
 
+    def test_create_document_external_document_url_validation(self):
+        # create an actual document in the remote Open Zaak that we can point to
+        with get_client(self.service) as client:
+            openzaak_document = client.create_document(
+                # must be unique for the source organisation
+                identification=str(uuid4()),
+                source_organisation="123456782",
+                document_type_url=self.DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="Dummy",
+                filesize=0,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+
+        document_url = (
+            "http://openzaak.docker.internal:8001/documenten/api/v1/"
+            f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
+        )
+        organisation = OrganisationFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[self.information_category],
+            verantwoordelijke=organisation,
+        )
+        endpoint = reverse("api:document-list")
+
+        with self.subTest("validate document_url is provided"):
+            response = self.client.post(
+                endpoint,
+                data={
+                    "identifier": "WOO-P/0042",
+                    "publicatie": publication.uuid,
+                    "officieleTitel": "Test document external URL",
+                    "creatiedatum": "2024-11-05",
+                    "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+                },
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.subTest("validate document_url is not empty"):
+            response = self.client.post(
+                endpoint,
+                data={
+                    "identifier": "WOO-P/0042",
+                    "publicatie": publication.uuid,
+                    "officieleTitel": "Test document external URL",
+                    "creatiedatum": "2024-11-05",
+                    "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+                    "documentUrl": "",
+                },
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.subTest("validate document_url points to known service"):
+            response = self.client.post(
+                endpoint,
+                data={
+                    "identifier": "WOO-P/0043",
+                    "publicatie": publication.uuid,
+                    "officieleTitel": "Test document external URL",
+                    "creatiedatum": "2024-11-05",
+                    "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+                    "documentUrl": "https://example.com",
+                },
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.subTest("validate document_url points to document resource"):
+            response = self.client.post(
+                endpoint,
+                data={
+                    "identifier": "WOO-P/0044",
+                    "publicatie": publication.uuid,
+                    "officieleTitel": "Test document external URL",
+                    "creatiedatum": "2024-11-05",
+                    "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+                    "documentUrl": f"{document_url}/bad-suffix",
+                },
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.subTest("validate document_url points to existing version"):
+            response = self.client.post(
+                endpoint,
+                data={
+                    "identifier": "WOO-P/0045",
+                    "publicatie": publication.uuid,
+                    "officieleTitel": "Test document external URL",
+                    "creatiedatum": "2024-11-05",
+                    "aanleveringBestand": DocumentDeliveryMethods.retrieve_url,
+                    "documentUrl": f"{document_url}?versie=999",
+                },
+                headers={**AUDIT_HEADERS, "Host": "host.docker.internal:8000"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
     """

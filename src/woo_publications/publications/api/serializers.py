@@ -352,6 +352,29 @@ class DocumentCreateSerializer(DocumentSerializer):
             "bestandsdelen",
         )
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        source_url = attrs["source_url"]
+        match attrs["aanlevering_bestand"]:
+            case DocumentDeliveryMethods.receive_upload if source_url:
+                raise serializers.ValidationError(
+                    {
+                        "document_url": _(
+                            "You can not provide a document URL when the delivery "
+                            "is set to manually upload the file part(s)."
+                        )
+                    },
+                    code="invalid",
+                )
+            case DocumentDeliveryMethods.retrieve_url if not source_url:
+                raise serializers.ValidationError(
+                    {"document_url": _("You must provide a non-empty document URL.")},
+                    code="blank",
+                )
+
+        return attrs
+
     @transaction.atomic
     def create(self, validated_data):
         # not a model field, drop it. This is used for validation to check source_url.
