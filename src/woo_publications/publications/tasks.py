@@ -88,10 +88,13 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
             document.register_in_documents_api(
                 build_absolute_uri=lambda abs_path: urljoin(base_url, abs_path[1:])
             )
-            assert document.zgw_document is not None
         else:
             assert document.zgw_document is None
-            raise NotImplementedError
+            with get_documents_client(document.document_service) as client:
+                zgw_document = client.retrieve_document(uuid=document.document_uuid)
+            document.zgw_document = zgw_document
+
+        assert document.zgw_document is not None
 
         # Check if we have file parts to upload/complete. If there are, download the
         # source document first.

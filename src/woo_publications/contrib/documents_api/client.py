@@ -73,7 +73,11 @@ class DocumentenClient(NLXClient):
     Requires Documenten API 1.1+ since we use the large file uploads mechanism.
     """
 
-    def retrieve_document(self, *, url: str) -> Document:
+    def retrieve_document(self, *, url: str = "", uuid: UUID | None = None) -> Document:
+        assert url or uuid
+        if not url:
+            url = f"enkelvoudiginformatieobjecten/{uuid}"
+
         response = self.get(url)
         response.raise_for_status()
 
