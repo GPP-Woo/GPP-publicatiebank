@@ -1,11 +1,18 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import date
+from io import BytesIO
+from typing import Protocol
 from uuid import UUID
 
 from django.core.files import File
+from django.core.files.uploadedfile import (
+    InMemoryUploadedFile,
+    TemporaryUploadedFile,
+    UploadedFile,
+)
 
 from furl import furl
 from zgw_consumers.client import build_client
@@ -186,3 +193,139 @@ class DocumentenClient(NLXClient):
             json={"lock": lock},
         )
         response.raise_for_status()
+
+
+class FileFactory(Protocol):
+    def __call__(self, index: int, part_size: int) -> UploadedFile: ...
+
+
+class PartsDownloader:
+    """
+    Download the content of a document for the specified parts.
+
+    The binary content of a document is downloaded in streaming mode so that it still
+    works in memory-constrained environments. A referenced file could be multiple GB,
+    which will quickly exhaust container memory limits when trying to load all of that
+    naively into memory.
+
+    Similarly, to *upload* this file content to a Documents API (to persist our own
+    copy/version), large files must be uploaded in chunks and the remote API dictates
+    the expected file size for each chunk.
+
+    This helper breaks up a large download into the necessary chunks. Small files
+    (< 10MB) are loaded in memory, larger files are downloaded to temporary files on
+    disk.
+    """
+
+    def __init__(
+        self,
+        parts: Sequence[FilePart],
+        file_name: str,
+        total_size: int,
+        chunk_size=8_192,  # 8 kb
+        small_file_size_limit: int = 10 * 1024 * 1024,  # 10MiB limit by default
+    ):
+        self.parts = parts
+        self.file_name = file_name
+        self.total_size = total_size
+        self.chunk_size = chunk_size
+        self.small_file_size_limit = small_file_size_limit
+
+    def _get_file_factory(self) -> FileFactory:
+        def _get_name(index: int) -> str:
+            return f"{self.file_name}_part{index}.bin"
+
+        def _in_memory_upload_factory(
+            index: int, part_size: int
+        ) -> InMemoryUploadedFile:
+            return InMemoryUploadedFile(
+                file=BytesIO(),
+                field_name=None,
+                name=_get_name(index),
+                content_type=None,
+                size=part_size,
+                charset=None,
+            )
+
+        def _temporary_uploaded_file_factory(
+            index: int, part_size: int
+        ) -> TemporaryUploadedFile:
+            return TemporaryUploadedFile(
+                name=_get_name(index),
+                content_type=None,
+                size=part_size,
+                charset=None,
+            )
+
+        if self.total_size <= self.small_file_size_limit:
+            return _in_memory_upload_factory
+        return _temporary_uploaded_file_factory
+
+    def download(
+        self,
+        client: DocumentenClient,
+        source_url: str,
+    ) -> Iterator[tuple[FilePart, UploadedFile]]:
+        """
+        Download the file content and create 'uploads' for each file part.
+
+        For completed parts, no actual file content will be written, only incomplete
+        parts will actually be processed.
+        """
+        file_factory = self._get_file_factory()
+
+        # initialize the first part to process & prepare the first target file
+        files: list[UploadedFile] = [
+            file_factory(index=0, part_size=self.parts[0].size)
+        ]
+        part_index: int = 0
+        part_bytes_written: int = 0
+
+        # furl keeps the query string parameters when modifying the URL path like
+        # this
+        download_url = furl(source_url) / "download"
+        # stream and consume the content via iter_content to keep a low enough memory
+        # footprint
+        download_response = client.get(str(download_url), stream=True)
+        download_response.raise_for_status()
+
+        # process the bytes as we download them
+        for chunk in download_response.iter_content(chunk_size=self.chunk_size):
+            # there must be equal parts and files for this to make sense
+            part = self.parts[part_index]
+            file = files[part_index]
+
+            # bytes_left_to_write may be larger than chunk size, but that's
+            # okay, it just means that the bytes for next part is empty and we don't
+            # prepare the next file yet.
+            bytes_left_to_write = part.size - part_bytes_written
+            for_current_part = chunk[:bytes_left_to_write]
+
+            # we only need to write to the part if we need to actually process it
+            if not part.completed:
+                file.write(for_current_part)
+            # but always *mark* the bytes as written otherwise we lose our position in
+            # the download stream
+            part_bytes_written += len(for_current_part)
+
+            # if this chunk has data for the next part, prepare the next file
+            for_next_part = chunk[bytes_left_to_write:]
+            if for_next_part_size := len(for_next_part):
+                part_index += 1
+                file = file_factory(
+                    index=part_index, part_size=self.parts[part_index].size
+                )
+                files.append(file)
+                file.write(for_next_part)
+                part_bytes_written = for_next_part_size
+
+            # this chunk finishes the part exactly, initialize the next part
+            elif part_bytes_written == part.size and part is not self.parts[-1]:
+                part_index += 1
+                file = file_factory(
+                    index=part_index, part_size=self.parts[part_index].size
+                )
+                files.append(file)
+                part_bytes_written = 0
+
+        return zip(self.parts, files, strict=True)

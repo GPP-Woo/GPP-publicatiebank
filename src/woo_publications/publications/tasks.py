@@ -1,22 +1,14 @@
 import logging
-from io import BytesIO
 from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
-from django.core.files.uploadedfile import (
-    InMemoryUploadedFile,
-    TemporaryUploadedFile,
-    UploadedFile,
-)
-
-from furl import furl
 from zgw_consumers.models import Service
 
 from woo_publications.celery import app
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.documents_api.client import (
-    FilePart,
+    PartsDownloader,
     get_client as get_documents_client,
 )
 from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_client
@@ -25,8 +17,6 @@ from woo_publications.publications.constants import PublicationStatusOptions
 from .models import Document, Publication, Topic
 
 logger = logging.getLogger(__name__)
-
-TEN_MB = 10 * 1024 * 1024
 
 
 @app.task
@@ -80,93 +70,35 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
 
         assert document.zgw_document is not None
 
-        # Check if we have file parts to upload/complete. If there are, download the
-        # source document first.
-        if parts := document.zgw_document.file_parts:
-            file_size = source_document.file_size
-            assert file_size is not None
+        # There must be *some* parts left to upload, or the upload_complete flag would
+        # have been set.
+        parts = document.zgw_document.file_parts
+        assert source_document.file_size is not None
+        downloader = PartsDownloader(
+            parts=parts,
+            file_name=document.bestandsnaam,
+            total_size=source_document.file_size,
+        )
+        parts_and_files = downloader.download(
+            client=source_documents_client,
+            source_url=document.source_url,
+        )
 
-            def _file_factory(index: int, part_size: int) -> UploadedFile:
-                name = f"{document.bestandsnaam}_part{index}.bin"
-                assert file_size is not None
-                # use in-memory files for files smaller than 10MB
-                if file_size <= TEN_MB:  # 10 MB
-                    return InMemoryUploadedFile(
-                        file=BytesIO(),
-                        field_name=None,
-                        name=name,
-                        content_type=None,
-                        size=part_size,
-                        charset=None,
-                    )
-                else:
-                    return TemporaryUploadedFile(
-                        name=name,
-                        content_type=None,
-                        size=file_size,
-                        charset=None,
-                    )
+        # we now have part metadata and actual file-like objects for each part that
+        # we can upload
+        with get_documents_client(document.document_service) as client:
+            for part, part_file in parts_and_files:
+                if part.completed:
+                    continue
 
-            # furl keeps the query string parameters when modifying the URL path like
-            # this
-            download_url = furl(document.source_url) / "download"
-            download_response = source_documents_client.get(
-                str(download_url),
-                stream=True,
-            )
-            download_response.raise_for_status()
+                part_file.seek(0)
+                client.proxy_file_part_upload(
+                    part_file,
+                    file_part_uuid=part.uuid,
+                    lock=document.lock,
+                )
 
-            _part: FilePart = parts[0]
-            _files: list[UploadedFile] = [_file_factory(index=0, part_size=_part.size)]
-            _part_bytes_written = 0
-
-            for chunk in download_response.iter_content(chunk_size=8_192):  # 8kb chunks
-                _part_index = parts.index(_part)
-                _file = _files[_part_index]
-
-                # _num_bytes_left_to_write may be larger than chunk size, but that's
-                # okay, it just means that the bytes for next part is empty and we don't
-                # prepare the next file yet.
-                _num_bytes_left_to_write = _part.size - _part_bytes_written
-                for_current_part = chunk[:_num_bytes_left_to_write]
-                # we only need to write to the part if we need to actually process it
-                if not _part.completed:
-                    _file.write(for_current_part)
-                _part_bytes_written += len(for_current_part)
-
-                # if this chunk has data for the next part, prepare the next file
-                for_next_part = chunk[_num_bytes_left_to_write:]
-                if next_part_size := len(for_next_part):
-                    _next_part_index = _part_index + 1
-                    _part = parts[_next_part_index]
-                    _file = _file_factory(index=_next_part_index, part_size=_part.size)
-                    _files.append(_file)
-                    _part_bytes_written = next_part_size
-                # this chunk finishes the part exactly, initialize the next part
-                elif _part_bytes_written == _part.size and _part is not parts[-1]:
-                    _next_part_index = _part_index + 1
-                    _part = parts[_next_part_index]
-                    _file = _file_factory(index=_next_part_index, part_size=_part.size)
-                    _files.append(_file)
-                    _part_bytes_written = 0
-
-            assert len(_files) == len(parts)
-
-            # we now have part metadata and actual file-like objects for each part that
-            # we can upload
-            with get_documents_client(document.document_service) as client:
-                for part, part_file in zip(parts, _files, strict=True):
-                    if part.completed:
-                        continue
-
-                    part_file.seek(0)
-                    client.proxy_file_part_upload(
-                        part_file,
-                        file_part_uuid=part.uuid,
-                        lock=document.lock,
-                    )
-
-                document.check_and_mark_completed(client)
+            document.check_and_mark_completed(client)
 
 
 @app.task
