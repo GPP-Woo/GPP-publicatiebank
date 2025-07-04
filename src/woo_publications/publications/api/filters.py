@@ -161,6 +161,16 @@ class PublicationFilterSet(FilterSet):
         choices=PublicationStatusOptions.choices,
         widget=CSVWidget(),
     )
+    kenmerk = filters.CharFilter(
+        help_text=_("Filter publications based on the given identifier."),
+        field_name="publicationidentifier__kenmerk",
+        lookup_expr="exact",
+    )
+    bron = filters.CharFilter(
+        help_text=_("Filter publications based on the given identifier source."),
+        field_name="publicationidentifier__bron",
+        lookup_expr="exact",
+    )
     archiefnominatie = filters.MultipleChoiceFilter(
         help_text=_("Filter publications based on the archiefnominatie."),
         choices=ArchiveNominationChoices.choices,
@@ -249,6 +259,8 @@ class PublicationFilterSet(FilterSet):
             "search",
             "eigenaar",
             "publicatiestatus",
+            "kenmerk",
+            "bron",
             "informatie_categorieen",
             "onderwerpen",
             "archiefnominatie",

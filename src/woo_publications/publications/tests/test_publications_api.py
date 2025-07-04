@@ -1130,6 +1130,57 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertItemInResults(data["results"], "uuid", str(published.uuid))
             self.assertItemInResults(data["results"], "uuid", str(revoked.uuid))
 
+    def test_list_publication_filter_kenmerken(self):
+        publication_1, publication_2 = PublicationFactory.create_batch(
+            2, publicatiestatus=PublicationStatusOptions.published
+        )
+        PublicationIdentifierFactory(
+            publicatie=publication_1, kenmerk="kenmerk-1", bron="bron-1"
+        )
+        list_url = reverse("api:publication-list")
+
+        with self.subTest("filter on none existing kenmerk"):
+            response = self.client.get(
+                list_url,
+                {"kenmerk": "does not exist"},
+                headers=AUDIT_HEADERS,
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["count"], 0)
+
+        with self.subTest("filter on existing kenmerk"):
+            response = self.client.get(
+                list_url,
+                {"kenmerk": "kenmerk-1"},
+                headers=AUDIT_HEADERS,
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(publication_1.uuid))
+
+        with self.subTest("filter on none existing bron"):
+            response = self.client.get(
+                list_url,
+                {"bron": "does not exist"},
+                headers=AUDIT_HEADERS,
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["count"], 0)
+
+        with self.subTest("filter on existing bron"):
+            response = self.client.get(
+                list_url,
+                {"bron": "bron-1"},
+                headers=AUDIT_HEADERS,
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(data["results"][0]["uuid"], str(publication_1.uuid))
+
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_detail_publication(self):
         ic = InformationCategoryFactory.create(
