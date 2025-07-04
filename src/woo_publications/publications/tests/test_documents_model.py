@@ -1,13 +1,20 @@
+import json
 import uuid
+from unittest.mock import MagicMock, patch
 
 from django.db import IntegrityError, transaction
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 from django_fsm import TransitionNotAllowed
 from zgw_consumers.constants import APITypes
-from zgw_consumers.test.factories import ServiceFactory
 
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.tests.factories import ServiceFactory
+from woo_publications.metadata.tests.factories import (
+    InformationCategoryFactory,
+    OrganisationFactory,
+)
+from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
 from ..models import Document
@@ -90,3 +97,68 @@ class TestDocumentApi(TestCase):
             )
 
             published_document.revoke()
+
+
+@override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
+class TestRegisterInDocumentApi(VCRMixin, TestCase):
+    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
+    DOCUMENT_TYPE_URL = (
+        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
+        + DOCUMENT_TYPE_UUID
+    )
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Set up global configuration
+        cls.service = service = ServiceFactory.create(
+            for_documents_api_docker_compose=True
+        )
+        config = GlobalConfiguration.get_solo()
+        config.documents_api_service = service
+        config.organisation_rsin = "000000000"
+        config.save()
+
+        cls.information_category = InformationCategoryFactory.create(
+            uuid=cls.DOCUMENT_TYPE_UUID
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
+    def _get_vcr_kwargs(self, **kwargs):
+        kwargs.setdefault("ignore_hosts", ("invalid-domain",))
+        return super()._get_vcr_kwargs(**kwargs)
+
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
+        publisher = OrganisationFactory.create(is_actief=True, rsin="")
+        document: Document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            publicatie__publisher=publisher,
+        )
+        document.register_in_documents_api(
+            build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
+        )
+
+        response_data = json.loads(
+            self.cassette.data[0][1]["body"]["string"].decode("utf-8")
+        )
+        self.assertEqual(response_data["bronorganisatie"], "000000000")
+
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
+        publisher = OrganisationFactory.create(is_actief=True, rsin="123456782")
+        document: Document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            publicatie__publisher=publisher,
+        )
+        document.register_in_documents_api(
+            build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
+        )
+
+        response_data = json.loads(
+            self.cassette.data[0][1]["body"]["string"].decode("utf-8")
+        )
+        self.assertEqual(response_data["bronorganisatie"], "123456782")
