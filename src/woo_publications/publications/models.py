@@ -51,12 +51,7 @@ from woo_publications.utils.validators import (
 )
 
 from .archiving import get_retention_informatie_category
-from .constants import (
-    DOCUMENT_ACTION_TOOI_IDENTIFIERS,
-    DocumentActionTypeOptions,
-    PublicationStatusOptions,
-)
-from .typing import DocumentActions
+from .constants import PublicationStatusOptions
 
 # when the document isn't specified both the service and uuid needs to be unset
 _DOCUMENT_NOT_SET = models.Q(document_service=None, document_uuid=None)
@@ -712,13 +707,6 @@ class Document(ConcurrentTransitionMixin, models.Model):
         blank=True,
     )
 
-    # documenthandeling fields
-    soort_handeling = models.CharField(
-        verbose_name=_("action type"),
-        choices=DocumentActionTypeOptions.choices,
-        default=DocumentActionTypeOptions.declared,
-    )
-
     # Documents API integration
     document_service = models.ForeignKey(
         "zgw_consumers.Service",
@@ -776,35 +764,6 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     def __str__(self):
         return self.officiele_titel
-
-    @property
-    def documenthandelingen(self) -> DocumentActions:
-        """
-        Fake documenthandeling field to populate the `DocumentActionSerializer`.
-        """
-        return [
-            {
-                "soort_handeling": self.soort_handeling,
-                "identifier": DOCUMENT_ACTION_TOOI_IDENTIFIERS[self.soort_handeling],
-                "at_time": self.registratiedatum,
-                "was_assciated_with": (
-                    self.publicatie.verantwoordelijke.uuid
-                    if self.publicatie.verantwoordelijke
-                    else None
-                ),
-            }
-        ]
-
-    @documenthandelingen.setter
-    def documenthandelingen(self, value: DocumentActions) -> None:
-        """
-        Set the (created) `soort_handeling` field
-        """
-        assert len(value) == 1
-        documenthandeling = value[0]
-        assert documenthandeling["soort_handeling"]
-
-        self.soort_handeling = documenthandeling["soort_handeling"]
 
     @property
     def zgw_document(self) -> ZGWDocument | None:

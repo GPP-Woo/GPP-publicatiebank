@@ -16,7 +16,7 @@ from woo_publications.accounts.tests.factories import (
     UserFactory,
 )
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import PublicationStatusOptions
 from ..models import Document
 from .factories import DocumentFactory, PublicationFactory
 
@@ -251,9 +251,6 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 added_item.publicatiestatus, PublicationStatusOptions.concept
             )
-            self.assertEqual(
-                str(added_item.soort_handeling), DocumentActionTypeOptions.declared
-            )
             self.assertEqual(added_item.eigenaar, self.organisation_member)
 
         with self.subTest("complete data"):
@@ -271,9 +268,6 @@ class TestDocumentAdmin(WebTest):
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
                 "eleifend eros sed consectetur.",
-            )
-            form["soort_handeling"].select(
-                text=DocumentActionTypeOptions.received.label
             )
 
             add_response = form.submit(name="_save")
@@ -312,9 +306,6 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(
                 str(added_item.laatst_gewijzigd_datum), "2024-09-24 12:00:00+00:00"
             )
-            self.assertEqual(
-                str(added_item.soort_handeling), DocumentActionTypeOptions.received
-            )
 
     @patch("woo_publications.publications.admin.index_document.delay")
     def test_document_create_schedules_index_task(
@@ -341,7 +332,6 @@ class TestDocumentAdmin(WebTest):
             "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
             "eleifend eros sed consectetur.",
         )
-        form["soort_handeling"].select(text=DocumentActionTypeOptions.received.label)
 
         with self.captureOnCommitCallbacks(execute=True):
             add_response = form.submit(name="_save")
@@ -393,7 +383,6 @@ class TestDocumentAdmin(WebTest):
         form["officiele_titel"] = "changed official title"
         form["verkorte_titel"] = "changed short title"
         form["omschrijving"] = "changed description"
-        form["soort_handeling"].select(text=DocumentActionTypeOptions.received.label)
 
         with freeze_time("2024-09-29T14:00:00-00:00"):
             response = form.submit(name="_save")
@@ -411,9 +400,6 @@ class TestDocumentAdmin(WebTest):
         self.assertEqual(str(document.registratiedatum), "2024-09-25 14:00:00+00:00")
         self.assertEqual(
             str(document.laatst_gewijzigd_datum), "2024-09-29 14:00:00+00:00"
-        )
-        self.assertEqual(
-            str(document.soort_handeling), DocumentActionTypeOptions.received
         )
 
     @patch("woo_publications.publications.admin.index_document.delay")

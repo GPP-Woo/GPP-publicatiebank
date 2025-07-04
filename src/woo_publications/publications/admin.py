@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from functools import partial
 from typing import Any
 from uuid import UUID
@@ -25,7 +24,6 @@ from woo_publications.accounts.models import OrganisationMember, User
 from woo_publications.logging.logevent import audit_admin_update
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
-from woo_publications.metadata.models import Organisation
 from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
@@ -589,16 +587,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             },
         ),
         (
-            _("Document actions"),
-            {
-                "fields": (
-                    "soort_handeling",
-                    "at_time",
-                    "was_assciated_with",
-                )
-            },
-        ),
-        (
             _("Documents API integration"),
             {
                 "fields": (
@@ -616,8 +604,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "laatst_gewijzigd_datum",
         "gepubliceerd_op",
         "ingetrokken_op",
-        "at_time",
-        "was_assciated_with",
     )
     search_fields = (
         "uuid",
@@ -712,14 +698,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             '<a href="{}">{}</a>',
             actions,
         )
-
-    @admin.display(description=_("at time"))
-    def at_time(self, obj: Document) -> datetime:
-        return obj.registratiedatum
-
-    @admin.display(description=_("was associated with"))
-    def was_assciated_with(self, obj: Document) -> Organisation | None:
-        return obj.publicatie.verantwoordelijke
 
 
 class PublicationInline(admin.StackedInline):
