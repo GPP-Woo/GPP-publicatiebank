@@ -43,10 +43,6 @@ from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 logger = logging.getLogger(__name__)
 
 
-class DummySerializer(serializers.Serializer):
-    pass
-
-
 class OwnerData(TypedDict):
     naam: str
     identifier: str
@@ -359,8 +355,8 @@ class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
 
     discriminator_field = "aanlevering_bestand"
     serializer_mapping = {
-        DocumentDeliveryMethods.receive_upload: DummySerializer,
-        DocumentDeliveryMethods.retrieve_url: RetrieveUrlDocumentCreateSerializer,
+        DocumentDeliveryMethods.receive_upload.value: serializers.Serializer,
+        DocumentDeliveryMethods.retrieve_url.value: RetrieveUrlDocumentCreateSerializer,
     }
 
     class Meta(DocumentSerializer.Meta):

@@ -293,7 +293,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DocumentCreate'
-        required: true
       security:
       - tokenAuth: []
       responses:
@@ -2016,6 +2015,19 @@ components:
       - identifier
       - wasAssciatedWith
     DocumentCreate:
+      oneOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+      discriminator:
+        propertyName: aanleveringBestand
+        mapping:
+          ontvangen: '#/components/schemas/DocumentCreateShared'
+          ophalen: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+    DocumentCreateRetrieveUrlDocumentCreate:
+      allOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/RetrieveUrlDocumentCreate'
+    DocumentCreateShared:
       type: object
       description: Manage the creation of new Documents.
       properties:
@@ -2151,16 +2163,6 @@ components:
 
             * `ontvangen` - Receive
             * `ophalen` - Retrieve
-        documentUrl:
-          type: string
-          format: uri
-          default: ''
-          description: The resource URL of the document in an (external) Documents
-            API. Must be the detail endpoint - we'll construct the download URL ourselves.
-            Must be provided when the `aanleveringBestand` is set to `ophalen`, and
-            must be empty/absent when `aanleveringBestand` is `ontvangen`. Note that
-            you may include the `versie` query parameter to point to a particular
-            document version.
         bestandsdelen:
           type: array
           items:
@@ -3218,6 +3220,20 @@ components:
       required:
       - bron
       - kenmerk
+    RetrieveUrlDocumentCreate:
+      type: object
+      properties:
+        documentUrl:
+          type: string
+          format: uri
+          description: The resource URL of the document in an (external) Documents
+            API. Must be the detail endpoint - we'll construct the download URL ourselves.
+            Must be provided when the `aanleveringBestand` is set to `ophalen`, and
+            must be empty/absent when `aanleveringBestand` is `ontvangen`. Note that
+            you may include the `versie` query parameter to point to a particular
+            document version.
+      required:
+      - documentUrl
     SoortHandelingEnum:
       enum:
       - ondertekening
