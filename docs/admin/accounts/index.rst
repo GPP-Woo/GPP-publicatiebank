@@ -82,6 +82,7 @@ velden **dikgedrukt** weergegeven.
    deze rechten alleen toe als het echt noodzakelijk is. Over het algemeen kan je beter
    een gebruiker aan een groep toewijzen.
 
+.. _admin_accounts_index_groups:
 Groepen
 -------
 
