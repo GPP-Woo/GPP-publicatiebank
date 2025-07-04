@@ -2,7 +2,7 @@ interactions:
 - request:
     body: '{"identificatie": "9c0a3198-c88e-4fd1-ba12-9ffe716c199e", "bronorganisatie":
       "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
-      "creatiedatum": "2024-10-14", "titel": "reveal", "auteur": "GPP-Woo/ODRC", "status":
+      "creatiedatum": "2024-10-14", "titel": "reveal", "auteur": "GPP-Woo/GPP-publicatiebank", "status":
       "definitief", "formaat": "application/octet-stream", "taal": "dut", "bestandsnaam":
       "unknown.bin", "inhoud": null, "bestandsomvang": 5, "beschrijving": "", "indicatieGebruiksrecht":
       false}'
@@ -25,7 +25,7 @@ interactions:
     uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/1e2c063b-e16f-4775-b64b-84b7a7b3b085","identificatie":"9c0a3198-c88e-4fd1-ba12-9ffe716c199e","bronorganisatie":"000000000","creatiedatum":"2024-10-14","titel":"reveal","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-13T12:52:29.157061Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/5fe58ab3-27bd-4975-8f61-e1e196569b93","volgnummer":1,"omvang":5,"voltooid":false,"lock":"a7972f4d6c8d486989467da5c9038621"}],"trefwoorden":[],"lock":"a7972f4d6c8d486989467da5c9038621"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/1e2c063b-e16f-4775-b64b-84b7a7b3b085","identificatie":"9c0a3198-c88e-4fd1-ba12-9ffe716c199e","bronorganisatie":"000000000","creatiedatum":"2024-10-14","titel":"reveal","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-13T12:52:29.157061Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/5fe58ab3-27bd-4975-8f61-e1e196569b93","volgnummer":1,"omvang":5,"voltooid":false,"lock":"a7972f4d6c8d486989467da5c9038621"}],"trefwoorden":[],"lock":"a7972f4d6c8d486989467da5c9038621"}'
     headers:
       API-version:
       - 1.4.2
