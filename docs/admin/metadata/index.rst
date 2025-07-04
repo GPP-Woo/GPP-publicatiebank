@@ -155,6 +155,7 @@ Op een organisatie zijn de volgende gegevens beschikbaar. Op het scherm worden v
 
 * ``Is actief``. Een selectievakje die aangeeft of de organisatie geactiveerd is of niet.
   Om een organisatie te activeren klik je het vinkje aan, om een organisatie te deactiveren schakel je het vinkje uit, en sla de wijzigingen op.
+* ``RSIN``. De RSIN van de organisatie.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding die aangeeft uit welke landelijke waardelijst de organisatie komt, of dat deze zelf toegevoegd is door een beheerder.
 * ``Naam``. De naam van de *organistaie*, bijvoorbeeld "Politie".
