@@ -25,6 +25,7 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "timeline_logger",
     "treebeard",
     "upgrade_check",
+    "drf_polymorphic",
     # Project applications.
     "woo_publications.accounts",
     "woo_publications.api",
@@ -268,6 +269,7 @@ purposes:
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
+        "maykin_common.drf_spectacular.hooks.remove_invalid_url_defaults",
     ],
     "SERVE_INCLUDE_SCHEMA": False,
     "CAMELIZE_NAMES": True,

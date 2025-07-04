@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_fsm import FSMField
+from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -22,7 +23,11 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import DocumentActionTypeOptions, PublicationStatusOptions
+from ..constants import (
+    DocumentActionTypeOptions,
+    DocumentDeliveryMethods,
+    PublicationStatusOptions,
+)
 from ..models import (
     Document,
     DocumentIdentifier,
@@ -33,7 +38,7 @@ from ..models import (
 from ..tasks import index_document, index_publication
 from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
-from .validators import PublicationStatusValidator
+from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
 logger = logging.getLogger(__name__)
 
@@ -177,18 +182,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )
-    bestandsdelen = FilePartSerializer(
-        label=_("file parts"),
-        help_text=_(
-            "The expected file parts/chunks to upload the file contents. These are "
-            "derived from the specified total file size (`bestandsomvang`) in the "
-            "document create body."
-        ),
-        source="zgw_document.file_parts",
-        many=True,
-        read_only=True,
-        allow_null=True,
-    )
     documenthandelingen = DocumentActionSerializer(
         help_text=_(
             "The document actions of this document, currently only one action will be "
@@ -215,6 +208,15 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         source="documentidentifier_set",
         required=False,
     )
+    upload_voltooid = serializers.BooleanField(
+        source="upload_complete",
+        read_only=True,
+        label=_("document upload completed"),
+        help_text=_(
+            "Indicates if the file has been uploaded and made 'ready for use' in the "
+            "upstream Documents API."
+        ),
+    )
 
     class Meta:  # pyright: ignore
         model = Document
@@ -238,8 +240,8 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "eigenaar",
             "registratiedatum",
             "laatst_gewijzigd_datum",
-            "bestandsdelen",
             "documenthandelingen",
+            "upload_voltooid",
         )
         extra_kwargs = {
             "uuid": {
@@ -299,6 +301,145 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
 
         return attrs
 
+
+class RetrieveUrlDocumentCreateSerializer(serializers.ModelSerializer):
+    document_url = serializers.URLField(
+        source="source_url",
+        label=_("document URL"),
+        required=True,
+        allow_blank=False,
+        help_text=_(
+            "The resource URL of the document in an (external) Documents API. Must be "
+            "the detail endpoint - we'll construct the download URL ourselves. Must be "
+            "provided when the `aanleveringBestand` is set to `ophalen`, and must be "
+            "empty/absent when `aanleveringBestand` is `ontvangen`. Note that you may "
+            "include the `versie` query parameter to point to a particular document "
+            "version."
+        ),
+        validators=[SourceDocumentURLValidator()],
+    )
+
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = Document
+        fields = ("document_url",)
+
+
+class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
+    """
+    Manage the creation of new Documents.
+    """
+
+    aanlevering_bestand = serializers.ChoiceField(
+        label=_("delivery method"),
+        choices=DocumentDeliveryMethods.choices,
+        default=DocumentDeliveryMethods.receive_upload,
+        help_text=_(
+            "When the delivery method is set to retrieve a provided document "
+            "URL pointing to a Documents API, then this will be processed in the "
+            "background and no `bestandsdelen` will be returned. Otherwise for "
+            "direct uploads, an array of expected file parts is returned."
+        ),
+    )
+    bestandsdelen = FilePartSerializer(
+        label=_("file parts"),
+        help_text=_(
+            "The expected file parts/chunks to upload the file contents. These are "
+            "derived from the specified total file size (`bestandsomvang`) in the "
+            "document create body."
+        ),
+        source="zgw_document.file_parts",
+        many=True,
+        read_only=True,
+        allow_null=True,
+    )
+
+    discriminator_field = "aanlevering_bestand"
+    serializer_mapping = {
+        DocumentDeliveryMethods.receive_upload.value: None,
+        DocumentDeliveryMethods.retrieve_url.value: RetrieveUrlDocumentCreateSerializer,
+    }
+
+    class Meta(DocumentSerializer.Meta):
+        fields = DocumentSerializer.Meta.fields + (
+            "aanlevering_bestand",
+            "bestandsdelen",
+        )
+
+    @transaction.atomic
+    def create(self, validated_data):
+        # not a model field, drop it. This is used for validation to check source_url.
+        validated_data.pop("aanlevering_bestand")
+        document_identifiers = validated_data.pop("documentidentifier_set", [])
+        # on create, the status is always derived from the publication. Anything
+        # submitted by the client is ignored.
+        publication: Publication = validated_data["publicatie"]
+        validated_data["publicatiestatus"] = publication.publicatiestatus
+
+        validated_data["eigenaar"] = update_or_create_organisation_member(
+            self.context["request"], validated_data.get("eigenaar")
+        )
+
+        if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
+            validated_data["gepubliceerd_op"] = timezone.now()
+
+        document = super().create(validated_data)
+
+        DocumentIdentifier.objects.bulk_create(
+            DocumentIdentifier(document=document, **identifiers)
+            for identifiers in document_identifiers
+        )
+
+        return document
+
+
+class DocumentUpdateSerializer(DocumentSerializer):
+    """
+    Manage updates to metadata of Documents.
+    """
+
+    publicatie = serializers.SlugRelatedField(
+        slug_field="uuid",
+        help_text=_("The unique identifier of the publication."),
+        read_only=True,
+    )
+    documenthandelingen = DocumentActionSerializer(
+        help_text=_(
+            "The document actions of this document, currently only one action will be "
+            "used per document."
+        ),
+        read_only=True,
+    )
+
+    class Meta(DocumentSerializer.Meta):
+        fields = DocumentSerializer.Meta.fields
+        read_only_fields = [
+            field
+            for field in DocumentSerializer.Meta.fields
+            if field
+            not in (
+                "officiele_titel",
+                "verkorte_titel",
+                "omschrijving",
+                "publicatiestatus",
+                "eigenaar",
+                "creatiedatum",
+                "ontvangstdatum",
+                "datum_ondertekend",
+            )
+        ]
+        extra_kwargs = {
+            "officiele_titel": {
+                "required": False,
+            },
+            "creatiedatum": {
+                "required": False,
+            },
+            "publicatiestatus": {
+                **DocumentSerializer.Meta.extra_kwargs["publicatiestatus"],
+                "read_only": False,
+            },
+        }
+
     @transaction.atomic
     def update(self, instance, validated_data):
         update_document_identifiers = "documentidentifier_set" in validated_data
@@ -354,75 +495,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             )
 
         return document
-
-    @transaction.atomic
-    def create(self, validated_data):
-        document_identifiers = validated_data.pop("documentidentifier_set", [])
-        # on create, the status is always derived from the publication. Anything
-        # submitted by the client is ignored.
-        publication: Publication = validated_data["publicatie"]
-        validated_data["publicatiestatus"] = publication.publicatiestatus
-
-        validated_data["eigenaar"] = update_or_create_organisation_member(
-            self.context["request"], validated_data.get("eigenaar")
-        )
-
-        if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
-            validated_data["gepubliceerd_op"] = timezone.now()
-
-        document = super().create(validated_data)
-
-        DocumentIdentifier.objects.bulk_create(
-            DocumentIdentifier(document=document, **identifiers)
-            for identifiers in document_identifiers
-        )
-
-        return document
-
-
-class DocumentUpdateSerializer(DocumentSerializer):
-    publicatie = serializers.SlugRelatedField(
-        slug_field="uuid",
-        help_text=_("The unique identifier of the publication."),
-        read_only=True,
-    )
-    documenthandelingen = DocumentActionSerializer(
-        help_text=_(
-            "The document actions of this document, currently only one action will be "
-            "used per document."
-        ),
-        read_only=True,
-    )
-
-    class Meta(DocumentSerializer.Meta):
-        fields = DocumentSerializer.Meta.fields
-        read_only_fields = [
-            field
-            for field in DocumentSerializer.Meta.fields
-            if field
-            not in (
-                "officiele_titel",
-                "verkorte_titel",
-                "omschrijving",
-                "publicatiestatus",
-                "eigenaar",
-                "creatiedatum",
-                "ontvangstdatum",
-                "datum_ondertekend",
-            )
-        ]
-        extra_kwargs = {
-            "officiele_titel": {
-                "required": False,
-            },
-            "creatiedatum": {
-                "required": False,
-            },
-            "publicatiestatus": {
-                **DocumentSerializer.Meta.extra_kwargs["publicatiestatus"],
-                "read_only": False,
-            },
-        }
 
 
 class PublicationIdentifierSerializer(

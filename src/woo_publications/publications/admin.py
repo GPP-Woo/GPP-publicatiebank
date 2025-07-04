@@ -321,6 +321,7 @@ class DocumentInlineAdmin(admin.StackedInline):
         "laatst_gewijzigd_datum",
         "gepubliceerd_op",
         "ingetrokken_op",
+        "source_url",
     )
     extra = 0
 
@@ -585,6 +586,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "datum_ondertekend",
                     "eigenaar",
                     "uuid",
+                    "source_url",
                 )
             },
         ),
@@ -618,6 +620,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "ingetrokken_op",
         "at_time",
         "was_assciated_with",
+        "source_url",
     )
     search_fields = (
         "uuid",

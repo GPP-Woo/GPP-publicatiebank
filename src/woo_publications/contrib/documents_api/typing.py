@@ -53,5 +53,9 @@ class EIOCreateResponseBody(EIOCreateBody):
 class EIORetrieveBody(TypedDict):
     # note: incomplete, only documented what we use
     url: Annotated[str, "API resource URL"]
+    creatiedatum: Annotated[str, "ISO-8601 date"]
+    formaat: NotRequired[Annotated[str, "mime type"]]
+    bestandsnaam: NotRequired[Annotated[str, "max 255 chars"]]
+    bestandsomvang: NotRequired[int | None]
     bestandsdelen: list[BestandsDeelMeta]
     locked: bool

@@ -20,3 +20,4 @@ maykin-common[axes,mfa]
 # DRF & other API tooling
 open-api-framework
 djangorestframework-recursive
+drf-polymorphic
