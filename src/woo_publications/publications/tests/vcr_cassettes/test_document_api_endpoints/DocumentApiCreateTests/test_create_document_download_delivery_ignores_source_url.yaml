@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: '{"identificatie": "3d14ef6e-da84-47d5-8f56-33ab5ee6f41a", "bronorganisatie":
+      "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
+      "creatiedatum": "2024-11-05", "titel": "Test document external URL", "auteur":
+      "GPP-Woo/ODRC", "status": "definitief", "formaat": "application/octet-stream",
+      "taal": "dut", "bestandsnaam": "unknown.bin", "inhoud": null, "bestandsomvang":
+      0, "beschrijving": "", "indicatieGebruiksrecht": false}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTc1MTY2MTcxMywiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9.r6PO4BbFHhudFIBmfxZkfyG9bmS7of55kq62l6lHcaI
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '518'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: POST
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
+  response:
+    body:
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/52e158ad-2c69-45c0-af28-ff6f01adb80b","identificatie":"3d14ef6e-da84-47d5-8f56-33ab5ee6f41a","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Test
+        document external URL","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/ODRC","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2025-07-04T20:41:54.737502Z","bestandsnaam":"unknown.bin","inhoud":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/52e158ad-2c69-45c0-af28-ff6f01adb80b/download?versie=1","bestandsomvang":0,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":false,"bestandsdelen":[],"trefwoorden":[],"lock":""}'
+    headers:
+      API-version:
+      - 1.4.2
+      Allow:
+      - GET, POST, HEAD, OPTIONS
+      Content-Length:
+      - '1093'
+      Content-Security-Policy:
+      - 'connect-src ''self'' raw.githubusercontent.com; frame-ancestors ''none'';
+        base-uri ''self''; object-src ''none''; img-src ''self'' data: cdn.redoc.ly
+        cdnjs.cloudflare.com tile.openstreetmap.org; script-src ''self'' ''unsafe-inline''
+        cdnjs.cloudflare.com cdn.jsdelivr.net; form-action ''self''; default-src ''self'';
+        frame-src ''self''; worker-src ''self'' blob:; style-src ''self'' ''unsafe-inline''
+        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; font-src ''self''
+        fonts.gstatic.com'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Location:
+      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/52e158ad-2c69-45c0-af28-ff6f01adb80b
+      Referrer-Policy:
+      - same-origin
+      Vary:
+      - origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 201
+      message: Created
+version: 1

@@ -1546,6 +1546,35 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             detail_data = detail.json()
             self.assertTrue(detail_data["locked"])
 
+    def test_create_document_download_delivery_ignores_source_url(self):
+        organisation = OrganisationFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[self.information_category],
+            verantwoordelijke=organisation,
+        )
+        endpoint = reverse("api:document-list")
+        body = {
+            "identifier": "WOO-P/0042",
+            "publicatie": publication.uuid,
+            "officieleTitel": "Test document external URL",
+            "creatiedatum": "2024-11-05",
+            "aanleveringBestand": DocumentDeliveryMethods.receive_upload,
+            "documentUrl": "https://example.com/foo",
+        }
+
+        response = self.client.post(
+            endpoint,
+            data=body,
+            headers={
+                **AUDIT_HEADERS,
+                "Host": "host.docker.internal:8000",
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        document = Document.objects.get()
+        self.assertEqual(document.source_url, "")
+
     def test_create_concept_document_with_a_publication_with_no_ic(self):
         organisation = OrganisationFactory.create()
         publication = PublicationFactory.create(

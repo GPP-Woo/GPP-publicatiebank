@@ -63,9 +63,6 @@ class SourceDocumentURLValidator:
     """
 
     def __call__(self, url: str):
-        if not url:
-            return
-
         # check if we have a service configured for this URL. If we don't, we can't
         # retrieve this URL.
         service = Service.get_service(url)

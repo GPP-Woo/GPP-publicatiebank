@@ -60,29 +60,13 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
         # Make sure that we have a persisted version of the source document metadata
         if document.document_uuid is None:
             assert document.document_service is None
-
-            update_fields = []
-            if (cd := source_document.creation_date) != document.creatiedatum:
-                document.creatiedatum = cd
-                update_fields.append("creatiedatum")
-
-            if (ct := source_document.content_type) != document.bestandsformaat:
-                document.bestandsformaat = ct
-                update_fields.append("bestandsformaat")
-
-            if (fn := source_document.file_name) != document.bestandsnaam:
-                document.bestandsnaam = fn
-                update_fields.append("bestandsnaam")
-
-            if (
-                fs := source_document.file_size
-            ) is not None and fs != document.bestandsomvang:
-                document.bestandsomvang = fs
-                update_fields.append("bestandsomvang")
-
-            if update_fields:
-                document.save(update_fields=update_fields)
-
+            # ensure that our metadata properties match the metadata from the source
+            # document. The properties get saved via the ``register_in_documents_api``
+            # method.
+            document.creatiedatum = source_document.creation_date
+            document.bestandsformaat = source_document.content_type
+            document.bestandsnaam = source_document.file_name
+            document.bestandsomvang = source_document.file_size or 0
             # now, create the metadata document for our own storage needs. This is
             # almost a copy of the source document.
             document.register_in_documents_api(
