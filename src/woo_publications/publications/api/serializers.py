@@ -355,7 +355,7 @@ class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
 
     discriminator_field = "aanlevering_bestand"
     serializer_mapping = {
-        DocumentDeliveryMethods.receive_upload.value: serializers.Serializer,
+        DocumentDeliveryMethods.receive_upload.value: None,
         DocumentDeliveryMethods.retrieve_url.value: RetrieveUrlDocumentCreateSerializer,
     }
 
