@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 from treebeard.mp_tree import MP_Node
 
+from woo_publications.config.validators import validate_rsin
 from woo_publications.constants import ArchiveNominationChoices
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
@@ -177,6 +178,14 @@ class Organisation(models.Model):
         blank=False,
         max_length=15,
         default=OrganisationOrigins.custom_entry,
+    )
+    # custom fields
+    rsin = models.CharField(
+        _("RSIN"),
+        max_length=9,
+        help_text=_("The RSIN of the organisation."),
+        validators=[validate_rsin],
+        blank=True,
     )
     is_actief = models.BooleanField(
         _("is active"),

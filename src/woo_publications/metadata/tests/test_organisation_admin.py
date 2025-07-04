@@ -127,7 +127,7 @@ class TestOrganisationAdmin(WebTest):
             # so the identifier comes across as the name and href of the <a> tag
             self.assertContains(search_response, organisation.identifier, 2)
 
-    def test_organisation_admin_can_only_is_actief_from_waardenlijst_items(
+    def test_organisation_admin_waardenlijst_items_can_update_extra_fields(
         self,
     ):
         for waardenlijst_origin in [
@@ -150,6 +150,7 @@ class TestOrganisationAdmin(WebTest):
 
                 form = response.forms["organisation_form"]
                 form["is_actief"] = False
+                form["rsin"] = "000000000"
                 self.assertNotIn("naam", form.fields)
 
                 form.submit(name="_save")
@@ -157,6 +158,7 @@ class TestOrganisationAdmin(WebTest):
                 organisation.refresh_from_db()
 
                 self.assertEqual(organisation.is_actief, False)
+                self.assertEqual(organisation.rsin, "000000000")
 
     def test_organisation_admin_can_update_item_with_oorsprong_zelf_toegevoegd(
         self,
