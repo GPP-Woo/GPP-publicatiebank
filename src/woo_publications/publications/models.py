@@ -505,7 +505,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         self.selectiecategorie = information_category.selectiecategorie
         self.archiefnominatie = information_category.archiefnominatie
         self.archiefactiedatum = localdate(
-            self.registratiedatum
+            self.gepubliceerd_op
             + relativedelta(years=information_category.bewaartermijn)
         )
         self.toelichting_bewaartermijn = information_category.toelichting_bewaartermijn

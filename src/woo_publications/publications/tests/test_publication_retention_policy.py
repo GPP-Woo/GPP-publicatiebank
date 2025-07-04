@@ -185,20 +185,21 @@ class TestPublicationsAdminRetentionPolicy(WebTest):
             "admin:publications_publication_change",
             kwargs={"object_id": publication.id},
         )
-
         response = self.app.get(reverse_url, user=self.user)
 
         form = response.forms["publication_form"]
         form["informatie_categorieen"].force_value([ic.id, ic2.id])
         form["publicatiestatus"].select(text=PublicationStatusOptions.published.label)
-        response = form.submit(name="_save")
+
+        with freeze_time("2025-01-10"):
+            response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
         publication.refresh_from_db()
         self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn")
         self.assertEqual(publication.selectiecategorie, "selectiecategorie")
         self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.retain)
-        self.assertEqual(str(publication.archiefactiedatum), "2030-01-01")
+        self.assertEqual(str(publication.archiefactiedatum), "2030-01-10")
         self.assertEqual(publication.toelichting_bewaartermijn, "toelichting")
 
     def test_update_published_publication_retention_policy_not_applied(self):
@@ -529,7 +530,9 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
             "toelichtingBewaartermijn": "NOT REPLACED",
         }
 
-        response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
+        # use different time when the publication was published
+        with freeze_time("2030-01-01"):
+            response = self.client.put(detail_url, data, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -538,7 +541,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         self.assertEqual(
             response_data["archiefnominatie"], ArchiveNominationChoices.retain
         )
-        self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
+        self.assertEqual(response_data["archiefactiedatum"], "2035-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
 
     def test_update_published_publication_retention_policy_not_applied(self):
