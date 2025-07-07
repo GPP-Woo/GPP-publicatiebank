@@ -293,7 +293,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DocumentCreate'
-        required: true
       security:
       - tokenAuth: []
       responses:
@@ -1776,6 +1775,14 @@ paths:
           description: ''
 components:
   schemas:
+    AanleveringBestandEnum:
+      enum:
+      - ontvangen
+      - ophalen
+      type: string
+      description: |-
+        * `ontvangen` - Receive
+        * `ophalen` - Retrieve
     ArchiefnominatieEnum:
       enum:
       - blijvend_bewaren
@@ -1987,6 +1994,19 @@ components:
       - uploadVoltooid
       - uuid
     DocumentCreate:
+      oneOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+      discriminator:
+        propertyName: aanleveringBestand
+        mapping:
+          ontvangen: '#/components/schemas/DocumentCreateShared'
+          ophalen: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+    DocumentCreateRetrieveUrlDocumentCreate:
+      allOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/RetrieveUrlDocumentCreate'
+    DocumentCreateShared:
       type: object
       description: Manage the creation of new Documents.
       properties:
@@ -2105,6 +2125,16 @@ components:
           title: documentupload voltooid
           description: Indicates if the file has been uploaded and made 'ready for
             use' in the upstream Documents API.
+        aanleveringBestand:
+          allOf:
+          - $ref: '#/components/schemas/AanleveringBestandEnum'
+          default: ontvangen
+          title: delivery method
+          description: |-
+            When the delivery method is set to retrieve a provided document URL pointing to a Documents API, then this will be processed in the background and no `bestandsdelen` will be returned. Otherwise for direct uploads, an array of expected file parts is returned.
+
+            * `ontvangen` - Receive
+            * `ophalen` - Retrieve
         bestandsdelen:
           type: array
           items:
@@ -3147,6 +3177,20 @@ components:
       required:
       - bron
       - kenmerk
+    RetrieveUrlDocumentCreate:
+      type: object
+      properties:
+        documentUrl:
+          type: string
+          format: uri
+          description: The resource URL of the document in an (external) Documents
+            API. Must be the detail endpoint - we'll construct the download URL ourselves.
+            Must be provided when the `aanleveringBestand` is set to `ophalen`, and
+            must be empty/absent when `aanleveringBestand` is `ontvangen`. Note that
+            you may include the `versie` query parameter to point to a particular
+            document version.
+      required:
+      - documentUrl
     Theme:
       type: object
       properties:
