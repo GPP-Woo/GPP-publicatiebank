@@ -25,6 +25,7 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "timeline_logger",
     "treebeard",
     "upgrade_check",
+    "drf_polymorphic",
     # Project applications.
     "woo_publications.accounts",
     "woo_publications.api",

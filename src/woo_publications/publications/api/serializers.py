@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_fsm import FSMField
+from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -22,7 +23,7 @@ from woo_publications.contrib.documents_api.client import FilePart
 from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
-from ..constants import PublicationStatusOptions
+from ..constants import DocumentDeliveryMethods, PublicationStatusOptions
 from ..models import (
     Document,
     DocumentIdentifier,
@@ -33,7 +34,7 @@ from ..models import (
 from ..tasks import index_document, index_publication
 from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
-from .validators import PublicationStatusValidator
+from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
 logger = logging.getLogger(__name__)
 
@@ -271,11 +272,44 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         return attrs
 
 
-class DocumentCreateSerializer(DocumentSerializer):
+class RetrieveUrlDocumentCreateSerializer(serializers.ModelSerializer):
+    document_url = serializers.URLField(
+        source="source_url",
+        label=_("document URL"),
+        required=True,
+        allow_blank=False,
+        help_text=_(
+            "The resource URL of the document in an (external) Documents API. Must be "
+            "the detail endpoint - we'll construct the download URL ourselves. Must be "
+            "provided when the `aanleveringBestand` is set to `ophalen`, and must be "
+            "empty/absent when `aanleveringBestand` is `ontvangen`. Note that you may "
+            "include the `versie` query parameter to point to a particular document "
+            "version."
+        ),
+        validators=[SourceDocumentURLValidator()],
+    )
+
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = Document
+        fields = ("document_url",)
+
+
+class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
     """
     Manage the creation of new Documents.
     """
 
+    aanlevering_bestand = serializers.ChoiceField(
+        label=_("delivery method"),
+        choices=DocumentDeliveryMethods.choices,
+        default=DocumentDeliveryMethods.receive_upload,
+        help_text=_(
+            "When the delivery method is set to retrieve a provided document "
+            "URL pointing to a Documents API, then this will be processed in the "
+            "background and no `bestandsdelen` will be returned. Otherwise for "
+            "direct uploads, an array of expected file parts is returned."
+        ),
+    )
     bestandsdelen = FilePartSerializer(
         label=_("file parts"),
         help_text=_(
@@ -289,11 +323,22 @@ class DocumentCreateSerializer(DocumentSerializer):
         allow_null=True,
     )
 
+    discriminator_field = "aanlevering_bestand"
+    serializer_mapping = {
+        DocumentDeliveryMethods.receive_upload.value: None,
+        DocumentDeliveryMethods.retrieve_url.value: RetrieveUrlDocumentCreateSerializer,
+    }
+
     class Meta(DocumentSerializer.Meta):
-        fields = DocumentSerializer.Meta.fields + ("bestandsdelen",)
+        fields = DocumentSerializer.Meta.fields + (
+            "aanlevering_bestand",
+            "bestandsdelen",
+        )
 
     @transaction.atomic
     def create(self, validated_data):
+        # not a model field, drop it. This is used for validation to check source_url.
+        validated_data.pop("aanlevering_bestand")
         document_identifiers = validated_data.pop("documentidentifier_set", [])
         # on create, the status is always derived from the publication. Anything
         # submitted by the client is ignored.

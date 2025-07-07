@@ -32,10 +32,9 @@ from woo_publications.logging.service import (
 )
 
 from ...logging.api_tools import AuditTrailRetrieveMixin
+from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import (
-    index_document,
-)
+from ..tasks import index_document, process_source_document
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -115,9 +114,24 @@ class DocumentViewSet(
         assert serializer.instance is not None
         woo_document = serializer.instance
         assert isinstance(woo_document, Document)
-        woo_document.register_in_documents_api(
-            build_absolute_uri=self.request.build_absolute_uri,
-        )
+
+        # only perform the synchronous registration if we upload directly, otherwise
+        # process in the background
+        match serializer.validated_data["aanlevering_bestand"]:
+            case DocumentDeliveryMethods.receive_upload:
+                woo_document.register_in_documents_api(
+                    build_absolute_uri=self.request.build_absolute_uri,
+                )
+            case DocumentDeliveryMethods.retrieve_url:
+                base_url = self.request.build_absolute_uri("/")
+                transaction.on_commit(
+                    lambda: process_source_document.delay(
+                        document_id=woo_document.id,
+                        base_url=base_url,
+                    )
+                )
+            case _:  # pragma: no cover
+                raise AssertionError("Unreachable code")
 
     @override
     @transaction.atomic()
