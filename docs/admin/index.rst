@@ -19,7 +19,7 @@ Volg de volgende stappen om toegang te krijgen tot de Admin-omgeving:
 
 Menubalk
 ----------
-Bovenaan de Admin-omgeving staat de menubalk. Deze geeft toegang tot de verschillende beheer-functionaliteiten van het 'WOO Publications'-component. Welke onderdelen de beheerder in de menubalk ziet, is afhankelijk van in welke (autorisatie-) :ref:`groepen<_admin_accounts_index_groups>` hij/zij zit.  De onderdelen die mogelijk getoond worden leggen we hieronder verder uit, maar eerst willen we je nog wijzen op de klikbare links uiterst rechtsboven in de menubalk.
+Bovenaan de Admin-omgeving staat de menubalk. Deze geeft toegang tot de verschillende beheer-functionaliteiten van het 'WOO Publications'-component. Welke onderdelen de beheerder in de menubalk ziet, is afhankelijk van in welke (autorisatie-) :ref:`groepen <admin_accounts_index_groups>` hij/zij zit.  De onderdelen die mogelijk getoond worden leggen we hieronder verder uit, maar eerst willen we je nog wijzen op de klikbare links uiterst rechtsboven in de menubalk.
 
 .. image:: menubalk_rechtsboven.png
     :width: 100%
