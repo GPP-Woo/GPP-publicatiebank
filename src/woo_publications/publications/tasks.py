@@ -88,7 +88,9 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
         # we can upload
         with get_documents_client(document.document_service) as client:
             for part, part_file in parts_and_files:
-                if part.completed:
+                # this line is hard to test, since the documents API determines the part
+                # sizes
+                if part.completed:  # pragma: no cover
                     continue
 
                 part_file.seek(0)

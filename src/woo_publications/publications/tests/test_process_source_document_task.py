@@ -214,7 +214,7 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
         woo_document = DocumentFactory.create(source_url=source_url)
 
         registered_document_uuids: set[str] = set()
-        for run in range(1):
+        for run in range(2):
             with self.subTest(processing_run=run):
                 process_source_document(
                     document_id=woo_document.id,

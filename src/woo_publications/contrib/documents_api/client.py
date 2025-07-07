@@ -272,6 +272,9 @@ class PartsDownloader:
         For completed parts, no actual file content will be written, only incomplete
         parts will actually be processed.
         """
+        if not self.parts:
+            return zip((), (), strict=True)
+
         file_factory = self._get_file_factory()
 
         # initialize the first part to process & prepare the first target file
@@ -304,6 +307,8 @@ class PartsDownloader:
             # we only need to write to the part if we need to actually process it
             if not part.completed:
                 file.write(for_current_part)
+            elif file.size != 0:
+                file.size = 0
             # but always *mark* the bytes as written otherwise we lose our position in
             # the download stream
             part_bytes_written += len(for_current_part)
