@@ -1,0 +1,2 @@
+ignore:
+  - "src/woo_publications/utils/multipart_encoder.py"
