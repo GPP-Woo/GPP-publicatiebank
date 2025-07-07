@@ -5,23 +5,25 @@ Publicaties
 
 Onder het menu-item "Publicaties" en op het dashboard onder het kopje "Publicaties" wordt toegang geboden tot het beheer van:
 
-* Documenten
-* Publicaties
-* Onderwerpen
+* :ref:`admin_publicaties_index_documenten`
+* :ref:`admin_publicaties_index_publicaties`
+* :ref:`admin_publicaties_index_onderwerpen`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
+
+.. _admin_publicaties_index_documenten:
 
 Documenten
 -----------
 
-Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *document* hoort altijd bij een publicatie.
+Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *document* hoort altijd bij een :ref:`publicatie <admin_publicaties_index_publicaties>`.
 
-In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in het publicatiebank-component.
+In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in de GPP-publicatiebank.
 Op dit scherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **document toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
-* Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiedatum**.
+* Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiejaar**.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**. Op dit moment worden de acties **Geselecteerde documenten verwijderen**, **Verstuur de geselecteerde documenten naar de zoekindex**, **Verwijder de geselecteerde documenten uit de zoekindex**, **Trek gepubliceerde documenten in** en **Wijzig de eigenaren van het document** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *document*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *document*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, creatiedatum en/of publicatiestatus**.
@@ -65,6 +67,8 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 * ``Document UUID``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Documentvergrendelingscode``. Systeemveld, bevat de vergrendelingscode van een bestand in de Documenten API.
 * ``Upload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
+
+.. _admin_publicaties_index_publicaties:
 
 Publicaties
 ------------
@@ -157,6 +161,8 @@ Voorbereidiende gesprekken hierover lopen nog.
 .. warning:: De bewaartermijn van de gekoppelde informatiecategorieën wordt toegepast bij het aanmaken van een registratie en bij het toevoegen/verwijderen van een koppeling voor de informatiecategorieën. Eventuele manuele aanpassingen op de archiefnominatie, archiefactiedatum en/of overige archiveringsvelden worden hierdoor automatisch overschreven.
 
 .. _Wet open overheid, art. 3.3, lid 8: https://wetten.overheid.nl/BWBR0045754/2024-10-01#Hoofdstuk3_Artikel3.3
+
+.. _admin_publicaties_index_onderwerpen:
 
 Onderwerpen
 -----------
