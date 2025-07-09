@@ -19,6 +19,7 @@ class KeepOrganisationsValuesTests(TestCase):
         organisation.refresh_from_db()
         organisation2.refresh_from_db()
         organisation3.refresh_from_db()
+        organisation4.refresh_from_db()
 
         self.assertTrue(organisation.is_actief)
         self.assertEqual(organisation.rsin, "000000000")
