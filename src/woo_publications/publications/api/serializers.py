@@ -762,7 +762,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         if apply_retention:
-            publication.apply_retention_policy(commit=False)
+            publication.apply_retention_policy(commit=True)
 
         if reindex_documents:
             for document in instance.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
