@@ -912,6 +912,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         As a side-effect, this populates ``self.zgw_document``.
         """
 
+        from woo_publications.contrib.documents_api.api import DUMMY_IC_UUID
+
         # Look up which service to use to register the document
         config = GlobalConfiguration.get_solo()
         if (service := config.documents_api_service) is None:
@@ -922,12 +924,11 @@ class Document(ConcurrentTransitionMixin, models.Model):
         # Resolve the 'informatieobjecttype' for the Documents API to use.
         # XXX: if there are multiple, which to pick?
         information_category = self.publicatie.informatie_categorieen.first()
-        # TODO: remove this hotfix #315
         if not information_category:
             # Now that IC's can be empty because of concept publications.
-            # select a dummy IC to be selected as the informatieobjecttype
-            # within open-zaak.
-            information_category = InformationCategory.objects.first()
+            # Assign the hardcoded dummy information category for the generation
+            # of the document_type_url.
+            information_category = InformationCategory(uuid=DUMMY_IC_UUID)
 
         assert isinstance(information_category, InformationCategory)
         iot_path = reverse(

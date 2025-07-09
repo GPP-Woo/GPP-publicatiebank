@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
+from woo_publications.contrib.documents_api.api import DUMMY_IC_UUID
 from woo_publications.metadata.tests.factories import InformationCategoryFactory
 
 
@@ -29,6 +30,28 @@ class CatalogiAPIDocumentTypeViewTests(APITestCase):
             "url": f"http://testserver{endpoint}",
             "catalogus": "http://testserver/catalogi/api/v1/catalogussen/-fake-",
             "omschrijving": "Raadsbesluit",
+            "vertrouwelijkheidaanduiding": "openbaar",
+            "beginGeldigheid": "2024-09-01",
+            "concept": False,
+            "informatieobjectcategorie": "Wet Open Overheid",
+            "besluittypen": [],
+            "zaaktypen": [],
+        }
+        self.assertEqual(response.json(), expected_data)
+
+    def test_dummy_information_category_exposed_as_documenttype(self):
+        endpoint = reverse(
+            "catalogi-informatieobjecttypen-detail",
+            kwargs={"uuid": DUMMY_IC_UUID},
+        )
+
+        response = self.client.get(endpoint)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected_data = {
+            "url": f"http://testserver{endpoint}",
+            "catalogus": "http://testserver/catalogi/api/v1/catalogussen/-fake-",
+            "omschrijving": "",
             "vertrouwelijkheidaanduiding": "openbaar",
             "beginGeldigheid": "2024-09-01",
             "concept": False,

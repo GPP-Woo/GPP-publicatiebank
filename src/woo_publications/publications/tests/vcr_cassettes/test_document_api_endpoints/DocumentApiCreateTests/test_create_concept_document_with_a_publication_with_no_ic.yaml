@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"identificatie": "25ad10ab-1d9d-4028-9171-d19444af6394", "bronorganisatie":
-      "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
+    body: '{"identificatie": "6ad59e3f-354a-4bfa-b822-c175077c6c94", "bronorganisatie":
+      "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/0f06fded-7e08-437d-9fa2-021841a93842",
       "creatiedatum": "2024-11-05", "titel": "Testdocument WOO-P + Open Zaak", "auteur":
       "GPP-Woo/GPP-publicatiebank", "status": "definitief", "formaat": "application/octet-stream",
       "taal": "dut", "bestandsnaam": "unknown.bin", "inhoud": null, "bestandsomvang":
@@ -12,11 +12,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTc1MDI0NzMzMCwiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9.tNIMEeKT-Wuri6Ps3AFRvi3lQYwidsDNZOrQSjLK4w8
+      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTc1MjA3MTEzMywiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9._nNef24YHgllPxhaGeft5Tm_HyAT-qfACHTtD9_0Wow
       Connection:
       - keep-alive
       Content-Length:
-      - '534'
+      - '548'
       Content-Type:
       - application/json
       User-Agent:
@@ -25,30 +25,29 @@ interactions:
     uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/bb37450d-a4c4-4e20-aa5e-5c8c640a2d23","identificatie":"25ad10ab-1d9d-4028-9171-d19444af6394","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
-        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2025-06-18T11:48:51.116808Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
-        123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/21906763-4ccc-459e-be1c-44a76158f98c","volgnummer":1,"omvang":10,"voltooid":false,"lock":"184a075e2d6f46fbabe008b5a19109f1"}],"trefwoorden":[],"lock":"184a075e2d6f46fbabe008b5a19109f1"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d29d9fcb-e54f-491c-a0f0-8da6c7e2774d","identificatie":"6ad59e3f-354a-4bfa-b822-c175077c6c94","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
+        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2025-07-09T14:25:33.875500Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
+        123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/0f06fded-7e08-437d-9fa2-021841a93842","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/d8671b55-1aa9-408f-bfc6-32729f977147","volgnummer":1,"omvang":10,"voltooid":false,"lock":"fb5bfa6c01a64f4ea3530e17a3eee473"}],"trefwoorden":[],"lock":"fb5bfa6c01a64f4ea3530e17a3eee473"}'
     headers:
       API-version:
       - 1.4.2
       Allow:
       - GET, POST, HEAD, OPTIONS
       Content-Length:
-      - '1204'
+      - '1218'
       Content-Security-Policy:
-      - 'base-uri ''self''; form-action ''self''; worker-src ''self'' blob:; object-src
-        ''none''; frame-ancestors ''none''; font-src ''self'' fonts.gstatic.com; img-src
-        ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com tile.openstreetmap.org; default-src
-        ''self''; connect-src ''self'' raw.githubusercontent.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; frame-src ''self'';
-        style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
-        cdn.jsdelivr.net'
+      - 'frame-ancestors ''none''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com
+        cdnjs.cloudflare.com cdn.jsdelivr.net; script-src ''self'' ''unsafe-inline''
+        cdnjs.cloudflare.com cdn.jsdelivr.net; form-action ''self''; default-src ''self'';
+        worker-src ''self'' blob:; base-uri ''self''; frame-src ''self''; connect-src
+        ''self'' raw.githubusercontent.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; font-src ''self'' fonts.gstatic.com; object-src ''none'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
       Location:
-      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/bb37450d-a4c4-4e20-aa5e-5c8c640a2d23
+      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d29d9fcb-e54f-491c-a0f0-8da6c7e2774d
       Referrer-Policy:
       - same-origin
       Vary:
@@ -60,4 +59,55 @@ interactions:
     status:
       code: 201
       message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTc1MjA3MTEzMywiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9._nNef24YHgllPxhaGeft5Tm_HyAT-qfACHTtD9_0Wow
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d29d9fcb-e54f-491c-a0f0-8da6c7e2774d
+  response:
+    body:
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d29d9fcb-e54f-491c-a0f0-8da6c7e2774d","identificatie":"6ad59e3f-354a-4bfa-b822-c175077c6c94","bronorganisatie":"000000000","creatiedatum":"2024-11-05","titel":"Testdocument
+        WOO-P + Open Zaak","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2025-07-09T14:25:33.875500Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"Testing
+        123","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/0f06fded-7e08-437d-9fa2-021841a93842","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/d8671b55-1aa9-408f-bfc6-32729f977147","volgnummer":1,"omvang":10,"voltooid":false,"lock":"fb5bfa6c01a64f4ea3530e17a3eee473"}],"trefwoorden":[],"_expand":{}}'
+    headers:
+      API-version:
+      - 1.4.2
+      Allow:
+      - GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+      Content-Length:
+      - '1189'
+      Content-Security-Policy:
+      - 'frame-ancestors ''none''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com
+        cdnjs.cloudflare.com cdn.jsdelivr.net; script-src ''self'' ''unsafe-inline''
+        cdnjs.cloudflare.com cdn.jsdelivr.net; form-action ''self''; default-src ''self'';
+        worker-src ''self'' blob:; base-uri ''self''; frame-src ''self''; connect-src
+        ''self'' raw.githubusercontent.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; font-src ''self'' fonts.gstatic.com; object-src ''none'''
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      ETag:
+      - '"2250f42300af827f2f830addaea4a11f"'
+      Referrer-Policy:
+      - same-origin
+      Vary:
+      - origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 200
+      message: OK
 version: 1

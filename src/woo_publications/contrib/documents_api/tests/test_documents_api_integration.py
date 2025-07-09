@@ -27,6 +27,8 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import InformationCategoryFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
+from ..api import DUMMY_IC_UUID
+
 
 class DocumentsApiIntegrationTests(VCRMixin, LiveServerTestCase):
     # host and port must match the service declared in
@@ -57,6 +59,30 @@ class DocumentsApiIntegrationTests(VCRMixin, LiveServerTestCase):
             "bronorganisatie": "000000000",
             "creatiedatum": "2024-09-18",
             "titel": "Test document",
+            "auteur": "Automated test suite",
+            "taal": "ENG",
+            "bestandsomvang": 0,
+        }
+
+        response = client.post("enkelvoudiginformatieobjecten", json=document_data)
+
+        self.assertEqual(response.status_code, 201, response.json())
+
+    def test_can_create_document_with_dummy_informatieobjecttype(self):
+        iot_path = reverse(
+            "catalogi-informatieobjecttypen-detail",
+            kwargs={"uuid": DUMMY_IC_UUID},
+        )
+        iot_url = (
+            furl(self.live_server_url.replace("0.0.0.0", "host.docker.internal"))
+            / iot_path
+        )
+        client = build_client(self.documents_api_service)
+        document_data = {
+            "informatieobjecttype": str(iot_url),
+            "bronorganisatie": "000000000",
+            "creatiedatum": "2024-09-18",
+            "titel": "Test document with dummy IC",
             "auteur": "Automated test suite",
             "taal": "ENG",
             "bestandsomvang": 0,

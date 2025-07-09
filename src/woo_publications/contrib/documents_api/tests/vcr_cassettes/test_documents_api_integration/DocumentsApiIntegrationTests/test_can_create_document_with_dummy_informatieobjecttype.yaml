@@ -1,0 +1,61 @@
+interactions:
+- request:
+    body: '{"informatieobjecttype": "http://host.docker.internal:8100/catalogi/api/v1/informatieobjecttypen/0f06fded-7e08-437d-9fa2-021841a93842",
+      "bronorganisatie": "000000000", "creatiedatum": "2024-09-18", "titel": "Test
+      document with dummy IC", "auteur": "Automated test suite", "taal": "ENG", "bestandsomvang":
+      0}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTc1MjA4MTQ0MSwiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9.sMu80UalCeK7oZaAxbQXV21TO3FbuCrLF7ph7B7Yw9A
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '307'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: POST
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
+  response:
+    body:
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/50d23455-89c4-4efb-b944-7bb253318f80","identificatie":"DOCUMENT-2024-0000000001","bronorganisatie":"000000000","creatiedatum":"2024-09-18","titel":"Test
+        document with dummy IC","vertrouwelijkheidaanduiding":"openbaar","auteur":"Automated
+        test suite","status":"","formaat":"","taal":"ENG","versie":1,"beginRegistratie":"2025-07-09T17:17:21.763022Z","bestandsnaam":"","inhoud":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/50d23455-89c4-4efb-b944-7bb253318f80/download?versie=1","bestandsomvang":0,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":null,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8100/catalogi/api/v1/informatieobjecttypen/0f06fded-7e08-437d-9fa2-021841a93842","locked":false,"bestandsdelen":[],"trefwoorden":[],"lock":""}'
+    headers:
+      API-version:
+      - 1.4.2
+      Allow:
+      - GET, POST, HEAD, OPTIONS
+      Content-Length:
+      - '1044'
+      Content-Security-Policy:
+      - 'frame-ancestors ''none''; object-src ''none''; base-uri ''self''; default-src
+        ''self''; frame-src ''self''; connect-src ''self'' raw.githubusercontent.com;
+        form-action ''self''; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com
+        cdnjs.cloudflare.com cdn.jsdelivr.net; font-src ''self'' fonts.gstatic.com;
+        script-src ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net;
+        worker-src ''self'' blob:'
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Location:
+      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/50d23455-89c4-4efb-b944-7bb253318f80
+      Referrer-Policy:
+      - same-origin
+      Vary:
+      - origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 201
+      message: Created
+version: 1
