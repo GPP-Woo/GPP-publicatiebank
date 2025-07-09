@@ -403,6 +403,12 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+        publication = Publication.objects.get()
+        self.assertEqual(publication.bron_bewaartermijn, "NOT REPLACED")
+        self.assertEqual(publication.selectiecategorie, "NOT REPLACED")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
+        self.assertEqual(publication.archiefactiedatum, date(2000, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "NOT REPLACED")
 
     def test_create_published_publication_retention_policy_applied(self):
         ic = InformationCategoryFactory.create(
@@ -439,6 +445,12 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
+        publication = Publication.objects.get()
+        self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn")
+        self.assertEqual(publication.selectiecategorie, "selectiecategorie")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.retain)
+        self.assertEqual(publication.archiefactiedatum, date(2030, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "toelichting")
 
     def test_update_concept_publication_retention_policy_not_applied(self):
         ic, ic2 = InformationCategoryFactory.create_batch(
@@ -490,6 +502,12 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+        publication.refresh_from_db()
+        self.assertEqual(publication.bron_bewaartermijn, "NOT REPLACED")
+        self.assertEqual(publication.selectiecategorie, "NOT REPLACED")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
+        self.assertEqual(publication.archiefactiedatum, date(2000, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "NOT REPLACED")
 
     def test_update_to_publish_retention_policy_applied(self):
         ic = InformationCategoryFactory.create(
@@ -543,6 +561,12 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2035-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
+        publication.refresh_from_db()
+        self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn")
+        self.assertEqual(publication.selectiecategorie, "selectiecategorie")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.retain)
+        self.assertEqual(publication.archiefactiedatum, date(2035, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "toelichting")
 
     def test_update_published_publication_retention_policy_not_applied(self):
         ic = InformationCategoryFactory.create(
@@ -594,6 +618,12 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2000-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "NOT REPLACED")
+        publication.refresh_from_db()
+        self.assertEqual(publication.bron_bewaartermijn, "NOT REPLACED")
+        self.assertEqual(publication.selectiecategorie, "NOT REPLACED")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.destroy)
+        self.assertEqual(publication.archiefactiedatum, date(2000, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "NOT REPLACED")
 
     def test_update_published_publication_with_new_ic_retention_policy_applied(self):
         ic, ic2 = InformationCategoryFactory.create_batch(
@@ -646,3 +676,9 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
         )
         self.assertEqual(response_data["archiefactiedatum"], "2030-01-01")
         self.assertEqual(response_data["toelichtingBewaartermijn"], "toelichting")
+        publication.refresh_from_db()
+        self.assertEqual(publication.bron_bewaartermijn, "bewaartermijn")
+        self.assertEqual(publication.selectiecategorie, "selectiecategorie")
+        self.assertEqual(publication.archiefnominatie, ArchiveNominationChoices.retain)
+        self.assertEqual(publication.archiefactiedatum, date(2030, 1, 1))
+        self.assertEqual(publication.toelichting_bewaartermijn, "toelichting")
