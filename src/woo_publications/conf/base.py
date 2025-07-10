@@ -195,10 +195,10 @@ REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
 )
 REST_FRAMEWORK["EXCEPTION_HANDLER"] = "rest_framework.views.exception_handler"
 
-API_VERSION = "1.1.0"
+API_VERSION = "2.0.0"
 
 SPECTACULAR_SETTINGS = {
-    "SCHEMA_PATH_PREFIX": "/api/v1",
+    "SCHEMA_PATH_PREFIX": "/api/v2",
     "TITLE": "WOO Publications",
     "DESCRIPTION": _(
         """

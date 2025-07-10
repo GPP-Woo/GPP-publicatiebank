@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: WOO Publications
-  version: 1.1.0
+  version: 2.0.0
   description: |2
 
     ## Documentatie
@@ -58,7 +58,7 @@ info:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
 paths:
-  /api/v1/documenten:
+  /api/v2/documenten:
     get:
       operationId: documentenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -302,7 +302,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreate'
           description: ''
-  /api/v1/documenten/{uuid}:
+  /api/v2/documenten/{uuid}:
     get:
       operationId: documentenRetrieve
       description: Haal een specifiek document op.
@@ -502,7 +502,7 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v1/documenten/{uuid}/bestandsdelen/{partUuid}:
+  /api/v2/documenten/{uuid}/bestandsdelen/{partUuid}:
     put:
       operationId: documentenBestandsdelenUpdate
       description: |-
@@ -568,7 +568,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentStatus'
           description: ''
-  /api/v1/documenten/{uuid}/download:
+  /api/v2/documenten/{uuid}/download:
     get:
       operationId: documentenDownloadRetrieve
       description: |-
@@ -635,7 +635,7 @@ paths:
           description: Conflict - the document is not (yet) available for download.
         '502':
           description: Bad gateway - kon de inhoud niet streamen.
-  /api/v1/informatiecategorieen:
+  /api/v2/informatiecategorieen:
     get:
       operationId: informatiecategorieenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -704,7 +704,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedInformationCategoryList'
           description: ''
-  /api/v1/informatiecategorieen/{uuid}:
+  /api/v2/informatiecategorieen/{uuid}:
     get:
       operationId: informatiecategorieenRetrieve
       description: Haal een specifiieke informatiecategorie op.
@@ -753,7 +753,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
-  /api/v1/onderwerpen:
+  /api/v2/onderwerpen:
     get:
       operationId: onderwerpenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -841,7 +841,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTopicList'
           description: ''
-  /api/v1/onderwerpen/{uuid}:
+  /api/v2/onderwerpen/{uuid}:
     get:
       operationId: onderwerpenRetrieve
       description: Haal een specifiek onderwerp op.
@@ -890,7 +890,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Topic'
           description: ''
-  /api/v1/organisaties:
+  /api/v2/organisaties:
     get:
       operationId: organisatiesList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
@@ -1036,7 +1036,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v1/organisaties/{uuid}:
+  /api/v2/organisaties/{uuid}:
     get:
       operationId: organisatiesRetrieve
       description: Haal een specifieke organisatie op.
@@ -1191,7 +1191,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v1/publicaties:
+  /api/v2/publicaties:
     get:
       operationId: publicatiesList
       description: Geeft een lijst (met paginering) terug van alle bestaande publicaties.
@@ -1440,7 +1440,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Publication'
           description: ''
-  /api/v1/publicaties/{uuid}:
+  /api/v2/publicaties/{uuid}:
     get:
       operationId: publicatiesRetrieve
       description: Haal een specifieke publicatie op.
@@ -1641,7 +1641,7 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v1/themas:
+  /api/v2/themas:
     get:
       operationId: themasList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -1697,7 +1697,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedThemeList'
           description: ''
-  /api/v1/themas/{uuid}:
+  /api/v2/themas/{uuid}:
     get:
       operationId: themasRetrieve
       description: Haal een specifiek thema op.
