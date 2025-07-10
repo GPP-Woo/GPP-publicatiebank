@@ -23,7 +23,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from woo_publications.api.exceptions import BadGateway
+from woo_publications.api.exceptions import BadGateway, Conflict
 from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.logging.service import (
     AuditTrailViewSetMixin,
@@ -32,12 +32,12 @@ from woo_publications.logging.service import (
 )
 
 from ...logging.api_tools import AuditTrailRetrieveMixin
+from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import (
-    index_document,
-)
+from ..tasks import index_document, process_source_document
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
+    DocumentCreateSerializer,
     DocumentSerializer,
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
@@ -114,9 +114,24 @@ class DocumentViewSet(
         assert serializer.instance is not None
         woo_document = serializer.instance
         assert isinstance(woo_document, Document)
-        woo_document.register_in_documents_api(
-            build_absolute_uri=self.request.build_absolute_uri,
-        )
+
+        # only perform the synchronous registration if we upload directly, otherwise
+        # process in the background
+        match serializer.validated_data["aanlevering_bestand"]:
+            case DocumentDeliveryMethods.receive_upload:
+                woo_document.register_in_documents_api(
+                    build_absolute_uri=self.request.build_absolute_uri,
+                )
+            case DocumentDeliveryMethods.retrieve_url:
+                base_url = self.request.build_absolute_uri("/")
+                transaction.on_commit(
+                    lambda: process_source_document.delay(
+                        document_id=woo_document.id,
+                        base_url=base_url,
+                    )
+                )
+            case _:  # pragma: no cover
+                raise AssertionError("Unreachable code")
 
     @override
     @transaction.atomic()
@@ -134,9 +149,13 @@ class DocumentViewSet(
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)
-        if action in ["update", "partial_update"]:
-            return DocumentUpdateSerializer
-        return super().get_serializer_class()
+        match action:
+            case "create":
+                return DocumentCreateSerializer
+            case "update" | "partial_update":
+                return DocumentUpdateSerializer
+            case _:
+                return super().get_serializer_class()
 
     @extend_schema(
         summary=_("Upload file part"),
@@ -210,6 +229,11 @@ class DocumentViewSet(
                 description=_("The binary file contents."),
                 response=bytes,
             ),
+            status.HTTP_409_CONFLICT: OpenApiResponse(
+                description=_(
+                    "Conflict - the document is not (yet) available for download."
+                ),
+            ),
             status.HTTP_502_BAD_GATEWAY: OpenApiResponse(
                 description=_("Bad gateway - failure to stream content."),
             ),
@@ -220,7 +244,7 @@ class DocumentViewSet(
                 type=str,
                 location=OpenApiParameter.HEADER,
                 description=_("Total size in bytes of the download."),
-                response=(200,),
+                response=[200],
             ),
             OpenApiParameter(
                 name="Content-Disposition",
@@ -229,7 +253,7 @@ class DocumentViewSet(
                 description=_(
                     "Marks the file as attachment and includes the filename."
                 ),
-                response=(200,),
+                response=[200],
             ),
         ],
     )
@@ -237,6 +261,9 @@ class DocumentViewSet(
     def download(self, request: Request, *args, **kwargs) -> StreamingHttpResponse:
         document = self.get_object()
         assert isinstance(document, Document)
+
+        if not document.upload_complete:
+            raise Conflict(detail=_("The document upload is not yet completed."))
 
         assert document.document_service is not None, (
             "Document must exist in upstream API"

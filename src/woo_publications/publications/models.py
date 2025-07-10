@@ -34,6 +34,7 @@ from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
+    DocumentenClient,
     get_client,
 )
 from woo_publications.logging.serializing import serialize_instance
@@ -656,6 +657,15 @@ class Document(ConcurrentTransitionMixin, models.Model):
         default=0,
         help_text=_("Size of the file on disk, in bytes."),
     )
+    source_url = models.URLField(
+        _("source URL"),
+        max_length=1000,
+        blank=True,
+        help_text=_(
+            "If the document originates from a Documenten API, this URL uniquely "
+            "identifies the matching resource. The value is empty for manual uploads."
+        ),
+    )
     publicatiestatus = FSMField(
         _("status"),
         max_length=12,
@@ -1003,15 +1013,18 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 file_part_uuid=uuid,
                 lock=self.lock,
             )
+            completed = self.check_and_mark_completed(client)
 
-            completed = client.check_uploads_complete(document_uuid=self.document_uuid)
-            if completed:
-                client.unlock_document(uuid=self.document_uuid, lock=self.lock)
+        return completed
 
-                self.lock = ""
-                self.upload_complete = True
-                self.save(update_fields=("lock", "upload_complete"))
+    def check_and_mark_completed(self, client: DocumentenClient) -> bool:
+        completed = client.check_uploads_complete(document_uuid=self.document_uuid)
+        if completed:
+            client.unlock_document(uuid=self.document_uuid, lock=self.lock)
 
+            self.lock = ""
+            self.upload_complete = True
+            self.save(update_fields=("lock", "upload_complete"))
         return completed
 
 

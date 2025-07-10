@@ -292,8 +292,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Document'
-        required: true
+              $ref: '#/components/schemas/DocumentCreate'
       security:
       - tokenAuth: []
       responses:
@@ -301,7 +300,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Document'
+                $ref: '#/components/schemas/DocumentCreate'
           description: ''
   /api/v1/documenten/{uuid}:
     get:
@@ -632,17 +631,9 @@ paths:
                 type: string
                 format: binary
           description: De binaire bestandsinhoud.
+        '409':
+          description: Conflict - the document is not (yet) available for download.
         '502':
-          headers:
-            Content-Length:
-              schema:
-                type: string
-              description: Totale grootte (in bytes) van de download.
-            Content-Disposition:
-              schema:
-                type: string
-              description: Markeert het bestand als 'bijlage' en bevat de bestandsnaam
-                van het document.
           description: Bad gateway - kon de inhoud niet streamen.
   /api/v1/informatiecategorieen:
     get:
@@ -1784,6 +1775,14 @@ paths:
           description: ''
 components:
   schemas:
+    AanleveringBestandEnum:
+      enum:
+      - ontvangen
+      - ophalen
+      type: string
+      description: |-
+        * `ontvangen` - Receive
+        * `ophalen` - Retrieve
     ArchiefnominatieEnum:
       enum:
       - blijvend_bewaren
@@ -1977,6 +1976,165 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
+      required:
+      - creatiedatum
+      - gepubliceerdOp
+      - ingetrokkenOp
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publicatie
+      - publicatiestatus
+      - registratiedatum
+      - uploadVoltooid
+      - uuid
+    DocumentCreate:
+      oneOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+      discriminator:
+        propertyName: aanleveringBestand
+        mapping:
+          ontvangen: '#/components/schemas/DocumentCreateShared'
+          ophalen: '#/components/schemas/DocumentCreateRetrieveUrlDocumentCreate'
+    DocumentCreateRetrieveUrlDocumentCreate:
+      allOf:
+      - $ref: '#/components/schemas/DocumentCreateShared'
+      - $ref: '#/components/schemas/RetrieveUrlDocumentCreate'
+    DocumentCreateShared:
+      type: object
+      description: Manage the creation of new Documents.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier:
+          type: string
+          title: Identificatie
+          description: De (primaire) unieke identificatie.
+          maxLength: 255
+        publicatie:
+          type: string
+          format: uuid
+          description: De unieke identificatie van de publicatie.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: The document identifiers attached to this document.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          readOnly: true
+          title: Status
+          description: "\nOn creation, the publicatiestatus is derived from the publication\
+            \ and cannot be specified directly.\n\nThe possible state transitions\
+            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
+            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+            `.\n\nNote that some transitions may be limited by business logic.\n\n\
+            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
+            \ - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
+        creatiedatum:
+          type: string
+          format: date
+          description: De datum waarop het document ontstaan is. Niet te verwarren
+            met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date of reception
+          description: The timestamp when the document is received by the organisatie.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Signed date
+          description: The timestamp when the document is signed by the organisatie.
+        bestandsformaat:
+          type: string
+          description: TODO - placeholder accepting anything, in the future this will
+            be validated against a reference value list.
+          maxLength: 255
+        bestandsnaam:
+          type: string
+          description: Bestandsnaam 'op de harde schijf' van het document, bijvoorbeeld
+            'gelakt-verslag.pdf'.
+          maxLength: 255
+        bestandsomvang:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          nullable: true
+          description: |-
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        registratiedatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Geregistreerd op
+          description: Systeemdatum en -tijd wanneer het document in de databank opgeslagen
+            is. Niet te verwarren met de creatiedatum van de publicatie, die typisch
+            *voor* de registratiedatum valt.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
+            is in de database.
+        uploadVoltooid:
+          type: boolean
+          readOnly: true
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
+        aanleveringBestand:
+          allOf:
+          - $ref: '#/components/schemas/AanleveringBestandEnum'
+          default: ontvangen
+          title: delivery method
+          description: |-
+            When the delivery method is set to retrieve a provided document URL pointing to a Documents API, then this will be processed in the background and no `bestandsdelen` will be returned. Otherwise for direct uploads, an array of expected file parts is returned.
+
+            * `ontvangen` - Receive
+            * `ophalen` - Retrieve
         bestandsdelen:
           type: array
           items:
@@ -1996,6 +2154,7 @@ components:
       - publicatie
       - publicatiestatus
       - registratiedatum
+      - uploadVoltooid
       - uuid
     DocumentIdentifier:
       type: object
@@ -2027,6 +2186,7 @@ components:
       - documentUploadVoltooid
     DocumentUpdate:
       type: object
+      description: Manage updates to metadata of Documents.
       properties:
         uuid:
           type: string
@@ -2135,17 +2295,13 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
-        bestandsdelen:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilePart'
+        uploadVoltooid:
+          type: boolean
           readOnly: true
-          nullable: true
-          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
-            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
       required:
-      - bestandsdelen
       - bestandsformaat
       - bestandsnaam
       - bestandsomvang
@@ -2156,6 +2312,7 @@ components:
       - publicatie
       - publicatiestatus
       - registratiedatum
+      - uploadVoltooid
       - uuid
     Eigenaar:
       type: object
@@ -2456,6 +2613,7 @@ components:
             $ref: '#/components/schemas/Topic'
     PatchedDocumentUpdate:
       type: object
+      description: Manage updates to metadata of Documents.
       properties:
         uuid:
           type: string
@@ -2564,15 +2722,12 @@ components:
           title: Laatst gewijzigd op
           description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
             is in de database.
-        bestandsdelen:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilePart'
+        uploadVoltooid:
+          type: boolean
           readOnly: true
-          nullable: true
-          description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
-            Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
+          title: documentupload voltooid
+          description: Indicates if the file has been uploaded and made 'ready for
+            use' in the upstream Documents API.
     PatchedOrganisation:
       type: object
       properties:
@@ -3022,6 +3177,20 @@ components:
       required:
       - bron
       - kenmerk
+    RetrieveUrlDocumentCreate:
+      type: object
+      properties:
+        documentUrl:
+          type: string
+          format: uri
+          description: The resource URL of the document in an (external) Documents
+            API. Must be the detail endpoint - we'll construct the download URL ourselves.
+            Must be provided when the `aanleveringBestand` is set to `ophalen`, and
+            must be empty/absent when `aanleveringBestand` is `ontvangen`. Note that
+            you may include the `versie` query parameter to point to a particular
+            document version.
+      required:
+      - documentUrl
     Theme:
       type: object
       properties:

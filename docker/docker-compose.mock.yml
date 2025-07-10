@@ -1,0 +1,9 @@
+# mock service to simulate binary file downloads
+
+services:
+  mocks:
+    build: ./mock
+    ports:
+      - "80:80"
+    volumes:
+      - ./mock/:/app/
