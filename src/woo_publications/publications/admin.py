@@ -256,9 +256,7 @@ def revoke(
     queryset: models.QuerySet[Publication | Document | Topic],
 ):
     assert is_authenticated_request(request)
-    queryset = queryset.filter(
-        ~models.Q(publicatiestatus=PublicationStatusOptions.revoked)
-    )
+    queryset = queryset.exclude(publicatiestatus=PublicationStatusOptions.revoked)
 
     model = queryset.model
     num_objects = queryset.count()
@@ -686,6 +684,27 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     force=True,
                 )
             )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "publicatie":
+            db = kwargs.get("using")
+            default_qs = self.get_field_queryset(db, db_field, request)
+            # get_field_queryset relies on two things:
+            # - to have a registered admin panel
+            # - for the admin panel to have the ordering param set or
+            #   to have a valid db instance to retrieve the ordering
+            #   from the model ordering
+            # because the db instance of formfield_for_foreignkey can be None,
+            # and we haven't defined a default ordering on in the publication admin,
+            # means that we need to define a fallback scenario otherwise we won't
+            # have a queryset to exclude the revoked publication from.
+            if not default_qs:  # pragma: no cover
+                default_qs = Publication.objects
+
+            kwargs["queryset"] = default_qs.exclude(
+                publicatiestatus=PublicationStatusOptions.revoked
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin.display(description=_("file size"), ordering="bestandsomvang")
     def show_filesize(self, obj: Document) -> str:

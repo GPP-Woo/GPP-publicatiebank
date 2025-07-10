@@ -307,6 +307,36 @@ class TestDocumentAdmin(WebTest):
                 str(added_item.laatst_gewijzigd_datum), "2024-09-24 12:00:00+00:00"
             )
 
+    def test_document_admin_revoked_publication_not_present_in_dropdown(self):
+        PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept, officiele_titel="concept"
+        )
+        PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            officiele_titel="published",
+        )
+
+        # cannot create a revoked publication directly
+        revoked_publication = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            officiele_titel="revoked",
+        )
+        revoked_publication.publicatiestatus = PublicationStatusOptions.revoked
+        revoked_publication.save()
+
+        response = self.app.get(
+            reverse("admin:publications_document_add"),
+            user=self.user,
+        )
+
+        form = response.forms["document_form"]
+        # create a list of all the dropdown labels
+        publicatie_labels = [publicatie[2] for publicatie in form["publicatie"].options]
+
+        self.assertIn("concept", publicatie_labels)
+        self.assertIn("published", publicatie_labels)
+        self.assertNotIn("revoked", publicatie_labels)
+
     @patch("woo_publications.publications.admin.index_document.delay")
     def test_document_create_schedules_index_task(
         self, mock_index_document_delay: MagicMock
