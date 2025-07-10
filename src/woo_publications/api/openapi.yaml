@@ -1876,6 +1876,7 @@ components:
           title: Identificatie
           description: De (primaire) unieke identificatie.
           maxLength: 255
+          deprecated: true
         publicatie:
           type: string
           format: uuid
@@ -2019,6 +2020,7 @@ components:
           title: Identificatie
           description: De (primaire) unieke identificatie.
           maxLength: 255
+          deprecated: true
         publicatie:
           type: string
           format: uuid
@@ -2197,6 +2199,7 @@ components:
           readOnly: true
           title: Identificatie
           description: De (primaire) unieke identificatie.
+          deprecated: true
         publicatie:
           type: string
           format: uuid
@@ -2624,6 +2627,7 @@ components:
           readOnly: true
           title: Identificatie
           description: De (primaire) unieke identificatie.
+          deprecated: true
         publicatie:
           type: string
           format: uuid
