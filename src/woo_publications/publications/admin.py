@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, TypedDict
+from typing import Any
 from uuid import UUID
 
 from django import forms
@@ -19,7 +19,6 @@ from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _, ngettext
 
 from furl import furl
-from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import OrganisationMember, User
 from woo_publications.logging.logevent import (
@@ -687,43 +686,34 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def delete_queryset(
         self, request: HttpRequest, queryset: models.QuerySet[Document]
     ):
-        class DocumentData(TypedDict):
-            id: Any
-            uuid: UUID | models.UUIDField
-            document_service: Service
-            document_uuid: UUID
-
-        document_data: list[DocumentData] = [
-            {
-                "id": document.pk,
-                "uuid": document.uuid,
-                "document_service": document.document_service,
-                "document_uuid": document.document_uuid,
-            }
-            for document in queryset
-        ]
+        queryset = queryset.select_related("document_service")
+        # evaluate and cache the queryset *before* the actual delete so that we can
+        # dispatch cleanup tasks after the delete
+        _objs_to_delete: list[Document] = list(queryset)
 
         super().delete_queryset(request, queryset)
 
-        for document in document_data:
+        for document in _objs_to_delete:
             transaction.on_commit(
                 partial(
                     remove_from_index_by_uuid.delay,
                     model_name="Document",
-                    uuid=str(document["uuid"]),
+                    uuid=str(document.uuid),
                     force=True,
                 )
             )
-            if document["document_service"] and document["document_uuid"]:
-                transaction.on_commit(
-                    partial(
-                        remove_document_from_openzaak.delay,
-                        document_id=document["id"],
-                        user_id=request.user.pk,
-                        service_uuid=document["document_service"].uuid,
-                        document_uuid=document["document_uuid"],
-                    )
+            if not document.document_service or not document.document_uuid:
+                continue
+
+            transaction.on_commit(
+                partial(
+                    remove_document_from_openzaak.delay,
+                    document_id=document.id,
+                    user_id=request.user.pk,
+                    service_uuid=document.document_service.uuid,
+                    document_uuid=document.document_uuid,
                 )
+            )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "publicatie":

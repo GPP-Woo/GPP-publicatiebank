@@ -1,5 +1,4 @@
 from unittest.mock import MagicMock, call, patch
-from uuid import uuid4
 
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -990,8 +989,8 @@ class TestPublicationsAdmin(WebTest):
             publicatie=publication,
             eigenaar=self.organisation_member,
             publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
             document_service=service,
-            document_uuid=uuid4(),
         )
         reverse_url = reverse(
             "admin:publications_publication_change",

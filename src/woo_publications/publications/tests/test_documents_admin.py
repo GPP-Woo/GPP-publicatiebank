@@ -568,7 +568,7 @@ class TestDocumentAdmin(WebTest):
             document_id=document.id,
             user_id=self.user.pk,
             service_uuid=document.document_service.uuid,
-            document_uuid=uuid.UUID(document.document_uuid),  #  pyright: ignore[reportArgumentType]
+            document_uuid=document.document_uuid,
         )
 
     @patch("woo_publications.publications.admin.remove_document_from_openzaak.delay")
