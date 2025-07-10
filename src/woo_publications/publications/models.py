@@ -24,7 +24,6 @@ from django_fsm import (
     Transition,
     transition,
 )
-from requests import RequestException
 from rest_framework.reverse import reverse
 from typing_extensions import deprecated
 from zgw_consumers.constants import APITypes
@@ -994,15 +993,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
             return
 
         with get_client(self.document_service) as client:
-            try:
-                client.destroy_document(uuid=self.document_uuid)
-            except RequestException as err:
-                if (
-                    hasattr(err.response, "status_code")
-                    and err.response.status_code == 404  # pyright: ignore[reportOptionalMemberAccess]
-                ):
-                    return
-                raise err
+            client.destroy_document(uuid=self.document_uuid)
 
     def upload_part_data(self, uuid: UUID, file: File) -> bool:
         assert self.document_service, "A Documents API service must be recorded"
