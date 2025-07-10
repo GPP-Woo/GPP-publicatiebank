@@ -936,11 +936,15 @@ class Document(ConcurrentTransitionMixin, models.Model):
         )
         documenttype_url = build_absolute_uri(iot_path)
 
+        rsin = config.organisation_rsin
+        if (publisher := self.publicatie.publisher) and publisher.rsin:
+            rsin = publisher.rsin
+
         with get_client(service) as client:
             zgw_document = client.create_document(
                 # woo_document.identifier will have duplicates
                 identification=str(self.uuid),
-                source_organisation=config.organisation_rsin,
+                source_organisation=rsin,
                 document_type_url=documenttype_url,
                 creation_date=self.creatiedatum,
                 title=self.officiele_titel[:200],
