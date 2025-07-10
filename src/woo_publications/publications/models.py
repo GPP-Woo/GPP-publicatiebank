@@ -612,6 +612,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
         help_text=_("The owner of this document from gpp-app or gpp-publicatiebank."),
         on_delete=models.PROTECT,
     )
+    # TODO: remove this field in future release because it is deprecated
     identifier = models.CharField(
         _("identifier"),
         help_text=_("The (primary) unique identifier."),

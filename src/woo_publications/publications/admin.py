@@ -568,7 +568,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "publicatie",
-                    "identifier",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
@@ -598,6 +597,13 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "lock",
                     "upload_complete",
                 )
+            },
+        ),
+        (
+            _("Deprecated fields"),
+            {
+                "classes": ["collapse"],
+                "fields": ("identifier",),
             },
         ),
     ]

@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField
 from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.request import Request
 
@@ -157,6 +157,7 @@ class DocumentIdentifierSerializer(serializers.ModelSerializer[DocumentIdentifie
         )
 
 
+@extend_schema_serializer(deprecate_fields=("identifier",))
 class DocumentSerializer(serializers.ModelSerializer[Document]):
     publicatie = serializers.SlugRelatedField(
         queryset=Publication.objects.all(),
