@@ -24,14 +24,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from woo_publications.api.exceptions import BadGateway, Conflict
-from woo_publications.contrib.documents_api.client import get_client
+from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
+from woo_publications.logging.api_tools import AuditTrailRetrieveMixin
+from woo_publications.logging.logevent import audit_api_document_delete
 from woo_publications.logging.service import (
     AuditTrailViewSetMixin,
     audit_api_download,
     extract_audit_parameters,
 )
 
-from ...logging.api_tools import AuditTrailRetrieveMixin
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
 from ..tasks import index_document, process_source_document
@@ -134,18 +135,29 @@ class DocumentViewSet(
                 raise AssertionError("Unreachable code")
 
     @override
-    @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         assert isinstance(instance, Document)
+        user_id, user_repr, remarks = extract_audit_parameters(self.request)
+
         try:
             instance.destroy_document()
-        except RequestException as err:
-            raise APIException(
-                detail=_("Something went wrong while deleting the document.")
-            ) from err
+        except DocumentsAPIError as err:
+            audit_api_document_delete(
+                content_object=instance,
+                user_id=user_id,
+                user_display=user_repr,
+                remarks=remarks,
+                service_uuid=instance.document_service.uuid,
+                document_uuid=instance.document_uuid,
+            )
+            raise APIException(detail=err.message) from err
 
-        return super().destroy(request, *args, **kwargs)
+        # only perform the rollback on the destroy instead on everything
+        # in case we want to introduce side effects in the future.
+        # This way we will always keep the failed OZ log record.
+        with transaction.atomic():
+            return super().destroy(request, *args, **kwargs)
 
     def get_serializer_class(self):
         action = getattr(self, "action", None)

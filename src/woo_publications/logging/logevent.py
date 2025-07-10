@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import assert_never
+from uuid import UUID
 
 from django.db import models
 
@@ -17,12 +18,14 @@ __all__ = [
     "audit_admin_read",
     "audit_admin_update",
     "audit_admin_delete",
+    "audit_admin_document_delete",
     # api
     "audit_api_create",
     "audit_api_read",
     "audit_api_update",
     "audit_api_delete",
     "audit_api_download",
+    "audit_api_document_delete",
 ]
 
 
@@ -132,6 +135,25 @@ def audit_admin_delete(
     )
 
 
+def audit_admin_document_delete(
+    *,
+    content_object: models.Model,
+    django_user: User,
+    service_uuid: UUID,
+    document_uuid: UUID,
+) -> None:
+    _audit_event(
+        content_object=content_object,
+        event=Events.delete_document,
+        django_user=django_user,
+        document_data={
+            "success": False,
+            "service_uuid": service_uuid,
+            "document_uuid": document_uuid,
+        },
+    )
+
+
 # Api tooling:
 
 
@@ -223,4 +245,27 @@ def audit_api_download(
         user_display=user_display,
         django_user=None,
         remarks=remarks,
+    )
+
+
+def audit_api_document_delete(
+    *,
+    content_object: models.Model,
+    user_id: str,
+    user_display: str,
+    remarks: str,
+    service_uuid: UUID,
+    document_uuid: UUID,
+) -> None:
+    _audit_event(
+        content_object=content_object,
+        event=Events.delete_document,
+        user_id=user_id,
+        user_display=user_display,
+        remarks=remarks,
+        document_data={
+            "success": False,
+            "service_uuid": service_uuid,
+            "document_uuid": document_uuid,
+        },
     )

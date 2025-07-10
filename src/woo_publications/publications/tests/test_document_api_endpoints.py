@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from freezegun import freeze_time
-from requests.exceptions import ConnectionError, HTTPError, RequestException
+from requests.exceptions import ConnectionError, HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -29,8 +29,10 @@ from woo_publications.api.tests.mixins import (
     TokenAuthMixin,
 )
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.contrib.documents_api.client import get_client
+from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
+from woo_publications.logging.constants import Events
+from woo_publications.logging.models import TimelineLogProxy
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -2188,7 +2190,9 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
 
         with patch(
             "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
-            side_effect=RequestException(),
+            side_effect=DocumentsAPIError(
+                message=_("Something went wrong while deleting the document.")
+            ),
         ):
             with self.captureOnCommitCallbacks(execute=True):
                 response = self.client.delete(url, headers=AUDIT_HEADERS)
