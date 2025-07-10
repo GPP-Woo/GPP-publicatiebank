@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, call, patch
+from uuid import uuid4
 
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -6,6 +7,7 @@ from django.utils.translation import gettext as _
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
+from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.accounts.tests.factories import (
@@ -14,12 +16,14 @@ from woo_publications.accounts.tests.factories import (
 )
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
     OrganisationFactory,
 )
 from woo_publications.utils.tests.webtest import add_dynamic_field
 
+from ...contrib.documents_api.client import DocumentsAPIError
 from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
 from .factories import DocumentFactory, PublicationFactory
@@ -965,10 +969,17 @@ class TestPublicationsAdmin(WebTest):
             download_url=f"http://testserver{download_url}",
         )
 
-    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    @patch("woo_publications.publications.formset.remove_document_from_openzaak.delay")
+    @patch("woo_publications.publications.formset.remove_from_index_by_uuid.delay")
     def test_inline_document_delete_schedules_index_removal_task(
-        self, mock_remove_document_from_index: MagicMock
+        self,
+        mock_remove_from_index_by_uuid: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
     ):
+        service = ServiceFactory.create(
+            api_root="https://example.com/",
+            api_type=APITypes.drc,
+        )
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
             informatie_categorieen=[ic],
@@ -979,6 +990,8 @@ class TestPublicationsAdmin(WebTest):
             publicatie=publication,
             eigenaar=self.organisation_member,
             publicatiestatus=PublicationStatusOptions.published,
+            document_service=service,
+            document_uuid=uuid4(),
         )
         reverse_url = reverse(
             "admin:publications_publication_change",
@@ -992,8 +1005,14 @@ class TestPublicationsAdmin(WebTest):
         form = response.forms["publication_form"]
         form["document_set-0-DELETE"] = True
 
-        with self.captureOnCommitCallbacks(execute=True):
-            deletion_response = form.submit(name="_save")
+        with patch(
+            "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
+            side_effect=DocumentsAPIError(
+                message=_("Something went wrong while deleting the document.")
+            ),
+        ):
+            with self.captureOnCommitCallbacks(execute=True):
+                deletion_response = form.submit(name="_save")
 
         self.assertRedirects(
             deletion_response,
@@ -1001,11 +1020,22 @@ class TestPublicationsAdmin(WebTest):
         )
 
         self.assertFalse(Document.objects.filter(pk=document.pk).exists())
-        mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
+        mock_remove_from_index_by_uuid.assert_called_once_with(
+            model_name="Document", uuid=str(document.uuid)
+        )
+        mock_remove_document_from_openzaak.assert_called_once_with(
+            document_id=document.pk,
+            user_id=self.user.pk,
+            service_uuid=service.uuid,
+            document_uuid=document.document_uuid,
+        )
 
-    @patch("woo_publications.publications.formset.remove_document_from_index.delay")
+    @patch("woo_publications.publications.formset.remove_document_from_openzaak.delay")
+    @patch("woo_publications.publications.formset.remove_from_index_by_uuid.delay")
     def test_inline_document_delete_does_not_schedule_task_if_status_not_published(
-        self, mock_remove_document_from_index: MagicMock
+        self,
+        mock_remove_from_index_by_uuid: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
     ):
         ic = InformationCategoryFactory.create()
         publication = PublicationFactory.create(
@@ -1040,7 +1070,8 @@ class TestPublicationsAdmin(WebTest):
         )
 
         self.assertFalse(Document.objects.filter(pk=document.pk).exists())
-        mock_remove_document_from_index.assert_not_called()
+        mock_remove_from_index_by_uuid.assert_not_called()
+        mock_remove_document_from_openzaak.assert_not_called()
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):
