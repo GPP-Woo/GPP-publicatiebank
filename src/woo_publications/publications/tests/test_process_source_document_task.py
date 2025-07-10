@@ -227,9 +227,7 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
                 # we expect the document to be registered only once
                 self.assertEqual(len(registered_document_uuids), 1)
 
-    def test_file_parts_failure_is_recoverable(self):
-        # Simulate that something went wrong while uploading the file parts, and
-        # retrying the task can pick up where it left of.
+    def test_resume_completes_upload_when_woo_document_meta_already_exists(self):
         with get_client(self.service) as client:
             oz_uuid = _create_initial_document(
                 client=client,
