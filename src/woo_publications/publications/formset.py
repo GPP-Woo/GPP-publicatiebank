@@ -9,7 +9,7 @@ from woo_publications.logging.admin_tools import AuditLogInlineformset
 
 from .constants import PublicationStatusOptions
 from .models import Document, Publication
-from .tasks import remove_document_from_index
+from .tasks import remove_document_from_openzaak, remove_from_index_by_uuid
 
 
 class DocumentInlineformset(AuditLogInlineformset[Document, Publication, ModelForm]):
@@ -51,8 +51,25 @@ class DocumentInlineformset(AuditLogInlineformset[Document, Publication, ModelFo
         return super().save_new(form, commit)
 
     def delete_existing(self, obj, commit=True):
+        doc_id = obj.pk
+        super().delete_existing(obj, commit)
+
         if obj.publicatiestatus == PublicationStatusOptions.published:
             transaction.on_commit(
-                partial(remove_document_from_index.delay, document_id=obj.pk)
+                partial(
+                    remove_from_index_by_uuid.delay,
+                    model_name="Document",
+                    uuid=str(obj.uuid),
+                )
             )
-        super().delete_existing(obj, commit)
+
+        if obj.document_service and obj.document_uuid:
+            transaction.on_commit(
+                partial(
+                    remove_document_from_openzaak.delay,
+                    document_id=doc_id,
+                    user_id=self.request.user.pk,
+                    service_uuid=obj.document_service.uuid,
+                    document_uuid=obj.document_uuid,
+                )
+            )

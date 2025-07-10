@@ -21,7 +21,9 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from furl import furl
 
 from woo_publications.accounts.models import OrganisationMember, User
-from woo_publications.logging.logevent import audit_admin_update
+from woo_publications.logging.logevent import (
+    audit_admin_update,
+)
 from woo_publications.logging.serializing import serialize_instance
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 from woo_publications.typing import is_authenticated_request
@@ -42,6 +44,7 @@ from .tasks import (
     index_publication,
     index_topic,
     remove_document_from_index,
+    remove_document_from_openzaak,
     remove_from_index_by_uuid,
     remove_publication_from_index,
     remove_topic_from_index,
@@ -657,6 +660,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         return partial(form, request=request)  # pyright: ignore[reportCallIssue]
 
     def delete_model(self, request: HttpRequest, obj: Document):
+        doc_id = obj.pk
         super().delete_model(request, obj)
 
         if obj.publicatiestatus == PublicationStatusOptions.published:
@@ -668,20 +672,46 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
             )
 
+        if obj.document_service and obj.document_uuid:
+            transaction.on_commit(
+                partial(
+                    remove_document_from_openzaak.delay,
+                    document_id=doc_id,
+                    user_id=request.user.pk,
+                    service_uuid=obj.document_service.uuid,
+                    document_uuid=obj.document_uuid,
+                )
+            )
+
     def delete_queryset(
         self, request: HttpRequest, queryset: models.QuerySet[Document]
     ):
-        document_uuids: list[UUID] = [document.uuid for document in queryset]
+        queryset = queryset.select_related("document_service")
+        # evaluate and cache the queryset *before* the actual delete so that we can
+        # dispatch cleanup tasks after the delete
+        _objs_to_delete: list[Document] = list(queryset)
 
         super().delete_queryset(request, queryset)
 
-        for document_uuid in document_uuids:
+        for document in _objs_to_delete:
             transaction.on_commit(
                 partial(
                     remove_from_index_by_uuid.delay,
                     model_name="Document",
-                    uuid=str(document_uuid),
+                    uuid=str(document.uuid),
                     force=True,
+                )
+            )
+            if not document.document_service or not document.document_uuid:
+                continue
+
+            transaction.on_commit(
+                partial(
+                    remove_document_from_openzaak.delay,
+                    document_id=document.id,
+                    user_id=request.user.pk,
+                    service_uuid=document.document_service.uuid,
+                    document_uuid=document.document_uuid,
                 )
             )
 

@@ -15,6 +15,7 @@ from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
 )
+from woo_publications.contrib.documents_api.client import DocumentsAPIError
 
 from ..constants import PublicationStatusOptions
 from ..models import Document
@@ -523,15 +524,19 @@ class TestDocumentAdmin(WebTest):
             document_id=document.pk
         )
 
+    @patch("woo_publications.publications.admin.remove_document_from_openzaak.delay")
     @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
     def test_document_admin_delete(
-        self, mock_remove_from_index_by_uuid_delay: MagicMock
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
     ):
         document = DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
             officiele_titel="title one",
             verkorte_titel="one",
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            with_registered_document=True,
         )
         reverse_url = reverse(
             "admin:publications_document_delete",
@@ -544,8 +549,12 @@ class TestDocumentAdmin(WebTest):
 
         form = response.forms[1]
 
-        with self.captureOnCommitCallbacks(execute=True):
-            response = form.submit()
+        with patch(
+            "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
+            side_effect=DocumentsAPIError(message="error"),
+        ):
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit()
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
@@ -555,10 +564,19 @@ class TestDocumentAdmin(WebTest):
             model_name="Document",
             uuid=str(document.uuid),
         )
+        mock_remove_document_from_openzaak.assert_called_once_with(
+            document_id=document.id,
+            user_id=self.user.pk,
+            service_uuid=document.document_service.uuid,
+            document_uuid=document.document_uuid,
+        )
 
+    @patch("woo_publications.publications.admin.remove_document_from_openzaak.delay")
     @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
     def test_document_admin_delete_unpublished(
-        self, mock_remove_from_index_by_uuid_delay: MagicMock
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
     ):
         document = DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.revoked
@@ -576,6 +594,7 @@ class TestDocumentAdmin(WebTest):
 
         self.assertEqual(response.status_code, 302)
         mock_remove_from_index_by_uuid_delay.assert_not_called()
+        mock_remove_document_from_openzaak.assert_not_called()
 
     def test_document_admin_service_select_box_only_displays_document_apis(self):
         service = ServiceFactory.create(
@@ -661,8 +680,13 @@ class TestDocumentAdmin(WebTest):
                 document_id=doc_id, force=True
             )
 
+    @patch("woo_publications.publications.admin.remove_document_from_openzaak.delay")
     @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
-    def test_bulk_removal_action(self, remove_from_index_by_uuid_delay: MagicMock):
+    def test_bulk_removal_action(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
+    ):
         DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
             publicatie__publicatiestatus=PublicationStatusOptions.published,
@@ -687,8 +711,56 @@ class TestDocumentAdmin(WebTest):
             confirmation_form.submit()
 
         for doc_uuid in Document.objects.values_list("uuid", flat=True):
-            remove_from_index_by_uuid_delay.assert_any_call(
+            mock_remove_from_index_by_uuid_delay.assert_any_call(
                 model_name="Document", uuid=doc_uuid, force=True
+            )
+        mock_remove_document_from_openzaak.assert_not_called()
+
+    @patch("woo_publications.publications.admin.remove_document_from_openzaak.delay")
+    @patch("woo_publications.publications.admin.remove_from_index_by_uuid.delay")
+    def test_bulk_removal_action_with_service_triggers_task(
+        self,
+        mock_remove_from_index_by_uuid_delay: MagicMock,
+        mock_remove_document_from_openzaak: MagicMock,
+    ):
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+        DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.revoked,
+            publicatie__publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+        changelist = self.app.get(
+            reverse("admin:publications_document_changelist"),
+            user=self.user,
+        )
+        form = changelist.forms["changelist-form"]
+
+        form["_selected_action"] = [doc.pk for doc in Document.objects.all()]
+        form["action"] = "delete_selected"
+
+        response = form.submit()
+
+        with patch(
+            "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
+            side_effect=DocumentsAPIError(message="error"),
+        ):
+            with self.captureOnCommitCallbacks(execute=True):
+                confirmation_form = response.forms[1]
+                confirmation_form.submit()
+
+        for doc in Document.objects.all():
+            mock_remove_from_index_by_uuid_delay.assert_any_call(
+                model_name="Document", uuid=doc.uuid, force=True
+            )
+            mock_remove_document_from_openzaak.assert_called_once_with(
+                document_id=doc.id,
+                user_id=self.user.pk,
+                service_uuid=doc.document_service.uuid,
+                document_uuid=doc.document_uuid,
             )
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")

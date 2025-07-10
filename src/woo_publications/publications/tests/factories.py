@@ -114,7 +114,7 @@ class DocumentFactory(factory.django.DjangoModelFactory[Document]):
                 ServiceFactory,
                 for_documents_api_docker_compose=True,
             ),
-            document_uuid=factory.Faker("uuid4"),
+            document_uuid=factory.Faker("uuid4", cast_to=None),
         )
 
     @factory.post_generation
