@@ -59,6 +59,7 @@ class TestOrganisationAdminAuditLogging(WebTest):
                 "naam": "organisation name",
                 "oorsprong": OrganisationOrigins.custom_entry,
                 "is_actief": False,
+                "rsin": "",
             },
             "_cached_object_repr": "organisation name",
         }
@@ -116,6 +117,7 @@ class TestOrganisationAdminAuditLogging(WebTest):
                     "naam": "changed name",
                     "oorsprong": OrganisationOrigins.custom_entry,
                     "is_actief": False,
+                    "rsin": "",
                 },
                 "_cached_object_repr": "changed name",
             }
@@ -157,6 +159,7 @@ class TestOrganisationAdminAuditLogging(WebTest):
                 "naam": "soon to be deleted organisation",
                 "oorsprong": OrganisationOrigins.custom_entry,
                 "is_actief": False,
+                "rsin": "",
             },
             "_cached_object_repr": "soon to be deleted organisation",
         }
