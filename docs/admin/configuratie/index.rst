@@ -15,6 +15,8 @@ van het "woo-publicaties"-component beïnvloeden:
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
+.. _admin_configuratie_index_alg_inst:
+
 Algemene instellingen
 ---------------------
 
