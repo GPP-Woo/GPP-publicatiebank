@@ -2181,7 +2181,9 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
         mock_remove_document_from_index: MagicMock,
     ):
         document = DocumentFactory.create(
-            document_service=self.service, document_uuid=self.DOCUMENT_TYPE_UUID
+            document_service=self.service,
+            document_uuid=self.DOCUMENT_TYPE_UUID,
+            officiele_titel="doc-1",
         )
         url = reverse(
             "api:document-detail",
@@ -2203,6 +2205,21 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
             {"detail": _("Something went wrong while deleting the document.")},
         )
         self.assertTrue(Document.objects.filter(uuid=document.uuid).exists())
+        log = TimelineLogProxy.objects.for_object(document).get(  # pyright: ignore[reportAttributeAccessIssue]
+            extra_data__event=Events.delete_document
+        )
+        expected_data = {
+            "event": Events.delete_document,
+            "remarks": "remark",
+            "acting_user": {"identifier": "id", "display_name": "username"},
+            "document_data": {
+                "success": False,
+                "service_uuid": str(self.service.uuid),
+                "document_uuid": str(self.DOCUMENT_TYPE_UUID),
+            },
+            "_cached_object_repr": "doc-1",
+        }
+        self.assertEqual(log.extra_data, expected_data)
         mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
 
     @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
@@ -2225,6 +2242,11 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Document.objects.filter(uuid=document.uuid).exists())
         self.assertEqual(len(self.cassette), 1)
+        self.assertFalse(
+            TimelineLogProxy.objects.for_object(document)  # pyright: ignore[reportAttributeAccessIssue]
+            .filter(extra_data__event=Events.delete_document)
+            .exists()
+        )
         mock_remove_document_from_index.assert_called_once_with(document_id=document.pk)
 
     @patch("woo_publications.publications.tasks.remove_document_from_index.delay")
