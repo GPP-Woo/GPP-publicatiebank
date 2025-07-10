@@ -29,6 +29,7 @@ from woo_publications.api.tests.mixins import (
     TokenAuthMixin,
 )
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.documents_api.api import DUMMY_IC_UUID
 from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.logging.constants import Events
@@ -1558,6 +1559,21 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        document = Document.objects.get()
+        with (
+            self.subTest("expect IC to be the hardcoded dummy data"),
+            get_client(document.document_service) as client,
+        ):
+            detail = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}"
+            )
+            self.assertEqual(detail.status_code, status.HTTP_200_OK)
+            detail_data = detail.json()
+            self.assertEqual(
+                detail_data["informatieobjecttype"],
+                f"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/{DUMMY_IC_UUID}",
+            )
 
     @patch("woo_publications.publications.models.Document.register_in_documents_api")
     def test_create_document_with_custom_owner(

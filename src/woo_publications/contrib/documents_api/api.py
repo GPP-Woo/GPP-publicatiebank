@@ -20,6 +20,7 @@ from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.metadata.models import InformationCategory
 
+DUMMY_IC_UUID: UUID = UUID("0f06fded-7e08-437d-9fa2-021841a93842")
 FIXED_DUMMY_IOT_DATA = {
     "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
     "begin_geldigheid": "2024-09-01",
@@ -96,7 +97,11 @@ class CatalogiAPIDocumentTypeView(views.APIView):
         **NOTE**: this API endpoint is internal and used in the integration with the
         Documenten API. Publication components are not expected to interact with it.
         """
-        information_category = get_object_or_404(InformationCategory, uuid=uuid)
+        if uuid == DUMMY_IC_UUID:
+            information_category = InformationCategory(uuid=DUMMY_IC_UUID)
+        else:
+            information_category = get_object_or_404(InformationCategory, uuid=uuid)
+
         data = {
             "url": request.build_absolute_uri(request.path),
             "catalogus": request.build_absolute_uri(
