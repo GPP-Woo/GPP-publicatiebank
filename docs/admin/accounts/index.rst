@@ -41,9 +41,9 @@ Op dit scherm zijn een aantal acties mogelijk:
     - *Stafstatus ja/nee*: enkel gebruikers met stafstatus kunnen op de beheeromgeving inloggen.
     - *Supergebruikerstatus ja/nee*: supergebruikers hebben altijd alle rechten om alle acties uit te voeren.
     - *Actief ja/nee*: inactieve gebruikers kunnen niet inloggen.
-    - *Groepen*: een gebruiker kan lid zijn van één of meerdere `groepen <admin_accounts_index_groups>`_ waaraan bepaalde rechten gekoppeld zijn.
+    - *Groepen*: een gebruiker kan lid zijn van één of meerdere :ref:`groepen <admin_accounts_index_groups>` waaraan bepaalde rechten gekoppeld zijn.
 
-* In de lijstweergave kan je voor elke gebruiker `audit-logs <admin_logging_index>`_ weergeven via de **Toon logs** link. Deze logs tonen welke wijzigingen er aan het gebruikersaccount gemaakt zijn en door wie.
+* In de lijstweergave kan je voor elke gebruiker :ref:`audit-logs <admin_logging_index>` weergeven via de **Toon logs** link. Deze logs tonen welke wijzigingen er aan het gebruikersaccount gemaakt zijn en door wie.
 * De knop **Overnemen** laat (super)gebruikers toe zich voor te doen als de geselecteerde
   gebruiker. Dit is handig om de rechten te controleren of een probleem te reproduceren.
 
