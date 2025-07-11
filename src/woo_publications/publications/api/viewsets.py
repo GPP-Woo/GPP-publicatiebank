@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Iterable
 from functools import partial
 from typing import override
@@ -9,6 +8,7 @@ from django.http import StreamingHttpResponse
 from django.utils.http import content_disposition_header
 from django.utils.translation import gettext_lazy as _
 
+import structlog
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -47,7 +47,7 @@ from .serializers import (
     TopicSerializer,
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 DOWNLOAD_CHUNK_SIZE = (
     8_192  # read 8 kB into memory at a time when downloading from upstream
@@ -287,13 +287,10 @@ class DocumentViewSet(
 
             if (_status := upstream_response.status_code) != status.HTTP_200_OK:
                 logger.warning(
-                    "Streaming of file contents (ID: %s) fails. Status code: %r.",
-                    document.document_uuid,
-                    _status,
-                    extra={
-                        "document_id": document.document_uuid,
-                        "api_root": client.base_url,
-                    },
+                    "file_contents_streaming_failed",
+                    document_id=str(document.document_uuid),
+                    status_code=_status,
+                    api_root=client.base_url,
                 )
                 raise BadGateway(detail=_("Could not download from the upstream."))
 

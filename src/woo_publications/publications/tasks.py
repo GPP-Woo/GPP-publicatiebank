@@ -1,8 +1,8 @@
-import logging
 from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
+import structlog
 from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import User
@@ -20,7 +20,7 @@ from woo_publications.publications.constants import PublicationStatusOptions
 
 from .models import Document, Publication, Topic
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 @app.task
@@ -119,32 +119,35 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
     """
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
-        logger.info("No GPP search service configured, skipping the indexing task.")
+        logger.info("index_task_skipped", reason="no_gpp_search_service_configured")
         return
 
     document = Document.objects.select_related(
         "publicatie", "publicatie__publisher"
     ).get(pk=document_id)
+    log = logger.bind(document_id=str(document.uuid))
     if (
         current_status := document.publicatiestatus
     ) != PublicationStatusOptions.published:
-        logger.info("Document has publication status %s, skipping.", current_status)
+        log.info(
+            "index_task_skipped",
+            reason="invalid_document_publication_status",
+            publication_status=current_status,
+        )
         return
 
     if not document.upload_complete:
-        logger.info(
-            "Document upload is not yet complete, skipping.",
-            extra={"document": document.uuid},
-        )
+        log.info("index_task_skipped", reason="upload_not_complete")
         return
 
     if (
         not (pub_status := document.publicatie.publicatiestatus)
         == PublicationStatusOptions.published
     ):
-        logger.info(
-            "Related publication of document has publication status %s, skipping.",
-            pub_status,
+        log.info(
+            "index_task_skipped",
+            reason="invalid_publication_publication_status",
+            publication_status=pub_status,
         )
         return
 
@@ -165,19 +168,21 @@ def remove_document_from_index(*, document_id: int, force: bool = False) -> str 
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
         logger.info(
-            "No GPP search service configured, skipping the index removal task."
+            "index_removal_task_skipped", reason="no_gpp_search_service_configured"
         )
         return
 
     document = Document.objects.get(pk=document_id)
+    log = logger.bind(document_id=str(document.uuid))
     if (
         not force
         and (current_status := document.publicatiestatus)
         == PublicationStatusOptions.published
     ):
-        logger.info(
-            "Document has publication status %s, skipping index removal.",
-            current_status,
+        log.info(
+            "index_removal_task_skipped",
+            reason="invalid_document_publication_status",
+            publication_status=current_status,
         )
         return
 
@@ -197,14 +202,19 @@ def index_publication(*, publication_id: int) -> str | None:
     """
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
-        logger.info("No GPP search service configured, skipping the indexing task.")
+        logger.info("index_task_skipped", reason="no_gpp_search_service_configured")
         return
 
     publication = Publication.objects.get(pk=publication_id)
+    log = logger.bind(publication_id=str(publication.uuid))
     if (
         current_status := publication.publicatiestatus
     ) != PublicationStatusOptions.published:
-        logger.info("Publication has publication status %s, skipping.", current_status)
+        log.info(
+            "index_task_skipped",
+            reason="invalid_publication_publication_status",
+            publication_status=current_status,
+        )
         return
 
     with get_zoeken_client(service) as client:
@@ -226,19 +236,21 @@ def remove_publication_from_index(
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
         logger.info(
-            "No GPP search service configured, skipping the index removal task."
+            "index_removal_task_skipped", reason="no_gpp_search_service_configured"
         )
         return
 
     publication = Publication.objects.get(pk=publication_id)
+    log = logger.bind(publication_id=str(publication.uuid))
     if (
         not force
         and (current_status := publication.publicatiestatus)
         == PublicationStatusOptions.published
     ):
-        logger.info(
-            "publication has publication status %s, skipping index removal.",
-            current_status,
+        log.info(
+            "index_removal_task_skipped",
+            reason="invalid_publication_publication_status",
+            publication_status=current_status,
         )
         return
 
@@ -258,12 +270,17 @@ def index_topic(*, topic_id: int) -> str | None:
     """
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
-        logger.info("No GPP search service configured, skipping the indexing task.")
+        logger.info("index_task_skipped", reason="no_gpp_search_service_configured")
         return
 
     topic = Topic.objects.get(pk=topic_id)
+    log = logger.bind(topic_id=str(topic.uuid))
     if (current_status := topic.publicatiestatus) != PublicationStatusOptions.published:
-        logger.info("Topic has publication status %s, skipping.", current_status)
+        log.info(
+            "index_task_skipped",
+            reason="invalid_topic_publication_status",
+            publication_status=current_status,
+        )
         return
 
     with get_zoeken_client(service) as client:
@@ -283,19 +300,21 @@ def remove_topic_from_index(*, topic_id: int, force: bool = False) -> str | None
     config = GlobalConfiguration.get_solo()
     if (service := config.gpp_search_service) is None:
         logger.info(
-            "No GPP search service configured, skipping the index removal task."
+            "index_removal_task_skipped", reason="no_gpp_search_service_configured"
         )
         return
 
     topic = Topic.objects.get(pk=topic_id)
+    log = logger.bind(topic_id=str(topic.uuid))
     if (
         not force
         and (current_status := topic.publicatiestatus)
         == PublicationStatusOptions.published
     ):
-        logger.info(
-            "topic has publication status %s, skipping index removal.",
-            current_status,
+        log.info(
+            "index_removal_task_skipped",
+            reason="invalid_topic_publication_status",
+            publication_status=current_status,
         )
         return
 
@@ -317,9 +336,10 @@ def remove_from_index_by_uuid(
     successful database transaction commit.
     """
     config = GlobalConfiguration.get_solo()
+    log = logger.bind(model_name=model_name, uuid=str(uuid), force=force)
     if (service := config.gpp_search_service) is None:
-        logger.info(
-            "No GPP search service configured, skipping the index removal task."
+        log.info(
+            "index_removal_task_skipped", reason="no_gpp_search_service_configured"
         )
         return
 
@@ -361,7 +381,7 @@ def remove_document_from_openzaak(
         except DocumentsAPIError:
             logger.exception(
                 "destroying_documents_api_document_failed",
-                extra={"uuid": document_uuid},
+                uuid=str(document_uuid),
             )
             audit_admin_document_delete(
                 content_object=Document(id=document_id),

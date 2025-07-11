@@ -1,4 +1,3 @@
-import logging
 from functools import partial
 from typing import Literal, TypedDict
 
@@ -7,6 +6,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+import structlog
 from django_fsm import FSMField
 from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
@@ -36,7 +36,7 @@ from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class OwnerData(TypedDict):
@@ -441,12 +441,10 @@ class DocumentUpdateSerializer(DocumentSerializer):
 
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": current_publication_status,
-                        "target_status": new_publication_status,
-                        "model": instance._meta.model_name,
-                        "pk": instance.pk,
-                    },
+                    source_status=current_publication_status,
+                    target_status=new_publication_status,
+                    model=instance._meta.model_name,
+                    pk=instance.pk,
                 )
 
         document = super().update(instance, validated_data)
@@ -800,12 +798,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 )
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": current_publication_status,
-                        "target_status": new_publication_status,
-                        "model": instance._meta.model_name,
-                        "pk": instance.pk,
-                    },
+                    source_status=current_publication_status,
+                    target_status=new_publication_status,
+                    model=instance._meta.model_name,
+                    pk=instance.pk,
                 )
                 # determine if attention_policy should be applied or not.
                 if informatie_categorieen := validated_data.get(
