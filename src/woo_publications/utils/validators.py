@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.core.files.images import ImageFile
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import gettext as _
@@ -24,5 +25,15 @@ def max_img_size_validator(image: ImageFile):
         raise ValidationError(
             _("File size exceeds max size of {max_img_size}.").format(
                 max_img_size=filesizeformat(max_img_size)
+            )
+        )
+
+
+def max_file_size_validator(file: File):
+    max_file_size = settings.MAX_FILE_SIZE
+    if file.size > max_file_size:
+        raise ValidationError(
+            _("File size exceeds max size of {max_file_size}.").format(
+                max_file_size=filesizeformat(max_file_size)
             )
         )

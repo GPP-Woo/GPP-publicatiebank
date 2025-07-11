@@ -1,21 +1,28 @@
 import uuid
+from datetime import date
 from unittest.mock import MagicMock, patch
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
+from rest_framework import status
+from webtest import Upload
 from zgw_consumers.constants import APITypes
-from zgw_consumers.test.factories import ServiceFactory
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
 )
-from woo_publications.contrib.documents_api.client import DocumentsAPIError
+from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
+from woo_publications.contrib.tests.factories import ServiceFactory
+from woo_publications.metadata.tests.factories import InformationCategoryFactory
+from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..constants import PublicationStatusOptions
 from ..models import Document
@@ -238,7 +245,7 @@ class TestDocumentAdmin(WebTest):
             form["omschrijving"] = (
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
-                "eleifend eros sed consectetur.",
+                "eleifend eros sed consectetur."
             )
 
             add_response = form.submit(name="_save")
@@ -268,7 +275,7 @@ class TestDocumentAdmin(WebTest):
             form["omschrijving"] = (
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
                 "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
-                "eleifend eros sed consectetur.",
+                "eleifend eros sed consectetur."
             )
 
             add_response = form.submit(name="_save")
@@ -361,7 +368,7 @@ class TestDocumentAdmin(WebTest):
         form["omschrijving"] = (
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
             "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
-            "eleifend eros sed consectetur.",
+            "eleifend eros sed consectetur."
         )
 
         with self.captureOnCommitCallbacks(execute=True):
@@ -900,3 +907,113 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(doc1.eigenaar, org_member_1)
             self.assertEqual(doc2.eigenaar, org_member_1)
+
+
+@disable_admin_mfa()
+@override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
+class TestDocumentAdminFileUpload(VCRMixin, WebTest):
+    # this UUID is in the fixture
+    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
+    DOCUMENT_TYPE_URL = (
+        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
+        + DOCUMENT_TYPE_UUID
+    )
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Set up global configuration
+        cls.service = service = ServiceFactory.create(
+            for_documents_api_docker_compose=True
+        )
+        config = GlobalConfiguration.get_solo()
+        config.documents_api_service = service
+        config.organisation_rsin = "000000000"
+        config.save()
+
+        cls.information_category = information_category = (
+            InformationCategoryFactory.create(uuid=cls.DOCUMENT_TYPE_UUID)
+        )
+        cls.publication = PublicationFactory.create(
+            informatie_categorieen=[information_category],
+            publicatiestatus=PublicationStatusOptions.published,
+        )
+        cls.user = UserFactory.create(superuser=True)
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+        self.app.extra_environ = {"HTTP_HOST": "host.docker.internal:8000"}
+
+    def test_upload_document(self):
+        response = self.app.get(
+            reverse("admin:publications_document_add"),
+            user=self.user,
+        )
+
+        form = response.forms["document_form"]
+        form["publicatie"] = self.publication.pk
+        form["officiele_titel"] = "The official title of this document"
+        form["creatiedatum"] = "2025-01-01"
+        form["document"] = Upload("dummy.txt", b"1234567890")
+
+        add_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            add_response, reverse("admin:publications_document_changelist")
+        )
+
+        with get_client(service=self.service) as client:
+            document = Document.objects.get()
+            file_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+
+            self.assertEqual(file_response.status_code, status.HTTP_200_OK)
+            # read the binary data and check that it matches what we uploaded
+            self.assertEqual(file_response.content, b"1234567890")
+
+        self.assertEqual(document.document_service, self.service)
+        self.assertTrue(document.upload_complete)
+
+    def test_upload_document_file_part_error(self):
+        document = DocumentFactory.create(
+            publicatie=self.publication,
+            officiele_titel="titel",
+            creatiedatum=date(2025, 1, 1),
+            bestandsformaat="text/plain",
+            bestandsnaam="dummy.txt",
+            bestandsomvang=10,
+        )
+        document.register_in_documents_api(
+            build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
+        )
+
+        reverse_url = reverse(
+            "admin:publications_document_change",
+            kwargs={"object_id": document.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        form = response.forms["document_form"]
+        form["document"] = Upload("dummy.txt", b"1234567890")
+
+        add_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            add_response, reverse("admin:publications_document_changelist")
+        )
+
+        with get_client(service=self.service) as client:
+            document = Document.objects.get()
+            file_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+
+            self.assertEqual(file_response.status_code, status.HTTP_200_OK)
+            # read the binary data and check that it matches what we uploaded
+            self.assertEqual(file_response.content, b"1234567890")
+
+        self.assertEqual(document.document_service, self.service)
+        self.assertTrue(document.upload_complete)

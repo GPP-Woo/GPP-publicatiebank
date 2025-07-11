@@ -24,6 +24,7 @@ from django_fsm import (
     Transition,
     transition,
 )
+from requests import RequestException
 from rest_framework.reverse import reverse
 from typing_extensions import deprecated
 from zgw_consumers.constants import APITypes
@@ -34,6 +35,7 @@ from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
     DocumentenClient,
+    DocumentsAPIError,
     get_client,
 )
 from woo_publications.logging.serializing import serialize_instance
@@ -977,6 +979,21 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         # cache reference
         self.zgw_document = zgw_document
+
+    def upload_document(self, file: File):
+        file_start = 0
+
+        if not self.zgw_document:
+            with get_client(self.document_service) as client:
+                self.zgw_document = client.retrieve_document(uuid=self.document_uuid)
+
+        for part in self.zgw_document.file_parts:
+            file.seek(file_start)
+            try:
+                self.upload_part_data(uuid=part.uuid, file=file.read(part.size))
+                file_start = file_start + part.size
+            except RequestException as exc:
+                raise DocumentsAPIError(message="Document upload failed.") from exc
 
     @transaction.atomic()
     def destroy_document(self) -> None:

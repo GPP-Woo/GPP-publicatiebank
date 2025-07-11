@@ -277,6 +277,12 @@ MAX_IMG_WIDTH = config(
     group="Image upload settings",
 )
 
+MAX_FILE_SIZE = config(
+    "MAX_FILE_SIZE",
+    default=1_000_000,
+    help_text="The maximum file size in bytes.",
+)
+
 ##############################
 #                            #
 # 3RD PARTY LIBRARY SETTINGS #

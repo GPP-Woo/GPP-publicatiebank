@@ -592,6 +592,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             _("Documents API integration"),
             {
                 "fields": (
+                    "document",
                     "document_service",
                     "document_uuid",
                     "lock",
@@ -653,6 +654,13 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             readonly_fields += ("publicatiestatus",)
         else:
             readonly_fields += ("publicatie",)
+            if obj.document_uuid:
+                readonly_fields += (
+                    "document_service",
+                    "document_uuid",
+                    "lock",
+                    "upload_complete",
+                )
 
         return readonly_fields
 

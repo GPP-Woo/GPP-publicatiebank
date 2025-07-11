@@ -5,6 +5,7 @@ from functools import partial
 from typing import Literal
 
 from django import forms
+from django.contrib import messages
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
@@ -13,7 +14,9 @@ import structlog
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.typing import is_authenticated_request
+from woo_publications.utils.validators import max_file_size_validator
 
+from ..contrib.documents_api.client import DocumentsAPIError
 from .constants import PublicationStatusOptions
 from .models import Document, Publication
 from .tasks import index_document, index_publication
@@ -185,6 +188,21 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
 
 
 class DocumentAdminForm(PublicationStatusForm[Document]):
+    document = forms.FileField(
+        label=_("Document"),
+        required=False,
+        help_text=_("Physical document attached to this document instance."),
+        allow_empty_file=True,
+        validators=[max_file_size_validator],
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = self.instance
+        if instance.upload_complete:
+            self.fields["document"].disabled = True
+
+    @transaction.atomic
     def save(self, commit=True):
         new_publication_status = self.instance.publicatie.publicatiestatus
         # ignore the form field unless it's set to revoke
@@ -243,6 +261,13 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
                     pk=self.instance.pk,
                 )
 
+        if (
+            file := self.cleaned_data["document"]
+        ) and not self.instance.upload_complete:
+            self.instance.bestandsnaam = file._name
+            self.instance.bestandsformaat = file.content_type
+            self.instance.bestandsomvang = file.size
+
         document = super().save(commit=commit)
         # cannot force the commit as True because of the AttributeError:
         # 'DocumentForm' object has no attribute 'save_m2m'.
@@ -252,5 +277,19 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
 
         if post_save_callback is not None:
             post_save_callback()
+
+        if file and not document.upload_complete:
+            if not document.document_uuid:
+                document.register_in_documents_api(
+                    build_absolute_uri=self.request.build_absolute_uri,
+                )
+            try:
+                self.instance.upload_document(file=file)
+            except DocumentsAPIError:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    _("Something went wrong while uploading the document."),
+                )
 
         return document
