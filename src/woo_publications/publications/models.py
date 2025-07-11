@@ -563,8 +563,8 @@ class PublicationIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = _("kenmerk")
-        verbose_name_plural = _("kenmerken")
+        verbose_name = _("identifier")
+        verbose_name_plural = _("identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["publicatie", "kenmerk", "bron"],
@@ -1047,8 +1047,8 @@ class DocumentIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = _("kenmerk")
-        verbose_name_plural = _("kenmerken")
+        verbose_name = _("identifier")
+        verbose_name_plural = _("identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["document", "kenmerk", "bron"],

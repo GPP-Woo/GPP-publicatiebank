@@ -2,6 +2,48 @@
 Release notes
 =============
 
+2.0.0-rc.0 (2025-07-16)
+=======================
+
+Features
+--------
+
+* [#266] Limited status changes. Ensure to limit the publicatiestatus you can change to at any point.
+  During creation you can't create a revoked publication/document, published publication/document can
+  only be updated or revoked and a revoked publication/document can't be changed.
+  Besides this during the creation of a document it takes the same status as the connected publication.
+
+* [#214, #215] Added link to internal (GPP-app for example) and external (GPP-burgerportaal for example)
+  publications from the admin and api.
+
+* [#275, #307] Added description to the information category field and introduced the management command
+  `load_information_categories` to ensure that the manual data provided by the user won't be set to blank.
+
+* [#194, #195] Added identifiers to publication/document. Allow multiple identifiers to be linked to a
+  publication/document defined by the `identifier` and `source`. Set the old document identifier field to
+  deprecated because it won't be used in the future.
+
+* [#263] Made the fields (besides `Officiele Title`) not required for concept publications.
+* [#304] introduced the document delete enpoint in the API.
+* [#282] introduced the following date fields for the publication and document models:
+    - Publication:
+        - Gepubliceerd op (automatically filled in on publication)
+        - Ingetrokken op (automatically filled in when revoked)
+        - datum begin geldigheid
+        - datum einde geldigheid
+    - Document:
+        - Gepubliceerd op (automatically filled in on publication)
+        - Ingetrokken op (automatically filled in when revoked)
+        - Ontvangstdatum
+        - Datum ondertekening
+
+* [#274] Now allow option to upload document by Documents API url. This will make sure to automatically download
+  and upload the document to our components.
+* [#270] Added RSIN to organisations, this field can be filled in by the users themselves.
+
+* Now also delete documents from the configured Documents API when they are deleted in the GPP-publicatiebank
+* Removed document handelingen fields from the admin and api.
+
 1.2.0-rc.0 (2025-05-29)
 =======================
 

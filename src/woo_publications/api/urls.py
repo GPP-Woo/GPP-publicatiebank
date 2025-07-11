@@ -30,7 +30,7 @@ router.register("onderwerpen", TopicViewSet)
 urlpatterns = [
     path("docs/", RedirectView.as_view(pattern_name="api:api-docs")),
     path(
-        "v1/",
+        "v2/",
         include(
             [
                 path(
@@ -46,5 +46,7 @@ urlpatterns = [
             ]
         ),
     ),
+    # TODO remove in future release
     path("v1/", include(router.urls)),
+    path("v2/", include(router.urls)),
 ]
