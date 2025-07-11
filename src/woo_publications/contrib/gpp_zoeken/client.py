@@ -4,8 +4,7 @@ Client implementation for GPP-Zoeken.
 
 from __future__ import annotations
 
-import logging
-
+import structlog
 from zgw_consumers.client import build_client
 from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
@@ -33,7 +32,7 @@ from .typing import (
 
 __all__ = ["get_client"]
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 def get_client(service: Service) -> GPPSearchClient:

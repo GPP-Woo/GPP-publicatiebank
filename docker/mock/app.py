@@ -2,7 +2,7 @@
 Minimal Flask app to mock some API endpoints.
 """
 
-import logging
+import logging  # noqa: TID251
 
 from flask import Flask
 

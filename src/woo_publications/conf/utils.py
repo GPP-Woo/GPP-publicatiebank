@@ -1,9 +1,5 @@
-import logging
-
 from decouple import Csv, Undefined, undefined
 from open_api_framework.conf.utils import config as _config
-
-logger = logging.getLogger(__name__)
 
 
 def config[T](option: str, default: T | Undefined = undefined, *args, **kwargs) -> T:

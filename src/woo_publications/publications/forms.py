@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from functools import partial
 from typing import Literal
@@ -10,6 +9,8 @@ from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
+import structlog
+
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.typing import is_authenticated_request
 
@@ -17,7 +18,7 @@ from .constants import PublicationStatusOptions
 from .models import Document, Publication
 from .tasks import index_document, index_publication
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class ChangeOwnerForm(forms.Form):
@@ -145,12 +146,10 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                 )
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": self.initial_publication_status,
-                        "target_status": new_publication_status,
-                        "model": Publication._meta.model_name,
-                        "pk": self.instance.pk,
-                    },
+                    source_status=self.initial_publication_status,
+                    target_status=new_publication_status,
+                    model=Publication._meta.model_name,
+                    pk=self.instance.pk,
                 )
                 if "informatie_categorieen" in self.changed_data:
                     apply_retention_policy = True
@@ -238,12 +237,10 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
                 )
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": self.initial_publication_status,
-                        "target_status": new_publication_status,
-                        "model": Document._meta.model_name,
-                        "pk": self.instance.pk,
-                    },
+                    source_status=self.initial_publication_status,
+                    target_status=new_publication_status,
+                    model=Document._meta.model_name,
+                    pk=self.instance.pk,
                 )
 
         document = super().save(commit=commit)

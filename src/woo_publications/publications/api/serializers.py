@@ -1,4 +1,3 @@
-import logging
 from functools import partial
 from typing import Literal, TypedDict
 
@@ -7,6 +6,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+import structlog
 from django_fsm import FSMField
 from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
@@ -36,7 +36,7 @@ from ..typing import Kenmerk
 from .utils import _get_fsm_help_text
 from .validators import PublicationStatusValidator, SourceDocumentURLValidator
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class OwnerData(TypedDict):
@@ -441,12 +441,10 @@ class DocumentUpdateSerializer(DocumentSerializer):
 
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": current_publication_status,
-                        "target_status": new_publication_status,
-                        "model": instance._meta.model_name,
-                        "pk": instance.pk,
-                    },
+                    source_status=current_publication_status,
+                    target_status=new_publication_status,
+                    model=instance._meta.model_name,
+                    pk=instance.pk,
                 )
 
         document = super().update(instance, validated_data)
@@ -491,7 +489,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "the publication."
         ),
         many=True,
+        required=True,
         allow_empty=False,
+        allow_null=True,
     )
     di_woo_informatie_categorieen = serializers.ListField(
         child=serializers.UUIDField(),
@@ -510,6 +510,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         allow_empty=True,
         required=False,
+        allow_null=True,
     )
     publisher = serializers.SlugRelatedField(
         queryset=Organisation.objects.filter(is_actief=True),
@@ -556,6 +557,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         source="publicationidentifier_set",
         required=False,
+        allow_null=True,
     )
 
     class Meta:  # pyright: ignore
@@ -597,9 +599,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
             "laatst_gewijzigd_datum": {
                 "read_only": True,
-            },
-            "informatie_categorieen": {
-                "required": True,
             },
             "publicatiestatus": {
                 "help_text": _(
@@ -700,6 +699,17 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         return fields
 
     def to_internal_value(self, data):
+        # XXX: REMOVE THIS AGAIN - temporary workaround for GPP-app bug
+        for field in (
+            "bron_bewaartermijn",
+            "selectiecategorie",
+            "archiefnominatie",
+            "toelichting_bewaartermijn",
+        ):
+            if field in data and data[field] is None:
+                data[field] = ""
+        # END WORKAROUND
+
         publicatiestatus = data.get("publicatiestatus")
         # When publicatiestatus isn't given ensure that the default value is used
         # unless it is a partial update, in that case use the instance.
@@ -788,12 +798,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 )
                 logger.debug(
                     "state_transition_skipped",
-                    extra={
-                        "source_status": current_publication_status,
-                        "target_status": new_publication_status,
-                        "model": instance._meta.model_name,
-                        "pk": instance.pk,
-                    },
+                    source_status=current_publication_status,
+                    target_status=new_publication_status,
+                    model=instance._meta.model_name,
+                    pk=instance.pk,
                 )
                 # determine if attention_policy should be applied or not.
                 if informatie_categorieen := validated_data.get(

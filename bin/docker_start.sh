@@ -15,6 +15,10 @@ uwsgi_threads=${UWSGI_THREADS:-1}
 
 mountpoint=${SUBPATH:-/}
 
+# Figure out abspath of this script
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+
 until pg_isready; do
   >&2 echo "Waiting for database connection..."
   sleep 1
@@ -60,6 +64,7 @@ fi
 # Start server
 >&2 echo "Starting server"
 exec uwsgi \
+    --ini "${SCRIPTPATH}/uwsgi.ini" \
     --http :$uwsgi_port \
     --http-keepalive \
     --http-timeout=1800 \
