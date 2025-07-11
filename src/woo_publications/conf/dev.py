@@ -22,6 +22,7 @@ os.environ.setdefault("DISABLE_2FA", "yes")
 os.environ.setdefault("ENVIRONMENT", "development")
 os.environ.setdefault("LOG_REQUESTS", "no")
 os.environ.setdefault("LOG_STDOUT", "1")
+os.environ.setdefault("LOG_FORMAT_CONSOLE", "plain_console")
 os.environ.setdefault("VCR_RECORD_MODE", "once")
 
 from .base import *  # noqa isort:skip
@@ -45,7 +46,7 @@ LOGGING["loggers"].update(
             "propagate": True,
         },
         "django.db.backends": {
-            "handlers": ["django"],
+            "handlers": ["json_file"],
             "level": "INFO",
             "propagate": False,
         },
@@ -54,7 +55,7 @@ LOGGING["loggers"].update(
         # Autoreload logs excessively, turn it down a bit.
         #
         "django.utils.autoreload": {
-            "handlers": ["django"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },

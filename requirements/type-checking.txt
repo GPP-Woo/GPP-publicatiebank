@@ -24,6 +24,7 @@ asgiref==3.8.1
     #   django
     #   django-axes
     #   django-cors-headers
+    #   django-structlog
     #   django-stubs
 asn1crypto==1.5.1
     # via
@@ -181,6 +182,7 @@ django==5.2.3
     #   django-setup-configuration
     #   django-simple-certmanager
     #   django-solo
+    #   django-structlog
     #   django-stubs
     #   django-stubs-ext
     #   django-timeline-logger
@@ -259,6 +261,7 @@ django-ipware==7.0.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   django-structlog
 django-jsonform==2.23.1
     # via
     #   -c requirements/ci.txt
@@ -343,6 +346,10 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-structlog==9.1.1
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 django-stubs==5.0.4
     # via
     #   -r requirements/type-checking.in
@@ -856,6 +863,11 @@ sqlparse==0.5.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django
+structlog==25.4.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+    #   django-structlog
 tblib==3.0.0
     # via
     #   -c requirements/ci.txt
