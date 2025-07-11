@@ -11,8 +11,9 @@ Initiator
 Financiers
 -----------
 
-Brought together by Dimpact, the following nine municipalities contributed knowledge and financial means:
+Brought together by Dimpact, the following ten municipalities contributed knowledge and financial means:
 
+* 's-Hertogenbosch
 * Enschede
 * Groningen
 * Haarlemmermeer
