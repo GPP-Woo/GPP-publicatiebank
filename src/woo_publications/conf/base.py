@@ -348,7 +348,7 @@ REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = (
 REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
     "woo_publications.api.authorization.TokenAuthentication",
 )
-REST_FRAMEWORK["EXCEPTION_HANDLER"] = "rest_framework.views.exception_handler"
+REST_FRAMEWORK["EXCEPTION_HANDLER"] = "woo_publications.api.views.exception_handler"
 
 API_VERSION = "1.1.0"
 
