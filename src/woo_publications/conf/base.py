@@ -3,9 +3,12 @@ from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
 import django_stubs_ext
+import structlog
 from open_api_framework.conf.base import *  # noqa
 from upgrade_check import UpgradeCheck, VersionRange
 from vng_api_common.conf.api import BASE_REST_FRAMEWORK
+
+from woo_publications.logging.processors import drop_user_agent_in_dev
 
 from .utils import config
 
@@ -52,6 +55,158 @@ MIDDLEWARE = MIDDLEWARE + [
 MIDDLEWARE.remove("corsheaders.middleware.CorsMiddleware")
 MIDDLEWARE.remove("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
+#
+# LOGGING
+#
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+    "django_structlog.middlewares.RequestMiddleware",
+)
+
+# Override/fix the default -> TODO: check if there's an open-api-framework update
+# available
+LOG_LEVEL = config(
+    "LOG_LEVEL",
+    default="INFO",
+    help_text=(
+        "Control the verbosity of logging output. "
+        "Available values are ``CRITICAL``, ``ERROR``, ``WARNING``, ``INFO`` "
+        "and ``DEBUG``."
+    ),
+)
+# TODO - open-api-framework reads the LOG_REQUEST envvar (!)
+LOG_OUTGOING_REQUESTS = LOG_REQUESTS
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        # structlog - foreign_pre_chain handles logs coming from stdlib logging module,
+        # while the `structlog.configure` call handles everything coming from structlog.
+        # They are mutually exclusive.
+        "json": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+            "foreign_pre_chain": [
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.stdlib.add_logger_name,
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.ExtraAdder(),
+                drop_user_agent_in_dev,
+                structlog.stdlib.PositionalArgumentsFormatter(),
+            ],
+        },
+        "plain_console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
+            "foreign_pre_chain": [
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.stdlib.add_logger_name,
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.ExtraAdder(),
+                drop_user_agent_in_dev,
+                structlog.stdlib.PositionalArgumentsFormatter(),
+            ],
+        },
+        # legacy
+        "outgoing_requests": {"()": HttpFormatter},
+    },
+    "filters": {},
+    "handlers": {
+        "null": {  # used by the ``mute_logging`` util
+            "level": "DEBUG",
+            "class": "logging.NullHandler",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": config("LOG_FORMAT_CONSOLE", default="json"),
+        },
+        # replaces the "django" and "project" handlers - in containerized applications
+        # the best practices is to log to stdout (use the console handler).
+        "json_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGGING_DIR / "application.jsonl",
+            "formatter": "json",
+            "maxBytes": 1024 * 1024 * 10,  # 10 MB
+            "backupCount": 10,
+        },
+        "log_outgoing_requests": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            # TODO: use nicer formatter, OIP has something?
+            "formatter": "outgoing_requests",
+        },
+        "save_outgoing_requests": {
+            "level": "DEBUG",
+            "class": "log_outgoing_requests.handlers.DatabaseOutgoingRequestsHandler",
+        },
+    },
+    "loggers": {
+        "woo_publications": {
+            "handlers": ["json_file"] if not LOG_STDOUT else ["console"],
+            "level": LOG_LEVEL,
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["json_file"] if not LOG_STDOUT else ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        # suppress django.server request logs because those are already emitted by
+        # django-structlog middleware
+        "django.server": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.template": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "mozilla_django_oidc": {
+            "handlers": ["json_file"] if not LOG_STDOUT else ["console"],
+            "level": LOG_LEVEL,
+        },
+        "log_outgoing_requests": {
+            "handlers": (
+                ["log_outgoing_requests", "save_outgoing_requests"]
+                if LOG_OUTGOING_REQUESTS
+                else []
+            ),
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django_structlog": {
+            "handlers": ["json_file"] if not LOG_STDOUT else ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+    },
+}
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.filter_by_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        drop_user_agent_in_dev,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        # structlog.processors.ExceptionPrettyPrinter(),
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
 
 #
 # SECURITY settings
@@ -332,3 +487,9 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 UPGRADE_CHECK_PATHS = {
     "1.2.0": UpgradeCheck(VersionRange(minimum="1.0.0")),
 }
+
+#
+# DJANGO-STRUCTLOG
+#
+DJANGO_STRUCTLOG_IP_LOGGING_ENABLED = False
+DJANGO_STRUCTLOG_CELERY_ENABLED = True
