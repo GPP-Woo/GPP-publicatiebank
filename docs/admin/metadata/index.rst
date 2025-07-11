@@ -5,9 +5,9 @@ Metadata
 
 Onder het menu-item "Metadata" en op het dashboard onder het kopje "Metadata" wordt toegang geboden tot het beheer van:
 
-* :ref:`_admin_metadata_index_information_categories`
-* :ref:`_admin_metadata_index_organisations`
-* :ref:`_admin_metadata_index_themes`
+* :ref:`admin_metadata_index_information_categories`
+* :ref:`admin_metadata_index_organisations`
+* :ref:`admin_metadata_index_themes`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
