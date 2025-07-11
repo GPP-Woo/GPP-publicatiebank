@@ -66,7 +66,11 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
 
 WORKDIR /app
 COPY ./bin/docker_start.sh /start.sh
-COPY ./bin/celery_worker.sh ./bin/celery_beat.sh ./bin/celery_flower.sh /
+COPY ./bin/celery_worker.sh \
+    ./bin/celery_beat.sh \
+    ./bin/celery_flower.sh \
+    ./bin/uwsgi.ini \
+    /
 RUN mkdir /app/bin /app/log /app/media
 
 VOLUME ["/app/log", "/app/media"]

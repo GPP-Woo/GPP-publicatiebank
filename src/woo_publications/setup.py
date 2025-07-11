@@ -16,6 +16,7 @@ from pathlib import Path
 
 from django.conf import settings
 
+import structlog
 from dotenv import load_dotenv
 from requests import Session
 
@@ -29,6 +30,7 @@ def setup_env():
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "woo_publications.conf.dev")
 
+    structlog.contextvars.bind_contextvars(source="app")
     monkeypatch_requests()
 
 
