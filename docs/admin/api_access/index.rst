@@ -8,6 +8,8 @@ beheer je "Applicatie-API-Keys".
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
+.. _admin_api_access_index_apikeys:
+
 Applicatie-API-Keys
 -------------------
 
