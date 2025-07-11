@@ -177,7 +177,7 @@ Als een organisatie gedeactiveerd is, dan kunnen er geen nieuwe publicaties aan 
 worden. Als je een organisatie deactiveert waaraan al bestaande publicaties hangen, dan
 heeft dit geen invloed op de bestaande publicaties.
 
-.._admin_metadata_index_themes:
+.. _admin_metadata_index_themes:
 
 Thema's
 -------
