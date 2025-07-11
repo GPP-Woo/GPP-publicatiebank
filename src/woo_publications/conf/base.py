@@ -197,6 +197,11 @@ REST_FRAMEWORK["EXCEPTION_HANDLER"] = "rest_framework.views.exception_handler"
 
 API_VERSION = "2.0.0"
 
+EXCLUDED_API_PATH_PREFIXES = ("/api/v1",)
+assert isinstance(EXCLUDED_API_PATH_PREFIXES, str | tuple), (
+    "`EXCLUDED_API_PATH_PREFIXES` must be a string or a tuple."
+)
+
 SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v2",
     "TITLE": "WOO Publications",
@@ -270,6 +275,9 @@ purposes:
         "drf_spectacular.hooks.postprocess_schema_enums",
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
         "maykin_common.drf_spectacular.hooks.remove_invalid_url_defaults",
+    ],
+    "PREPROCESSING_HOOKS": [
+        "woo_publications.api.drf_spectacular.hooks.remove_excluded_api_paths",
     ],
     "SERVE_INCLUDE_SCHEMA": False,
     "CAMELIZE_NAMES": True,
