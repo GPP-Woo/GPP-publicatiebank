@@ -13,16 +13,16 @@ Financiers
 
 Brought together by Dimpact, the following ten municipalities contributed knowledge and financial means:
 
-* 's-Hertogenbosch
-* Enschede
-* Groningen
-* Haarlemmermeer
-* Kampen
-* Losser
-* Rotterdam
-* Sittard-Geleen
-* Waterland
-* Zaanstad
+* `'s-Hertogenbosch <https://www.s-hertogenbosch.nl/>`__
+* `Enschede <https://www.enschede.nl/>`__
+* `Groningen <https://gemeente.groningen.nl/>`__
+* `Haarlemmermeer <https://haarlemmermeer.nl/>`__
+* `Kampen <https://www.kampen.nl/>`__
+* `Losser <https://www.losser.nl/>`__
+* `Rotterdam <https://www.rotterdam.nl/>`__
+* `Sittard-Geleen <https://sittard-geleen.nl/>`__
+* `Waterland <https://www.waterland.nl/>`__
+* `Zaanstad <https://www.zaanstad.nl/>`__
 
 Development
 -----------
