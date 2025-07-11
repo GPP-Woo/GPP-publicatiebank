@@ -491,7 +491,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "the publication."
         ),
         many=True,
+        required=True,
         allow_empty=False,
+        allow_null=True,
     )
     di_woo_informatie_categorieen = serializers.ListField(
         child=serializers.UUIDField(),
@@ -510,6 +512,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         allow_empty=True,
         required=False,
+        allow_null=True,
     )
     publisher = serializers.SlugRelatedField(
         queryset=Organisation.objects.filter(is_actief=True),
@@ -556,6 +559,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         source="publicationidentifier_set",
         required=False,
+        allow_null=True,
     )
 
     class Meta:  # pyright: ignore
@@ -597,9 +601,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
             "laatst_gewijzigd_datum": {
                 "read_only": True,
-            },
-            "informatie_categorieen": {
-                "required": True,
             },
             "publicatiestatus": {
                 "help_text": _(
