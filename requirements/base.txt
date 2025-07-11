@@ -12,6 +12,7 @@ asgiref==3.8.1
     #   django
     #   django-axes
     #   django-cors-headers
+    #   django-structlog
 asn1crypto==1.5.1
     # via webauthn
 attrs==24.2.0
@@ -99,6 +100,7 @@ django==5.2.3
     #   django-setup-configuration
     #   django-simple-certmanager
     #   django-solo
+    #   django-structlog
     #   django-stubs-ext
     #   django-timeline-logger
     #   django-treebeard
@@ -149,7 +151,9 @@ django-fsm-2==4.0.0
 django-hijack==3.6.0
     # via -r requirements/base.in
 django-ipware==7.0.1
-    # via django-axes
+    # via
+    #   django-axes
+    #   django-structlog
 django-jsonform==2.23.1
     # via
     #   mozilla-django-oidc-db
@@ -190,6 +194,8 @@ django-solo==2.3.0
     #   mozilla-django-oidc-db
     #   notifications-api-common
     #   zgw-consumers
+django-structlog==9.1.1
+    # via -r requirements/base.in
 django-stubs-ext==5.2.0
     # via -r requirements/base.in
 django-timeline-logger==5.0.0
@@ -379,6 +385,10 @@ smartypants==2.0.1
     # via django-markup
 sqlparse==0.5.1
     # via django
+structlog==25.4.0
+    # via
+    #   -r requirements/base.in
+    #   django-structlog
 textile==4.0.2
     # via django-markup
 tornado==6.5

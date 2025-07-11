@@ -2,6 +2,7 @@
 celery
 furl
 Pillow
+structlog
 
 # Django packages
 django~=5.2
@@ -11,6 +12,7 @@ django-fsm-2
 django-hijack
 django-rosetta
 django-solo
+django-structlog
 django-stubs-ext
 django-timeline-logger
 django-treebeard
