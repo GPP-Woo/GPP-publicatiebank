@@ -5,9 +5,9 @@ Metadata
 
 Onder het menu-item "Metadata" en op het dashboard onder het kopje "Metadata" wordt toegang geboden tot het beheer van:
 
-* Informatiecategorieën
-* Organisaties
-* Thema's
+* :ref:`admin_metadata_index_information_categories`
+* :ref:`admin_metadata_index_organisations`
+* :ref:`admin_metadata_index_themes`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -31,20 +31,23 @@ De 17 *informatiecategorieën* zijn opgenomen in de landelijke waardelijst `Woo 
 
 In het publicatiebank-component leggen we de *informatiecategorieën* vast op de *publicatie* (in ontwikkeling). Dezelfde *informatiecategorieën* gelden voor de daaraan gekoppelde *documenten*.
 
+.. warning:: Let op! Bij gebruik van het GPP-burgerportaal zullen zelf-toegevoegde informatiecategorieën op de landelijke `Woo-index`_ getoond worden als de informatiecategorie "inspanningsverplichting art 3.1 Woo". De landelijke Woo-index ondersteunt immers alleen de landelijke waardelijst.
+
 Beheerscherm
 ~~~~~~~~~~~~
 
 In het beheerscherm van de *informatiecategorieën* wordt een lijst getoond van alle *informatiecategorieën* die zijn opgeslagen in het publicatiebank-component.
 
-Standaard staan de landelijke 17 verplichte *informatiecategorieën* hier al in. Zij zijn te herkennen aan de waarde "Waardelijst" in de kolom `Oorsprong` van de lijst. Zij kunnen niet gewijzigd worden.
-Daarnaast bestaat er de mogelijkheid om voor de eigen organisatie *extra informatiecategorieën* toe te voegen. Deze zijn te herkennen aan de waarde "Zelf-toegevoegd item" in de kolom `Oorsprong` van de lijst. Deze kunnen indien nodig gewijzigd worden.
+Standaard staan de landelijke 17 verplichte *informatiecategorieën* hier al in. Zij zijn te herkennen aan de waarde "Waardelijst" in de kolom `Oorsprong` van de lijst.
+Daarnaast bestaat er de mogelijkheid om voor de eigen organisatie *extra informatiecategorieën* toe te voegen. Deze zijn te herkennen aan de waarde "Zelf-toegevoegd item" in de kolom `Oorsprong` van de lijst.
 
 Op het beheerscherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **informatiecategorie toevoegen** waarmee een *informatiecategorie* toegevoegd kan worden.
+* Rechtboven zit een knop **toon API-resource-URLS** waarmee de lijst *informatiecategorieën* met resource-URI's wordt getoond. (technisch)
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee naar *informatiecategorieën* gezocht kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere informatiecategorieën**. Op dit moment wordt alleen de actie **Geselecteerde informatiecategorieën verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *informatiecategorieën* aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong**.
 * Bij een *informatiecategorie* kan op de `naam` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
 * Bij een *informatiecategorie* kan op **Toon logs** (op één na rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
@@ -55,22 +58,22 @@ Hierop zien we:
 * **Alle gegevens**. Deze lichten we hieronder toe.
 * Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *informatiecategorie*.
 * Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de beheerinterface zijn uitgevoerd op de *informatiecategorie*.
-* Als de *informatiecategorie* tot de landelijke lijst behoort, linksonder een knop om het scherm te **sluiten** en terug te keren naar de lijst.
-* Als de *informatiecategorie* door de organisatie zelf is toegevoegd, linksonder de mogelijkheid om **wijzigingen op te slaan** (indien van toepassing). Er kan voor gekozen worden om na het opslaan direct een nieuwe *informatiecategorie* aan te maken of om direct de huidige *informatiecategorie* nogmaals te wijzigen.
-* Rechtsonder de mogelijkheid om de *informatiecategorie* te **verwijderen**.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe *informatiecategorie* aan te maken of om direct de huidige *informatiecategorie* nogmaals te wijzigen.
+* Rechtsonder de mogelijkheid om de *informatiecategorie* te **verwijderen**. Let op, dit wordt ten zeerste afgeraden voor informatiecategorieën uit de landelijke waardelijst!
 
 Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
 **Algemene velden**
 
-* ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant".
-* ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten".
+* ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant". Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
+* ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten". Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
+* ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*. Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
 * ``Omschrijving``. De beknopte toelichting die aan medewerkers en burgers getoond wordt.
-* ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*.
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding van op welke wijze de *informatiecategorie* is toegevoegd; via de landelijke waardelijst of zelf toegevoegd.
+* ``Identificatie``. De unieke IRI waarmee deze categorie gedefinieerd is in de landelijke waardelijst. Voor zelf-toegevoegde items wordt een identificatie gegenereerd.
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 
-**Bewaartermijn**
+**Archivering**
 
 * ``Bron bewaartermijn``. De naam van de bron van de bewaartermijn. Doorgaans zal dit een selectielijst c.q. selectiebesluit zijn, welke conform de vigerende Archiefwet is vastgesteld.
 * ``Selectiecategorie``. De specifieke categorie binnen de bron van de bewaartermijn.
@@ -79,6 +82,8 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 * ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
 
 .. Tip:: Wanneer de ``Archiefnominatie`` permanent te bewaren is, dan dient de ``Bewaartermijn`` 10 of 20 jaar te zijn, conform de **vigerende** Archiefwet.
+
+.. _admin_metadata_index_organisations:
 
 Organisaties
 ------------
@@ -96,7 +101,7 @@ Of denk aan *shared service centres* die de ICT-diensten leveren voor meerdere g
 Het namens verschillende organisaties publiceren binnen één publicatieplatform wordt in
 het “Woo Publicaties”-component ondersteund. In de admin-interface kan, zoals hieronder
 wordt uitgelegd, een beheerder configureren namens welke organisaties gepubliceerd mag
-worden. De organisatie wordt op iedere :ref: `publicatie<admin_publicaties_index>`
+worden. De organisatie wordt op iedere :ref:`publicatie <admin_publicaties_index>`
 vastgelegd, zodat ook voor de burger inzichtelijk is van welke organisatie een
 publicatie is. Ook zijn deze gegevens relevant om (op termijn) te toetsen in hoeverre
 iedere organisatie voldoet aan de wettelijke openbaarmakingsplicht.
@@ -138,8 +143,8 @@ Op het beheerscherm zijn de volgende acties mogelijk:
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere organisaties**.
   Op dit moment wordt alleen de actie **Geselecteerde organisaties verwijderen** ondersteund.
   Merk op dat het mogelijk is om in de lijst één of meerdere *organisaties* aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *organisaties*. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
-* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong en/ofof status**.
+* Onder de (bulk-)actie staat de lijst met *organisaties*. Door op de kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
+* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong en/of status**.
 * Bij een *organisatie* kan op de *naam* geklikt worden om **de details in te zien** en deze eventueel **te wijzigen** en/of (de)activeren.
 * Bij een *organisatie* kan op **Toon logs** (op één na rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
 
@@ -165,13 +170,14 @@ Op een organisatie zijn de volgende gegevens beschikbaar. Op het scherm worden v
 Activeren/deactiveren van organisaties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Bij een nieuwe installatie zijn standaard alle organisaties gedeactiveerd. Een beheerder
+dient de gewenste organisaties te activeren om ze in gebruik te nemen.
+
 Als een organisatie gedeactiveerd is, dan kunnen er geen nieuwe publicaties aan gekoppeld
 worden. Als je een organisatie deactiveert waaraan al bestaande publicaties hangen, dan
 heeft dit geen invloed op de bestaande publicaties.
 
-Bij een nieuwe installatie zijn standaard alle organisaties gedeactiveerd. Een beheerder
-dient de gewenste organisaties te activeren om ze in gebruik te nemen.
-
+.. _admin_metadata_index_themes:
 
 Thema's
 -------
