@@ -701,6 +701,17 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         return fields
 
     def to_internal_value(self, data):
+        # XXX: REMOVE THIS AGAIN - temporary workaround for GPP-app bug
+        for field in (
+            "bron_bewaartermijn",
+            "selectiecategorie",
+            "archiefnominatie",
+            "toelichting_bewaartermijn",
+        ):
+            if field in data and data[field] is None:
+                data[field] = ""
+        # END WORKAROUND
+
         publicatiestatus = data.get("publicatiestatus")
         # When publicatiestatus isn't given ensure that the default value is used
         # unless it is a partial update, in that case use the instance.
