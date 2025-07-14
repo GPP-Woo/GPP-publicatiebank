@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from functools import partial
 from typing import Literal, TypedDict
 
@@ -55,7 +56,7 @@ def update_or_create_organisation_member(
     return OrganisationMember.objects.get_and_sync(**details)
 
 
-def _duplicate_nested_serializer_items(value):
+def _has_duplicate_nested_serializer_items(value):
     # transforms the nested dicts into a set and checks if the length is the same as
     # the original passed data. If the length is different that means that there were
     # duplicated items present because sets can't contain duplicate items.
@@ -239,7 +240,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
 
     def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
-        if value and _duplicate_nested_serializer_items(value):
+        if value and _has_duplicate_nested_serializer_items(value):
             raise serializers.ValidationError(
                 _("You cannot provide identical identifiers.")
             )
@@ -471,15 +472,28 @@ class PublicationIdentifierSerializer(
 
 
 class PublicationSerializer(serializers.ModelSerializer[Publication]):
-    eigenaar = EigenaarSerializer(
-        label=_("owner"),
+    """
+    Base serializer for publication read and write operations.
+
+    This base class defines the shared logic that should be kept in sync between read
+    and write operations for consistent API documentation (and behaviour).
+    """
+
+    url_publicatie_intern = serializers.SerializerMethodField(
+        label=_("internal publication url"),
         help_text=_(
-            "The creator of the document, derived from the audit headers.\n"
-            "Disclaimer**: If you use this field during creation/updating actions the "
-            "owner data will differ from the audit headers provided during creation."
+            "URL to the UI of the internal application where the publication life "
+            "cycle is managed. Requires the global configuration parameter to be set, "
+            "otherwise an empty string is returned."
         ),
-        allow_null=True,
-        required=False,
+    )
+    url_publicatie_extern = serializers.SerializerMethodField(
+        label=_("external publication url"),
+        help_text=_(
+            "URL to the UI of the external application where the publication life "
+            "cycle is managed. Requires the global configuration parameter to be set, "
+            "otherwise an empty string is returned."
+        ),
     )
     informatie_categorieen = serializers.SlugRelatedField(
         queryset=InformationCategory.objects.all(),
@@ -534,26 +548,20 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         allow_null=True,
         required=False,
     )
-    url_publicatie_intern = serializers.SerializerMethodField(
-        label=_("internal publication url"),
-        help_text=_(
-            "URL to the UI of the internal application where the publication life "
-            "cycle is managed. Requires the global configuration parameter to be set, "
-            "otherwise an empty string is returned."
-        ),
-    )
-    url_publicatie_extern = serializers.SerializerMethodField(
-        label=_("external publication url"),
-        help_text=_(
-            "URL to the UI of the external application where the publication life "
-            "cycle is managed. Requires the global configuration parameter to be set, "
-            "otherwise an empty string is returned."
-        ),
-    )
     kenmerken = PublicationIdentifierSerializer(
         help_text=_("The publication identifiers attached to this publication."),
         many=True,
         source="publicationidentifier_set",
+        required=False,
+    )
+    eigenaar = EigenaarSerializer(
+        label=_("owner"),
+        help_text=_(
+            "The creator of the document, derived from the audit headers.\n"
+            "Disclaimer**: If you use this field during creation/updating actions the "
+            "owner data will differ from the audit headers provided during creation."
+        ),
+        allow_null=True,
         required=False,
     )
 
@@ -588,15 +596,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "toelichting_bewaartermijn",
         )
         extra_kwargs = {
-            "uuid": {
-                "read_only": True,
-            },
-            "registratiedatum": {
-                "read_only": True,
-            },
-            "laatst_gewijzigd_datum": {
-                "read_only": True,
-            },
+            "uuid": {"read_only": True},
+            "registratiedatum": {"read_only": True},
+            "laatst_gewijzigd_datum": {"read_only": True},
             "publicatiestatus": {
                 "help_text": _(
                     "\n**Disclaimer**: you can't create a {revoked} publication."
@@ -657,15 +659,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             },
         }
 
-    def validate_kenmerken(self, value: list[Kenmerk]):
-        # Assert that there weren't any duplicated items given by the user.
-        if value and _duplicate_nested_serializer_items(value):
-            raise serializers.ValidationError(
-                _("You cannot provide identical identifiers.")
-            )
-
-        return value
-
     def get_fields(self):
         fields = super().get_fields()
         # When the given status (with fall back on the set data) is concept
@@ -719,6 +712,51 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
         return super().to_internal_value(data)
 
+    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
+    def get_url_publicatie_intern(self, obj: Publication) -> str:
+        return obj.gpp_app_url
+
+    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
+    def get_url_publicatie_extern(self, obj: Publication) -> str:
+        return obj.gpp_burgerportaal_url
+
+
+class PublicationReadSerializer(PublicationSerializer):
+    """
+    Encapsulate the read behaviour for publication serialization.
+
+    For read operations, we're much closer to the database model and can provide
+    stronger guarantees about the returned data, leading to stricter schema/type
+    definitions.
+    """
+
+    class Meta(PublicationSerializer.Meta):
+        extra_kwargs = {
+            **PublicationSerializer.Meta.extra_kwargs,
+        }
+
+
+class PublicationWriteSerializer(PublicationSerializer):
+    """
+    Encapsulate the create/update validation logic and behaviour.
+
+    The publication serializer is split in read/write parts so that the output can be
+    properly documented in the API schema. Writes for concept publications are much
+    more relaxed that published publications.
+
+    .. todo:: test validation behaviour of an incomplete concept publication being
+    changed to published.
+    """
+
+    def validate_kenmerken(self, value: Sequence[Kenmerk]):
+        # Assert that there weren't any duplicated items given by the user.
+        if value and _has_duplicate_nested_serializer_items(value):
+            raise serializers.ValidationError(
+                _("You cannot provide identical identifiers.")
+            )
+
+        return value
+
     def validate(self, attrs):
         attrs = super().validate(attrs)
 
@@ -739,7 +777,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         return attrs
 
     @transaction.atomic
-    def update(self, instance, validated_data):
+    def update(self, instance: Publication, validated_data):
         apply_retention = False
         reindex_documents = False
 
@@ -878,14 +916,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         publication.save()
 
         return publication
-
-    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
-    def get_url_publicatie_intern(self, obj: Publication) -> str:
-        return obj.gpp_app_url
-
-    @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
-    def get_url_publicatie_extern(self, obj: Publication) -> str:
-        return obj.gpp_burgerportaal_url
 
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):

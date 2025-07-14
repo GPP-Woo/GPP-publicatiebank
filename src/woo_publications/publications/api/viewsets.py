@@ -43,7 +43,8 @@ from .serializers import (
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
     FilePartSerializer,
-    PublicationSerializer,
+    PublicationReadSerializer,
+    PublicationWriteSerializer,
     TopicSerializer,
 )
 
@@ -372,10 +373,18 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     queryset = Publication.objects.prefetch_related(
         "publicationidentifier_set"
     ).order_by("-registratiedatum")
-    serializer_class = PublicationSerializer
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
+
+    def get_serializer_class(
+        self,
+    ) -> type[PublicationReadSerializer] | type[PublicationWriteSerializer]:
+        match self.action:
+            case "create" | "update" | "partial_update":
+                return PublicationWriteSerializer
+            case _:
+                return PublicationReadSerializer
 
 
 @extend_schema(tags=["Onderwerpen"])
