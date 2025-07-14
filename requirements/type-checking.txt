@@ -152,7 +152,7 @@ cssselect==1.2.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   pyquery
-django==5.2.3
+django==5.2.4
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -354,7 +354,7 @@ django-stubs==5.0.4
     # via
     #   -r requirements/type-checking.in
     #   djangorestframework-stubs
-django-stubs-ext==5.2.0
+django-stubs-ext==5.2.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -574,7 +574,7 @@ maykin-2fa==1.0.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-maykin-common==0.5.0
+maykin-common==0.6.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -624,7 +624,7 @@ phonenumberslite==8.13.45
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django-two-factor-auth
-pillow==11.3.0
+pillow==11.2.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -744,7 +744,7 @@ regex==2024.9.11
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   textile
-requests==2.32.4
+requests==2.32.3
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -915,7 +915,7 @@ uritemplate==4.1.1
     #   -r requirements/ci.txt
     #   coreapi
     #   drf-spectacular
-urllib3==2.5.0
+urllib3==2.2.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -923,13 +923,12 @@ urllib3==2.5.0
     #   requests
     #   sentry-sdk
     #   types-requests
-    #   vcrpy
 uwsgi==2.0.26
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-vcrpy==7.0.0
+vcrpy==6.0.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
