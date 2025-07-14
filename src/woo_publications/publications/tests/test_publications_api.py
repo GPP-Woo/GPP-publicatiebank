@@ -2540,27 +2540,3 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "publisher": [_("This field may not be null.")],
             },
         )
-
-    def test_workaround_null_values(self):
-        # Temporary workaround to accept/transform null values sent by GPP-app until
-        # they patch that up on their end.
-        ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory.create(is_actief=True)
-        url = reverse("api:publication-list")
-        data = {
-            # required fields
-            "informatieCategorieen": [str(ic.uuid)],
-            "publisher": str(organisation.uuid),
-            "officieleTitel": "title one",
-            # optional fields
-            "publicatiestatus": PublicationStatusOptions.published,
-            "bronBewaartermijn": None,
-            "selectiecategorie": None,
-            "archiefnominatie": None,
-            "archiefactiedatum": None,
-            "toelichtingBewaartermijn": None,
-        }
-
-        response = self.client.post(url, data, headers=AUDIT_HEADERS)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())

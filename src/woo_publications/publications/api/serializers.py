@@ -491,7 +491,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         required=True,
         allow_empty=False,
-        allow_null=True,
     )
     di_woo_informatie_categorieen = serializers.ListField(
         child=serializers.UUIDField(),
@@ -510,7 +509,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         allow_empty=True,
         required=False,
-        allow_null=True,
     )
     publisher = serializers.SlugRelatedField(
         queryset=Organisation.objects.filter(is_actief=True),
@@ -557,7 +555,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         many=True,
         source="publicationidentifier_set",
         required=False,
-        allow_null=True,
     )
 
     class Meta:  # pyright: ignore
@@ -699,17 +696,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         return fields
 
     def to_internal_value(self, data):
-        # XXX: REMOVE THIS AGAIN - temporary workaround for GPP-app bug
-        for field in (
-            "bron_bewaartermijn",
-            "selectiecategorie",
-            "archiefnominatie",
-            "toelichting_bewaartermijn",
-        ):
-            if field in data and data[field] is None:
-                data[field] = ""
-        # END WORKAROUND
-
         publicatiestatus = data.get("publicatiestatus")
         # When publicatiestatus isn't given ensure that the default value is used
         # unless it is a partial update, in that case use the instance.

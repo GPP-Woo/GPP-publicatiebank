@@ -2397,8 +2397,7 @@ components:
           type: string
         omschrijving:
           type: string
-          description: De beknopte toelichting die aan medewerkers en burgers getoond
-            wordt.
+          description: The brief explanation shown to employees and citizens.
         oorsprong:
           allOf:
           - $ref: '#/components/schemas/InformationCategoryOorsprongEnum'
@@ -2803,7 +2802,6 @@ components:
           items:
             type: string
             format: uuid
-            nullable: true
           description: De informatiecategorie verduidelijkt de soort informatie die
             in de publicatie voorkomt.
         diWooInformatieCategorieen:
@@ -2818,7 +2816,6 @@ components:
           items:
             type: string
             format: uuid
-            nullable: true
           description: Onderwerpen gaan over maatschappelijk relevante informatie
             die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
             blijven en overstijgen de typische levensduur van een enkele publicatie.
@@ -2841,7 +2838,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicationIdentifier'
-          nullable: true
           description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
@@ -3007,7 +3003,6 @@ components:
           items:
             type: string
             format: uuid
-            nullable: true
           description: De informatiecategorie verduidelijkt de soort informatie die
             in de publicatie voorkomt.
         diWooInformatieCategorieen:
@@ -3022,7 +3017,6 @@ components:
           items:
             type: string
             format: uuid
-            nullable: true
           description: Onderwerpen gaan over maatschappelijk relevante informatie
             die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
             blijven en overstijgen de typische levensduur van een enkele publicatie.
@@ -3045,7 +3039,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicationIdentifier'
-          nullable: true
           description: The publication identifiers attached to this publication.
         officieleTitel:
           type: string
