@@ -2397,7 +2397,8 @@ components:
           type: string
         omschrijving:
           type: string
-          description: The brief explanation shown to employees and citizens.
+          description: De beknopte toelichting die aan medewerkers en burgers getoond
+            wordt.
         oorsprong:
           allOf:
           - $ref: '#/components/schemas/InformationCategoryOorsprongEnum'
