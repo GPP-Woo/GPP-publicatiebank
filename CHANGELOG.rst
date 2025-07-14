@@ -2,6 +2,60 @@
 Release notes
 =============
 
+1.2.0 (2025-07-14)
+==================
+
+Stable feature release - there are no changes compared to the release candidate.
+
+Upgrade procedure
+-----------------
+
+* ⚠️ PostgreSQL 13 is no longer supported due to our framework dropping support for it.
+  Upgrading to newer Postgres versions should be straight forward.
+
+* GPP-publicatiebank instances now need a persistent volume for the topic image uploads.
+  Our Helm charts have been updated, and more information is available in the Helm
+  installation documentation.
+
+Features
+--------
+
+* [#205, #206, #207, #209, #211, #237] Added "Topics" to group multiple publications together:
+
+    * Topics are used to bundle publications together that have social relevance.
+    * They support images and promotion on the citizen portal.
+    * Topics are also indexed in GPP-zoeken.
+
+* [#232] The large file uploads (in particular with multiple chunks) are now optimized
+  to consume much less memory.
+* [#235] The API now supports filtering on multiple publication statuses at the same time.
+* [#198, #199, #200, #201, #202, #203, #204] Added support for archive parameters and retention policies:
+
+    * The retention policy can be specified on information categories.
+    * The archive action date of publications is automatically calculated.
+    * You can manually override these parameters if needed.
+    * Relevant filters on API endpoints have been added.
+    * Added bulk actions in the admin to reassess the retention policy.
+
+* [#51] Added bulk revocation actions in the admin for publications and documents.
+* [#260] You can now reassign the owner of a publication/document (both via the API and
+  the admin interface).
+
+Bugfixes
+--------
+
+* Fixed misconfiguration of our docker compose file.
+* [#252] Fixed invalid format of some translations.
+
+Project maintenance
+-------------------
+
+* Updated the documentation.
+* Switched code quality tools to Ruff.
+* Simplified documentation test tools.
+* Added upgrade-check mechanism for "hard stops".
+* [#277] Upgraded framework version to next LTS release.
+
 1.2.0-rc.0 (2025-05-29)
 =======================
 
