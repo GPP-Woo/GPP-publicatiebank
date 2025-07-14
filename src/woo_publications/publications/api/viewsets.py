@@ -351,10 +351,12 @@ class DocumentViewSet(
             "When creating a publication as a concept the only required field is "
             "`officieleTitel`."
         ),
+        responses={status.HTTP_201_CREATED: PublicationReadSerializer},
     ),
     partial_update=extend_schema(
         summary=_("Update a publication partially."),
         description=_("Update a publication partially."),
+        responses={status.HTTP_200_OK: PublicationReadSerializer},
     ),
     update=extend_schema(
         summary=_("Update a publication entirely."),
@@ -363,6 +365,7 @@ class DocumentViewSet(
             "When updating a publication as a concept the only required field is "
             "`officieleTitel`."
         ),
+        responses={status.HTTP_200_OK: PublicationReadSerializer},
     ),
     destroy=extend_schema(
         summary=_("Destroy a publication."),

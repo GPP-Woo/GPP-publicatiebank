@@ -13,6 +13,7 @@ from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
 from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
@@ -611,52 +612,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 "default": PublicationStatusOptions.published,
                 "validators": [PublicationStatusValidator()],
             },
-            "bron_bewaartermijn": {
-                "help_text": _(
-                    "The source of the retention policy (example: Selectielijst "
-                    "gemeenten 2020)."
-                    "\n\n**Note** on create or when updating the information "
-                    "categories, manually provided values are ignored and overwritten "
-                    "by the automatically derived parameters from the related "
-                    "information categories."
-                )
-            },
-            "selectiecategorie": {
-                "help_text": _(
-                    "The category as specified in the provided retention policy source "
-                    "(example: 20.1.2)."
-                    "\n\n**Note** on create or when updating the information "
-                    "categories, manually provided values are ignored and overwritten "
-                    "by the automatically derived parameters from the related "
-                    "information categories."
-                )
-            },
-            "archiefnominatie": {
-                "help_text": _(
-                    "Determines if the archived data will be retained or destroyed."
-                    "\n\n**Note** on create or when updating the information "
-                    "categories, manually provided values are ignored and overwritten "
-                    "by the automatically derived parameters from the related "
-                    "information categories."
-                )
-            },
-            "archiefactiedatum": {
-                "help_text": _(
-                    "Date when the publication will be archived or destroyed."
-                    "\n\n**Note** on create or when updating the information "
-                    "categories, manually provided values are ignored and overwritten "
-                    "by the automatically derived parameters from the related "
-                    "information categories."
-                )
-            },
-            "toelichting_bewaartermijn": {
-                "help_text": _(
-                    "**Note** on create or when updating the information "
-                    "categories, manually provided values are ignored and overwritten "
-                    "by the automatically derived parameters from the related "
-                    "information categories."
-                )
-            },
         }
 
     def get_fields(self):
@@ -730,10 +685,25 @@ class PublicationReadSerializer(PublicationSerializer):
     definitions.
     """
 
-    class Meta(PublicationSerializer.Meta):
-        extra_kwargs = {
-            **PublicationSerializer.Meta.extra_kwargs,
-        }
+    def get_fields(self):
+        fields = super().get_fields()
+        for field in fields.values():
+            # for reach operations, we can guarantee that all the fields will be present
+            # in the response body (that does *not* mean they have a non-empty value!)
+            field.required = True
+
+        # pubisher field
+        publisher = fields["publisher"]
+        assert isinstance(publisher, SlugRelatedField)
+        publisher.allow_null = True
+        publisher.help_text += _(
+            " The publisher can be `null` if the publication is a concept."
+        )
+
+        # owner (explicitly set or via audit trails)
+        fields["eigenaar"].allow_null = False
+
+        return fields
 
 
 class PublicationWriteSerializer(PublicationSerializer):
@@ -747,6 +717,30 @@ class PublicationWriteSerializer(PublicationSerializer):
     .. todo:: test validation behaviour of an incomplete concept publication being
     changed to published.
     """
+
+    def get_fields(self):
+        fields = super().get_fields()
+
+        for _field_name in (
+            "bron_bewaartermijn",
+            "selectiecategorie",
+            "archiefnominatie",
+            "archiefactiedatum",
+            "toelichting_bewaartermijn",
+        ):
+            field = fields[_field_name]
+            extra_help = _(
+                "\n\n**Note** on create or when updating the information "
+                "categories, manually provided values are ignored and overwritten "
+                "by the automatically derived parameters from the related "
+                "information categories."
+            )
+            if not field.help_text:
+                extra_help = extra_help.strip()
+                field.help_text = ""  # normalize to str
+            field.help_text += extra_help
+
+        return fields
 
     def validate_kenmerken(self, value: Sequence[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
