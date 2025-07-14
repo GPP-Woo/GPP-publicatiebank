@@ -575,7 +575,7 @@ phonenumberslite==8.13.45
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   django-two-factor-auth
-pillow==11.2.1
+pillow==11.3.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -692,7 +692,7 @@ regex==2024.9.11
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   textile
-requests==2.32.3
+requests==2.32.4
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -816,19 +816,20 @@ uritemplate==4.1.1
     #   -r requirements/base.txt
     #   coreapi
     #   drf-spectacular
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   elastic-apm
     #   requests
     #   sentry-sdk
+    #   vcrpy
 uwsgi==2.0.26
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   open-api-framework
-vcrpy==6.0.1
+vcrpy==7.0.0
     # via -r requirements/test-tools.in
 vine==5.1.0
     # via

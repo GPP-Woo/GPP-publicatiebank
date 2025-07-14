@@ -302,7 +302,7 @@ oyaml==1.0
     # via commonground-api-common
 phonenumberslite==8.13.45
     # via django-two-factor-auth
-pillow==11.2.1
+pillow==11.3.0
     # via -r requirements/base.in
 polib==1.2.0
     # via django-rosetta
@@ -354,7 +354,7 @@ referencing==0.35.1
     #   jsonschema-specifications
 regex==2024.9.11
     # via textile
-requests==2.32.3
+requests==2.32.4
     # via
     #   ape-pie
     #   commonground-api-common
@@ -409,7 +409,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-spectacular
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   elastic-apm
     #   requests
