@@ -12,6 +12,7 @@ from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
+from rest_framework.fields import empty
 from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
@@ -659,6 +660,24 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 )
             },
         }
+        empty_field_values = {
+            "informatie_categorieen": [],
+            "onderwerpen": [],
+            "kenmerken": [],
+            "eigenaar": None,
+            "publisher": None,
+            "verantwoordelijke": None,
+            "opsteller": None,
+            "datum_begin_geldigheid": None,
+            "datum_einde_geldigheid": None,
+            "archiefactiedatum": None,
+            "selectiecategorie": "",
+            "bron_bewaartermijn": "",
+            "archiefnominatie": "",
+            "toelichting_bewaartermijn": "",
+            "verkorte_titel": "",
+            "omschrijving": "",
+        }
 
     def validate_kenmerken(self, value: list[Kenmerk]):
         # Assert that there weren't any duplicated items given by the user.
@@ -668,6 +687,24 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             )
 
         return value
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        super().__init__(instance, data, **kwargs)
+
+        fields = self.fields
+        # make sure that none read_only fields have empty_field_values mapping
+        # only exceptions are for fields which are not allowed empty for concept
+        # - publicatiestatus
+        # - officiele_titel
+
+        editable_fields = set(
+            field
+            for field in fields
+            if not fields[str(field)].read_only
+            and field not in ["publicatiestatus", "officiele_titel"]
+        )
+
+        assert editable_fields == set(self.Meta.empty_field_values.keys())
 
     def get_fields(self):
         fields = super().get_fields()
@@ -699,17 +736,6 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         return fields
 
     def to_internal_value(self, data):
-        # XXX: REMOVE THIS AGAIN - temporary workaround for GPP-app bug
-        for field in (
-            "bron_bewaartermijn",
-            "selectiecategorie",
-            "archiefnominatie",
-            "toelichting_bewaartermijn",
-        ):
-            if field in data and data[field] is None:
-                data[field] = ""
-        # END WORKAROUND
-
         publicatiestatus = data.get("publicatiestatus")
         # When publicatiestatus isn't given ensure that the default value is used
         # unless it is a partial update, in that case use the instance.
@@ -721,15 +747,15 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
                 publicatiestatus = self.fields["publicatiestatus"].default
 
         if publicatiestatus == PublicationStatusOptions.concept:
-            # Make sure to transform some field to the correct empty value.
-            if "informatie_categorieen" in data and not data["informatie_categorieen"]:
-                data["informatie_categorieen"] = []
-
-            if "onderwerpen" in data and not data["onderwerpen"]:
-                data["onderwerpen"] = []
-
-            if "kenmerken" in data and not data["kenmerken"]:
-                data["kenmerken"] = []
+            empty_field_values = self.Meta.empty_field_values
+            for field in data.keys():
+                if (
+                    field not in ["publicatiestatus", "officiele_titel"]
+                    and field in data
+                    and not data[field]
+                    and not self.fields[field].read_only
+                ):
+                    data[field] = empty_field_values[field]
 
         return super().to_internal_value(data)
 

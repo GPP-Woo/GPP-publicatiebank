@@ -2251,25 +2251,29 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
 
     def test_create_publication_fields_empty(self):
         url = reverse("api:publication-list")
-        with self.subTest("create concept publication doesn't raise errors"):
+        with self.subTest(
+            "create concept publication with empty string value doesn't raise errors"
+        ):
             data = {
                 # required:
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "title one",
                 # allowed empty:
-                "informatieCategorieen": [],
-                "onderwerpen": [],
+                "informatieCategorieen": "",
+                "onderwerpen": "",
                 "publisher": "",
                 "verantwoordelijke": "",
                 "opsteller": "",
-                "kenmerken": [],
+                "kenmerken": "",
                 "verkorteTitel": "",
                 "omschrijving": "",
-                "eigenaar": None,
+                "eigenaar": "",
+                "datumBeginGeldigheid": "",
+                "datumEindeGeldigheid": "",
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
-                "archiefactiedatum": None,
+                "archiefactiedatum": "",
                 "toelichtingBewaartermijn": "",
             }
 
@@ -2278,7 +2282,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest(
-            "create concept publication fully empty doesn't raise errors"
+            "create concept publication with none values doesn't raise errors"
         ):
             data = {
                 # required:
@@ -2287,113 +2291,161 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 # allowed empty:
                 "informatieCategorieen": None,
                 "onderwerpen": None,
-                "publisher": "",
-                "verantwoordelijke": "",
-                "opsteller": "",
+                "publisher": None,
+                "verantwoordelijke": None,
+                "opsteller": None,
                 "kenmerken": None,
-                "verkorteTitel": "",
-                "omschrijving": "",
+                "verkorteTitel": None,
+                "omschrijving": None,
                 "eigenaar": None,
-                "bronBewaartermijn": "",
-                "selectiecategorie": "",
-                "archiefnominatie": "",
+                "datumBeginGeldigheid": None,
+                "datumEindeGeldigheid": None,
+                "bronBewaartermijn": None,
+                "selectiecategorie": None,
+                "archiefnominatie": None,
                 "archiefactiedatum": None,
-                "toelichtingBewaartermijn": "",
+                "toelichtingBewaartermijn": None,
             }
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        with self.subTest("create published publication doesn't raise errors"):
+        with self.subTest(
+            "create published publication with empty list values doesn't raise errors"
+        ):
             data = {
                 # required:
-                "publicatiestatus": PublicationStatusOptions.published,
+                "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "title one",
                 # allowed empty:
                 "informatieCategorieen": [],
                 "onderwerpen": [],
-                "publisher": "",
-                "verantwoordelijke": "",
-                "opsteller": "",
+                "publisher": [],
+                "verantwoordelijke": [],
+                "opsteller": [],
                 "kenmerken": [],
-                "verkorteTitel": "",
-                "omschrijving": "",
-                "eigenaar": None,
-                "bronBewaartermijn": "",
-                "selectiecategorie": "",
-                "archiefnominatie": "",
-                "archiefactiedatum": None,
-                "toelichtingBewaartermijn": "",
+                "verkorteTitel": [],
+                "omschrijving": [],
+                "eigenaar": [],
+                "datumBeginGeldigheid": [],
+                "datumEindeGeldigheid": [],
+                "bronBewaartermijn": [],
+                "selectiecategorie": [],
+                "archiefnominatie": [],
+                "archiefactiedatum": [],
+                "toelichtingBewaartermijn": [],
             }
 
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
 
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            data = response.json()
-            self.assertEqual(
-                data["informatieCategorieen"], [_("This list may not be empty.")]
-            )
-            self.assertEqual(data["publisher"], [_("This field may not be null.")])
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        with self.subTest(
+            "create published publication with empty dict values doesn't raise errors"
+        ):
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "title one",
+                # allowed empty:
+                "informatieCategorieen": {},
+                "onderwerpen": {},
+                "publisher": {},
+                "verantwoordelijke": {},
+                "opsteller": {},
+                "kenmerken": {},
+                "verkorteTitel": {},
+                "omschrijving": {},
+                "eigenaar": {},
+                "datumBeginGeldigheid": {},
+                "datumEindeGeldigheid": {},
+                "bronBewaartermijn": {},
+                "selectiecategorie": {},
+                "archiefnominatie": {},
+                "archiefactiedatum": {},
+                "toelichtingBewaartermijn": {},
+            }
+
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    @freeze_time("2026-01-01")
     def test_update_publication_fields_empty(self):
         organisation_member = OrganisationMemberFactory.create(
             identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
             naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
         )
-        with self.subTest("update with empty values doesn't raise errors"):
-            publication = PublicationFactory.create(
-                officiele_titel="title one",
-                publicatiestatus=PublicationStatusOptions.concept,
-                eigenaar=organisation_member,
-            )
-            url = reverse(
-                "api:publication-detail",
-                kwargs={"uuid": str(publication.uuid)},
-            )
+        publication = PublicationFactory.create(
+            officiele_titel="title one",
+            publicatiestatus=PublicationStatusOptions.concept,
+            eigenaar=organisation_member,
+        )
+        url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
 
+        expected_data = {
+            "uuid": str(publication.uuid),
+            "urlPublicatieIntern": "",
+            "urlPublicatieExtern": "",
+            "informatieCategorieen": [],
+            "diWooInformatieCategorieen": None,
+            "onderwerpen": [],
+            "publisher": None,
+            "verantwoordelijke": None,
+            "opsteller": None,
+            "kenmerken": [],
+            "officieleTitel": "update",
+            "verkorteTitel": "",
+            "omschrijving": "",
+            "eigenaar": {"identifier": "id", "weergaveNaam": "username"},
+            "publicatiestatus": "concept",
+            "gepubliceerdOp": None,
+            "ingetrokkenOp": None,
+            "registratiedatum": "2026-01-01T01:00:00+01:00",
+            "laatstGewijzigdDatum": "2026-01-01T01:00:00+01:00",
+            "datumBeginGeldigheid": None,
+            "datumEindeGeldigheid": None,
+            "bronBewaartermijn": "",
+            "selectiecategorie": "",
+            "archiefnominatie": "",
+            "archiefactiedatum": None,
+            "toelichtingBewaartermijn": "",
+        }
+
+        with self.subTest("update with empty string values doesn't raise errors"):
             data = {
                 # required:
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "update",
                 # allowed empty:
-                "informatieCategorieen": [],
-                "onderwerpen": [],
+                "informatieCategorieen": "",
+                "onderwerpen": "",
                 "publisher": "",
                 "verantwoordelijke": "",
                 "opsteller": "",
-                "kenmerken": [],
+                "kenmerken": "",
                 "verkorteTitel": "",
                 "omschrijving": "",
-                "eigenaar": None,
+                "eigenaar": "",
+                "datumBeginGeldigheid": "",
+                "datumEindeGeldigheid": "",
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
-                "archiefactiedatum": None,
+                "archiefactiedatum": "",
                 "toelichtingBewaartermijn": "",
             }
 
             response = self.client.put(url, data, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response.json()["eigenaar"],
-                {
-                    "identifier": "id",
-                    "weergaveNaam": "username",
-                },
-            )
+            data = response.json()
+            self.assertEqual(data, expected_data)
 
-        with self.subTest("update fully empty values doesn't raise errors"):
-            publication = PublicationFactory.create(
-                officiele_titel="title one",
-                publicatiestatus=PublicationStatusOptions.concept,
-                eigenaar=organisation_member,
-            )
-            url = reverse(
-                "api:publication-detail",
-                kwargs={"uuid": str(publication.uuid)},
-            )
-
+        with self.subTest("update with empty null values doesn't raise errors"):
             data = {
                 # required:
                 "publicatiestatus": PublicationStatusOptions.concept,
@@ -2401,30 +2453,87 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 # allowed empty:
                 "informatieCategorieen": None,
                 "onderwerpen": None,
-                "publisher": "",
-                "verantwoordelijke": "",
-                "opsteller": "",
+                "publisher": None,
+                "verantwoordelijke": None,
+                "opsteller": None,
                 "kenmerken": None,
-                "verkorteTitel": "",
-                "omschrijving": "",
+                "verkorteTitel": None,
+                "omschrijving": None,
                 "eigenaar": None,
-                "bronBewaartermijn": "",
-                "selectiecategorie": "",
-                "archiefnominatie": "",
+                "datumBeginGeldigheid": None,
+                "datumEindeGeldigheid": None,
+                "bronBewaartermijn": None,
+                "selectiecategorie": None,
+                "archiefnominatie": None,
                 "archiefactiedatum": None,
-                "toelichtingBewaartermijn": "",
+                "toelichtingBewaartermijn": None,
             }
 
             response = self.client.put(url, data, headers=AUDIT_HEADERS)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response.json()["eigenaar"],
-                {
-                    "identifier": "id",
-                    "weergaveNaam": "username",
-                },
-            )
+            data = response.json()
+            self.assertEqual(data, expected_data)
+
+        with self.subTest("update with empty list values doesn't raise errors"):
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "update",
+                # allowed empty:
+                "informatieCategorieen": [],
+                "onderwerpen": [],
+                "publisher": [],
+                "verantwoordelijke": [],
+                "opsteller": [],
+                "kenmerken": [],
+                "verkorteTitel": [],
+                "omschrijving": [],
+                "eigenaar": [],
+                "datumBeginGeldigheid": [],
+                "datumEindeGeldigheid": [],
+                "bronBewaartermijn": [],
+                "selectiecategorie": [],
+                "archiefnominatie": [],
+                "archiefactiedatum": [],
+                "toelichtingBewaartermijn": [],
+            }
+
+            response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data, expected_data)
+
+        with self.subTest("update with empty dict values doesn't raise errors"):
+            data = {
+                # required:
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "update",
+                # allowed empty:
+                "informatieCategorieen": {},
+                "onderwerpen": {},
+                "publisher": {},
+                "verantwoordelijke": {},
+                "opsteller": {},
+                "kenmerken": {},
+                "verkorteTitel": {},
+                "omschrijving": {},
+                "eigenaar": {},
+                "datumBeginGeldigheid": {},
+                "datumEindeGeldigheid": {},
+                "bronBewaartermijn": {},
+                "selectiecategorie": {},
+                "archiefnominatie": {},
+                "archiefactiedatum": {},
+                "toelichtingBewaartermijn": {},
+            }
+
+            response = self.client.put(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data, expected_data)
 
     def test_create_publication_status_concept(self):
         url = reverse("api:publication-list")
@@ -2540,27 +2649,3 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "publisher": [_("This field may not be null.")],
             },
         )
-
-    def test_workaround_null_values(self):
-        # Temporary workaround to accept/transform null values sent by GPP-app until
-        # they patch that up on their end.
-        ic = InformationCategoryFactory.create()
-        organisation = OrganisationFactory.create(is_actief=True)
-        url = reverse("api:publication-list")
-        data = {
-            # required fields
-            "informatieCategorieen": [str(ic.uuid)],
-            "publisher": str(organisation.uuid),
-            "officieleTitel": "title one",
-            # optional fields
-            "publicatiestatus": PublicationStatusOptions.published,
-            "bronBewaartermijn": None,
-            "selectiecategorie": None,
-            "archiefnominatie": None,
-            "archiefactiedatum": None,
-            "toelichtingBewaartermijn": None,
-        }
-
-        response = self.client.post(url, data, headers=AUDIT_HEADERS)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
