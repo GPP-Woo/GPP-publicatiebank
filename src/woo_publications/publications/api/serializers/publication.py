@@ -63,9 +63,9 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     url_publicatie_extern = serializers.SerializerMethodField(
         label=_("external publication url"),
         help_text=_(
-            "URL to the UI of the external application where the publication life "
-            "cycle is managed. Requires the global configuration parameter to be set, "
-            "otherwise an empty string is returned."
+            "URL to the UI of the external application where the publication is "
+            "publicly visible. Requires the global configuration parameter to be "
+            "set, otherwise an empty string is returned."
         ),
     )
     informatie_categorieen = serializers.SlugRelatedField(
