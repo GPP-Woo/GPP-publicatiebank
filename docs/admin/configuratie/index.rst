@@ -67,9 +67,9 @@ worden weergegeven.
 
   Deze instelling is noodzakelijk voor de verbinding met het GPP-zoeken-component (of passend alternatief).
 
-* ``GPP-app publication URL template``. Het template waarmee op basis van het UUID de URL gegenereed kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in de GPP-app (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieIntern``).
+* ``GPP-app publicatie-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in de GPP-app (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieIntern``).
 
-* ``GPP-burgerportaal publication URL template``. Het template waarmee op basis van het UUID de URL gegenereed kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
+* ``GPP-burgerportaal publication-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
 
 .. _admin_configuratie_index_services:
 
