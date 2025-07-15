@@ -460,8 +460,8 @@ paths:
           description: ''
     delete:
       operationId: documentenDestroy
-      description: Delete a specific document.
-      summary: Delete a specific document.
+      description: Vernietig een specifiek document.
+      summary: Vernietig een specifiek document.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -632,7 +632,7 @@ paths:
                 format: binary
           description: De binaire bestandsinhoud.
         '409':
-          description: Conflict - the document is not (yet) available for download.
+          description: Conflict - het document is (nog) niet beschikbaar voor download.
         '502':
           description: Bad gateway - kon de inhoud niet streamen.
   /api/v2/informatiecategorieen:
@@ -1263,7 +1263,7 @@ paths:
         name: bron
         schema:
           type: string
-        description: Filter publications based on the given identifier source.
+        description: Filter publicaties op basis van de opgegeven kenmerkbron.
       - in: query
         name: eigenaar
         schema:
@@ -1285,7 +1285,7 @@ paths:
         name: kenmerk
         schema:
           type: string
-        description: Filter publications based on the given identifier.
+        description: Filter publicaties op basis van het opgegeven kenmerk.
       - in: query
         name: onderwerpen
         schema:
@@ -1393,8 +1393,10 @@ paths:
           description: ''
     post:
       operationId: publicatiesCreate
-      description: "Create a publication. \n\n When creating a publication as a concept\
-        \ the only required field is `officieleTitel`."
+      description: |-
+        Maak een publicatie aan.
+
+        Bij het aanmaken van een conceptpublicatie is het enige verplichte veld  `officieleTitel`.
       summary: Maak een publicatie aan.
       parameters:
       - in: header
@@ -1490,8 +1492,10 @@ paths:
           description: ''
     put:
       operationId: publicatiesUpdate
-      description: "Update a publication entirely. \n\n When updating a publication\
-        \ as a concept the only required field is `officieleTitel`."
+      description: |-
+        Update een publicatie voledig.
+
+        Bij het updaten van een conceptpublicatie is het enige verplichte veld  `officieleTitel`.
       summary: Werk een publicatie (in zijn geheel) bij.
       parameters:
       - in: header
@@ -1779,16 +1783,14 @@ components:
       - ophalen
       type: string
       description: |-
-        * `ontvangen` - Receive
-        * `ophalen` - Retrieve
+        * `ontvangen` - Ontvangen
+        * `ophalen` - Ophalen
     ArchiefnominatieEnum:
       enum:
       - blijvend_bewaren
       - vernietigen
       type: string
       description: |-
-        **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
-
         * `blijvend_bewaren` - Blijvend bewaren
         * `vernietigen` - Vernietigen
     BlankEnum:
@@ -1882,10 +1884,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: internal publication url
-          description: URL to the UI of the internal application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: Werk een publicatie (in zijn geheel) bij.
+          description: De URL die verwijst naar de UI van de interne applicatie waar
+            de publicatie beheerd wordt. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         urlPublicatieExtern:
           oneOf:
           - type: string
@@ -1894,10 +1896,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: external publication url
-          description: URL to the UI of the external application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: externe publicatie-URL.
+          description: De URL die verwijst naar de UI van de externe applicatie waar
+            de publicatie publiek toegankelijk is. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         informatieCategorieen:
           type: array
           items:
@@ -1940,7 +1942,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicationIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: De set aan identificatiekenmerken horend bij deze publicatie.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -1963,28 +1965,36 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
-            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
-            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
-            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
-            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
-            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
-            * `ingetrokken` - Ingetrokken"
+          description: |2-
+
+            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
+
+            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         registratiedatum:
           type: string
           format: date-time
@@ -2004,35 +2014,32 @@ components:
           type: string
           format: date
           nullable: true
-          title: Start date
-          description: The date when the rights and obligations of the attached documents
-            come into effect.
+          title: Startdatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: End date
-          description: The date when the rights and obligations of the attached documents
-            stops being in effect.
+          title: Einddatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            (zijn) komen te vervallen.
         bronBewaartermijn:
           type: string
           description: |-
             De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         selectiecategorie:
           type: string
           description: |-
             De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         archiefnominatie:
           description: |-
             Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
 
             * `blijvend_bewaren` - Blijvend bewaren
             * `vernietigen` - Vernietigen
@@ -2045,13 +2052,12 @@ components:
           nullable: true
           description: |-
             Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
         toelichtingBewaartermijn:
           type: string
-          description: '**Note** on create or when updating the information categories,
-            manually provided values are ignored and overwritten by the automatically
-            derived parameters from the related information categories.'
+          description: '**Opmerking** handmatig opgegeven waarden worden bij het aanmaken
+            (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
+            de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp
@@ -2083,7 +2089,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The document identifiers attached to this document.
+          description: De set aan identificatiekenmerken horend bij dit document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2098,27 +2104,34 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           readOnly: true
           title: Status
-          description: "\nOn creation, the publicatiestatus is derived from the publication\
-            \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
-            `.\n\nNote that some transitions may be limited by business logic.\n\n\
-            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
-            \ - Ingetrokken"
+          description: |2-
+
+            Tijdens het aanmaken wordt de publicatiestatus overgenomen van het publicatie. De publicatie kan niet zelf ingevuld worden.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         creatiedatum:
           type: string
           format: date
@@ -2128,14 +2141,15 @@ components:
           type: string
           format: date-time
           nullable: true
-          title: Date of reception
-          description: The timestamp when the document is received by the organisatie.
+          description: Indien van toepassing, datum wanneer het document door of namens
+            de organisatie in ontvangst is genomen.
         datumOndertekend:
           type: string
           format: date-time
           nullable: true
-          title: Signed date
-          description: The timestamp when the document is signed by the organisatie.
+          title: Datum ondertekening
+          description: Indien van toepassing, datum waarop het document (door alle
+            partijen) ondertekend is.
         bestandsformaat:
           type: string
           description: TODO - placeholder accepting anything, in the future this will
@@ -2179,8 +2193,9 @@ components:
           type: boolean
           readOnly: true
           title: documentupload voltooid
-          description: Indicates if the file has been uploaded and made 'ready for
-            use' in the upstream Documents API.
+          description: Geeft aan of alle bestandsdelen van het bestand ontvangen zijn
+            en het document ontgrendeld en klaar voor gebruik is in de achterliggende
+            Documenten-API.
       required:
       - creatiedatum
       - gepubliceerdOp
@@ -2227,7 +2242,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The document identifiers attached to this document.
+          description: De set aan identificatiekenmerken horend bij dit document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2242,27 +2257,34 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           readOnly: true
           title: Status
-          description: "\nOn creation, the publicatiestatus is derived from the publication\
-            \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
-            `.\n\nNote that some transitions may be limited by business logic.\n\n\
-            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
-            \ - Ingetrokken"
+          description: |2-
+
+            Tijdens het aanmaken wordt de publicatiestatus overgenomen van het publicatie. De publicatie kan niet zelf ingevuld worden.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         creatiedatum:
           type: string
           format: date
@@ -2272,14 +2294,15 @@ components:
           type: string
           format: date-time
           nullable: true
-          title: Date of reception
-          description: The timestamp when the document is received by the organisatie.
+          description: Indien van toepassing, datum wanneer het document door of namens
+            de organisatie in ontvangst is genomen.
         datumOndertekend:
           type: string
           format: date-time
           nullable: true
-          title: Signed date
-          description: The timestamp when the document is signed by the organisatie.
+          title: Datum ondertekening
+          description: Indien van toepassing, datum waarop het document (door alle
+            partijen) ondertekend is.
         bestandsformaat:
           type: string
           description: TODO - placeholder accepting anything, in the future this will
@@ -2323,18 +2346,19 @@ components:
           type: boolean
           readOnly: true
           title: documentupload voltooid
-          description: Indicates if the file has been uploaded and made 'ready for
-            use' in the upstream Documents API.
+          description: Geeft aan of alle bestandsdelen van het bestand ontvangen zijn
+            en het document ontgrendeld en klaar voor gebruik is in de achterliggende
+            Documenten-API.
         aanleveringBestand:
           allOf:
           - $ref: '#/components/schemas/AanleveringBestandEnum'
           default: ontvangen
-          title: delivery method
+          title: aanleverwijze
           description: |-
-            When the delivery method is set to retrieve a provided document URL pointing to a Documents API, then this will be processed in the background and no `bestandsdelen` will be returned. Otherwise for direct uploads, an array of expected file parts is returned.
+            Als de aanleverwijze op `ophalen` staat, dan wordt dit verwerkt op de achtergrond en worden er geen `bestandsdelen` teruggegeven in het antwoord. Voor directe uploads wordt er een lijst van verwachte `bestandsdelen` teruggegeven.
 
-            * `ontvangen` - Receive
-            * `ophalen` - Retrieve
+            * `ontvangen` - Ontvangen
+            * `ophalen` - Ophalen
         bestandsdelen:
           type: array
           items:
@@ -2343,7 +2367,7 @@ components:
           nullable: true
           description: De verwachte bestandsdelen/chunks om de bestandsinhoud te uploaden.
             Deze zijn afgeleid uit de opgegeven totale bestandsgrootte (`bestandsomvang`)
-            in de body van de document create operatie.
+            in de body van de document-create-operatie.
       required:
       - bestandsdelen
       - creatiedatum
@@ -2362,13 +2386,13 @@ components:
         kenmerk:
           type: string
           title: Identificatie
-          description: The identifier that (combined with bron) uniquely identifies
-            the document.
+          description: De identificatie die (samen met de bron) het document uniek
+            herleidbaar maakt.
           maxLength: 40
         bron:
           type: string
-          title: Source
-          description: Determines where the identifier is defined and sourced from.
+          description: Geeft aan in welk systeem het kenmerk leeft en waar het vandaan
+            komt.
           maxLength: 40
       required:
       - bron
@@ -2407,7 +2431,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The document identifiers attached to this document.
+          description: De set aan identificatiekenmerken horend bij dit document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2421,27 +2445,34 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
-          description: "\nOn creation, the publicatiestatus is derived from the publication\
-            \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
-            `.\n\nNote that some transitions may be limited by business logic.\n\n\
-            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
-            \ - Ingetrokken"
+          description: |2-
+
+            Tijdens het aanmaken wordt de publicatiestatus overgenomen van het publicatie. De publicatie kan niet zelf ingevuld worden.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         creatiedatum:
           type: string
           format: date
@@ -2451,14 +2482,15 @@ components:
           type: string
           format: date-time
           nullable: true
-          title: Date of reception
-          description: The timestamp when the document is received by the organisatie.
+          description: Indien van toepassing, datum wanneer het document door of namens
+            de organisatie in ontvangst is genomen.
         datumOndertekend:
           type: string
           format: date-time
           nullable: true
-          title: Signed date
-          description: The timestamp when the document is signed by the organisatie.
+          title: Datum ondertekening
+          description: Indien van toepassing, datum waarop het document (door alle
+            partijen) ondertekend is.
         bestandsformaat:
           type: string
           readOnly: true
@@ -2500,8 +2532,9 @@ components:
           type: boolean
           readOnly: true
           title: documentupload voltooid
-          description: Indicates if the file has been uploaded and made 'ready for
-            use' in the upstream Documents API.
+          description: Geeft aan of alle bestandsdelen van het bestand ontvangen zijn
+            en het document ontgrendeld en klaar voor gebruik is in de achterliggende
+            Documenten-API.
       required:
       - bestandsformaat
       - bestandsnaam
@@ -2835,7 +2868,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentIdentifier'
-          description: The document identifiers attached to this document.
+          description: De set aan identificatiekenmerken horend bij dit document.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -2849,27 +2882,34 @@ components:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           title: Status
-          description: "\nOn creation, the publicatiestatus is derived from the publication\
-            \ and cannot be specified directly.\n\nThe possible state transitions\
-            \ are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"`\n\
-            * `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
-            `.\n\nNote that some transitions may be limited by business logic.\n\n\
-            * `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken`\
-            \ - Ingetrokken"
+          description: |2-
+
+            Tijdens het aanmaken wordt de publicatiestatus overgenomen van het publicatie. De publicatie kan niet zelf ingevuld worden.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         creatiedatum:
           type: string
           format: date
@@ -2879,14 +2919,15 @@ components:
           type: string
           format: date-time
           nullable: true
-          title: Date of reception
-          description: The timestamp when the document is received by the organisatie.
+          description: Indien van toepassing, datum wanneer het document door of namens
+            de organisatie in ontvangst is genomen.
         datumOndertekend:
           type: string
           format: date-time
           nullable: true
-          title: Signed date
-          description: The timestamp when the document is signed by the organisatie.
+          title: Datum ondertekening
+          description: Indien van toepassing, datum waarop het document (door alle
+            partijen) ondertekend is.
         bestandsformaat:
           type: string
           readOnly: true
@@ -2928,8 +2969,9 @@ components:
           type: boolean
           readOnly: true
           title: documentupload voltooid
-          description: Indicates if the file has been uploaded and made 'ready for
-            use' in the upstream Documents API.
+          description: Geeft aan of alle bestandsdelen van het bestand ontvangen zijn
+            en het document ontgrendeld en klaar voor gebruik is in de achterliggende
+            Documenten-API.
     PatchedOrganisation:
       type: object
       properties:
@@ -3018,25 +3060,34 @@ components:
       - concept
       - ingetrokken
       type: string
-      description: "**Waarschuwing**: wanneer je een publicatie intrekt, dan worden\
-        \ ook de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
-        \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"\
-        `\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
-        `.\n\nNote that some transitions may be limited by business logic.\n\n* `gepubliceerd`\
-        \ - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken` - Ingetrokken"
+      description: |-
+        **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
+
+        De mogelijke statuswijzigingen zijn:
+
+        * `""` -> `"concept"`
+        * `""` -> `"gepubliceerd"`
+        * `"concept"` -> `"gepubliceerd"`
+        * `"gepubliceerd"` -> `"ingetrokken"`.
+
+        Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+        * `gepubliceerd` - Gepubliceerd
+        * `concept` - Concept
+        * `ingetrokken` - Ingetrokken
     PublicationIdentifier:
       type: object
       properties:
         kenmerk:
           type: string
           title: Identificatie
-          description: The identifier that (combined with bron) uniquely identifies
-            the publication.
+          description: De identificatie die (samen met de bron) de publicatie uniek
+            herleidbaar maakt.
           maxLength: 40
         bron:
           type: string
-          title: Source
-          description: Determines where the identifier is defined and sourced from.
+          description: Geeft aan in welk systeem het kenmerk leeft en waar het vandaan
+            komt.
           maxLength: 40
       required:
       - bron
@@ -3062,10 +3113,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: internal publication url
-          description: URL to the UI of the internal application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: Werk een publicatie (in zijn geheel) bij.
+          description: De URL die verwijst naar de UI van de interne applicatie waar
+            de publicatie beheerd wordt. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         urlPublicatieExtern:
           oneOf:
           - type: string
@@ -3074,10 +3125,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: external publication url
-          description: URL to the UI of the external application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: externe publicatie-URL.
+          description: De URL die verwijst naar de UI van de externe applicatie waar
+            de publicatie publiek toegankelijk is. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         informatieCategorieen:
           type: array
           items:
@@ -3104,8 +3155,8 @@ components:
           type: string
           format: uuid
           nullable: true
-          description: De organisatie die de publicatie publiceert. The publisher
-            can be `null` if the publication is a concept.
+          description: De organisatie die de publicatie publiceert.De 'publisher'
+            kan `null` zijn voor conceptpublicaties.
         verantwoordelijke:
           type: string
           format: uuid
@@ -3121,7 +3172,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicationIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: De set aan identificatiekenmerken horend bij deze publicatie.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -3143,28 +3194,36 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
-            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
-            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
-            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
-            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
-            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
-            * `ingetrokken` - Ingetrokken"
+          description: |2-
+
+            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
+
+            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         registratiedatum:
           type: string
           format: date-time
@@ -3184,16 +3243,16 @@ components:
           type: string
           format: date
           nullable: true
-          title: Start date
-          description: The date when the rights and obligations of the attached documents
-            come into effect.
+          title: Startdatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: End date
-          description: The date when the rights and obligations of the attached documents
-            stops being in effect.
+          title: Einddatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            (zijn) komen te vervallen.
         bronBewaartermijn:
           type: string
           description: 'De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld:
@@ -3315,10 +3374,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: internal publication url
-          description: URL to the UI of the internal application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: Werk een publicatie (in zijn geheel) bij.
+          description: De URL die verwijst naar de UI van de interne applicatie waar
+            de publicatie beheerd wordt. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         urlPublicatieExtern:
           oneOf:
           - type: string
@@ -3327,10 +3386,10 @@ components:
             - ''
             type: string
           readOnly: true
-          title: external publication url
-          description: URL to the UI of the external application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
+          title: externe publicatie-URL.
+          description: De URL die verwijst naar de UI van de externe applicatie waar
+            de publicatie publiek toegankelijk is. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
         informatieCategorieen:
           type: array
           items:
@@ -3372,7 +3431,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicationIdentifier'
-          description: The publication identifiers attached to this publication.
+          description: De set aan identificatiekenmerken horend bij deze publicatie.
         officieleTitel:
           type: string
           title: Officiële titel
@@ -3395,28 +3454,36 @@ components:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
-            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
-            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
-            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
-            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
-            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
-            * `ingetrokken` - Ingetrokken"
+          description: |2-
+
+            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
+
+            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
+
+            De mogelijke statuswijzigingen zijn:
+
+            * `""` -> `"concept"`
+            * `""` -> `"gepubliceerd"`
+            * `"concept"` -> `"gepubliceerd"`
+            * `"gepubliceerd"` -> `"ingetrokken"`.
+
+            Let op dat bij sommige wijzigingen beperkt kunnen zijn door business-logica.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
         gepubliceerdOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
         ingetrokkenOp:
           type: string
           format: date-time
           readOnly: true
           nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
+          description: Systeemdatum en -tijd wanneer de publicatie ingetrokken werd.
         registratiedatum:
           type: string
           format: date-time
@@ -3436,35 +3503,32 @@ components:
           type: string
           format: date
           nullable: true
-          title: Start date
-          description: The date when the rights and obligations of the attached documents
-            come into effect.
+          title: Startdatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: End date
-          description: The date when the rights and obligations of the attached documents
-            stops being in effect.
+          title: Einddatum
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            (zijn) komen te vervallen.
         bronBewaartermijn:
           type: string
           description: |-
             De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         selectiecategorie:
           type: string
           description: |-
             De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
           maxLength: 255
         archiefnominatie:
           description: |-
             Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
 
             * `blijvend_bewaren` - Blijvend bewaren
             * `vernietigen` - Vernietigen
@@ -3477,13 +3541,12 @@ components:
           nullable: true
           description: |-
             Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+            **Opmerking** handmatig opgegeven waarden worden bij het aanmaken (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).
         toelichtingBewaartermijn:
           type: string
-          description: '**Note** on create or when updating the information categories,
-            manually provided values are ignored and overwritten by the automatically
-            derived parameters from the related information categories.'
+          description: '**Opmerking** handmatig opgegeven waarden worden bij het aanmaken
+            (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
+            de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp
@@ -3502,12 +3565,12 @@ components:
         documentUrl:
           type: string
           format: uri
-          description: The resource URL of the document in an (external) Documents
-            API. Must be the detail endpoint - we'll construct the download URL ourselves.
-            Must be provided when the `aanleveringBestand` is set to `ophalen`, and
-            must be empty/absent when `aanleveringBestand` is `ontvangen`. Note that
-            you may include the `versie` query parameter to point to a particular
-            document version.
+          description: 'De bronlocatie (URL) van het document in een (externe) Documenten
+            API. Dit moet verwijzen naar de detail-endpoint - wij bouwen vervolgens
+            de download-URL  op. Dit veld moet opgegeven worden wanneer het `aanleveringBestand`-veld
+            op `ophalen` staat, dit veld moet dan ook leeg zijn als het `aanleveringBestand`
+            veld op `ontvangen` staat. Merk op dat je de `versie` query-parameter
+            kan opnemen om naar een specifieke documentversie te verwijzen. '
       required:
       - documentUrl
     Theme:

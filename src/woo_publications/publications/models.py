@@ -15,7 +15,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.timezone import localdate
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
@@ -563,8 +563,8 @@ class PublicationIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = _("kenmerk")
-        verbose_name_plural = _("kenmerken")
+        verbose_name = pgettext("trait", "identifier")
+        verbose_name_plural = pgettext("trait", "identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["publicatie", "kenmerk", "bron"],
@@ -1047,8 +1047,8 @@ class DocumentIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = _("kenmerk")
-        verbose_name_plural = _("kenmerken")
+        verbose_name = pgettext("trait", "identifier")
+        verbose_name_plural = pgettext("trait", "identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["document", "kenmerk", "bron"],
