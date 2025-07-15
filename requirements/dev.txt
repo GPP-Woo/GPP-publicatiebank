@@ -382,6 +382,7 @@ django-upgrade-check==1.1.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   open-api-framework
 django-webtest==1.9.13
     # via
     #   -c requirements/ci.txt
@@ -605,7 +606,7 @@ notifications-api-common==0.7.2
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   commonground-api-common
-open-api-framework==0.9.6
+open-api-framework==0.11.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -649,11 +650,16 @@ prompt-toolkit==3.0.47
     #   -r requirements/ci.txt
     #   click-repl
     #   questionary
-psycopg2==2.9.9
+psycopg==3.2.9
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
+psycopg-binary==3.2.9
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+    #   psycopg
 pycparser==2.22
     # via
     #   -c requirements/ci.txt
@@ -917,6 +923,7 @@ typing-extensions==4.12.2
     #   django-stubs-ext
     #   django-test-migrations
     #   mozilla-django-oidc-db
+    #   psycopg
     #   pydantic
     #   pydantic-core
     #   pyopenssl

@@ -206,7 +206,9 @@ django-treebeard==4.7.1
 django-two-factor-auth==1.17.0
     # via maykin-2fa
 django-upgrade-check==1.1.0
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   open-api-framework
 djangorestframework==3.15.2
     # via
     #   commonground-api-common
@@ -294,7 +296,7 @@ mozilla-django-oidc-db==0.19.0
     # via open-api-framework
 notifications-api-common==0.7.2
     # via commonground-api-common
-open-api-framework==0.9.6
+open-api-framework==0.11.0
     # via -r requirements/base.in
 orderedmultidict==1.0.1
     # via furl
@@ -310,8 +312,10 @@ prometheus-client==0.20.0
     # via flower
 prompt-toolkit==3.0.47
     # via click-repl
-psycopg2==2.9.9
+psycopg==3.2.9
     # via open-api-framework
+psycopg-binary==3.2.9
+    # via psycopg
 pycparser==2.22
     # via cffi
 pygments==2.18.0
@@ -398,6 +402,7 @@ typing-extensions==4.12.2
     # via
     #   django-stubs-ext
     #   mozilla-django-oidc-db
+    #   psycopg
     #   pyopenssl
     #   qrcode
     #   zgw-consumers

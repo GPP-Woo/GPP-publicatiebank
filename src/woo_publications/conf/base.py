@@ -27,7 +27,6 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "maykin_common",
     "timeline_logger",
     "treebeard",
-    "upgrade_check",
     "drf_polymorphic",
     # Project applications.
     "woo_publications.accounts",
