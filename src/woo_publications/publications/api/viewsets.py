@@ -43,7 +43,8 @@ from .serializers import (
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
     FilePartSerializer,
-    PublicationSerializer,
+    PublicationReadSerializer,
+    PublicationWriteSerializer,
     TopicSerializer,
 )
 
@@ -350,10 +351,12 @@ class DocumentViewSet(
             "When creating a publication as a concept the only required field is "
             "`officieleTitel`."
         ),
+        responses={status.HTTP_201_CREATED: PublicationReadSerializer},
     ),
     partial_update=extend_schema(
         summary=_("Update a publication partially."),
         description=_("Update a publication partially."),
+        responses={status.HTTP_200_OK: PublicationReadSerializer},
     ),
     update=extend_schema(
         summary=_("Update a publication entirely."),
@@ -362,6 +365,7 @@ class DocumentViewSet(
             "When updating a publication as a concept the only required field is "
             "`officieleTitel`."
         ),
+        responses={status.HTTP_200_OK: PublicationReadSerializer},
     ),
     destroy=extend_schema(
         summary=_("Destroy a publication."),
@@ -372,10 +376,18 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     queryset = Publication.objects.prefetch_related(
         "publicationidentifier_set"
     ).order_by("-registratiedatum")
-    serializer_class = PublicationSerializer
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
+
+    def get_serializer_class(
+        self,
+    ) -> type[PublicationReadSerializer] | type[PublicationWriteSerializer]:
+        match self.action:
+            case "create" | "update" | "partial_update":
+                return PublicationWriteSerializer
+            case _:
+                return PublicationReadSerializer
 
 
 @extend_schema(tags=["Onderwerpen"])

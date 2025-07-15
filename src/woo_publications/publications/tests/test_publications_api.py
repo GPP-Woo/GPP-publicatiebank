@@ -2259,9 +2259,9 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 # allowed empty:
                 "informatieCategorieen": [],
                 "onderwerpen": [],
-                "publisher": "",
-                "verantwoordelijke": "",
-                "opsteller": "",
+                "publisher": None,
+                "verantwoordelijke": None,
+                "opsteller": None,
                 "kenmerken": [],
                 "verkorteTitel": "",
                 "omschrijving": "",
@@ -2277,20 +2277,21 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        with self.subTest(
-            "create concept publication fully empty doesn't raise errors"
-        ):
+        with self.subTest("validate 'empty value' data types"):
             data = {
                 # required:
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "title one",
                 # allowed empty:
-                "informatieCategorieen": None,
-                "onderwerpen": None,
+                "informatieCategorieen": None,  # must be list
+                "onderwerpen": None,  # must be list
+                # UUID string or null, but DRF allows empty string
                 "publisher": "",
+                # UUID string or null, but DRF allows empty string
                 "verantwoordelijke": "",
+                # UUID string or null, but DRF allows empty string
                 "opsteller": "",
-                "kenmerken": None,
+                "kenmerken": None,  # must be list
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
@@ -2302,9 +2303,21 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             }
             response = self.client.post(url, data, headers=AUDIT_HEADERS)
 
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+            self.assertEqual(
+                set(data.keys()),
+                {
+                    "informatieCategorieen",
+                    "onderwerpen",
+                    "kenmerken",
+                },
+            )
+            self.assertEqual(response.data["informatie_categorieen"][0].code, "null")
+            self.assertEqual(response.data["onderwerpen"][0].code, "null")
+            self.assertEqual(response.data["kenmerken"][0].code, "null")
 
-        with self.subTest("create published publication doesn't raise errors"):
+        with self.subTest("create published publication validates required fields"):
             data = {
                 # required:
                 "publicatiestatus": PublicationStatusOptions.published,
@@ -2312,9 +2325,9 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 # allowed empty:
                 "informatieCategorieen": [],
                 "onderwerpen": [],
-                "publisher": "",
-                "verantwoordelijke": "",
-                "opsteller": "",
+                "publisher": None,
+                "verantwoordelijke": None,
+                "opsteller": None,
                 "kenmerken": [],
                 "verkorteTitel": "",
                 "omschrijving": "",
@@ -2330,6 +2343,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             data = response.json()
+            self.assertEqual(set(data.keys()), {"informatieCategorieen", "publisher"})
             self.assertEqual(
                 data["informatieCategorieen"], [_("This list may not be empty.")]
             )
@@ -2399,12 +2413,12 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "update",
                 # allowed empty:
-                "informatieCategorieen": None,
-                "onderwerpen": None,
+                "informatieCategorieen": [],
+                "onderwerpen": [],
                 "publisher": "",
                 "verantwoordelijke": "",
                 "opsteller": "",
-                "kenmerken": None,
+                "kenmerken": [],
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,

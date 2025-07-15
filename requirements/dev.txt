@@ -433,7 +433,7 @@ drf-nested-routers==0.94.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   commonground-api-common
-drf-polymorphic==2.1.0
+drf-polymorphic==2.1.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
