@@ -1430,7 +1430,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PublicationWrite'
-        required: true
       security:
       - tokenAuth: []
       responses:
@@ -1534,7 +1533,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PublicationWrite'
-        required: true
       security:
       - tokenAuth: []
       responses:
@@ -1864,6 +1862,206 @@ components:
       - url
       - vertrouwelijkheidaanduiding
       - zaaktypen
+    ConceptPublicationWrite:
+      type: object
+      description: |-
+        Base serializer for publication read and write operations.
+
+        This base class defines the shared logic that should be kept in sync between read
+        and write operations for consistent API documentation (and behaviour).
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        urlPublicatieIntern:
+          oneOf:
+          - type: string
+            format: uri
+          - enum:
+            - ''
+            type: string
+          readOnly: true
+          title: internal publication url
+          description: URL to the UI of the internal application where the publication
+            life cycle is managed. Requires the global configuration parameter to
+            be set, otherwise an empty string is returned.
+        urlPublicatieExtern:
+          oneOf:
+          - type: string
+            format: uri
+          - enum:
+            - ''
+            type: string
+          readOnly: true
+          title: external publication url
+          description: URL to the UI of the external application where the publication
+            life cycle is managed. Requires the global configuration parameter to
+            be set, otherwise an empty string is returned.
+        informatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: De informatiecategorie verduidelijkt de soort informatie die
+            in de publicatie voorkomt.
+        diWooInformatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+          description: De informatiecategorieën voor in de sitemap.
+        onderwerpen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Onderwerpen gaan over maatschappelijk relevante informatie
+            die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
+            blijven en overstijgen de typische levensduur van een enkele publicatie.
+        publisher:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die de publicatie publiceert.
+        verantwoordelijke:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die verantwoordelijk is voor de publicatie en
+            haar inhoud.
+        opsteller:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationIdentifier'
+          description: The publication identifiers attached to this publication.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          nullable: true
+          description: |-
+            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
+
+            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          default: gepubliceerd
+          title: Status
+          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
+            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
+            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
+            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
+            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
+            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
+            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
+            * `ingetrokken` - Ingetrokken"
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Published on
+          description: System timestamp reflecting when the publication was published.
+        ingetrokkenOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Revoked on
+          description: System timestamp reflecting when the publication was revoked.
+        registratiedatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Geregistreerd op
+          description: Systeemdatum en -tijd wanneer de publicatie in de databank
+            opgeslagen is. Niet te verwarren met de creatiedatum van de publicatie,
+            die typisch *voor* de registratiedatum valt.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
+            is in de database.
+        datumBeginGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: Start date
+          description: The date when the rights and obligations of the attached documents
+            come into effect.
+        datumEindeGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          title: End date
+          description: The date when the rights and obligations of the attached documents
+            stops being in effect.
+        bronBewaartermijn:
+          type: string
+          description: |-
+            De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
+
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+          maxLength: 255
+        selectiecategorie:
+          type: string
+          description: |-
+            De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
+
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+          maxLength: 255
+        archiefnominatie:
+          description: |-
+            Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
+
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+
+            * `blijvend_bewaren` - Blijvend bewaren
+            * `vernietigen` - Vernietigen
+          oneOf:
+          - $ref: '#/components/schemas/ArchiefnominatieEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        archiefactiedatum:
+          type: string
+          format: date
+          nullable: true
+          description: |-
+            Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
+
+            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
+        toelichtingBewaartermijn:
+          type: string
+          description: '**Note** on create or when updating the information categories,
+            manually provided values are ignored and overwritten by the automatically
+            derived parameters from the related information categories.'
+      required:
+      - diWooInformatieCategorieen
+      - gepubliceerdOp
+      - ingetrokkenOp
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - registratiedatum
+      - urlPublicatieExtern
+      - urlPublicatieIntern
+      - uuid
     Document:
       type: object
       properties:
@@ -2768,6 +2966,24 @@ components:
           title: Actief
           description: Geeft de actief-status van de organisatie aan.
     PatchedPublicationWrite:
+      oneOf:
+      - $ref: '#/components/schemas/PatchedPublicationWriteConceptPublicationWrite'
+      - $ref: '#/components/schemas/PatchedPublicationWritePublishedOrRevokedPublicationWrite'
+      discriminator:
+        propertyName: publicatiestatus
+        mapping:
+          concept: '#/components/schemas/PatchedPublicationWriteConceptPublicationWrite'
+          gepubliceerd: '#/components/schemas/PatchedPublicationWritePublishedOrRevokedPublicationWrite'
+          ingetrokken: '#/components/schemas/PatchedPublicationWritePublishedOrRevokedPublicationWrite'
+    PatchedPublicationWriteConceptPublicationWrite:
+      allOf:
+      - $ref: '#/components/schemas/PatchedPublicationWriteShared'
+      - $ref: '#/components/schemas/ConceptPublicationWrite'
+    PatchedPublicationWritePublishedOrRevokedPublicationWrite:
+      allOf:
+      - $ref: '#/components/schemas/PatchedPublicationWriteShared'
+      - $ref: '#/components/schemas/PublishedOrRevokedPublicationWrite'
+    PatchedPublicationWriteShared:
       type: object
       description: |-
         Encapsulate the create/update validation logic and behaviour.
@@ -2776,207 +2992,38 @@ components:
         properly documented in the API schema. Writes for concept publications are much
         more relaxed that published publications.
 
+        The write serializer in turn is a polymorphic serializer, covering the validation
+        behaviour for concept/published publication states.
+
         .. todo:: test validation behaviour of an incomplete concept publication being
         changed to published.
       properties:
-        uuid:
-          type: string
-          format: uuid
-          readOnly: true
-        urlPublicatieIntern:
-          oneOf:
-          - type: string
-            format: uri
-          - enum:
-            - ''
-            type: string
-          readOnly: true
-          title: internal publication url
-          description: URL to the UI of the internal application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
-        urlPublicatieExtern:
-          oneOf:
-          - type: string
-            format: uri
-          - enum:
-            - ''
-            type: string
-          readOnly: true
-          title: external publication url
-          description: URL to the UI of the external application where the publication
-            life cycle is managed. Requires the global configuration parameter to
-            be set, otherwise an empty string is returned.
-        informatieCategorieen:
-          type: array
-          items:
-            type: string
-            format: uuid
-          description: De informatiecategorie verduidelijkt de soort informatie die
-            in de publicatie voorkomt.
-        diWooInformatieCategorieen:
-          type: array
-          items:
-            type: string
-            format: uuid
-          readOnly: true
-          description: De informatiecategorieën voor in de sitemap.
-        onderwerpen:
-          type: array
-          items:
-            type: string
-            format: uuid
-          description: Onderwerpen gaan over maatschappelijk relevante informatie
-            die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
-            blijven en overstijgen de typische levensduur van een enkele publicatie.
-        publisher:
-          type: string
-          format: uuid
-          description: De organisatie die de publicatie publiceert.
-        verantwoordelijke:
-          type: string
-          format: uuid
-          nullable: true
-          description: De organisatie die verantwoordelijk is voor de publicatie en
-            haar inhoud.
-        opsteller:
-          type: string
-          format: uuid
-          nullable: true
-          description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
-        kenmerken:
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicationIdentifier'
-          description: The publication identifiers attached to this publication.
-        officieleTitel:
-          type: string
-          title: Officiële titel
-          maxLength: 255
-        verkorteTitel:
-          type: string
-          maxLength: 255
-        omschrijving:
-          type: string
-        eigenaar:
-          allOf:
-          - $ref: '#/components/schemas/Eigenaar'
-          nullable: true
-          description: |-
-            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
-
-            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
           default: gepubliceerd
           title: Status
-          description: "\n**Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.\n\
-            \n**Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook\
-            \ de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
-            \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"\
-            gepubliceerd\"`\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"\
-            ` -> `\"ingetrokken\"`.\n\nNote that some transitions may be limited by\
-            \ business logic.\n\n* `gepubliceerd` - Gepubliceerd\n* `concept` - Concept\n\
-            * `ingetrokken` - Ingetrokken"
-        gepubliceerdOp:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-          title: Published on
-          description: System timestamp reflecting when the publication was published.
-        ingetrokkenOp:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-          title: Revoked on
-          description: System timestamp reflecting when the publication was revoked.
-        registratiedatum:
-          type: string
-          format: date-time
-          readOnly: true
-          title: Geregistreerd op
-          description: Systeemdatum en -tijd wanneer de publicatie in de databank
-            opgeslagen is. Niet te verwarren met de creatiedatum van de publicatie,
-            die typisch *voor* de registratiedatum valt.
-        laatstGewijzigdDatum:
-          type: string
-          format: date-time
-          readOnly: true
-          title: Laatst gewijzigd op
-          description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
-            is in de database.
-        datumBeginGeldigheid:
-          type: string
-          format: date
-          nullable: true
-          title: Start date
-          description: The date when the rights and obligations of the attached documents
-            come into effect.
-        datumEindeGeldigheid:
-          type: string
-          format: date
-          nullable: true
-          title: End date
-          description: The date when the rights and obligations of the attached documents
-            stops being in effect.
-        bronBewaartermijn:
-          type: string
-          description: |-
-            De bron waaruit de bewaartermijn bepaald is (bjivoorbeeld: Selectielijst gemeenten 2020).
+          description: |2-
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
-          maxLength: 255
-        selectiecategorie:
-          type: string
-          description: |-
-            De categorie waaruit de bewaartermijn bepaald is, zoals deze in de bron bewaartermijn voorkomt (bijvoorbeeld: 20.1.2).
+            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
-          maxLength: 255
-        archiefnominatie:
-          description: |-
-            Geeft aan of de gegevens bij het archiveren bewaard blijven of definitief vernietigd worden.
+            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
 
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
-
-            * `blijvend_bewaren` - Blijvend bewaren
-            * `vernietigen` - Vernietigen
-          oneOf:
-          - $ref: '#/components/schemas/ArchiefnominatieEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        archiefactiedatum:
-          type: string
-          format: date
-          nullable: true
-          description: |-
-            Datum waarop de publicatie overgebracht of definitief vernietigd zal worden.
-
-            **Note** on create or when updating the information categories, manually provided values are ignored and overwritten by the automatically derived parameters from the related information categories.
-        toelichtingBewaartermijn:
-          type: string
-          description: '**Note** on create or when updating the information categories,
-            manually provided values are ignored and overwritten by the automatically
-            derived parameters from the related information categories.'
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
     PublicatiestatusEnum:
       enum:
       - gepubliceerd
       - concept
       - ingetrokken
       type: string
-      description: |-
-        * `""` -> `"concept"`
-        * `""` -> `"gepubliceerd"`
-        * `"concept"` -> `"gepubliceerd"`
-        * `"gepubliceerd"` -> `"ingetrokken"`.
-
-        Note that some transitions may be limited by business logic.
-
-        * `gepubliceerd` - Gepubliceerd
-        * `concept` - Concept
-        * `ingetrokken` - Ingetrokken
+      description: "**Waarschuwing**: wanneer je een publicatie intrekt, dan worden\
+        \ ook de gerelateerde gepubliceerde documenten ingetrokken.\n\nThe possible\
+        \ state transitions are: \n\n* `\"\"` -> `\"concept\"`\n* `\"\"` -> `\"gepubliceerd\"\
+        `\n* `\"concept\"` -> `\"gepubliceerd\"`\n* `\"gepubliceerd\"` -> `\"ingetrokken\"\
+        `.\n\nNote that some transitions may be limited by business logic.\n\n* `gepubliceerd`\
+        \ - Gepubliceerd\n* `concept` - Concept\n* `ingetrokken` - Ingetrokken"
     PublicationIdentifier:
       type: object
       properties:
@@ -3202,6 +3249,24 @@ components:
       - verantwoordelijke
       - verkorteTitel
     PublicationWrite:
+      oneOf:
+      - $ref: '#/components/schemas/PublicationWriteConceptPublicationWrite'
+      - $ref: '#/components/schemas/PublicationWritePublishedOrRevokedPublicationWrite'
+      discriminator:
+        propertyName: publicatiestatus
+        mapping:
+          concept: '#/components/schemas/PublicationWriteConceptPublicationWrite'
+          gepubliceerd: '#/components/schemas/PublicationWritePublishedOrRevokedPublicationWrite'
+          ingetrokken: '#/components/schemas/PublicationWritePublishedOrRevokedPublicationWrite'
+    PublicationWriteConceptPublicationWrite:
+      allOf:
+      - $ref: '#/components/schemas/PublicationWriteShared'
+      - $ref: '#/components/schemas/ConceptPublicationWrite'
+    PublicationWritePublishedOrRevokedPublicationWrite:
+      allOf:
+      - $ref: '#/components/schemas/PublicationWriteShared'
+      - $ref: '#/components/schemas/PublishedOrRevokedPublicationWrite'
+    PublicationWriteShared:
       type: object
       description: |-
         Encapsulate the create/update validation logic and behaviour.
@@ -3210,8 +3275,33 @@ components:
         properly documented in the API schema. Writes for concept publications are much
         more relaxed that published publications.
 
+        The write serializer in turn is a polymorphic serializer, covering the validation
+        behaviour for concept/published publication states.
+
         .. todo:: test validation behaviour of an incomplete concept publication being
         changed to published.
+      properties:
+        publicatiestatus:
+          allOf:
+          - $ref: '#/components/schemas/PublicatiestatusEnum'
+          default: gepubliceerd
+          title: Status
+          description: |2-
+
+            **Waarschuwing**: je kan geen ingetrokken publicatie aanmaken.
+
+            **Waarschuwing**: wanneer je een publicatie intrekt, dan worden ook de gerelateerde gepubliceerde documenten ingetrokken.
+
+            * `gepubliceerd` - Gepubliceerd
+            * `concept` - Concept
+            * `ingetrokken` - Ingetrokken
+    PublishedOrRevokedPublicationWrite:
+      type: object
+      description: |-
+        Base serializer for publication read and write operations.
+
+        This base class defines the shared logic that should be kept in sync between read
+        and write operations for consistent API documentation (and behaviour).
       properties:
         uuid:
           type: string
