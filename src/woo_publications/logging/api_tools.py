@@ -1,5 +1,3 @@
-from typing import Generic, TypeVar
-
 from django.db.models import Model
 
 from rest_framework import serializers
@@ -27,8 +25,6 @@ __all__ = [
     "AuditTrailViewSetMixin",
     "extract_audit_parameters",
 ]
-
-_MT_co = TypeVar("_MT_co", bound=Model, covariant=True)  # taken from DRF stubs
 
 
 def extract_audit_parameters(request: Request) -> tuple[str, str, str]:
@@ -66,15 +62,15 @@ class AuditTrailCreateMixin:
         )
 
 
-class AuditTrailRetrieveMixin(Generic[_MT_co]):
+class AuditTrailRetrieveMixin[MT: Model]:
     """
     Add support for audit trails to the
     :class:`rest_framework.mixins.RetrieveModelMixin`.
     """
 
-    _cached_object: _MT_co
+    _cached_object: MT
 
-    def get_object(self) -> _MT_co:
+    def get_object(self) -> MT:
         # Optimize multiple calls to get_object, since the default implementations
         # performs the DB lookup and permission checks every time.
         if not hasattr(self, "_cached_object"):
