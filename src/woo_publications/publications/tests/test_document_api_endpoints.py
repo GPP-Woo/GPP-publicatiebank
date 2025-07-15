@@ -1484,7 +1484,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             file_part_url = file_parts[0]["url"]
             self.assertEqual(
                 file_part_url,
-                "http://host.docker.internal:8000/api/v1/documenten/"
+                "http://host.docker.internal:8000/api/v2/documenten/"
                 f"{document.uuid}/bestandsdelen/{file_parts[0]['uuid']}",
             )
 
