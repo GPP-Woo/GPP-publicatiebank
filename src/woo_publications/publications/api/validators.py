@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 from django.utils.translation import gettext_lazy as _
 
 from furl import furl
@@ -9,6 +11,7 @@ from woo_publications.contrib.documents_api.client import get_client
 
 from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
+from ..typing import Kenmerk
 
 
 class PublicationStatusValidator:
@@ -103,3 +106,18 @@ class SourceDocumentURLValidator:
                     ),
                     code="invalid",
                 )
+
+
+def validate_duplicated_kenmerken(value: Sequence[Kenmerk]) -> None:
+    if not value:
+        return
+
+    # transforms the nested dicts into a set and checks if the length is the same as
+    # the original passed data. If the length is different that means that there were
+    # duplicated items present because sets can't contain duplicate items.
+    if (unique_value := {tuple(identifier.items()) for identifier in value}) and len(
+        unique_value
+    ) != len(value):
+        raise serializers.ValidationError(
+            _("You cannot provide identical identifiers.")
+        )
