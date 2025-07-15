@@ -71,7 +71,7 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 
 **Kenmerken**
 
-* Aan ieder document kan geen, een of meerdere combinaties van een ``identificatie`` en een ``bron`` gegeven worden. Dit kan bijvoorbeeld een documentnummer (identificatie) uit een aanlverend zaaksysteem of DMS (bron) zijn.
+* Aan ieder document kan geen, een of meerdere combinaties van een ``identificatie`` en een ``bron`` gegeven worden. Dit kan bijvoorbeeld een documentnummer (identificatie) uit een aanleverend zaaksysteem of DMS (bron) zijn.
 
 .. _admin_publicaties_index_publicaties:
 
