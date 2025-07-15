@@ -13,7 +13,7 @@ from drf_polymorphic.serializers import PolymorphicSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
+from rest_framework.relations import ManyRelatedField, SlugRelatedField
 from rest_framework.request import Request
 
 from woo_publications.accounts.models import OrganisationMember
@@ -530,6 +530,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         slug_field="uuid",
         help_text=_("The organisation which publishes the publication."),
         many=False,
+        allow_null=True,
     )
     verantwoordelijke = serializers.SlugRelatedField(
         queryset=Organisation.objects.filter(is_actief=True),
@@ -616,56 +617,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     def get_fields(self):
         fields = super().get_fields()
-        # When the given status (with fall back on the set data) is concept
-        # Then make all fields optional.
-        if hasattr(self, "initial_data"):
-            publicatiestatus = self.initial_data.get("publicatiestatus")
-            # When publicatiestatus isn't given ensure that the default value is used
-            # unless it is a partial update, in that case use the instance.
-            if not publicatiestatus:
-                if self.partial:
-                    assert isinstance(self.instance, Publication)
-                    publicatiestatus = self.instance.publicatiestatus
-                else:
-                    publicatiestatus = fields["publicatiestatus"].default
-
-            if publicatiestatus == PublicationStatusOptions.concept:
-                for field in fields:
-                    # Ensure that officiele_titel remains required.
-                    if field != "officiele_titel":
-                        fields[field].required = False
-                        fields[field].allow_null = True
-                        fields[field].allow_empty = True  # pyright: ignore[reportAttributeAccessIssue]
 
         assert fields["publicatiestatus"].help_text
         fsm_field = Publication._meta.get_field("publicatiestatus")
         assert isinstance(fsm_field, FSMField)
         fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
         return fields
-
-    def to_internal_value(self, data):
-        publicatiestatus = data.get("publicatiestatus")
-        # When publicatiestatus isn't given ensure that the default value is used
-        # unless it is a partial update, in that case use the instance.
-        if not publicatiestatus:
-            if self.partial:
-                assert isinstance(self.instance, Publication)
-                publicatiestatus = self.instance.publicatiestatus
-            else:
-                publicatiestatus = self.fields["publicatiestatus"].default
-
-        if publicatiestatus == PublicationStatusOptions.concept:
-            # Make sure to transform some field to the correct empty value.
-            if "informatie_categorieen" in data and not data["informatie_categorieen"]:
-                data["informatie_categorieen"] = []
-
-            if "onderwerpen" in data and not data["onderwerpen"]:
-                data["onderwerpen"] = []
-
-            if "kenmerken" in data and not data["kenmerken"]:
-                data["kenmerken"] = []
-
-        return super().to_internal_value(data)
 
     @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
     def get_url_publicatie_intern(self, obj: Publication) -> str:
@@ -692,10 +649,9 @@ class PublicationReadSerializer(PublicationSerializer):
             # in the response body (that does *not* mean they have a non-empty value!)
             field.required = True
 
-        # pubisher field
+        # publisher field
         publisher = fields["publisher"]
         assert isinstance(publisher, SlugRelatedField)
-        publisher.allow_null = True
         publisher.help_text += _(
             " The publisher can be `null` if the publication is a concept."
         )
@@ -706,21 +662,11 @@ class PublicationReadSerializer(PublicationSerializer):
         return fields
 
 
-class PublicationWriteSerializer(PublicationSerializer):
-    """
-    Encapsulate the create/update validation logic and behaviour.
-
-    The publication serializer is split in read/write parts so that the output can be
-    properly documented in the API schema. Writes for concept publications are much
-    more relaxed that published publications.
-
-    .. todo:: test validation behaviour of an incomplete concept publication being
-    changed to published.
-    """
-
+class PublicationWriteBaseSerializer(PublicationSerializer):
     def get_fields(self):
         fields = super().get_fields()
 
+        # Add notice about submitted values being overwritten on create
         for _field_name in (
             "bron_bewaartermijn",
             "selectiecategorie",
@@ -769,6 +715,79 @@ class PublicationWriteSerializer(PublicationSerializer):
             )
 
         return attrs
+
+
+class ConceptPublicationWriteSerializer(PublicationWriteBaseSerializer):
+    def get_fields(self):
+        fields = super().get_fields()
+
+        information_categories_field = fields["informatie_categorieen"]
+        assert isinstance(information_categories_field, ManyRelatedField)
+        information_categories_field.required = False
+        information_categories_field.allow_empty = True
+
+        # publisher field
+        publisher = fields["publisher"]
+        assert isinstance(publisher, SlugRelatedField)
+        publisher.required = False
+
+        return fields
+
+
+class PublishedOrRevokedPublicationWriteSerializer(PublicationWriteBaseSerializer):
+    def get_fields(self):
+        fields = super().get_fields()
+
+        # publisher field
+        publisher = fields["publisher"]
+        assert isinstance(publisher, SlugRelatedField)
+        publisher.allow_null = False
+
+        return fields
+
+
+class PublicationWriteSerializer(
+    PolymorphicSerializer, serializers.ModelSerializer[Publication]
+):
+    """
+    Encapsulate the create/update validation logic and behaviour.
+
+    The publication serializer is split in read/write parts so that the output can be
+    properly documented in the API schema. Writes for concept publications are much
+    more relaxed that published publications.
+
+    The write serializer in turn is a polymorphic serializer, covering the validation
+    behaviour for concept/published publication states.
+
+    .. todo:: test validation behaviour of an incomplete concept publication being
+    changed to published.
+    """
+
+    discriminator_field = "publicatiestatus"
+    serializer_mapping = {
+        PublicationStatusOptions.concept: ConceptPublicationWriteSerializer,
+        PublicationStatusOptions.published: PublishedOrRevokedPublicationWriteSerializer,  # noqa: E501
+        PublicationStatusOptions.revoked: PublishedOrRevokedPublicationWriteSerializer,
+    }
+
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = Publication
+        fields = ("publicatiestatus",)
+        extra_kwargs = {
+            "publicatiestatus": PublicationSerializer.Meta.extra_kwargs[
+                "publicatiestatus"
+            ],
+        }
+
+    def to_internal_value(self, data):
+        # ensure that for (partial) updates, we add the existing instance discriminator
+        # value to the data instead of falling back to the default
+        # TODO: patch up in drf-polymorphic
+        if self.instance is not None and self.discriminator_field not in data:
+            data[self.discriminator_field] = self.discriminator.get_attribute(
+                self.instance
+            )
+        return super().to_internal_value(data)
 
     @transaction.atomic
     def update(self, instance: Publication, validated_data):
