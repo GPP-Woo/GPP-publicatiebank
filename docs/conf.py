@@ -86,6 +86,7 @@ linkcheck_ignore = [
     r"http://localhost:\d+/",
     r"https://.*sentry.*",
     r"https://www\.miniwebtool\.com/django-secret-key-generator",
+    r"https://gemeente\.groningen\.nl/",
 ]
 
 

@@ -5,12 +5,15 @@ Accounts
 
 Onder het menu-item "Accounts" en op het dashboard onder het kopje "Accounts" wordt toegang geboden tot het beheer van:
 
-* Gebruikers
-* Groepen
-* TOTP devices
-* Webauthn devices
+* :ref:`admin_accounts_index_users`
+* :ref:`admin_accounts_index_groups`
+* :ref:`admin_accounts_index_employees`
+* :ref:`admin_accounts_index_totpdevices`
+* :ref:`admin_accounts_index_webauthndevices`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
+
+.. _admin_accounts_index_users:
 
 Gebruikers
 ----------
@@ -29,24 +32,19 @@ Op dit scherm zijn een aantal acties mogelijk:
 
 * Rechtsboven op het beheerscherm zit een knop **Gebruiker toevoegen** waarmee je een
   nieuwe lokale gebruikersaccount kan aanmaken.
-* Bovenaan staat een zoekveld, waar je gebruikers op gebruikersnaam, voornaam, achternaam
-  en email kan vinden.
+* Bovenaan staat een **zoekveld**, waar je gebruikers op gebruikersnaam, voornaam, achternaam
+  en e-mailadres kan vinden.
 * Er is een bulk-actie om gebruikers te verwijderen, maar het is beter om accounts te
   deactiveren in plaats van verwijderen zodat audit-informatie gekoppeld blijft.
-* Rechts kan je filteren op een aantal eigenschappen:
+* Rechts kan je **filteren** op een aantal eigenschappen:
 
-    - Stafstatus ja/nee: enkel gebruikers met stafstatus kunnen op de beheeromgeving
-      inloggen.
-    - Supergebruikerstatus ja/nee: supergebruikers hebben altijd alle rechten om alle
-      acties uit te voeren.
-    - Actief ja/nee: inactieve gebruikers kunnen niet inloggen.
-    - Groepen: een gebruiker kan lid zijn van één of meerdere groepen waaraan bepaalde
-      rechten gekoppeld zijn.
+    - *Stafstatus ja/nee*: enkel gebruikers met stafstatus kunnen op de beheeromgeving inloggen.
+    - *Supergebruikerstatus ja/nee*: supergebruikers hebben altijd alle rechten om alle acties uit te voeren.
+    - *Actief ja/nee*: inactieve gebruikers kunnen niet inloggen.
+    - *Groepen*: een gebruiker kan lid zijn van één of meerdere :ref:`groepen <admin_accounts_index_groups>` waaraan bepaalde rechten gekoppeld zijn.
 
-* In de lijstweergave kan je voor elke gebruiker audit-logs weergeven via de "Toon logs"
-  link. Deze logs tonen welke wijzigingen er aan het gebruikersaccount gemaakt zijn en
-  door wie.
-* De "Overnemen" knop laat (super)gebruikers toe zich voor te doen als de geselecteerde
+* In de lijstweergave kan je voor elke gebruiker :ref:`audit-logs <admin_logging_index>` weergeven via de **Toon logs** link. Deze logs tonen welke wijzigingen er aan het gebruikersaccount gemaakt zijn en door wie.
+* De knop **Overnemen** laat (super)gebruikers toe zich voor te doen als de geselecteerde
   gebruiker. Dit is handig om de rechten te controleren of een probleem te reproduceren.
 
 **Gebruiker bewerken**
@@ -55,11 +53,12 @@ Wanneer je de gebruikersnaam van een gebruiker aanklikt, dan opent een scherm me
 nadere details. Hier zie je:
 
 * **Alle gegevens**. Deze lichten we hieronder toe.
-* Rechtsboven een knop **Toon logs**. Deze toont de volledige
-  :ref:`audit trail<admin_logging_index>` van de *gebruiker*.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *gebruiker*.
 * Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de
   beheerinterface zijn uitgevoerd op de *gebruiker*.
-* Linksonder de mogelijkheid om de wijzigingen op te slaan.
+* Linksonder de mogelijkheid om de wijzigingen op te slaan. Er kan voor gekozen worden
+  om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige
+  registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de gebruiker te **verwijderen**.
 
 Bij een gebruiker zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte
@@ -81,6 +80,8 @@ velden **dikgedrukt** weergegeven.
 .. warning:: Van supergebruikers wordt verwacht dat ze goed weten wat ze doen, dus ken
    deze rechten alleen toe als het echt noodzakelijk is. Over het algemeen kan je beter
    een gebruiker aan een groep toewijzen.
+
+.. _admin_accounts_index_groups:
 
 Groepen
 -------
@@ -118,7 +119,9 @@ zie je:
 * **Alle gegevens**. Deze lichten we hieronder toe.
 * Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de
   beheerinterface zijn uitgevoerd op de *groep*.
-* Linksonder de mogelijkheid om de wijzigingen op te slaan.
+* Linksonder de mogelijkheid om de wijzigingen op te slaan. Er kan voor gekozen worden
+  om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige
+  registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de groep te **verwijderen**.
 
 Bij een groep zijn de volgende gegevens beschikbaar. Op het scherm worden verplichte
@@ -129,13 +132,15 @@ velden **dikgedrukt** weergegeven.
 * ``Rechten``. De mogelijke rechten op objecten die in de beheeromgeving zichtbaar zijn,
   typisch onderverdeeld in *toevoegen*, *wijzigen*, *verwijderen* en *inzien*.
 
+.. _admin_accounts_index_employees:
+
 Organisatieleden
 ----------------
 
 Een *organisatielid* bevat de minimale velden om een medewerker te kunnen relateren: de
-unieke identificatie en de weergavenaam. Organisatieleden zijn eigenaars van publicaties
+unieke identificatie en de weergavenaam. Organisatieleden zijn eigenaar van publicaties
 en documenten. De gegevens worden gevuld via de beheeromgeving of (automatisch) via de
-GPP-app.
+API.
 
 In het beheerscherm van de *organisatieleden* zie je een lijst van alle
 *organisatieleden*-registraties. Op dit scherm zijn de volgende acties mogelijk:
@@ -145,13 +150,13 @@ In het beheerscherm van de *organisatieleden* zie je een lijst van alle
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht
   kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**.
-  Op dit moment wordt de actie **Geselecteerde documenten verwijderen** ondersteund.
+  Op dit moment wordt de actie **Geselecteerde organisatieleden verwijderen** ondersteund.
   Merk op dat het mogelijk is om in de lijst één of meerdere *organisatielid*-registraties
   aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *organisatielid*-registraties. Door op de
   kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
 
-Wanneer bij een *organisatielid*-registratie op  de `identificatie` wordt geklikt, wordt
+Wanneer bij een *organisatielid*-registratie op de `identificatie` wordt geklikt, wordt
 een scherm geopend met de *medewerker*-details. Hierop zien we:
 
 * **Alle metadatavelden**. Deze lichten we hieronder toe.
@@ -167,10 +172,12 @@ een scherm geopend met de *medewerker*-details. Hierop zien we:
 Op een *organisatielid*-registratie zijn de volgende metadata beschikbaar. Op het scherm
 worden verplichte velden **dikgedrukt** weergegeven.
 
+* ``Naam``. De weergavenaam van een *organisatielid*.
 * ``Identificatie``. Het unieke kenmerk dat intern aan het *organisatielid* is toegekend.
   Deze kan je niet wijzigen voor bestaande objecten. De waarde moet uit de
-  inlogvoorziening van de organisatie komen.
-* ``Naam``. De weergavenaam van een *organisatielid*.
+  inlog-voorziening van de organisatie komen.
+
+.. _admin_accounts_index_totpdevices:
 
 TOTP devices
 ------------
@@ -183,6 +190,8 @@ multi-factor-authenticatie (MFA). Het bevat de technische gegevens voor gebruike
 een éénmalige code te kunnen generen bij het inloggen met lokale gebruikersaccounts.
 
 We documenteren deze functionaliteit verder niet.
+
+.. _admin_accounts_index_webauthndevices:
 
 Webauthn devices
 ----------------

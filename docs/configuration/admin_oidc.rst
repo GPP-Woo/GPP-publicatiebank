@@ -74,3 +74,22 @@ Click the **Opslaan** button to save the configuration.
 .. tip:: You can test the configuration by opening a private window and navigating to
    the admin login page. You should now see an option to "Log in with organisation account"
    and follow the login steps by clicking it.
+
+Pre-configured groups
+---------------------
+
+A standard installation of GPP-publicatiebank comes with some
+:ref:`user groups <admin_accounts_index_groups>` that permissions associated with them:
+
+* ``TechnischBeheer``, intended for staff members that have to configure credentials to
+  external services
+* ``FunctioneelBeheer``, intended for staff members that know their way around the
+  content managed in the application.
+
+If these group names are present in the configured *Groups claim*, then user group
+membership will be synced automatically.
+
+.. tip::
+   The permissions in the pre-configured groups are automatically updated every time the
+   application is restarted. If you wish, you can create your own groups and add the
+   group names to the user roles for automatic group assignment.
