@@ -2,7 +2,7 @@
 Public documents registration
 =============================
 
-:Version: 1.2.0
+:Version: 2.0.0-rc.0
 :Source: https://github.com/GPP-Woo/GPP-publicatiebank
 :Keywords: WOO, Public Documents, NL, Open Data
 
