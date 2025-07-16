@@ -65,6 +65,7 @@ fi
 >&2 echo "Starting server"
 exec uwsgi \
     --ini "${SCRIPTPATH}/uwsgi.ini" \
+    --master \
     --http :$uwsgi_port \
     --http-keepalive \
     --http-timeout=1800 \
