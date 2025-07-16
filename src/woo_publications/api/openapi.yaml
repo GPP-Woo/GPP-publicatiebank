@@ -2014,14 +2014,12 @@ components:
           type: string
           format: date
           nullable: true
-          title: Startdatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: Einddatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             (zijn) komen te vervallen.
         bronBewaartermijn:
@@ -3243,14 +3241,12 @@ components:
           type: string
           format: date
           nullable: true
-          title: Startdatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: Einddatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             (zijn) komen te vervallen.
         bronBewaartermijn:
@@ -3503,14 +3499,12 @@ components:
           type: string
           format: date
           nullable: true
-          title: Startdatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             in werking treden.
         datumEindeGeldigheid:
           type: string
           format: date
           nullable: true
-          title: Einddatum
           description: De datum waarop de rechten en plichten vastgelegd in deze documenten
             (zijn) komen te vervallen.
         bronBewaartermijn:
