@@ -666,6 +666,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         return partial(form, request=request)  # pyright: ignore[reportCallIssue]
 
     def delete_model(self, request: HttpRequest, obj: Document):
+        assert is_authenticated_request(request)
         doc_id = obj.pk
         super().delete_model(request, obj)
 
@@ -692,6 +693,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     def delete_queryset(
         self, request: HttpRequest, queryset: models.QuerySet[Document]
     ):
+        assert is_authenticated_request(request)
         queryset = queryset.select_related("document_service")
         # evaluate and cache the queryset *before* the actual delete so that we can
         # dispatch cleanup tasks after the delete

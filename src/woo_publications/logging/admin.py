@@ -81,7 +81,7 @@ class TimelineLogProxyAdmin(admin.ModelAdmin):
     def show_event(self, obj: TimelineLogProxy) -> str:
         if (event := obj.event) == "unknown":
             return gettext("Unknown")
-        return Events(event).label
+        return str(Events(event).label)
 
     @admin.display(description=_("kind"), ordering="content_type")
     def show_content_type(self, obj: TimelineLogProxy) -> str | None:

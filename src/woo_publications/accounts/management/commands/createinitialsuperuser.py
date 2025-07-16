@@ -14,7 +14,7 @@ from ...models import User
 class Command(BaseCommand):
     help = "Set up an initial superuser account if it doesn't exist yet"
 
-    UserModel: type[User]
+    UserModel: type[User]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

@@ -28,40 +28,40 @@ class AdminAuditLogMixin:
 
     model: type[models.Model]
 
-    def log_addition(self, request, object, message):
+    def log_addition(self, request, obj, message):
         assert isinstance(request.user, User)
         audit_admin_create(
-            content_object=object,
+            content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(object),
+            object_data=serialize_instance(obj),
         )
 
         return super().log_addition(  # pyright: ignore[reportAttributeAccessIssue]
-            request, object, message
+            request, obj, message
         )
 
-    def log_change(self, request, object, message):
+    def log_change(self, request, obj, message):
         assert isinstance(request.user, User)
         audit_admin_update(
-            content_object=object,
+            content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(object),
+            object_data=serialize_instance(obj),
         )
 
         return super().log_change(  # pyright: ignore[reportAttributeAccessIssue]
-            request, object, message
+            request, obj, message
         )
 
-    def log_deletion(self, request, object, object_repr):
+    def log_deletion(self, request, obj, object_repr):
         assert isinstance(request.user, User)
         audit_admin_delete(
-            content_object=object,
+            content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(object),
+            object_data=serialize_instance(obj),
         )
 
         return super().log_deletion(  # pyright: ignore[reportAttributeAccessIssue]
-            request, object, object_repr
+            request, obj, object_repr
         )
 
     def change_view(

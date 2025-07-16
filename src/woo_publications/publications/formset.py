@@ -6,6 +6,7 @@ from django.http import HttpRequest
 
 from woo_publications.accounts.models import OrganisationMember, User
 from woo_publications.logging.admin_tools import AuditLogInlineformset
+from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
 from .models import Document, Publication
@@ -64,6 +65,7 @@ class DocumentInlineformset(AuditLogInlineformset[Document, Publication, ModelFo
             )
 
         if obj.document_service and obj.document_uuid:
+            assert is_authenticated_request(self.request)
             transaction.on_commit(
                 partial(
                     remove_document_from_openzaak.delay,

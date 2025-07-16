@@ -7,6 +7,7 @@ from typing import Literal
 from django import forms
 from django.db import transaction
 from django.http import HttpRequest
+from django.utils.choices import BaseChoiceIterator
 from django.utils.translation import gettext_lazy as _
 
 import structlog
@@ -86,6 +87,7 @@ class PublicationStatusForm[M: Publication | Document](forms.ModelForm[M]):
             if selected_publicatiestatus := self.instance.publicatiestatus:
                 allowed_values.add(selected_publicatiestatus)
 
+            assert isinstance(publicatiestatus_field.choices, BaseChoiceIterator)
             publicatiestatus_field.choices = [
                 choice
                 for choice in publicatiestatus_field.choices
