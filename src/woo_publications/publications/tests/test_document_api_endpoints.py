@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from freezegun import freeze_time
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import ConnectionError
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -1851,11 +1851,11 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
             },
         )
-        # deliberately break the service configuration to trigger errors
-        self.service.client_id = "invalid-client-id"
-        self.service.save()
 
-        with self.assertRaises(HTTPError):
+        with (
+            self.assertRaises(ConnectionError),
+            self.vcr_raises(exception=ConnectionError),
+        ):
             self.client.put(
                 endpoint,
                 data={"inhoud": SimpleUploadedFile("dummy.txt", b"aAaAa")},
