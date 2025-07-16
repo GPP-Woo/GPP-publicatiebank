@@ -14,10 +14,12 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
 
         match db_field.name:
             case "gpp_app_publication_url_template":
+                assert field is not None
                 field.widget.attrs.setdefault(
                     "placeholder", "https://gpp-app.example.com/publicaties/<UUID>"
                 )
             case "gpp_burgerportaal_publication_url_template":
+                assert field is not None
                 field.widget.attrs.setdefault(
                     "placeholder",
                     "https://gpp-burgerportaal.example.com/publicaties/<UUID>",
