@@ -40,55 +40,55 @@ Breaking changes
 Features
 --------
 
-* [#295] You can now update ``Document.creatiedatum`` via the API.
-* [#266] The ``Publicatie`` and ``Document`` publication status progressions now have a
+* [:issue:`295`] You can now update ``Document.creatiedatum`` via the API.
+* [:issue:`266`] The ``Publicatie`` and ``Document`` publication status progressions now have a
   well-documented life cycle. The API validates that these status changes are
   meaningfull.
-* [#214, #215] You can now configure a pattern for the URLs to a publication in the
+* [:issue:`214`, :issue:`215`] You can now configure a pattern for the URLs to a publication in the
   internal application (GPP-app) and public citizen portal (GPP-burgerportaal). These
   URLs are included in the API responses for publications.
-* [#275] You can now add (custom) descriptions to information categories in the
+* [:issue:`275`] You can now add (custom) descriptions to information categories in the
   metadata loaded from overheid.nl value lists.
-* [#270] You can now add the RSIN to organisations in the metadata loaded from
+* [:issue:`270`] You can now add the RSIN to organisations in the metadata loaded from
   overheid.nl value lists.
-* [#194] You can now add (additional) ``identifiers`` ("kenmerken") to documents. Any
+* [:issue:`194`] You can now add (additional) ``identifiers`` ("kenmerken") to documents. Any
   specified identifiers are also indexed in GPP-zoeken.
-* [#195] You can now add (additional) ``identifiers`` ("kenmerken") to publications. Any
+* [:issue:`195`] You can now add (additional) ``identifiers`` ("kenmerken") to publications. Any
   specified identifiers are also indexed in GPP-zoeken.
-* [#263] Added support for "concept" publications with incomplete data. The validation
+* [:issue:`263`] Added support for "concept" publications with incomplete data. The validation
   requirements are relaxed since a lot of information may be unknown in automated
   publishing architectures. The validation is enforced when the publication status
   changes from ``concept``.
-* [#304] You can now delete documents via the API. The delete cascades to the underlying
+* [:issue:`304`] You can now delete documents via the API. The delete cascades to the underlying
   Documenten API and destroys the metadata and content there.
-* [#282] Added new metadata date/datetime fields:
+* [:issue:`282`] Added new metadata date/datetime fields:
 
     * Publication: published on, revoked on, start date, end date.
     * Document: received on, signed on, published on, revoked on.
 
-* [#320] Changed the built-in user group names to remove spaces, for better
+* [:issue:`320`] Changed the built-in user group names to remove spaces, for better
   compatibility with role names in MS Entra.
-* [#283] The archiving parameters are now calculated when a publication is published
+* [:issue:`283`] The archiving parameters are now calculated when a publication is published
   rather than when it's created.
-* [#272] Update the value for ``auteur`` in the Documenten API for documents that we
+* [:issue:`272`] Update the value for ``auteur`` in the Documenten API for documents that we
   register.
-* [#319] Support filtering in the API on identifiers ("kenmerken", value and/or source).
-* [#274] API clients can now provide a link to a resource in a Documents API instead of
+* [:issue:`319`] Support filtering in the API on identifiers ("kenmerken", value and/or source).
+* [:issue:`274`] API clients can now provide a link to a resource in a Documents API instead of
   uploading the metadata and file parts content.
-* [#271] The RSIN of the related publisher (organisation) is now used when the document
+* [:issue:`271`] The RSIN of the related publisher (organisation) is now used when the document
   metadata is registered in the Documents API. If none is available, the global default
   is used as was the situation before.
 
 Bugfixes
 --------
 
-* [#307, #311] Fixed container restarts overwriting custom archiving parameters set on
+* [:issue:`307`, :issue:`311`] Fixed container restarts overwriting custom archiving parameters set on
   information categories.
-* [#298] Fixed changes to ``publisher`` and/or ``informatieCategorieen`` on a
+* [:issue:`298`] Fixed changes to ``publisher`` and/or ``informatieCategorieen`` on a
   publication not triggering document re-indexing for the related documents.
-* [#330] Revoked publications are now excluded from the choices in the admin when
+* [:issue:`330`] Revoked publications are now excluded from the choices in the admin when
   adding a document.
-* [#309] Fixed not always deleting the document from the Documents API when a document
+* [:issue:`309`] Fixed not always deleting the document from the Documents API when a document
   is deleted from GPP-publicatiebank.
 
 Project maintenance
@@ -101,8 +101,8 @@ Project maintenance
 * Upgraded external packages to their latest (security) releases.
 * Removed the unused Javascript toolchain.
 * Updated github issue templates.
-* [#292] Removed ``documenthandelingen``.
-* [#340] Deprecated ``identifier`` on the ``Document`` resource, use ``kenmerken``
+* [:issue:`292`] Removed ``documenthandelingen``.
+* [:issue:`340`] Deprecated ``identifier`` on the ``Document`` resource, use ``kenmerken``
   instead.
 * Application logs are now structured (JSON) using ``structlog``.
 * Updated project documentation.
@@ -125,16 +125,18 @@ Upgrade procedure
 Features
 --------
 
-* [#205, #206, #207, #209, #211, #237] Added "Topics" to group multiple publications together:
+* [:issue:`205`, :issue:`206`, :issue:`207`, :issue:`209`, :issue:`211`, :issue:`237`]
+  Added "Topics" to group multiple publications together:
 
     * Topics are used to bundle publications together that have social relevance.
     * They support images and promotion on the citizen portal.
     * Topics are also indexed in GPP-zoeken.
 
-* [#232] The large file uploads (in particular with multiple chunks) are now optimized
+* [:issue:`232`] The large file uploads (in particular with multiple chunks) are now optimized
   to consume much less memory.
-* [#235] The API now supports filtering on multiple publication statuses at the same time.
-* [#198, #199, #200, #201, #202, #203, #204] Added support for archive parameters and retention policies:
+* [:issue:`235`] The API now supports filtering on multiple publication statuses at the same time.
+* [:issue:`198`, :issue:`199`, :issue:`200`, :issue:`201`, :issue:`202`, :issue:`203`, :issue:`204`]
+  Added support for archive parameters and retention policies:
 
     * The retention policy can be specified on information categories.
     * The archive action date of publications is automatically calculated.
@@ -142,15 +144,15 @@ Features
     * Relevant filters on API endpoints have been added.
     * Added bulk actions in the admin to reassess the retention policy.
 
-* [#51] Added bulk revocation actions in the admin for publications and documents.
-* [#260] You can now reassign the owner of a publication/document (both via the API and
+* [:issue:`51`] Added bulk revocation actions in the admin for publications and documents.
+* [:issue:`260`] You can now reassign the owner of a publication/document (both via the API and
   the admin interface).
 
 Bugfixes
 --------
 
 * Fixed misconfiguration of our docker compose file.
-* [#252] Fixed invalid format of some translations.
+* [:issue:`252`] Fixed invalid format of some translations.
 
 Project maintenance
 -------------------
@@ -159,7 +161,7 @@ Project maintenance
 * Switched code quality tools to Ruff.
 * Simplified documentation test tools.
 * Added upgrade-check mechanism for "hard stops".
-* [#277] Upgraded framework version to next LTS release.
+* [:issue:`277`] Upgraded framework version to next LTS release.
 
 1.2.0-rc.0 (2025-05-29)
 =======================
@@ -179,16 +181,18 @@ Upgrade procedure
 Features
 --------
 
-* [#205, #206, #207, #209, #211, #237] Added "Topics" to group multiple publications together:
+* [:issue:`205`, :issue:`206`, :issue:`207`, :issue:`209`, :issue:`211`, :issue:`237`]
+  Added "Topics" to group multiple publications together:
 
     * Topics are used to bundle publications together that have social relevance.
     * They support images and promotion on the citizen portal.
     * Topics are also indexed in GPP-zoeken.
 
-* [#232] The large file uploads (in particular with multiple chunks) are now optimized
+* [:issue:`232`] The large file uploads (in particular with multiple chunks) are now optimized
   to consume much less memory.
-* [#235] The API now supports filtering on multiple publication statuses at the same time.
-* [#198, #199, #200, #201, #202, #203, #204] Added support for archive parameters and retention policies:
+* [:issue:`235`] The API now supports filtering on multiple publication statuses at the same time.
+* [:issue:`198`, :issue:`199`, :issue:`200`, :issue:`201`, :issue:`202`, :issue:`203`, :issue:`204`]
+  Added support for archive parameters and retention policies:
 
     * The retention policy can be specified on information categories.
     * The archive action date of publications is automatically calculated.
@@ -196,15 +200,15 @@ Features
     * Relevant filters on API endpoints have been added.
     * Added bulk actions in the admin to reassess the retention policy.
 
-* [#51] Added bulk revocation actions in the admin for publications and documents.
-* [#260] You can now reassign the owner of a publication/document (both via the API and
+* [:issue:`51`] Added bulk revocation actions in the admin for publications and documents.
+* [:issue:`260`] You can now reassign the owner of a publication/document (both via the API and
   the admin interface).
 
 Bugfixes
 --------
 
 * Fixed misconfiguration of our docker compose file.
-* [#252] Fixed invalid format of some translations.
+* [:issue:`252`] Fixed invalid format of some translations.
 
 Project maintenance
 -------------------
@@ -213,14 +217,14 @@ Project maintenance
 * Switched code quality tools to Ruff.
 * Simplified documentation test tools.
 * Added upgrade-check mechanism for "hard stops".
-* [#277] Upgraded framework version to next LTS release.
+* [:issue:`277`] Upgraded framework version to next LTS release.
 
 1.1.1 (2025-05-02)
 ==================
 
 Bugfix release.
 
-* [#267] Added missing "documenthandeling" TOOI identifier, required for valid sitemap
+* [:issue:`267`] Added missing "documenthandeling" TOOI identifier, required for valid sitemap
   generation.
 
 1.1.0 (2025-04-16)
@@ -250,14 +254,14 @@ Project maintenance
 
 Third 1.1 release candidate.
 
-* [#244] Fixed incomplete bulk delete fix.
+* [:issue:`244`] Fixed incomplete bulk delete fix.
 
 1.1.0-rc.1 (2025-04-10)
 =======================
 
 Second 1.1 release candidate.
 
-* [#244] Fixed bulk delete not triggering index removal in GPP-zoeken.
+* [:issue:`244`] Fixed bulk delete not triggering index removal in GPP-zoeken.
 
 1.1.0-rc.0 (2025-03-26)
 =======================
