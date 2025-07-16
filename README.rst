@@ -47,7 +47,10 @@ Versie          Release datum   API specificatie
 ==============  ==============  =============================
 latest          n/a             `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/main/src/woo_publications/api/openapi.yaml>`_,
                                 `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/main/src/woo_publications/api/openapi.yaml>`_,
-                                (`verschillen <https://github.com/GPP-Woo/GPP-publicatiebank/compare/1.2.0..main>`_)
+                                (`verschillen <https://github.com/GPP-Woo/GPP-publicatiebank/compare/2.0.0-rc.0..main>`_)
+2.0.0           2025-07-16      `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/2.0.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
+                                `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/2.0.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
+                                (`verschillen <https://github.com/GPP-Woo/GPP-publicatiebank/compare/1.2.0..2.0.0-rc.0>`_)
 1.1.0           2025-05-19      `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/1.2.0/src/woo_publications/api/openapi.yaml>`_,
                                 `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/1.2.0/src/woo_publications/api/openapi.yaml>`_,
                                 (`verschillen <https://github.com/GPP-Woo/GPP-publicatiebank/compare/1.0.0-rc.0..1.2.0>`_)
