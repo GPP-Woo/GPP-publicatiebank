@@ -15,7 +15,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.timezone import localdate
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
@@ -248,7 +248,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         blank=True,
     )
     datum_begin_geldigheid = models.DateField(
-        _("start date"),
+        _("in effect from"),
         help_text=_(
             "The date when the rights and obligations of the attached "
             "documents come into effect."
@@ -257,7 +257,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         blank=True,
     )
     datum_einde_geldigheid = models.DateField(
-        _("end date"),
+        _("in effect until"),
         help_text=_(
             "The date when the rights and obligations of the attached "
             "documents stops being in effect."
@@ -563,8 +563,8 @@ class PublicationIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = pgettext("trait", "identifier")
-        verbose_name_plural = pgettext("trait", "identifiers")
+        verbose_name = pgettext_lazy("trait", "identifier")
+        verbose_name_plural = pgettext_lazy("trait", "identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["publicatie", "kenmerk", "bron"],
@@ -1047,8 +1047,8 @@ class DocumentIdentifier(models.Model):
     )
 
     class Meta:
-        verbose_name = pgettext("trait", "identifier")
-        verbose_name_plural = pgettext("trait", "identifiers")
+        verbose_name = pgettext_lazy("trait", "identifier")
+        verbose_name_plural = pgettext_lazy("trait", "identifiers")
         constraints = [
             models.UniqueConstraint(
                 fields=["document", "kenmerk", "bron"],
