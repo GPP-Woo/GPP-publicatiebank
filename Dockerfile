@@ -105,7 +105,10 @@ ARG SECRET_KEY=dummy
 LABEL org.label-schema.vcs-ref=$COMMIT_HASH \
       org.label-schema.vcs-url="https://github.com/GPP-Woo/GPP-publicatiebank" \
       org.label-schema.version=$RELEASE \
-      org.label-schema.name="gpp-publicatiebank"
+      org.label-schema.name="gpp-publicatiebank" \
+      org.opencontainers.image.source="https://github.com/GPP-Woo/GPP-publicatiebank" \
+      org.opencontainers.image.description="A registration providing the functionalities \
+        for a \"public documents\" storage. Part of the GPP-Woo suite."
 
 # Run collectstatic and compilemessages, so the result is already included in
 # the image
