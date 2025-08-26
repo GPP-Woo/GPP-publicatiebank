@@ -95,6 +95,7 @@ class GPPSearchClient(NLXClient):
             "creatiedatum": document.creatiedatum.isoformat(),
             "registratiedatum": document.registratiedatum.isoformat(),
             "laatstGewijzigdDatum": document.laatst_gewijzigd_datum.isoformat(),
+            "gepubliceerdOp": document.gepubliceerd_op.isoformat(),
             "fileSize": document.bestandsomvang,
             "downloadUrl": download_url,
         }
@@ -144,6 +145,13 @@ class GPPSearchClient(NLXClient):
             "omschrijving": publication.omschrijving,
             "registratiedatum": publication.registratiedatum.isoformat(),
             "laatstGewijzigdDatum": publication.laatst_gewijzigd_datum.isoformat(),
+            "gepubliceerdOp": publication.gepubliceerd_op.isoformat(),
+            "datumBeginGeldigheid": publication.datum_begin_geldigheid.isoformat()
+            if publication.datum_begin_geldigheid
+            else None,
+            "datumEindeGeldigheid": publication.datum_einde_geldigheid.isoformat()
+            if publication.datum_einde_geldigheid
+            else None,
         }
 
         response = self.post("publicaties", json=body)
