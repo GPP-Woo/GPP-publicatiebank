@@ -576,7 +576,7 @@ maykin-2fa==1.0.2
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   open-api-framework
-maykin-common==0.6.0
+maykin-common==0.8.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt

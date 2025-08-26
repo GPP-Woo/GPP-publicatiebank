@@ -280,7 +280,7 @@ maykin-2fa==1.0.2
     # via
     #   maykin-common
     #   open-api-framework
-maykin-common==0.6.0
+maykin-common==0.8.0
     # via -r requirements/base.in
 mozilla-django-oidc==4.0.1
     # via mozilla-django-oidc-db
