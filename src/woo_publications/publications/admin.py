@@ -557,7 +557,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "bestandsnaam",
         "publicatiestatus",
         "show_filesize",
-        "identifier",
         "registratiedatum",
         "upload_complete",
         "show_actions",
@@ -617,7 +616,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     search_fields = (
         "uuid",
-        "identifier",
         "officiele_titel",
         "verkorte_titel",
         "bestandsnaam",

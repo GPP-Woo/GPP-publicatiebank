@@ -33,6 +33,15 @@ class TestDocumentAdmin(WebTest):
             naam=cls.user.get_full_name(),
         )
 
+    def assertNumResults(self, response, amount: int):
+        self.assertContains(response, "field-bestandsnaam", amount)
+
+    def assertDocumentListed(self, response, document: Document, times: int = 1):
+        # check for record presence by counting how many times the detail/change link is
+        # present
+        detail_path = reverse("admin:publications_document_change", args=(document.pk,))
+        self.assertContains(response, detail_path, times)
+
     def test_document_admin_shows_items(self):
         DocumentFactory.create(
             eigenaar=self.organisation_member,
@@ -54,7 +63,7 @@ class TestDocumentAdmin(WebTest):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "field-identifier", 2)
+        self.assertContains(response, "field-bestandsnaam", 2)
 
     def test_document_admin_search(self):
         publication = PublicationFactory.create()
@@ -97,59 +106,48 @@ class TestDocumentAdmin(WebTest):
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document)
 
-        with self.subTest("filter on identifier"):
-            form["q"] = document.identifier
-
-            search_response = form.submit()
-
-            self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document.identifier)
-
-        with self.subTest("filter on officiele_title"):
+        with self.subTest("filter on officiele_titel"):
             form["q"] = "title one"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document)
 
         with self.subTest("filter on verkorte_titel"):
             form["q"] = "two"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            # because of django 5.2 the checkbox for selecting items for action
-            # now has the clickable link name in its area label
-            self.assertContains(search_response, "title two", 2)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document2)
 
         with self.subTest("filter on bestandsnaam"):
             form["q"] = "doc2.txt"
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document2.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document2)
 
         with self.subTest("filter on publication uuid"):
             form["q"] = str(publication.uuid)
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document)
 
         with self.subTest("filter on owner identifier"):
             form["q"] = org_member_1.identifier
             search_response = form.submit()
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document)
 
     def test_document_admin_list_filters(self):
         self.app.set_user(user=self.user)
@@ -190,8 +188,8 @@ class TestDocumentAdmin(WebTest):
             # Sanity check that we indeed filtered on registratiedatum
             assert "registratiedatum__gte" in search_response.context["request"].GET
 
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document2.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document2)
 
         with self.subTest("filter on creatiedatum"):
             search_response = response.click(description=_("Today"), index=1)
@@ -201,8 +199,8 @@ class TestDocumentAdmin(WebTest):
             # Sanity check that we indeed filtered on creatiedatum
             assert "creatiedatum__gte" in search_response.context["request"].GET
 
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document2.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document2)
 
         with self.subTest("filter on publicatiestatus"):
             search_response = response.click(
@@ -212,8 +210,8 @@ class TestDocumentAdmin(WebTest):
             self.assertEqual(search_response.status_code, 200)
 
             self.assertEqual(search_response.status_code, 200)
-            self.assertContains(search_response, "field-identifier", 1)
-            self.assertContains(search_response, document2.identifier, 1)
+            self.assertNumResults(search_response, 1)
+            self.assertDocumentListed(search_response, document2)
 
     @freeze_time("2024-09-24T12:00:00-00:00")
     def test_document_admin_create(self):
