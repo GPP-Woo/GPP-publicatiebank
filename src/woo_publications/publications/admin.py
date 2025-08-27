@@ -563,27 +563,46 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     fieldsets = [
         (
-            None,
+            _("Description"),
             {
                 "fields": (
                     "publicatie",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
-                    "creatiedatum",
-                    "bestandsformaat",
-                    "bestandsnaam",
-                    "bestandsomvang",
                     "publicatiestatus",
-                    "gepubliceerd_op",
-                    "ingetrokken_op",
-                    "registratiedatum",
-                    "laatst_gewijzigd_datum",
+                    "uuid",
+                )
+            },
+        ),
+        (
+            _("Actions"),
+            {
+                "fields": (
+                    "creatiedatum",
                     "ontvangstdatum",
                     "datum_ondertekend",
-                    "eigenaar",
-                    "uuid",
+                    "registratiedatum",
+                    "gepubliceerd_op",
+                    "ingetrokken_op",
+                    "laatst_gewijzigd_datum",
+                )
+            },
+        ),
+        (
+            _("Actors"),
+            {
+                "fields": ("eigenaar",),
+            },
+        ),
+        (
+            _("File"),
+            {
+                "fields": (
                     "source_url",
+                    "bestandsnaam",
+                    "bestandsformaat",
+                    "bestandsomvang",
                 )
             },
         ),
