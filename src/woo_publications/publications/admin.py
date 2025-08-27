@@ -760,6 +760,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
 class PublicationInline(admin.StackedInline):
     model = Publication.onderwerpen.through
+    verbose_name = _("Publication")
+    verbose_name_plural = _("Publications")
     autocomplete_fields = ("publication",)
     extra = 0
 
@@ -776,6 +778,27 @@ class PublicationInline(admin.StackedInline):
 
 @admin.register(Topic)
 class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    fieldsets = [
+        (
+            _("Description"),
+            {
+                "fields": (
+                    "afbeelding",
+                    "officiele_titel",
+                    "omschrijving",
+                    "publicatiestatus",
+                    "promoot",
+                    "uuid",
+                )
+            },
+        ),
+        (
+            _("Actions"),
+            {
+                "fields": ("registratiedatum", "laatst_gewijzigd_datum"),
+            },
+        ),
+    ]
     list_display = (
         "officiele_titel",
         "publicatiestatus",
