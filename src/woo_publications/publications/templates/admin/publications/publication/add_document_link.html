@@ -1,0 +1,22 @@
+{% load i18n admin_urls l10n %}
+{% url inline_admin_formset.opts.opts|admin_urlname:'add' as inline_add_url %}
+<tr class="add-row">
+    <td colspan="{{ inline_admin_formset.readonly_fields|length|add:"2" }}">
+        {% if original %}
+            <a
+                href="{{ inline_add_url }}?{{ inline_admin_formset.opts.fk_name }}={{ original.pk|unlocalize }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="addlink"
+            >
+              {% blocktrans with model_name=inline_admin_formset.opts.verbose_name|capfirst trimmed %}
+                Add another {{ model_name }} (opens in new tab/window)
+              {% endblocktrans %}
+            </a>
+        {% else %}
+          {% blocktrans with rel_model_name=inline_admin_formset.opts.verbose_name_plural|capfirst model_name=opts.model_name|capfirst trimmed %}
+            You can add {{ rel_model_name }} after saving this {{ model_name }}.
+          {% endblocktrans %}
+        {% endif %}
+    </td>
+</tr>

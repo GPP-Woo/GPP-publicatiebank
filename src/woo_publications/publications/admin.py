@@ -310,11 +310,14 @@ def revoke(
 
 class DocumentInlineAdmin(admin.TabularInline[Document, Publication]):
     model = Document
+    fk_name = "publicatie"  # necessary for the template override
+    template = "admin/publications/publication/document_inline.html"
     fields = (
         "truncated_title",
         "status",
         "registratiedatum",
         "laatst_gewijzigd_datum",
+        "show_actions",
     )
     readonly_fields = fields
     can_delete = False
@@ -331,6 +334,20 @@ class DocumentInlineAdmin(admin.TabularInline[Document, Publication]):
     @admin.display(description=_("status"))
     def status(self, obj: Document) -> str:
         return obj.get_publicatiestatus_display()
+
+    @admin.display(description=_("actions"))
+    def show_actions(self, obj: Document) -> str:
+        actions = [
+            (
+                reverse("admin:publications_document_delete", args=(obj.pk,)),
+                _("Delete"),
+            ),
+        ]
+        return format_html_join(
+            " | ",
+            '<a href="{}" target="_blank">{}</a>',
+            actions,
+        )
 
     def has_add_permission(self, request: HttpRequest, obj: Publication | None) -> bool:
         return False
