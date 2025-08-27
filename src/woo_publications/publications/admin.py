@@ -378,26 +378,40 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     fieldsets = (
         (
-            None,
+            _("Description"),
             {
                 "fields": (
                     "informatie_categorieen",
                     "onderwerpen",
-                    "publisher",
-                    "verantwoordelijke",
-                    "opsteller",
                     "officiele_titel",
                     "verkorte_titel",
                     "omschrijving",
-                    "publicatiestatus",
-                    "gepubliceerd_op",
-                    "ingetrokken_op",
-                    "registratiedatum",
-                    "laatst_gewijzigd_datum",
                     "datum_begin_geldigheid",
                     "datum_einde_geldigheid",
-                    "eigenaar",
+                    "publicatiestatus",
                     "uuid",
+                )
+            },
+        ),
+        (
+            _("Actions"),
+            {
+                "fields": (
+                    "registratiedatum",
+                    "gepubliceerd_op",
+                    "ingetrokken_op",
+                    "laatst_gewijzigd_datum",
+                )
+            },
+        ),
+        (
+            _("Actors"),
+            {
+                "fields": (
+                    "publisher",
+                    "verantwoordelijke",
+                    "opsteller",
+                    "eigenaar",
                 )
             },
         ),
