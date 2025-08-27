@@ -752,6 +752,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
         ),
     )
 
+    get_publicatiestatus_display: Callable[[], str]
     get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
     documentidentifier_set: models.QuerySet[DocumentIdentifier]
 

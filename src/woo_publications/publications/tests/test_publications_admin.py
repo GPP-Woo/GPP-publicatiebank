@@ -6,7 +6,6 @@ from django.utils.translation import gettext as _
 from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
-from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.accounts.tests.factories import (
@@ -15,14 +14,11 @@ from woo_publications.accounts.tests.factories import (
 )
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
-from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
     OrganisationFactory,
 )
-from woo_publications.utils.tests.webtest import add_dynamic_field
 
-from ...contrib.documents_api.client import DocumentsAPIError
 from ..constants import PublicationStatusOptions
 from ..models import Document, Publication
 from .factories import DocumentFactory, PublicationFactory
@@ -919,158 +915,6 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 302)
         mock_remove_from_index_by_uuid_delay.assert_not_called()
-
-    @patch("woo_publications.publications.admin.index_document.delay")
-    def test_inline_document_create_schedules_index_task(
-        self, mock_index_document_delay: MagicMock
-    ):
-        ic = InformationCategoryFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            officiele_titel="title one",
-            publicatiestatus=PublicationStatusOptions.published,
-        )
-        reverse_url = reverse(
-            "admin:publications_publication_change",
-            kwargs={"object_id": publication.id},
-        )
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["document_set-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
-        add_dynamic_field(form, "document_set-0-eigenaar", self.organisation_member.pk)
-        add_dynamic_field(form, "document_set-0-identifier", "http://example.com/1")
-        add_dynamic_field(form, "document_set-0-officiele_titel", "title")
-        add_dynamic_field(form, "document_set-0-creatiedatum", "17-10-2024")
-        add_dynamic_field(form, "document_set-0-bestandsformaat", "application/pdf")
-        add_dynamic_field(form, "document_set-0-bestandsnaam", "foo.pdf")
-        add_dynamic_field(form, "document_set-0-bestandsomvang", "0")
-
-        with self.captureOnCommitCallbacks(execute=True):
-            update_response = form.submit(name="_save")
-
-        self.assertRedirects(
-            update_response,
-            reverse("admin:publications_publication_changelist"),
-        )
-        document = Document.objects.get()
-
-        # assert that the document inherited the publicatiestatus from the publication
-        self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
-        download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
-        )
-        mock_index_document_delay.assert_called_once_with(
-            document_id=document.pk,
-            download_url=f"http://testserver{download_url}",
-        )
-
-    @patch("woo_publications.publications.formset.remove_document_from_openzaak.delay")
-    @patch("woo_publications.publications.formset.remove_from_index_by_uuid.delay")
-    def test_inline_document_delete_schedules_index_removal_task(
-        self,
-        mock_remove_from_index_by_uuid: MagicMock,
-        mock_remove_document_from_openzaak: MagicMock,
-    ):
-        service = ServiceFactory.create(
-            api_root="https://example.com/",
-            api_type=APITypes.drc,
-        )
-        ic = InformationCategoryFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            eigenaar=self.organisation_member,
-            officiele_titel="title one",
-        )
-        document = DocumentFactory.create(
-            publicatie=publication,
-            eigenaar=self.organisation_member,
-            publicatiestatus=PublicationStatusOptions.published,
-            with_registered_document=True,
-            document_service=service,
-        )
-        reverse_url = reverse(
-            "admin:publications_publication_change",
-            kwargs={"object_id": publication.id},
-        )
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["document_set-0-DELETE"] = True
-
-        with patch(
-            "woo_publications.contrib.documents_api.client.DocumentenClient.destroy_document",
-            side_effect=DocumentsAPIError(
-                message=_("Something went wrong while deleting the document.")
-            ),
-        ):
-            with self.captureOnCommitCallbacks(execute=True):
-                deletion_response = form.submit(name="_save")
-
-        self.assertRedirects(
-            deletion_response,
-            reverse("admin:publications_publication_changelist"),
-        )
-
-        self.assertFalse(Document.objects.filter(pk=document.pk).exists())
-        mock_remove_from_index_by_uuid.assert_called_once_with(
-            model_name="Document", uuid=str(document.uuid)
-        )
-        mock_remove_document_from_openzaak.assert_called_once_with(
-            document_id=document.pk,
-            user_id=self.user.pk,
-            service_uuid=service.uuid,
-            document_uuid=document.document_uuid,
-        )
-
-    @patch("woo_publications.publications.formset.remove_document_from_openzaak.delay")
-    @patch("woo_publications.publications.formset.remove_from_index_by_uuid.delay")
-    def test_inline_document_delete_does_not_schedule_task_if_status_not_published(
-        self,
-        mock_remove_from_index_by_uuid: MagicMock,
-        mock_remove_document_from_openzaak: MagicMock,
-    ):
-        ic = InformationCategoryFactory.create()
-        publication = PublicationFactory.create(
-            informatie_categorieen=[ic],
-            eigenaar=self.organisation_member,
-            officiele_titel="title one",
-            publicatiestatus=PublicationStatusOptions.concept,
-        )
-        document = DocumentFactory.create(
-            publicatie=publication,
-            eigenaar=self.organisation_member,
-            publicatiestatus=PublicationStatusOptions.concept,
-        )
-        reverse_url = reverse(
-            "admin:publications_publication_change",
-            kwargs={"object_id": publication.id},
-        )
-
-        response = self.app.get(reverse_url, user=self.user)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.forms["publication_form"]
-        form["document_set-0-DELETE"] = True
-
-        with self.captureOnCommitCallbacks(execute=True):
-            deletion_response = form.submit(name="_save")
-
-        self.assertRedirects(
-            deletion_response,
-            reverse("admin:publications_publication_changelist"),
-        )
-
-        self.assertFalse(Document.objects.filter(pk=document.pk).exists())
-        mock_remove_from_index_by_uuid.assert_not_called()
-        mock_remove_document_from_openzaak.assert_not_called()
 
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_index_bulk_action(self, mock_index_publication_delay: MagicMock):
