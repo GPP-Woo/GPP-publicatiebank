@@ -371,6 +371,7 @@ class PublicationWriteSerializer(
 
         update_publicatie_identifiers = "publicationidentifier_set" in validated_data
         publication_identifiers = validated_data.pop("publicationidentifier_set", [])
+        initial_publisher = instance.publisher
 
         if "eigenaar" in validated_data:
             if eigenaar := validated_data.pop("eigenaar"):
@@ -450,6 +451,12 @@ class PublicationWriteSerializer(
                 transaction.on_commit(
                     partial(index_document.delay, document_id=document.pk)
                 )
+
+        if (
+            "publisher" in validated_data
+            and initial_publisher != validated_data["publisher"]
+        ):
+            instance.update_documents_rsin()
 
         return publication
 
