@@ -2218,6 +2218,124 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 any_order=True,
             )
 
+    @patch("woo_publications.publications.tasks.update_document_rsin.delay")
+    def test_publication_update_publisher_schedules_document_rsin_update_task(
+        self, mock_update_document_rsin_delay: MagicMock
+    ):
+        config = GlobalConfiguration.get_solo()
+        config.organisation_rsin = "112345670"
+        config.save()
+
+        publisher = OrganisationFactory.create(rsin="000000000", is_actief=True)
+        new_publisher_with_rsin = OrganisationFactory.create(
+            rsin="123456782", is_actief=True
+        )
+        new_publisher_without_rsin = OrganisationFactory.create(rsin="", is_actief=True)
+        concept = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept, publisher=publisher
+        )
+        published = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published, publisher=publisher
+        )
+        concept_document = DocumentFactory.create(
+            publicatie=concept,
+            publicatiestatus=PublicationStatusOptions.concept,
+            with_registered_document=True,
+        )
+        published_document = DocumentFactory.create(
+            publicatie=published,
+            publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+
+        with self.subTest("update concept with new publisher rsin"):
+            detail_url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(concept.uuid)},
+            )
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    detail_url,
+                    {"publisher": str(new_publisher_with_rsin.uuid)},
+                    headers=AUDIT_HEADERS,
+                )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_update_document_rsin_delay.assert_called_with(
+                document_id=concept_document.pk, rsin="123456782"
+            )
+
+        with self.subTest("update published with global config rsin"):
+            detail_url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(published.uuid)},
+            )
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    detail_url,
+                    {"publisher": str(new_publisher_without_rsin.uuid)},
+                    headers=AUDIT_HEADERS,
+                )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_update_document_rsin_delay.assert_called_with(
+                document_id=published_document.pk, rsin="112345670"
+            )
+
+        GlobalConfiguration.clear_cache()
+
+    @patch("woo_publications.publications.tasks.update_document_rsin.delay")
+    def test_publication_regular_update_does_not_schedules_document_rsin_update_task(
+        self, mock_update_document_rsin_delay: MagicMock
+    ):
+        publisher = OrganisationFactory.create(rsin="000000000", is_actief=True)
+        concept = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept, publisher=publisher
+        )
+        published = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published, publisher=publisher
+        )
+        DocumentFactory.create(
+            publicatie=concept,
+            publicatiestatus=PublicationStatusOptions.concept,
+            with_registered_document=True,
+        )
+        DocumentFactory.create(
+            publicatie=published,
+            publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+
+        with self.subTest("update concept with new publisher rsin"):
+            detail_url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(concept.uuid)},
+            )
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    detail_url,
+                    {"officieleTitel": "changed official title"},
+                    headers=AUDIT_HEADERS,
+                )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_update_document_rsin_delay.assert_not_called()
+
+        with self.subTest("update published with global config rsin"):
+            detail_url = reverse(
+                "api:publication-detail",
+                kwargs={"uuid": str(published.uuid)},
+            )
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.patch(
+                    detail_url,
+                    {"officieleTitel": "changed official title"},
+                    headers=AUDIT_HEADERS,
+                )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            mock_update_document_rsin_delay.assert_not_called()
+
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
     def test_create_concept_with_only_officiele_titel(self):
