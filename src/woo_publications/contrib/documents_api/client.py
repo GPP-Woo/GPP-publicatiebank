@@ -157,6 +157,15 @@ class DocumentenClient(NLXClient):
             file_parts=_to_file_parts(response_data["bestandsdelen"]),
         )
 
+    def update_document_bronorganisatie(
+        self, *, uuid: UUID, source_organisation: str, lock: str
+    ) -> None:
+        response = self.patch(
+            f"enkelvoudiginformatieobjecten/{uuid}",
+            json={"bronorganisatie": source_organisation, "lock": lock},
+        )
+        response.raise_for_status()
+
     def destroy_document(self, uuid: UUID) -> None:
         try:
             response = self.delete(f"enkelvoudiginformatieobjecten/{uuid}")
@@ -200,6 +209,15 @@ class DocumentenClient(NLXClient):
             url=f"enkelvoudiginformatieobjecten/{document_uuid}"
         )
         return all(part.completed for part in document.file_parts)
+
+    def lock_document(self, uuid: UUID) -> str:
+        """
+        lock the document in the Documents API to enable editing.
+        """
+        response = self.post(f"enkelvoudiginformatieobjecten/{uuid}/lock")
+        response.raise_for_status()
+
+        return response.json()["lock"]
 
     def unlock_document(self, *, uuid: UUID, lock: str) -> None:
         """
