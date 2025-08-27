@@ -399,11 +399,13 @@ def update_document_rsin(*, document_id: int, rsin: str):
 
     if (uuid := document.document_uuid) and (service := document.document_service):
         with get_documents_client(service) as client:
-            # Lock the document to allow updates.
-            lock = client.lock_document(uuid)
-            # Save the lock incase something goes wrong during the update
-            document.lock = lock
-            document.save(update_fields=("lock",))
+            lock = document.lock
+            if not lock:
+                # Lock the document to allow updates.
+                lock = client.lock_document(uuid)
+                # Save the lock incase something goes wrong during the update
+                document.lock = lock
+                document.save(update_fields=("lock",))
 
             try:
                 # Perform bronorganisatie update
