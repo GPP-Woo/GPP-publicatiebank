@@ -508,6 +508,19 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         if commit:
             self.save()
 
+    def update_documents_rsin(self):
+        from .tasks import update_document_rsin
+
+        config = GlobalConfiguration.get_solo()
+        rsin = config.organisation_rsin
+        if (publisher := self.publisher) and publisher.rsin:
+            rsin = publisher.rsin
+
+        for document in self.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
+            transaction.on_commit(
+                partial(update_document_rsin.delay, document_id=document.pk, rsin=rsin)
+            )
+
     @property
     def get_diwoo_informatie_categorieen_uuids(
         self,
