@@ -1,10 +1,12 @@
 interactions:
 - request:
-    body: '{"uuid": "5316c717-f449-4311-8038-59bc75a34602", "publisher": {"uuid":
-      "e1921720-13bf-4995-854a-cc051bcf89e9", "naam": "specific"}, "onderwerpen":
-      [], "informatieCategorieen": [], "identifiers": [], "officieleTitel": "election",
-      "verkorteTitel": "", "omschrijving": "", "registratiedatum": "2025-06-26T13:33:11.099619+00:00",
-      "laatstGewijzigdDatum": "2025-06-26T13:33:11.100226+00:00"}'
+    body: '{"uuid": "f1f00a29-e8a0-42fc-9ed8-8149fd483c10", "publisher": {"uuid":
+      "6baf30f2-db76-47d1-9256-82e563b7ece8", "naam": "drug"}, "onderwerpen": [],
+      "informatieCategorieen": [], "identifiers": [], "officieleTitel": "could", "verkorteTitel":
+      "", "omschrijving": "", "registratiedatum": "2025-08-27T07:47:05.718406+00:00",
+      "laatstGewijzigdDatum": "2025-08-27T07:47:05.719029+00:00", "gepubliceerdOp":
+      "2025-08-27T07:47:05.718406+00:00", "datumBeginGeldigheid": null, "datumEindeGeldigheid":
+      null}'
     headers:
       Accept:
       - '*/*'
@@ -15,7 +17,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '385'
+      - '492'
       Content-Type:
       - application/json
       User-Agent:
@@ -24,7 +26,7 @@ interactions:
     uri: http://localhost:8002/api/v1/publicaties
   response:
     body:
-      string: '{"taskId":"f2886f5f-5b58-4b47-882f-712444de5742"}'
+      string: '{"taskId":"f9291131-02a1-4ca2-b1f6-9b323e9c0243"}'
     headers:
       Allow:
       - POST, OPTIONS

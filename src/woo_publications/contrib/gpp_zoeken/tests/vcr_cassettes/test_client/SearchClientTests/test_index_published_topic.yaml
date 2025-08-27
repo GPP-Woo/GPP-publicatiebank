@@ -1,8 +1,8 @@
 interactions:
 - request:
-    body: '{"uuid": "cd4af834-08e3-482b-98da-48283cc35092", "officieleTitel": "military",
-      "omschrijving": "", "registratiedatum": "2025-06-26T13:33:12.455668+00:00",
-      "laatstGewijzigdDatum": "2025-06-26T13:33:12.455688+00:00"}'
+    body: '{"uuid": "ea7d23c8-d178-47bf-9ffd-61f31008ab8e", "officieleTitel": "fly",
+      "omschrijving": "", "registratiedatum": "2025-08-27T07:47:05.736883+00:00",
+      "laatstGewijzigdDatum": "2025-08-27T07:47:05.736893+00:00"}'
     headers:
       Accept:
       - '*/*'
@@ -13,7 +13,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '214'
+      - '209'
       Content-Type:
       - application/json
       User-Agent:
@@ -22,7 +22,7 @@ interactions:
     uri: http://localhost:8002/api/v1/onderwerpen
   response:
     body:
-      string: '{"taskId":"8cf2c15f-820b-4987-90a2-80e41494ee5e"}'
+      string: '{"taskId":"2000333a-6409-4cc9-8edd-b637241e48f1"}'
     headers:
       Allow:
       - POST, OPTIONS

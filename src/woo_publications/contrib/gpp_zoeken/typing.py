@@ -29,6 +29,7 @@ class IndexDocumentBody(TypedDict):
     creatiedatum: str  # ISO-8601 date
     registratiedatum: str  # ISO-8601 datetime
     laatstGewijzigdDatum: str  # ISO-8601 datetime
+    gepubliceerdOp: str  # ISO-8601 datetime
     fileSize: int | None
     downloadUrl: str
 
@@ -44,6 +45,9 @@ class IndexPublicationBody(TypedDict):
     omschrijving: str
     registratiedatum: str  # ISO-8601 datetime
     laatstGewijzigdDatum: str  # ISO-8601 datetime
+    gepubliceerdOp: str  # ISO-8601 datetime
+    datumBeginGeldigheid: str | None  # ISO-8601 datetime
+    datumEindeGeldigheid: str | None  # ISO-8601 datetime
 
 
 class IndexTopicBody(TypedDict):
