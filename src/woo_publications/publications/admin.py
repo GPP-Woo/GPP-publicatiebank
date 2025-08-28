@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any
 from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
-from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import model_ngettext
 from django.db import models, transaction
 from django.http import HttpRequest
-from django.template.defaultfilters import filesizeformat
+from django.template.defaultfilters import filesizeformat, truncatechars
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -31,7 +29,6 @@ from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
 from .forms import ChangeOwnerForm, DocumentAdminForm, PublicationAdminForm
-from .formset import DocumentInlineformset
 from .models import (
     Document,
     DocumentIdentifier,
@@ -311,18 +308,54 @@ def revoke(
     )
 
 
-class DocumentInlineAdmin(admin.StackedInline):
-    formset = DocumentInlineformset
+class DocumentInlineAdmin(admin.TabularInline[Document, Publication]):
     model = Document
-    readonly_fields = (
-        "publicatiestatus",
+    fk_name = "publicatie"  # necessary for the template override
+    template = "admin/publications/publication/document_inline.html"
+    fields = (
+        "truncated_title",
+        "status",
         "registratiedatum",
         "laatst_gewijzigd_datum",
-        "gepubliceerd_op",
-        "ingetrokken_op",
-        "source_url",
+        "show_actions",
     )
-    extra = 0
+    readonly_fields = fields
+    can_delete = False
+
+    @admin.display(description=_("official title"))
+    def truncated_title(self, obj: Document) -> str:
+        title = truncatechars(obj.officiele_titel, 40)
+        return format_html(
+            '<a href="{path}">{title}</a>',
+            path=reverse("admin:publications_document_change", args=(obj.pk,)),
+            title=title,
+        )
+
+    @admin.display(description=_("status"))
+    def status(self, obj: Document) -> str:
+        return obj.get_publicatiestatus_display()
+
+    @admin.display(description=_("actions"))
+    def show_actions(self, obj: Document) -> str:
+        actions = [
+            (
+                reverse("admin:publications_document_delete", args=(obj.pk,)),
+                _("Delete"),
+            ),
+        ]
+        return format_html_join(
+            " | ",
+            '<a href="{}" target="_blank">{}</a>',
+            actions,
+        )
+
+    def has_add_permission(self, request: HttpRequest, obj: Publication | None) -> bool:
+        return False
+
+    def has_change_permission(
+        self, request: HttpRequest, obj: Publication | None = None
+    ) -> bool:
+        return False
 
 
 class PublicationIdentifierInlineAdmin(admin.TabularInline):
@@ -500,22 +533,6 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                         force=True,
                     )
                 )
-
-    def get_formset_kwargs(
-        self,
-        request: HttpRequest,
-        obj: Publication | None,
-        inline: InlineModelAdmin[Any, Publication],
-        prefix: str,
-    ):
-        kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
-
-        # add the request to the create formset instance so that we can generate
-        # absolute URLs
-        if isinstance(inline, DocumentInlineAdmin):
-            kwargs["request"] = request
-
-        return kwargs
 
     def get_form(self, request: HttpRequest, obj=None, change=False, **kwargs):  # pyright: ignore[reportIncompatibleMethodOverride]
         form = super().get_form(request, obj, change, **kwargs)
