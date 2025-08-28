@@ -2,6 +2,22 @@
 Release notes
 =============
 
+2.0.0 (2025-09-01)
+==================
+
+Features
+--------
+
+* [:issue:`361`] Expand the fields indexed in the GPP-zoeken now include the ``gepubliceerd_op``,
+  ``datum_begin_geldigheid`` and ``datum_einde_geldigheid`` for publication and only
+  ``gepubliceerd_op`` for the documents.
+* [:issue:`349`] Ensure to update the ``bronorganisatie`` field in the documents api when the ``publisher``
+  on the publication changes.
+* [:issue:`367`] Removed the ability to update documents within the publication admin panel. The document data
+  can still be altered in the document admin panel.
+* [:issue:`364`, :issue:`365` :issue:`366`] improved the layout of the publication admin panels.
+* [:issue:`363`] removed search field `identifier` in the document admin panel.
+
 2.0.0-rc.0 (2025-07-16)
 =======================
 
