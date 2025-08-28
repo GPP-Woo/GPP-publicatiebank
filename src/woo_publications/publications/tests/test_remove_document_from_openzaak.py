@@ -14,7 +14,7 @@ from woo_publications.contrib.documents_api.client import DocumentsAPIError, get
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.logging.constants import Events
 from woo_publications.logging.models import TimelineLogProxy
-from woo_publications.publications.tasks import remove_document_from_openzaak
+from woo_publications.publications.tasks import remove_document_from_documents_api
 from woo_publications.publications.tests.factories import DocumentFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
@@ -84,7 +84,7 @@ class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
             self.assertEqual(openzaak_response.status_code, status.HTTP_200_OK)
 
         with self.captureOnCommitCallbacks(execute=True):
-            remove_document_from_openzaak(
+            remove_document_from_documents_api(
                 document_id=self.document.pk,
                 user_id=self.user.pk,
                 service_uuid=self.service.uuid,
@@ -103,7 +103,7 @@ class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
         )
 
     def test_document_not_in_openzaak_create_no_errors(self):
-        remove_document_from_openzaak(
+        remove_document_from_documents_api(
             document_id=self.document.pk,
             user_id=self.user.pk,
             service_uuid=self.service.uuid,
@@ -111,7 +111,7 @@ class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
         )
 
     def test_no_error_raised_when_OZ_returns_404(self):
-        remove_document_from_openzaak(
+        remove_document_from_documents_api(
             document_id=self.document.pk,
             user_id=self.user.pk,
             service_uuid=self.service.uuid,
@@ -129,7 +129,7 @@ class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
         side_effect=DocumentsAPIError(message="error"),
     )
     def test_create_log_when_openzaak_has_error(self, mock_destroy_document: MagicMock):
-        remove_document_from_openzaak(
+        remove_document_from_documents_api(
             document_id=self.document.pk,
             user_id=self.user.pk,
             service_uuid=self.service.uuid,

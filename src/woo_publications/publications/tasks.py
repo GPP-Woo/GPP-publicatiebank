@@ -12,7 +12,6 @@ from woo_publications.contrib.documents_api.client import (
     DocumentsAPIError,
     PartsDownloader,
     get_client as get_documents_client,
-    get_client as get_openzaak_client,
 )
 from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_client
 from woo_publications.logging.logevent import audit_admin_document_delete
@@ -365,7 +364,7 @@ def remove_from_index_by_uuid(
 
 
 @app.task
-def remove_document_from_openzaak(
+def remove_document_from_documents_api(
     *,
     document_id: int,
     user_id: int,
@@ -375,7 +374,7 @@ def remove_document_from_openzaak(
     service = Service.objects.get(uuid=service_uuid)
     user = User.objects.get(id=user_id)
 
-    with get_openzaak_client(service) as client:
+    with get_documents_client(service) as client:
         try:
             client.destroy_document(uuid=document_uuid)
         except DocumentsAPIError:

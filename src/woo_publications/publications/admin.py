@@ -40,8 +40,8 @@ from .tasks import (
     index_document,
     index_publication,
     index_topic,
+    remove_document_from_documents_api,
     remove_document_from_index,
-    remove_document_from_openzaak,
     remove_from_index_by_uuid,
     remove_publication_from_index,
     remove_topic_from_index,
@@ -716,7 +716,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         if obj.document_service and obj.document_uuid:
             transaction.on_commit(
                 partial(
-                    remove_document_from_openzaak.delay,
+                    remove_document_from_documents_api.delay,
                     document_id=doc_id,
                     user_id=request.user.pk,
                     service_uuid=obj.document_service.uuid,
@@ -749,7 +749,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
             transaction.on_commit(
                 partial(
-                    remove_document_from_openzaak.delay,
+                    remove_document_from_documents_api.delay,
                     document_id=document.id,
                     user_id=request.user.pk,
                     service_uuid=document.document_service.uuid,
