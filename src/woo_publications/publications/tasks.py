@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 import structlog
+from requests import RequestException
 from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import User
@@ -389,3 +390,34 @@ def remove_document_from_documents_api(
                 document_uuid=document_uuid,
             )
             return
+
+
+@app.task
+def update_document_rsin(*, document_id: int, rsin: str):
+    document = Document.objects.get(pk=document_id)
+    uuid = document.document_uuid
+
+    if not uuid or not document.document_service:
+        return
+
+    with get_documents_client(document.document_service) as client:
+        lock = document.lock
+        if not lock:
+            # Lock the document to allow updates.
+            lock = client.lock_document(uuid)
+            # Save the lock incase something goes wrong during the update
+            document.lock = lock
+            document.save(update_fields=("lock",))
+
+        try:
+            # Perform bronorganisatie update
+            client.update_document_bronorganisatie(
+                uuid=uuid, source_organisation=rsin, lock=lock
+            )
+        except RequestException:
+            raise
+        finally:
+            # Unlock the document again
+            client.unlock_document(uuid=uuid, lock=lock)
+            document.lock = ""
+            document.save(update_fields=("lock",))

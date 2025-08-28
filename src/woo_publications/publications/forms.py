@@ -183,6 +183,9 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                     partial(index_document.delay, document_id=document.pk)
                 )
 
+        if self.instance.pk and "publisher" in self.changed_data:
+            publication.update_documents_rsin()
+
         return publication
 
 

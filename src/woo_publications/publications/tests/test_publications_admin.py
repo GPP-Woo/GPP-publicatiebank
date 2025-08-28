@@ -1175,6 +1175,145 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(pub1.eigenaar, org_member_1)
             self.assertEqual(pub2.eigenaar, org_member_1)
 
+    @patch("woo_publications.publications.tasks.update_document_rsin.delay")
+    def test_publication_update_publisher_schedules_document_rsin_update_task(
+        self, mock_update_document_rsin_delay: MagicMock
+    ):
+        self.addCleanup(GlobalConfiguration.clear_cache)
+        config = GlobalConfiguration.get_solo()
+        config.organisation_rsin = "112345670"
+        config.save()
+
+        ic = InformationCategoryFactory.create()
+        publisher = OrganisationFactory.create(rsin="000000000", is_actief=True)
+        new_publisher_with_rsin = OrganisationFactory.create(
+            rsin="123456782", is_actief=True
+        )
+        new_publisher_without_rsin = OrganisationFactory.create(rsin="", is_actief=True)
+        concept = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publisher=publisher,
+            informatie_categorieen=[ic],
+        )
+        published = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publisher=publisher,
+            informatie_categorieen=[ic],
+        )
+        concept_document = DocumentFactory.create(
+            publicatie=concept,
+            publicatiestatus=PublicationStatusOptions.concept,
+            with_registered_document=True,
+        )
+        published_document = DocumentFactory.create(
+            publicatie=published,
+            publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+
+        with self.subTest("update concept with new publisher rsin"):
+            detail_url = reverse(
+                "admin:publications_publication_change",
+                kwargs={"object_id": concept.id},
+            )
+            response = self.app.get(detail_url, user=self.user)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.forms["publication_form"]
+            form["publisher"] = str(new_publisher_with_rsin.pk)
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit(name="_save")
+
+            self.assertEqual(response.status_code, 302)
+            mock_update_document_rsin_delay.assert_called_with(
+                document_id=concept_document.pk, rsin="123456782"
+            )
+
+        with self.subTest("update published with global config rsin"):
+            detail_url = reverse(
+                "admin:publications_publication_change",
+                kwargs={"object_id": published.id},
+            )
+            response = self.app.get(detail_url, user=self.user)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.forms["publication_form"]
+            form["publisher"] = str(new_publisher_without_rsin.pk)
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit(name="_save")
+
+            self.assertEqual(response.status_code, 302)
+            mock_update_document_rsin_delay.assert_called_with(
+                document_id=published_document.pk, rsin="112345670"
+            )
+
+    @patch("woo_publications.publications.tasks.update_document_rsin.delay")
+    def test_publication_regular_update_does_not_schedules_document_rsin_update_task(
+        self, mock_update_document_rsin_delay: MagicMock
+    ):
+        ic = InformationCategoryFactory.create()
+        publisher = OrganisationFactory.create(rsin="000000000", is_actief=True)
+        concept = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.concept,
+            publisher=publisher,
+            informatie_categorieen=[ic],
+        )
+        published = PublicationFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            publisher=publisher,
+            informatie_categorieen=[ic],
+        )
+        DocumentFactory.create(
+            publicatie=concept,
+            publicatiestatus=PublicationStatusOptions.concept,
+            with_registered_document=True,
+        )
+        DocumentFactory.create(
+            publicatie=published,
+            publicatiestatus=PublicationStatusOptions.published,
+            with_registered_document=True,
+        )
+
+        with self.subTest("update concept with new publisher rsin"):
+            detail_url = reverse(
+                "admin:publications_publication_change",
+                kwargs={"object_id": concept.id},
+            )
+            response = self.app.get(detail_url, user=self.user)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.forms["publication_form"]
+            form["officiele_titel"] = "changed official title"
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit(name="_save")
+
+            self.assertEqual(response.status_code, 302)
+            mock_update_document_rsin_delay.assert_not_called()
+
+        with self.subTest("update published with global config rsin"):
+            detail_url = reverse(
+                "admin:publications_publication_change",
+                kwargs={"object_id": published.id},
+            )
+            response = self.app.get(detail_url, user=self.user)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.forms["publication_form"]
+            form["officiele_titel"] = "changed official title"
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit(name="_save")
+
+            self.assertEqual(response.status_code, 302)
+            mock_update_document_rsin_delay.assert_not_called()
+
 
 @disable_admin_mfa()
 class TestPublicationRequiredFields(WebTest):

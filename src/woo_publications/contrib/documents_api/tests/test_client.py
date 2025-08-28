@@ -155,6 +155,19 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
         bestandsdelen = detail_data["bestandsdelen"]
         self.assertEqual(len(bestandsdelen), 0)
 
+        with self.subTest("can lock document"):
+            with get_client(service) as client:
+                client.lock_document(uuid=document.uuid)
+
+                # and verify that it's in the expected state
+                detail_response = client.get(
+                    f"enkelvoudiginformatieobjecten/{document.uuid}"
+                )
+                detail_response.raise_for_status()
+                detail_data = detail_response.json()
+
+            self.assertTrue(detail_data["locked"])
+
     @override_settings(LANGUAGE_CODE="en-en")
     def test_destroy_document_error(self):
         service = ServiceFactory.build(for_documents_api_docker_compose=True)
@@ -167,3 +180,39 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
             self.vcr_raises(RequestException),
         ):
             client.destroy_document(uuid=UUID("3fae4cd5-b122-4b34-bfd9-4617909d3f22"))
+
+    def test_update_bronorganisatie(self):
+        service = ServiceFactory.build(for_documents_api_docker_compose=True)
+
+        with get_client(service) as client:
+            # create document
+            document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="Sample document",
+                filesize=1_000,  # in bytes
+                filename="sample.png",
+            )
+
+            # sanity check that the bronorganisatie is the given rsin
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.uuid}"
+            )
+            self.assertEqual(openzaak_response.json()["bronorganisatie"], "123456782")
+
+            # update bronorganisatie
+            client.update_document_bronorganisatie(
+                uuid=document.uuid,
+                source_organisation="112345670",
+                lock=document.lock,
+            )
+
+            # ensure that the bronorganisatie has been updated
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.uuid}"
+            )
+            self.assertEqual(openzaak_response.json()["bronorganisatie"], "112345670")
