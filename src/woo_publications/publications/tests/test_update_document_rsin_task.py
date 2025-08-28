@@ -6,6 +6,7 @@ from django.core.files import File
 from django.test import TestCase, override_settings
 
 import requests_mock
+from requests import HTTPError
 from rest_framework import status
 
 from woo_publications.config.models import GlobalConfiguration
@@ -131,7 +132,8 @@ class TestUpdateDocumentRsinTask(VCRMixin, TestCase):
                 f"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/{external_document.uuid}",
                 status_code=400,
             )
-            update_document_rsin(document_id=document.pk, rsin="112345670")
+            with self.assertRaises(HTTPError):
+                update_document_rsin(document_id=document.pk, rsin="112345670")
 
         document.refresh_from_db()
         with get_client(self.service) as client:

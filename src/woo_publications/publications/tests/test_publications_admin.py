@@ -1179,6 +1179,7 @@ class TestPublicationsAdmin(WebTest):
     def test_publication_update_publisher_schedules_document_rsin_update_task(
         self, mock_update_document_rsin_delay: MagicMock
     ):
+        self.addCleanup(GlobalConfiguration.clear_cache)
         config = GlobalConfiguration.get_solo()
         config.organisation_rsin = "112345670"
         config.save()
@@ -1249,8 +1250,6 @@ class TestPublicationsAdmin(WebTest):
             mock_update_document_rsin_delay.assert_called_with(
                 document_id=published_document.pk, rsin="112345670"
             )
-
-        GlobalConfiguration.clear_cache()
 
     @patch("woo_publications.publications.tasks.update_document_rsin.delay")
     def test_publication_regular_update_does_not_schedules_document_rsin_update_task(

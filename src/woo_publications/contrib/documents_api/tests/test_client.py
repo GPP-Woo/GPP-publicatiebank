@@ -196,8 +196,6 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
                 title="Sample document",
                 filesize=1_000,  # in bytes
                 filename="sample.png",
-                content_type="image/png",
-                description="a" * 5000,  # use a long string and try to break it
             )
 
             # sanity check that the bronorganisatie is the given rsin

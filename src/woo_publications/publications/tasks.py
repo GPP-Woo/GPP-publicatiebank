@@ -2,7 +2,6 @@ from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
-import sentry_sdk
 import structlog
 from requests import RequestException
 from zgw_consumers.models import Service
@@ -396,26 +395,29 @@ def remove_document_from_documents_api(
 @app.task
 def update_document_rsin(*, document_id: int, rsin: str):
     document = Document.objects.get(pk=document_id)
+    uuid = document.document_uuid
 
-    if (uuid := document.document_uuid) and (service := document.document_service):
-        with get_documents_client(service) as client:
-            lock = document.lock
-            if not lock:
-                # Lock the document to allow updates.
-                lock = client.lock_document(uuid)
-                # Save the lock incase something goes wrong during the update
-                document.lock = lock
-                document.save(update_fields=("lock",))
+    if not uuid or not document.document_service:
+        return
 
-            try:
-                # Perform bronorganisatie update
-                client.update_document_bronorganisatie(
-                    uuid=uuid, source_organisation=rsin, lock=lock
-                )
-            except RequestException as err:
-                sentry_sdk.capture_exception(err)
-            finally:
-                # Unlock the document again
-                client.unlock_document(uuid=uuid, lock=lock)
-                document.lock = ""
-                document.save(update_fields=("lock",))
+    with get_documents_client(document.document_service) as client:
+        lock = document.lock
+        if not lock:
+            # Lock the document to allow updates.
+            lock = client.lock_document(uuid)
+            # Save the lock incase something goes wrong during the update
+            document.lock = lock
+            document.save(update_fields=("lock",))
+
+        try:
+            # Perform bronorganisatie update
+            client.update_document_bronorganisatie(
+                uuid=uuid, source_organisation=rsin, lock=lock
+            )
+        except RequestException:
+            raise
+        finally:
+            # Unlock the document again
+            client.unlock_document(uuid=uuid, lock=lock)
+            document.lock = ""
+            document.save(update_fields=("lock",))
