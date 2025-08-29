@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-28 23:35+0200\n"
-"PO-Revision-Date: 2025-08-28 23:39+0200\n"
-"Last-Translator:   <admin@admin.admin>\n"
+"POT-Creation-Date: 2025-08-29 11:16+0200\n"
+"PO-Revision-Date: 2025-08-29 11:20+0200\n"
+"Last-Translator:   <sergei.maertens@maykinmedia.nl>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -765,23 +765,19 @@ msgstr "status"
 
 #: woo_publications/publications/admin.py:343
 msgid "Delete"
-msgstr "Verwijder"
+msgstr ""
 
 #: woo_publications/publications/admin.py:381
 #: woo_publications/publications/admin.py:597
 #: woo_publications/publications/admin.py:833
-#, fuzzy
-#| msgid "description"
 msgid "Description"
-msgstr "omschrijving"
+msgstr "Beschrijving"
 
 #: woo_publications/publications/admin.py:397
 #: woo_publications/publications/admin.py:610
 #: woo_publications/publications/admin.py:846
-#, fuzzy
-#| msgid "actions"
 msgid "Actions"
-msgstr "acties"
+msgstr "Handelingen"
 
 #: woo_publications/publications/admin.py:408
 #: woo_publications/publications/admin.py:624
@@ -802,7 +798,7 @@ msgstr "Open in burgerportaal"
 
 #: woo_publications/publications/admin.py:630
 msgid "File"
-msgstr "Bestanden"
+msgstr "Bestand"
 
 #: woo_publications/publications/admin.py:641
 msgid "Documents API integration"
@@ -818,16 +814,12 @@ msgid "file size"
 msgstr "bestandsomvang"
 
 #: woo_publications/publications/admin.py:813
-#, fuzzy
-#| msgid "publication"
 msgid "Publication"
-msgstr "publicatie"
+msgstr "Publicatie"
 
 #: woo_publications/publications/admin.py:814
-#, fuzzy
-#| msgid "publications"
 msgid "Publications"
-msgstr "publicaties"
+msgstr "Publicaties"
 
 #: woo_publications/publications/api/filters.py:36
 msgid ""
@@ -1918,18 +1910,17 @@ msgstr ""
 #: woo_publications/publications/templates/admin/publications/publication/add_document_link.html:12
 #, python-format
 msgid "Add another %(model_name)s (opens in new tab/window)"
-msgstr "Voeg een nieuwe %(model_name)s toe (opent in een nieuwe tabblad) "
+msgstr "Nog een %(model_name)s toevoegen (opent in een nieuw scherm/tab)"
 
 #: woo_publications/publications/templates/admin/publications/publication/add_document_link.html:17
 #, python-format
 msgid "You can add %(rel_model_name)s after saving this %(model_name)s."
 msgstr ""
-"Je kan een nieuwe %(rel_model_name)s aanmaken nadat je deze %(model_name)s "
-"hebt opgeslagen."
+"Je kan %(rel_model_name)s toevoegen nadat deze %(model_name)s opgeslagen is."
 
 #: woo_publications/publications/templates/admin/publications/publication/document_inline.html:28
 msgid "Delete?"
-msgstr "Verwijder?"
+msgstr "Verwijderen?"
 
 #: woo_publications/templates/admin/base_site.html:5
 #: woo_publications/templates/admin/base_site.html:24
