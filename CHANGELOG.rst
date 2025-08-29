@@ -5,6 +5,8 @@ Release notes
 2.0.0 (2025-09-01)
 ==================
 
+Major feature release - continue reading for the breaking changes.
+
 Upgrade procedure
 -----------------
 
