@@ -37,6 +37,7 @@ Breaking changes
     * ``Functioneel Beheer`` -> ``FunctioneelBeheer``
     * ``Technisch Beheer`` -> ``TechnischBeheer``
 
+* The minimum required Documenten API version is raised from 1.1 to 1.4.
 
 Features
 --------

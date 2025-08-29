@@ -75,7 +75,7 @@ Documenten API
 
 The Documenten API from the
 `ZGW API's standard <https://vng-realisatie.github.io/gemma-zaken/>`_ is used to persist
-the actual documents. Version 1.1 and newer are supported, since we use the large file
+the actual documents. Version 1.4 and newer are supported, since we use the large file
 uploads mechanism.
 
 .. seealso::
@@ -89,11 +89,13 @@ uploads mechanism.
    ==============  ==========================
    Documenten API  Status
    ==============  ==========================
-   1.1             Should work
-   1.2             Should work
-   1.3             Should work
    1.4             Tested in CI (based on Open Zaak 1.16)
+   1.5             Should work
    ==============  ==========================
+
+.. note:: Version 1.1 - 1.3 mostly work, though you may see failures attempting to
+   update the ``bronorganisatie`` if the ``publisher`` of a publication changes. This
+   field was immutable before version 1.4.0 of the API specification.
 
 GPP-zoeken
 **********
