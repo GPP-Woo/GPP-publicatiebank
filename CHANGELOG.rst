@@ -5,18 +5,114 @@ Release notes
 2.0.0 (2025-09-01)
 ==================
 
+Upgrade procedure
+-----------------
+
+⚠️ We bumped the major version because some of the changes are technically breaking
+changes, which affect GPP-app and equivalent alternatives. GPP-burgerportaal should not
+be affected. You will need GPP-app 3.x or newer.
+
+No manual actions are needed.
+
+Breaking changes
+----------------
+
+* Bumped the major version of the API to ``v2``. All the endpoints moved to the
+  ``/api/v2`` URL prefix. We *also* still serve the endpoints under the ``/api/v1``
+  prefix to make transitioning easier, but this is undocumented and deprecated. Most
+  likely we'll remove this in the next feature release.
+
+* The publication status field of the ``Publicatie`` and ``Document`` resource now has
+  restrictions in the allowed state transitions. Before 2.0.0, you could change the
+  ``publicatiestatus`` to any possible status, which now is no longer possible. The
+  allowed state transitions are documented in the API specification.
+
+* Removed ``documenthandelingen`` - the information can be extracted from the new date
+  and datetime fields on ``Document``.
+
+* Changed built-in group names - update your OpenID Connect role/group names accordingly.
+
+    * ``Functioneel Beheer`` -> ``FunctioneelBeheer``
+    * ``Technisch Beheer`` -> ``TechnischBeheer``
+
+
 Features
 --------
 
-* [:issue:`361`] Expand the fields indexed in the GPP-zoeken now include the ``gepubliceerd_op``,
-  ``datum_begin_geldigheid`` and ``datum_einde_geldigheid`` for publication and only
-  ``gepubliceerd_op`` for the documents.
-* [:issue:`349`] Ensure to update the ``bronorganisatie`` field in the documents api when the ``publisher``
-  on the publication changes.
-* [:issue:`367`] Removed the ability to update documents within the publication admin panel. The document data
-  can still be altered in the document admin panel.
-* [:issue:`364`, :issue:`365` :issue:`366`] improved the layout of the publication admin panels.
-* [:issue:`363`] removed search field `identifier` in the document admin panel.
+* [:issue:`361`] The new date fields ``gepubliceerd_op``, ``datum_begin_geldigheid``
+  and ``datum_einde_geldigheid`` are now also sent to the search index for indexing.
+* [:issue:`349`] When the ``publisher`` changes on a publication, the ``bronorganisatie`` in the underlying
+  Documents API storage is now updated for the documents belonging to the publication.
+* [:issue:`367`] The admin panel UI for related documents within a publication is simplified.
+* [:issue:`364`, :issue:`365` :issue:`366`] Improved the field organization for publications, documents and topics in the admin.
+* [:issue:`363`] The deprecated `identifier` field is no longer displayed in the document list in the admin.
+* [:issue:`295`] You can now update ``Document.creatiedatum`` via the API.
+* [:issue:`266`] The ``Publicatie`` and ``Document`` publication status progressions now have a
+  well-documented life cycle. The API validates that these status changes are
+  meaningfull.
+* [:issue:`214`, :issue:`215`] You can now configure a pattern for the URLs to a publication in the
+  internal application (GPP-app) and public citizen portal (GPP-burgerportaal). These
+  URLs are included in the API responses for publications.
+* [:issue:`275`] You can now add (custom) descriptions to information categories in the
+  metadata loaded from overheid.nl value lists.
+* [:issue:`270`] You can now add the RSIN to organisations in the metadata loaded from
+  overheid.nl value lists.
+* [:issue:`194`] You can now add (additional) ``identifiers`` ("kenmerken") to documents. Any
+  specified identifiers are also indexed in GPP-zoeken.
+* [:issue:`195`] You can now add (additional) ``identifiers`` ("kenmerken") to publications. Any
+  specified identifiers are also indexed in GPP-zoeken.
+* [:issue:`263`] Added support for "concept" publications with incomplete data. The validation
+  requirements are relaxed since a lot of information may be unknown in automated
+  publishing architectures. The validation is enforced when the publication status
+  changes from ``concept``.
+* [:issue:`304`] You can now delete documents via the API. The delete cascades to the underlying
+  Documenten API and destroys the metadata and content there.
+* [:issue:`282`] Added new metadata date/datetime fields:
+
+    * Publication: published on, revoked on, start date, end date.
+    * Document: received on, signed on, published on, revoked on.
+
+* [:issue:`320`] Changed the built-in user group names to remove spaces, for better
+  compatibility with role names in MS Entra.
+* [:issue:`283`] The archiving parameters are now calculated when a publication is published
+  rather than when it's created.
+* [:issue:`272`] Update the value for ``auteur`` in the Documenten API for documents that we
+  register.
+* [:issue:`319`] Support filtering in the API on identifiers ("kenmerken", value and/or source).
+* [:issue:`274`] API clients can now provide a link to a resource in a Documents API instead of
+  uploading the metadata and file parts content.
+* [:issue:`271`] The RSIN of the related publisher (organisation) is now used when the document
+  metadata is registered in the Documents API. If none is available, the global default
+  is used as was the situation before.
+
+
+Bugfixes
+--------
+
+* [:issue:`307`, :issue:`311`] Fixed container restarts overwriting custom archiving parameters set on
+  information categories.
+* [:issue:`298`] Fixed changes to ``publisher`` and/or ``informatieCategorieen`` on a
+  publication not triggering document re-indexing for the related documents.
+* [:issue:`330`] Revoked publications are now excluded from the choices in the admin when
+  adding a document.
+* [:issue:`309`] Fixed not always deleting the document from the Documents API when a document
+  is deleted from GPP-publicatiebank.
+
+Project maintenance
+-------------------
+
+* Replaced the CI pipeline for quality control on the OpenAPI specification with a
+  reusable variant.
+* Updated frontend dependencies (security fixes).
+* Replaced boilerplate utilities with their equivalents from maykin-common.
+* Upgraded external packages to their latest (security) releases.
+* Removed the unused Javascript toolchain.
+* Updated github issue templates.
+* [:issue:`292`] Removed ``documenthandelingen``.
+* [:issue:`340`] Deprecated ``identifier`` on the ``Document`` resource, use ``kenmerken``
+  instead.
+* Application logs are now structured (JSON) using ``structlog``.
+* Updated project documentation.
 
 2.0.0-rc.0 (2025-07-16)
 =======================
