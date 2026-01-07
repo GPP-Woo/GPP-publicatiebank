@@ -1,7 +1,9 @@
 from decouple import Csv, Undefined, undefined
 from open_api_framework.conf.utils import config as _config
+from typing_extensions import deprecated
 
 
+@deprecated("To be replaced with maykin_common.config")
 def config[T](option: str, default: T | Undefined = undefined, *args, **kwargs) -> T:
     """
     Pull a config parameter from the environment.

@@ -211,7 +211,7 @@ structlog.configure(
 # SECURITY settings
 #
 
-CSRF_FAILURE_VIEW = "woo_publications.accounts.views.csrf_failure"
+CSRF_FAILURE_VIEW = "maykin_common.views.csrf_failure"
 
 #
 # Custom settings
