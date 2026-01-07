@@ -28,7 +28,11 @@ from ...tasks import index_document, index_publication
 from ...typing import Kenmerk
 from ..utils import _get_fsm_help_text
 from ..validators import PublicationStatusValidator, validate_duplicated_kenmerken
-from .owner import EigenaarSerializer, update_or_create_organisation_member
+from .owner import (
+    EigenaarGroepSerializer,
+    EigenaarSerializer,
+    update_or_create_organisation_member,
+)
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -138,6 +142,15 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         allow_null=True,
         required=False,
     )
+    eigenaar_groep = EigenaarGroepSerializer(
+        label=_("owner (group)"),
+        help_text=_(
+            "Optional organisation unit that also owns the publication, in addition to "
+            "the `eigenaar` property."
+        ),
+        allow_null=True,
+        required=False,
+    )
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -156,6 +169,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "verkorte_titel",
             "omschrijving",
             "eigenaar",
+            "eigenaar_groep",
             "publicatiestatus",
             "gepubliceerd_op",
             "ingetrokken_op",

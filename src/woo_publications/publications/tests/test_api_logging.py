@@ -111,6 +111,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "informatie_categorieen": [ic.pk],
                 "onderwerpen": [topic.pk],
                 "eigenaar": self.organisation_member.pk,
+                "eigenaar_groep": None,
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -190,6 +191,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "informatie_categorieen": [ic.pk],
                 "onderwerpen": [topic.pk],
                 "eigenaar": self.organisation_member.pk,
+                "eigenaar_groep": None,
                 "laatst_gewijzigd_datum": "2024-09-27T12:00:00Z",
                 "officiele_titel": "changed offical title",
                 "omschrijving": "changed description",
@@ -286,6 +288,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "informatie_categorieen": [ic.pk, ic2.pk],
                     "onderwerpen": [topic.pk, topic2.pk],
                     "eigenaar": self.organisation_member.pk,
+                    "eigenaar_groep": None,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -424,6 +427,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "informatie_categorieen": [ic.pk, ic2.pk],
                     "onderwerpen": [topic.pk, topic2.pk],
                     "eigenaar": self.organisation_member.pk,
+                    "eigenaar_groep": None,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -529,6 +533,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 "informatie_categorieen": [ic.id],
                 "onderwerpen": [],
                 "eigenaar": self.organisation_member.pk,
+                "eigenaar_groep": None,
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": (

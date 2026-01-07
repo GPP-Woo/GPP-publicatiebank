@@ -374,7 +374,7 @@ class DocumentViewSet(
 )
 class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     queryset = Publication.objects.prefetch_related(
-        "publicationidentifier_set"
+        "eigenaar", "eigenaar_groep", "publicationidentifier_set"
     ).order_by("-registratiedatum")
     filterset_class = PublicationFilterSet
     lookup_field = "uuid"
