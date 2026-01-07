@@ -1,3 +1,4 @@
+import uuid
 from typing import ClassVar
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -108,6 +109,12 @@ class OrganisationUnit(models.Model):
     member of that unit.
     """
 
+    uuid = models.UUIDField(
+        _("UUID"),
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     identifier = models.CharField(
         _("identifier"),
         help_text=_(

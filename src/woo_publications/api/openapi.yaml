@@ -58,6 +58,227 @@ info:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
 paths:
+  /api/v2/accounts/organisatie-eenheden:
+    get:
+      operationId: accountsOrganisatieEenhedenList
+      description: Returns a paginated result list of existing organisation units.
+      summary: All available organisation units.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Organisatie-eenheden
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrganisationUnitList'
+          description: ''
+  /api/v2/accounts/organisatie-eenheden/{uuid}:
+    get:
+      operationId: accountsOrganisatieEenhedenRetrieve
+      description: Retrieve a specific organisation unit.
+      summary: Retrieve a specific organisation unit.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Organisatie-eenheden
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationUnit'
+          description: ''
+    put:
+      operationId: accountsOrganisatieEenhedenUpdate
+      description: |-
+        Update the metadata of a specific organisation unit.
+
+        The following properties cannot be modified after initial creation:
+        * `uuid`
+        * `identifier`
+      summary: Update the metadata of a specific organisation unit.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Organisatie-eenheden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationUnit'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationUnit'
+          description: ''
+    patch:
+      operationId: accountsOrganisatieEenhedenPartialUpdate
+      description: |-
+        Update the metadata of a specific organisation unit partially.
+
+        The following properties cannot be modified after initial creation:
+        * `uuid`
+        * `identifier`
+      summary: Update the metadata of a specific organisation unit partially.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Organisatie-eenheden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganisationUnit'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationUnit'
+          description: ''
   /api/v2/documenten:
     get:
       operationId: documentenList
@@ -2705,6 +2926,27 @@ components:
         * `solijst` - Register samenwerkingsorganisaties compleet
         * `oorglijst` - Register overige overheidsorganisaties compleet
         * `zelf_toegevoegd` - Zelf-toegevoegd item
+    OrganisationUnit:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier:
+          type: string
+          readOnly: true
+          title: Identificatie
+          description: The system identifier that uniquely identifies the organisation
+            unit performing the action.
+        naam:
+          type: string
+          description: The display name of the organisation unit.
+          maxLength: 255
+      required:
+      - identifier
+      - naam
+      - uuid
     PaginatedDocumentList:
       type: object
       required:
@@ -2774,6 +3016,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Organisation'
+    PaginatedOrganisationUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganisationUnit'
     PaginatedPublicationReadList:
       type: object
       required:
@@ -3005,6 +3270,23 @@ components:
           type: boolean
           title: Actief
           description: Geeft de actief-status van de organisatie aan.
+    PatchedOrganisationUnit:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier:
+          type: string
+          readOnly: true
+          title: Identificatie
+          description: The system identifier that uniquely identifies the organisation
+            unit performing the action.
+        naam:
+          type: string
+          description: The display name of the organisation unit.
+          maxLength: 255
     PatchedPublicationWrite:
       oneOf:
       - $ref: '#/components/schemas/PatchedPublicationWriteConceptPublicationWrite'

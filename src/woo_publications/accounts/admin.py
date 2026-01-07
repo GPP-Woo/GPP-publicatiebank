@@ -77,7 +77,7 @@ class OrganisationMemberAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 @admin.register(OrganisationUnit)
 class OrganisationUnitAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = ("identifier", "naam")
-    search_fields = ("identifier",)
+    search_fields = ("identifier", "uuid")
     ordering = ("naam",)
 
     def get_readonly_fields(self, request, obj=None):

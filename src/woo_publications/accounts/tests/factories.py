@@ -8,7 +8,7 @@ from ..models import OrganisationMember, OrganisationUnit
 User = get_user_model()
 
 
-class UserFactory(DjangoModelFactory):
+class UserFactory(DjangoModelFactory[User]):
     username = factory.Sequence(lambda n: f"user-{n}")
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
@@ -24,7 +24,7 @@ class UserFactory(DjangoModelFactory):
         )
 
 
-class OrganisationMemberFactory(DjangoModelFactory):
+class OrganisationMemberFactory(DjangoModelFactory[OrganisationMember]):
     identifier = factory.Sequence(lambda n: f"identifier-{n}")
     naam = factory.Faker("name")
 
@@ -32,7 +32,7 @@ class OrganisationMemberFactory(DjangoModelFactory):
         model = OrganisationMember
 
 
-class OrganisationUnitFactory(DjangoModelFactory):
+class OrganisationUnitFactory(DjangoModelFactory[OrganisationUnit]):
     identifier = factory.Sequence(lambda n: f"identifier-{n}")
     naam = factory.Faker("name")
 
