@@ -60,7 +60,7 @@ boltons==25.0.0
     #   -r requirements/base.txt
     #   face
     #   glom
-cbor2==5.6.5
+cbor2==5.8.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -130,7 +130,7 @@ cryptography==45.0.5
     #   webauthn
 cssselect==1.3.0
     # via pyquery
-django==5.2.7
+django==5.2.10
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -845,7 +845,7 @@ uritemplate==4.2.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   drf-spectacular
-urllib3==2.5.0
+urllib3==2.6.2
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
