@@ -1,11 +1,7 @@
-from django.contrib.auth import get_user_model
-
 import factory
 from factory.django import DjangoModelFactory
 
-from ..models import OrganisationMember, OrganisationUnit
-
-User = get_user_model()
+from ..models import OrganisationMember, OrganisationUnit, User
 
 
 class UserFactory(DjangoModelFactory[User]):

@@ -8,6 +8,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from django_otp.plugins.otp_totp.models import TOTPDevice
+
 from .managers import OrganisationMemberManager, UserManager
 
 
@@ -15,6 +17,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
     Use the built-in user model.
     """
+
+    id: int
 
     username_validator = UnicodeUsernameValidator()
 
@@ -49,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
     objects = UserManager()
+    totpdevice_set: ClassVar[models.Manager[TOTPDevice]]
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
