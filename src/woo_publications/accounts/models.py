@@ -1,3 +1,4 @@
+import uuid
 from typing import ClassVar
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -7,6 +8,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from django_otp.plugins.otp_totp.models import TOTPDevice
+
 from .managers import OrganisationMemberManager, UserManager
 
 
@@ -14,6 +17,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
     Use the built-in user model.
     """
+
+    id: int
 
     username_validator = UnicodeUsernameValidator()
 
@@ -48,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
     objects = UserManager()
+    totpdevice_set: ClassVar[models.Manager[TOTPDevice]]
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
@@ -94,6 +100,44 @@ class OrganisationMember(models.Model):
     class Meta:
         verbose_name = _("organisation member")
         verbose_name_plural = _("organisation members")
+
+    def __str__(self):
+        return f"{self.naam} - ({self.identifier})"
+
+
+class OrganisationUnit(models.Model):
+    """
+    A logical group of people that can perform a task.
+
+    The organisation unit is an alternative owner role, as a counterpart to a single
+    organisation member. Resources owned by an organisation unit can be managed by any
+    member of that unit.
+    """
+
+    uuid = models.UUIDField(
+        _("UUID"),
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    identifier = models.CharField(
+        _("identifier"),
+        help_text=_(
+            "The system identifier that uniquely identifies the organisation unit "
+            "performing the action."
+        ),
+        max_length=255,
+        unique=True,
+    )
+    naam = models.CharField(
+        _("naam"),
+        help_text=_("The display name of the organisation unit."),
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = _("organisation unit")
+        verbose_name_plural = _("organisation units")
 
     def __str__(self):
         return f"{self.naam} - ({self.identifier})"

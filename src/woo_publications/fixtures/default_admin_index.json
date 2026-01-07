@@ -16,6 +16,10 @@
             ],
             [
                 "accounts",
+                "organisationunit"
+            ],
+            [
+                "accounts",
                 "user"
             ],
             [
@@ -70,12 +74,12 @@
                 "accesslog"
             ],
             [
-                "logging",
-                "timelinelogproxy"
-            ],
-            [
                 "log_outgoing_requests",
                 "outgoingrequestslog"
+            ],
+            [
+                "logging",
+                "timelinelogproxy"
             ]
         ]
     }

@@ -8,6 +8,7 @@ Onder het menu-item "Accounts" en op het dashboard onder het kopje "Accounts" wo
 * :ref:`admin_accounts_index_users`
 * :ref:`admin_accounts_index_groups`
 * :ref:`admin_accounts_index_employees`
+* :ref:`admin_accounts_index_organisation_units`
 * :ref:`admin_accounts_index_totpdevices`
 * :ref:`admin_accounts_index_webauthndevices`
 
@@ -149,7 +150,7 @@ In het beheerscherm van de *organisatieleden* zie je een lijst van alle
   kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht
   kan worden.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere documentregistraties**.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere organisatieleden**.
   Op dit moment wordt de actie **Geselecteerde organisatieleden verwijderen** ondersteund.
   Merk op dat het mogelijk is om in de lijst één of meerdere *organisatielid*-registraties
   aan te vinken.
@@ -176,6 +177,51 @@ worden verplichte velden **dikgedrukt** weergegeven.
 * ``Identificatie``. Het unieke kenmerk dat intern aan het *organisatielid* is toegekend.
   Deze kan je niet wijzigen voor bestaande objecten. De waarde moet uit de
   inlog-voorziening van de organisatie komen.
+
+.. _admin_accounts_index_organisation_units:
+
+Organisatie-eenheden
+--------------------
+
+Een *organisatie-eenheid* bevat de minimale velden om een organisatie-eenheid te kunnen
+relateren: de unieke identificatie en de weergavenaam. Organisatie-eenheden kunnen (ook)
+eigenaar zijn van publicaties en documenten, naast het organisatielid. De gegevens
+worden gevuld via de beheeromgeving of (automatisch) via de API.
+
+In het beheerscherm van de *organisatie-eenheden* zie je een lijst van alle
+*organisatie-eenheden*-registraties. Op dit scherm zijn de volgende acties mogelijk:
+
+* Rechtboven zit een knop **organisatie-eenheid toevoegen** waarmee een groep toegevoegd
+  kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht
+  kan worden.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere organisatie-eenheden**.
+  Op dit moment wordt de actie **Geselecteerde organisatie-eenheden verwijderen** ondersteund.
+  Merk op dat het mogelijk is om in de lijst één of meerdere *organisatie-eenheid*-registraties
+  aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *organisatie-eenheid*-registraties. Door op de
+  kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
+
+Wanneer bij een *organisatie-eenheid*-registratie op de `identificatie` wordt geklikt, wordt
+een scherm geopend met de *medewerker*-details. Hierop zien we:
+
+* **Alle metadatavelden**. Deze lichten we hieronder toe.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige
+  :ref:`audit trail<admin_logging_index>` van de *organisatie-eenheid*-registratie.
+* Rechtsboven een knop **Geschiedenis**. Deze toont de beheerhandelingen die vanuit de
+  Admin-interface zijn uitgevoerd op de registratie.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden
+  om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige
+  registratie nogmaals te wijzigen.
+* Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
+
+Op een *organisatie-eenheid*-registratie zijn de volgende metadata beschikbaar. Op het scherm
+worden verplichte velden **dikgedrukt** weergegeven.
+
+* ``Naam``. De weergavenaam van een *organisatie-eenheid*.
+* ``Identificatie``. Het unieke kenmerk dat intern aan het *organisatie-eenheid* is toegekend.
+  Deze kan je niet wijzigen voor bestaande objecten. De waarde wordt typisch aangelever
+  door de GPP-app via de API.
 
 .. _admin_accounts_index_totpdevices:
 

@@ -4,6 +4,7 @@ from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
 from rest_framework import routers
 
+from woo_publications.accounts.api.viewsets import OrganisationUnitViewSet
 from woo_publications.metadata.api.viewsets import (
     InformationCategoryViewSet,
     OrganisationViewSet,
@@ -20,6 +21,7 @@ app_name = "api"
 router = routers.DefaultRouter(trailing_slash=False, use_regex_path=False)
 router.include_format_suffixes = False
 
+router.register("accounts/organisatie-eenheden", OrganisationUnitViewSet)
 router.register("documenten", DocumentViewSet)
 router.register("informatiecategorieen", InformationCategoryViewSet)
 router.register("organisaties", OrganisationViewSet)
