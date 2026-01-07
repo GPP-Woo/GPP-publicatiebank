@@ -97,3 +97,35 @@ class OrganisationMember(models.Model):
 
     def __str__(self):
         return f"{self.naam} - ({self.identifier})"
+
+
+class OrganisationUnit(models.Model):
+    """
+    A logical group of people that can perform a task.
+
+    The organisation unit is an alternative owner role, as a counterpart to a single
+    organisation member. Resources owned by an organisation unit can be managed by any
+    member of that unit.
+    """
+
+    identifier = models.CharField(
+        _("identifier"),
+        help_text=_(
+            "The system identifier that uniquely identifies the organisation unit "
+            "performing the action."
+        ),
+        max_length=255,
+        unique=True,
+    )
+    naam = models.CharField(
+        _("naam"),
+        help_text=_("The display name of the organisation unit."),
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = _("organisation unit")
+        verbose_name_plural = _("organisation units")
+
+    def __str__(self):
+        return f"{self.naam} - ({self.identifier})"
