@@ -15,6 +15,7 @@ from rest_framework.test import APITestCase
 from woo_publications.accounts.models import OrganisationMember
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
+    OrganisationUnitFactory,
     UserFactory,
 )
 from woo_publications.api.tests.mixins import (
@@ -2334,6 +2335,50 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             mock_update_document_rsin_delay.assert_not_called()
+
+    def test_publication_with_owner_group(self):
+        org_unit = OrganisationUnitFactory.create(
+            identifier="klachten", naam="Klachten"
+        )
+        publication = PublicationFactory.create(
+            eigenaar=self.organisation_member,
+            eigenaar_groep=org_unit,
+            publicatiestatus=PublicationStatusOptions.concept,
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            archiefactiedatum="2025-01-01",
+        )
+
+        with self.subTest("eigenaarGroep in list response"):
+            list_response = self.client.get(
+                reverse("api:publication-list"), headers=AUDIT_HEADERS
+            )
+
+            self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+            record = list_response.json()["results"][0]
+            self.assertEqual(
+                record["eigenaarGroep"],
+                {
+                    "identifier": "klachten",
+                    "weergaveNaam": "Klachten",
+                },
+            )
+
+        with self.subTest("eigenaarGroep in detail response"):
+            detail_response = self.client.get(
+                reverse("api:publication-detail", kwargs={"uuid": publication.uuid}),
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
+            record = detail_response.json()
+            self.assertEqual(
+                record["eigenaarGroep"],
+                {
+                    "identifier": "klachten",
+                    "weergaveNaam": "Klachten",
+                },
+            )
 
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
