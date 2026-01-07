@@ -1,7 +1,4 @@
-from unittest import skip
-
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 from django_webtest import WebTest
 from maykin_2fa.test import disable_admin_mfa
@@ -117,23 +114,21 @@ class TestOrganisationUnitAdmin(WebTest):
             ).exists()
         )
 
-    @skip("Not implemented yet.")
-    def test_organisation_unit_admin_delete_when_having_items(self):
+    def test_organisation_unit_admin_delete_sets_publication_field_to_null(self):
         org_unit = OrganisationUnitFactory.create(
             identifier="one", naam="first org unit"
         )
-        PublicationFactory.create(eigenaar_groep=org_unit)
+        publication = PublicationFactory.create(eigenaar_groep=org_unit)
         reverse_url = reverse(
             "admin:accounts_organisationunit_delete",
             kwargs={"object_id": org_unit.pk},
         )
-
         response = self.app.get(reverse_url, user=self.user)
+        assert response.status_code == 200
 
-        self.assertEqual(response.status_code, 200)
+        confirmation_form = response.forms[1]
+        confirmation_form.submit()
 
-        title = _("Cannot delete %(name)s") % {
-            "name": OrganisationUnit._meta.verbose_name
-        }
-
-        self.assertContains(response, title)
+        self.assertFalse(OrganisationUnit.objects.exists())
+        publication.refresh_from_db()
+        self.assertIsNone(publication.eigenaar_groep)
