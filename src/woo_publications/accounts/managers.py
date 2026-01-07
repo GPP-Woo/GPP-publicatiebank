@@ -6,7 +6,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.db import models, transaction
 
 if TYPE_CHECKING:
-    from .models import OrganisationMember
+    from .models import OrganisationMember, OrganisationUnit
 
 
 class UserManager(BaseUserManager):
@@ -45,5 +45,12 @@ class UserManager(BaseUserManager):
 class OrganisationMemberManager(models.Manager["OrganisationMember"]):
     @transaction.atomic
     def get_and_sync(self, identifier: str, naam: str) -> OrganisationMember:
+        obj, _ = self.update_or_create(identifier=identifier, defaults={"naam": naam})
+        return obj
+
+
+class OrganisationUnitManager(models.Manager["OrganisationUnit"]):
+    @transaction.atomic
+    def get_and_sync(self, identifier: str, naam: str) -> OrganisationUnit:
         obj, _ = self.update_or_create(identifier=identifier, defaults={"naam": naam})
         return obj

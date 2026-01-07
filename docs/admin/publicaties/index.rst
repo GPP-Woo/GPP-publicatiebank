@@ -145,6 +145,9 @@ Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het sc
 * ``Datum begin geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten in werking treden.
 *  ``Datum einde geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten (zijn) komen te vervallen.
 * ``Eigenaar``. De medewerker die wordt beschouwd als de "eigenaar" van de publicatie. In de GPP-app kan alleen de "eigenaar" de publicatie wijzigen.
+* ``Eigenaar (groep)``. De :ref:`organisatie-eenheid <admin_accounts_index_organisation_units>` die ook de publicatie
+  mag beheren, naast de medewerker-gebonden eigenaar. De GPP-app laat toe dat andere organisatieleden dan de eigenaar
+  de publicatie wijzigen, zolang ze bij deze organisatie-eenheid horen.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 
 **Archivering**

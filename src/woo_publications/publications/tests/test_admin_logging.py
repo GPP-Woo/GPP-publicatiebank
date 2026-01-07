@@ -101,6 +101,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "informatie_categorieen": [ic.pk, ic2.pk],
                 "onderwerpen": [topic.pk],
                 "eigenaar": self.organisation_member.pk,
+                "eigenaar_groep": None,
                 "laatst_gewijzigd_datum": "2024-09-25T00:14:00Z",
                 "officiele_titel": "The official title of this publication",
                 "omschrijving": (
@@ -209,6 +210,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "informatie_categorieen": [ic.pk],
                     "onderwerpen": [topic.pk],
                     "eigenaar": self.organisation_member.pk,
+                    "eigenaar_groep": None,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "changed official title",
                     "omschrijving": "changed description",
@@ -316,6 +318,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "informatie_categorieen": [ic.pk, ic2.pk],
                     "onderwerpen": [topic.pk],
                     "eigenaar": self.organisation_member.pk,
+                    "eigenaar_groep": None,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -445,6 +448,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "informatie_categorieen": [ic.pk, ic2.pk],
                     "onderwerpen": [topic.pk],
                     "eigenaar": self.organisation_member.pk,
+                    "eigenaar_groep": None,
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
                     "officiele_titel": "title one",
                     "omschrijving": "Lorem ipsum dolor sit amet, "
@@ -563,6 +567,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "informatie_categorieen": [information_category.pk],
                 "onderwerpen": [topic.pk],
                 "eigenaar": self.organisation_member.pk,
+                "eigenaar_groep": None,
                 "laatst_gewijzigd_datum": "2024-09-27T00:14:00Z",
                 "officiele_titel": "title one",
                 "omschrijving": "Lorem ipsum dolor sit amet, "

@@ -412,6 +412,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "verantwoordelijke",
                     "opsteller",
                     "eigenaar",
+                    "eigenaar_groep",
                 )
             },
         ),
@@ -432,6 +433,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "informatie_categorieen",
         "onderwerpen",
         "eigenaar",
+        "eigenaar_groep",
     )
     raw_id_fields = (
         "publisher",
@@ -450,6 +452,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "officiele_titel",
         "verkorte_titel",
         "eigenaar__identifier",
+        "eigenaar_groep__identifier",
     )
     list_filter = (
         "registratiedatum",

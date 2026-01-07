@@ -12,9 +12,10 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
+    OrganisationUnitFactory,
     UserFactory,
 )
 from woo_publications.api.tests.mixins import (
@@ -184,6 +185,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "identifier": "id",
                     "weergaveNaam": "username",
                 },
+                "eigenaarGroep": None,
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
                 "datumBeginGeldigheid": None,
@@ -220,6 +222,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "identifier": "id",
                     "weergaveNaam": "username",
                 },
+                "eigenaarGroep": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "datumBeginGeldigheid": None,
@@ -281,6 +284,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "identifier": self.organisation_member.identifier,
                 "weergaveNaam": self.organisation_member.naam,
             },
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -313,6 +317,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "identifier": self.organisation_member.identifier,
                 "weergaveNaam": self.organisation_member.naam,
             },
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "datumBeginGeldigheid": None,
@@ -967,6 +972,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             "publicatiestatus": PublicationStatusOptions.published,
             "eigenaar": {"weergaveNaam": "buurman", "identifier": "123"},
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -996,6 +1002,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "facilisis mollis urna.",
             "publicatiestatus": PublicationStatusOptions.published,
             "eigenaar": {"weergaveNaam": "buurman", "identifier": "456"},
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "bronBewaartermijn": "Selectielijst gemeenten 2020",
@@ -1228,6 +1235,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "identifier": self.organisation_member.identifier,
                 "weergaveNaam": self.organisation_member.naam,
             },
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "datumBeginGeldigheid": None,
@@ -1515,6 +1523,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "identifier": "id",
                     "weergaveNaam": "username",
                 },
+                "eigenaarGroep": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "datumBeginGeldigheid": "2025-06-19",
@@ -1696,6 +1705,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     "identifier": "test-identifier",
                     "weergaveNaam": "test-naam",
                 },
+                "eigenaarGroep": None,
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "datumBeginGeldigheid": "2025-06-19",
@@ -1866,6 +1876,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "identifier": self.organisation_member.identifier,
                 "weergaveNaam": self.organisation_member.naam,
             },
+            "eigenaarGroep": None,
             "registratiedatum": "2024-09-24T14:00:00+02:00",
             "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
             "datumBeginGeldigheid": None,
@@ -2042,7 +2053,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 {
                     "nonFieldErrors": [
                         _(
-                            "The fields 'naam' and 'weergaveNaam' has to be "
+                            "The fields 'naam' and 'weergaveNaam' have to be "
                             "both present or excluded."
                         )
                     ]
@@ -2075,6 +2086,113 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     identifier="test-identifier", naam="test-naam"
                 )
             )
+
+    def test_set_owner_group_on_publication(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic], eigenaar_groep=None
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+        assert not OrganisationUnit.objects.exists()
+
+        with self.subTest("incomplete owner group data"):
+            data = {
+                "eigenaarGroep": {
+                    # No "identifier" field given
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            response_data = response.json()
+            self.assertEqual(
+                response_data["eigenaarGroep"],
+                {
+                    "nonFieldErrors": [
+                        _(
+                            "The fields 'naam' and 'weergaveNaam' have to be "
+                            "both present or excluded."
+                        )
+                    ]
+                },
+            )
+
+        with self.subTest("create new organisation unit"):
+            data = {
+                "eigenaarGroep": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaarGroep"],
+                {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            )
+            # OrganisationMember got created
+            self.assertTrue(
+                OrganisationUnit.objects.filter(
+                    identifier="test-identifier", naam="test-naam"
+                ).exists()
+            )
+
+        with self.subTest("update existing organisation unit"):
+            other_org_unit = OrganisationUnitFactory.create(
+                identifier="other", naam="Other unit"
+            )
+            publication.eigenaar_groep = other_org_unit
+            publication.save()
+
+            data = {
+                "eigenaarGroep": {
+                    "identifier": "other",
+                    "weergaveNaam": "updated name",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            publication.refresh_from_db()
+            other_org_unit.refresh_from_db()
+            self.assertEqual(publication.eigenaar_groep, other_org_unit)
+            self.assertEqual(other_org_unit.identifier, "other")
+            self.assertEqual(other_org_unit.naam, "updated name")
+
+        with self.subTest("create publication"):
+            assert not OrganisationUnit.objects.filter(
+                identifier="from-create"
+            ).exists()
+            url = reverse("api:publication-list")
+            data = {
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "title one",
+                "eigenaarGroep": {
+                    "identifier": "from-create",
+                    "weergaveNaam": "Created",
+                },
+            }
+
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            org_unit = OrganisationUnit.objects.get(identifier="from-create")
+            self.assertEqual(org_unit.naam, "Created")
 
     def test_destroy_publication(self):
         ic = InformationCategoryFactory.create(
@@ -2335,6 +2453,50 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             mock_update_document_rsin_delay.assert_not_called()
 
+    def test_publication_with_owner_group(self):
+        org_unit = OrganisationUnitFactory.create(
+            identifier="klachten", naam="Klachten"
+        )
+        publication = PublicationFactory.create(
+            eigenaar=self.organisation_member,
+            eigenaar_groep=org_unit,
+            publicatiestatus=PublicationStatusOptions.concept,
+            bron_bewaartermijn="Selectielijst gemeenten 2020",
+            archiefnominatie=ArchiveNominationChoices.retain,
+            archiefactiedatum="2025-01-01",
+        )
+
+        with self.subTest("eigenaarGroep in list response"):
+            list_response = self.client.get(
+                reverse("api:publication-list"), headers=AUDIT_HEADERS
+            )
+
+            self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+            record = list_response.json()["results"][0]
+            self.assertEqual(
+                record["eigenaarGroep"],
+                {
+                    "identifier": "klachten",
+                    "weergaveNaam": "Klachten",
+                },
+            )
+
+        with self.subTest("eigenaarGroep in detail response"):
+            detail_response = self.client.get(
+                reverse("api:publication-detail", kwargs={"uuid": publication.uuid}),
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
+            record = detail_response.json()
+            self.assertEqual(
+                record["eigenaarGroep"],
+                {
+                    "identifier": "klachten",
+                    "weergaveNaam": "Klachten",
+                },
+            )
+
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
     def test_create_concept_with_only_officiele_titel(self):
@@ -2383,6 +2545,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
+                "eigenaarGroep": None,
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
@@ -2412,6 +2575,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
+                "eigenaarGroep": None,
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
@@ -2449,6 +2613,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
+                "eigenaarGroep": None,
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
@@ -2496,6 +2661,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
+                "eigenaarGroep": None,
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",
@@ -2539,6 +2705,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 "verkorteTitel": "",
                 "omschrijving": "",
                 "eigenaar": None,
+                "eigenaarGroep": None,
                 "bronBewaartermijn": "",
                 "selectiecategorie": "",
                 "archiefnominatie": "",

@@ -115,11 +115,6 @@
                 "contenttype"
             ],
             [
-                "view_timelinelogproxy",
-                "logging",
-                "timelinelogproxy"
-            ],
-            [
                 "view_outgoingrequestslog",
                 "log_outgoing_requests",
                 "outgoingrequestslog"
@@ -128,6 +123,11 @@
                 "view_outgoingrequestslogconfig",
                 "log_outgoing_requests",
                 "outgoingrequestslogconfig"
+            ],
+            [
+                "view_timelinelogproxy",
+                "logging",
+                "timelinelogproxy"
             ],
             [
                 "add_informationcategory",
@@ -357,6 +357,46 @@
     "fields": {
         "name": "FunctioneelBeheer",
         "permissions": [
+            [
+                "add_organisationmember",
+                "accounts",
+                "organisationmember"
+            ],
+            [
+                "change_organisationmember",
+                "accounts",
+                "organisationmember"
+            ],
+            [
+                "delete_organisationmember",
+                "accounts",
+                "organisationmember"
+            ],
+            [
+                "view_organisationmember",
+                "accounts",
+                "organisationmember"
+            ],
+            [
+                "add_organisationunit",
+                "accounts",
+                "organisationunit"
+            ],
+            [
+                "change_organisationunit",
+                "accounts",
+                "organisationunit"
+            ],
+            [
+                "delete_organisationunit",
+                "accounts",
+                "organisationunit"
+            ],
+            [
+                "view_organisationunit",
+                "accounts",
+                "organisationunit"
+            ],
             [
                 "view_user",
                 "accounts",
