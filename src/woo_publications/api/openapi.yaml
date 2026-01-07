@@ -2181,6 +2181,13 @@ components:
             De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
 
             **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        eigenaarGroep:
+          allOf:
+          - $ref: '#/components/schemas/EigenaarGroep'
+          nullable: true
+          title: owner (group)
+          description: Optional organisation unit that also owns the publication,
+            in addition to the `eigenaar` property.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2779,6 +2786,21 @@ components:
         weergaveNaam:
           type: string
           description: De weergavenaam van de gebruiker.
+      required:
+      - identifier
+      - weergaveNaam
+    EigenaarGroep:
+      type: object
+      properties:
+        identifier:
+          type: string
+          title: Identificatie
+          description: The system identifier that uniquely identifies the organisation
+            unit performing the action.
+          maxLength: 255
+        weergaveNaam:
+          type: string
+          description: The display name of the organisation unit.
       required:
       - identifier
       - weergaveNaam
@@ -3469,6 +3491,13 @@ components:
             De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
 
             **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        eigenaarGroep:
+          allOf:
+          - $ref: '#/components/schemas/EigenaarGroep'
+          nullable: true
+          title: owner (group)
+          description: Optional organisation unit that also owns the publication,
+            in addition to the `eigenaar` property.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -3566,6 +3595,7 @@ components:
       - datumEindeGeldigheid
       - diWooInformatieCategorieen
       - eigenaar
+      - eigenaarGroep
       - gepubliceerdOp
       - informatieCategorieen
       - ingetrokkenOp
@@ -3727,6 +3757,13 @@ components:
             De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
 
             **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
+        eigenaarGroep:
+          allOf:
+          - $ref: '#/components/schemas/EigenaarGroep'
+          nullable: true
+          title: owner (group)
+          description: Optional organisation unit that also owns the publication,
+            in addition to the `eigenaar` property.
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
