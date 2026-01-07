@@ -198,6 +198,18 @@ class Publication(ConcurrentTransitionMixin, models.Model):
         ),
         on_delete=models.PROTECT,
     )
+    eigenaar_groep = models.ForeignKey(
+        "accounts.OrganisationUnit",
+        verbose_name=_("owner (group)"),
+        help_text=_(
+            "The organisation unit owning this publication, from gpp-app or "
+            "gpp-publicatiebank. Any member in the referenced group can manage this "
+            "publication."
+        ),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     officiele_titel = models.CharField(
         _("official title"),
         max_length=255,
