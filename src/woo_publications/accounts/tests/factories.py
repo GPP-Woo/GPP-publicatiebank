@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
-from ..models import OrganisationMember
+from ..models import OrganisationMember, OrganisationUnit
 
 User = get_user_model()
 
@@ -30,3 +30,11 @@ class OrganisationMemberFactory(DjangoModelFactory):
 
     class Meta:  # pyright: ignore
         model = OrganisationMember
+
+
+class OrganisationUnitFactory(DjangoModelFactory):
+    identifier = factory.Sequence(lambda n: f"identifier-{n}")
+    naam = factory.Faker("name")
+
+    class Meta:  # pyright: ignore
+        model = OrganisationUnit

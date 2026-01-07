@@ -11,7 +11,7 @@ from hijack.contrib.admin import HijackUserAdminMixin
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .forms import PreventPrivilegeEscalationMixin, UserChangeForm
-from .models import OrganisationMember, User
+from .models import OrganisationMember, OrganisationUnit, User
 from .utils import validate_max_user_permissions
 
 
@@ -62,6 +62,20 @@ class UserAdmin(AdminAuditLogMixin, HijackUserAdminMixin, _UserAdmin):
 
 @admin.register(OrganisationMember)
 class OrganisationMemberAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    list_display = ("identifier", "naam")
+    search_fields = ("identifier",)
+    ordering = ("naam",)
+
+    def get_readonly_fields(self, request, obj=None):
+        read_only_fields = super().get_readonly_fields(request, obj)
+        if obj:
+            read_only_fields = ("identifier",)
+
+        return read_only_fields
+
+
+@admin.register(OrganisationUnit)
+class OrganisationUnitAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     list_display = ("identifier", "naam")
     search_fields = ("identifier",)
     ordering = ("naam",)
