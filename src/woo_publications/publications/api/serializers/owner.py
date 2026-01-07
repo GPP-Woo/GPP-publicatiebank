@@ -60,6 +60,15 @@ class EigenaarSerializer(serializers.ModelSerializer[OrganisationMember]):
         return super().validate(attrs)
 
 
+class OwnerGroupData(TypedDict):
+    naam: str
+    identifier: str
+
+
+def update_or_create_organisation_unit(details: OwnerGroupData):
+    return OrganisationUnit.objects.get_and_sync(**details)
+
+
 class EigenaarGroepSerializer(serializers.ModelSerializer[OrganisationUnit]):
     weergave_naam = serializers.CharField(
         source="naam",

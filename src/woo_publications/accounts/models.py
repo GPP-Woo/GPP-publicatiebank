@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from .managers import OrganisationMemberManager, UserManager
+from .managers import OrganisationMemberManager, OrganisationUnitManager, UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -134,6 +134,8 @@ class OrganisationUnit(models.Model):
         help_text=_("The display name of the organisation unit."),
         max_length=255,
     )
+
+    objects: ClassVar[OrganisationUnitManager] = OrganisationUnitManager()  # pyright: ignore[reportIncompatibleVariableOverride]
 
     class Meta:
         verbose_name = _("organisation unit")

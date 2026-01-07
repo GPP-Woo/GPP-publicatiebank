@@ -12,7 +12,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     OrganisationUnitFactory,
@@ -2086,6 +2086,113 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     identifier="test-identifier", naam="test-naam"
                 )
             )
+
+    def test_set_owner_group_on_publication(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic], eigenaar_groep=None
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+        assert not OrganisationUnit.objects.exists()
+
+        with self.subTest("incomplete owner group data"):
+            data = {
+                "eigenaarGroep": {
+                    # No "identifier" field given
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            response_data = response.json()
+            self.assertEqual(
+                response_data["eigenaarGroep"],
+                {
+                    "nonFieldErrors": [
+                        _(
+                            "The fields 'naam' and 'weergaveNaam' have to be "
+                            "both present or excluded."
+                        )
+                    ]
+                },
+            )
+
+        with self.subTest("create new organisation unit"):
+            data = {
+                "eigenaarGroep": {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            response_data = response.json()
+
+            self.assertEqual(
+                response_data["eigenaarGroep"],
+                {
+                    "identifier": "test-identifier",
+                    "weergaveNaam": "test-naam",
+                },
+            )
+            # OrganisationMember got created
+            self.assertTrue(
+                OrganisationUnit.objects.filter(
+                    identifier="test-identifier", naam="test-naam"
+                ).exists()
+            )
+
+        with self.subTest("update existing organisation unit"):
+            other_org_unit = OrganisationUnitFactory.create(
+                identifier="other", naam="Other unit"
+            )
+            publication.eigenaar_groep = other_org_unit
+            publication.save()
+
+            data = {
+                "eigenaarGroep": {
+                    "identifier": "other",
+                    "weergaveNaam": "updated name",
+                },
+            }
+
+            response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            publication.refresh_from_db()
+            other_org_unit.refresh_from_db()
+            self.assertEqual(publication.eigenaar_groep, other_org_unit)
+            self.assertEqual(other_org_unit.identifier, "other")
+            self.assertEqual(other_org_unit.naam, "updated name")
+
+        with self.subTest("create publication"):
+            assert not OrganisationUnit.objects.filter(
+                identifier="from-create"
+            ).exists()
+            url = reverse("api:publication-list")
+            data = {
+                "publicatiestatus": PublicationStatusOptions.concept,
+                "officieleTitel": "title one",
+                "eigenaarGroep": {
+                    "identifier": "from-create",
+                    "weergaveNaam": "Created",
+                },
+            }
+
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            org_unit = OrganisationUnit.objects.get(identifier="from-create")
+            self.assertEqual(org_unit.naam, "Created")
 
     def test_destroy_publication(self):
         ic = InformationCategoryFactory.create(

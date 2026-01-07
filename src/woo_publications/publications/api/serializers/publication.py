@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.relations import ManyRelatedField, SlugRelatedField
 from rest_framework.request import Request
 
-from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.logging.api_tools import extract_audit_parameters
 from woo_publications.metadata.models import InformationCategory, Organisation
 
@@ -32,6 +32,7 @@ from .owner import (
     EigenaarGroepSerializer,
     EigenaarSerializer,
     update_or_create_organisation_member,
+    update_or_create_organisation_unit,
 )
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -393,6 +394,14 @@ class PublicationWriteSerializer(
                     identifier=eigenaar["identifier"], naam=eigenaar["naam"]
                 )
 
+        if (
+            "eigenaar_groep" in validated_data
+            and (org_unit := validated_data.pop("eigenaar_groep")) is not None
+        ):
+            validated_data["eigenaar_groep"] = OrganisationUnit.objects.get_and_sync(
+                identifier=org_unit["identifier"], naam=org_unit["naam"]
+            )
+
         request: Request = self.context["request"]
         user_id, user_repr, remarks = extract_audit_parameters(request)
 
@@ -487,6 +496,11 @@ class PublicationWriteSerializer(
         validated_data["eigenaar"] = update_or_create_organisation_member(
             self.context["request"], validated_data.get("eigenaar")
         )
+
+        if (org_unit_details := validated_data.get("eigenaar_groep")) is not None:
+            validated_data["eigenaar_groep"] = update_or_create_organisation_unit(
+                org_unit_details
+            )
 
         publication = super().create(validated_data)
 
