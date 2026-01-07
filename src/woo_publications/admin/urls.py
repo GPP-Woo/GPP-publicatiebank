@@ -4,9 +4,8 @@ from django.urls import include, path
 
 from maykin_2fa import monkeypatch_admin
 from maykin_2fa.urls import urlpatterns, webauthn_urlpatterns
+from maykin_common.accounts.views import PasswordResetView
 from mozilla_django_oidc_db.views import AdminLoginFailure
-
-from woo_publications.accounts.views.password_reset import PasswordResetView
 
 # Configure admin
 
