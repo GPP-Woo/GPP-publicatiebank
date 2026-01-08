@@ -1063,6 +1063,58 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(data["results"][0], expected_second_item_data)
             self.assertEqual(data["results"][1], expected_first_item_data)
 
+    def test_list_publications_filter_owner_group(self):
+        org_unit_1 = OrganisationUnitFactory.create(identifier="123", naam="duplicate")
+        org_unit_2 = OrganisationUnitFactory.create(identifier="456", naam="duplicate")
+
+        PublicationFactory.create()
+        PublicationFactory.create(eigenaar_groep=org_unit_1)
+        publication_with_owner_group_2 = PublicationFactory.create(
+            eigenaar_groep=org_unit_2
+        )
+
+        with self.subTest("filter with existing owner group"):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {"eigenaarGroep": "456"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertEqual(
+                data["results"][0]["uuid"], str(publication_with_owner_group_2.uuid)
+            )
+
+        with self.subTest("filter with non-existent owner group"):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {"eigenaarGroep": "999"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 0)
+
+        with self.subTest("filter with non input"):
+            response = self.client.get(
+                reverse("api:publication-list"),
+                {"eigenaarGroep": ""},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 3)
+
     def test_list_publication_filter_publication_status(self):
         published = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published

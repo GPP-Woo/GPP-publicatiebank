@@ -156,6 +156,13 @@ class PublicationFilterSet(FilterSet):
         field_name="eigenaar__identifier",
         lookup_expr="exact",
     )
+    eigenaar_groep = filters.CharFilter(
+        help_text=_(
+            "Filter publications based on the owner group identifier of the object."
+        ),
+        field_name="eigenaar_groep__identifier",
+        lookup_expr="exact",
+    )
     publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter publications based on the publication status."),
         choices=PublicationStatusOptions.choices,
@@ -258,6 +265,7 @@ class PublicationFilterSet(FilterSet):
         fields = (
             "search",
             "eigenaar",
+            "eigenaar_groep",
             "publicatiestatus",
             "kenmerk",
             "bron",

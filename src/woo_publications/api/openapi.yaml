@@ -1491,6 +1491,12 @@ paths:
           type: string
         description: Filter publicaties op basis van de identificatie van de eigenaar.
       - in: query
+        name: eigenaarGroep
+        schema:
+          type: string
+        description: Filter publications based on the owner group identifier of the
+          object.
+      - in: query
         name: informatieCategorieen
         schema:
           type: array
