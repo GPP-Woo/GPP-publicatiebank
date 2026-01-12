@@ -100,6 +100,9 @@ class OrganisationMember(models.Model):
     class Meta:
         verbose_name = _("organisation member")
         verbose_name_plural = _("organisation members")
+        indexes = [
+            models.Index(fields=("identifier",)),
+        ]
 
     def __str__(self):
         return f"{self.naam} - ({self.identifier})"
@@ -140,6 +143,9 @@ class OrganisationUnit(models.Model):
     class Meta:
         verbose_name = _("organisation unit")
         verbose_name_plural = _("organisation units")
+        indexes = [
+            models.Index(fields=("identifier",)),
+        ]
 
     def __str__(self):
         return f"{self.naam} - ({self.identifier})"
