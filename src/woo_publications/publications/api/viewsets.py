@@ -338,7 +338,12 @@ class DocumentViewSet(
 @extend_schema_view(
     list=extend_schema(
         summary=_("All available publications."),
-        description=_("Returns a paginated result list of existing publications."),
+        description=_(
+            "Returns a paginated result list of existing publications."
+            "\n\n**Note**: when filtering on both `eigenaar` and `eigenaarGroep`, "
+            "publications matching any kind of owner will be returned. These "
+            "parameters have OR-behaviour when combined."
+        ),
     ),
     retrieve=extend_schema(
         summary=_("Retrieve a specific publication."),

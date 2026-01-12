@@ -1415,7 +1415,10 @@ paths:
   /api/v2/publicaties:
     get:
       operationId: publicatiesList
-      description: Geeft een lijst (met paginering) terug van alle bestaande publicaties.
+      description: |-
+        Returns a paginated result list of existing publications.
+
+        **Note**: when filtering on both `eigenaar` and `eigenaarGroep`, publications matching any kind of owner will be returned. These parameters have OR-behaviour when combined.
       summary: Alle beschikbare publicaties.
       parameters:
       - in: header
