@@ -54,7 +54,7 @@ beautifulsoup4==4.13.4
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webtest
-billiard==4.2.1
+billiard==4.2.4
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -80,7 +80,7 @@ cbor2==5.8.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webauthn
-celery==5.5.3
+celery==5.6.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -549,7 +549,7 @@ jsonschema-specifications==2025.4.1
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   jsonschema
-kombu==5.5.4
+kombu==5.6.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -970,12 +970,17 @@ typing-inspection==0.4.1
     #   -r requirements/ci.txt
     #   pydantic
     #   pydantic-settings
-tzdata==2025.2
+tzdata==2025.3
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   faker
     #   kombu
+tzlocal==5.3.1
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+    #   celery
 uritemplate==4.2.0
     # via
     #   -c requirements/ci.txt

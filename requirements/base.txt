@@ -22,7 +22,7 @@ attrs==25.3.0
     #   glom
     #   jsonschema
     #   referencing
-billiard==4.2.1
+billiard==4.2.4
     # via celery
 bleach==6.2.0
     # via
@@ -34,7 +34,7 @@ boltons==25.0.0
     #   glom
 cbor2==5.8.0
     # via webauthn
-celery==5.5.3
+celery==5.6.2
     # via
     #   -r requirements/base.in
     #   django-structlog
@@ -272,7 +272,7 @@ jsonschema==4.24.0
     # via drf-spectacular
 jsonschema-specifications==2025.4.1
     # via jsonschema
-kombu==5.5.4
+kombu==5.6.2
     # via celery
 markdown==3.8.2
     # via django-markup
@@ -419,8 +419,10 @@ typing-inspection==0.4.1
     # via
     #   pydantic
     #   pydantic-settings
-tzdata==2025.2
+tzdata==2025.3
     # via kombu
+tzlocal==5.3.1
+    # via celery
 uritemplate==4.2.0
     # via drf-spectacular
 urllib3==2.6.3
