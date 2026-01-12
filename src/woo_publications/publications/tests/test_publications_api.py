@@ -1115,6 +1115,30 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(data["count"], 3)
 
+    def test_list_publications_filter_owner_OR_owner_group(self):
+        org_member = OrganisationMemberFactory.create(identifier="123")
+        org_unit = OrganisationUnitFactory.create(identifier="456")
+        PublicationFactory.create(
+            eigenaar=org_member,
+            eigenaar_groep=None,
+        )
+        PublicationFactory.create(
+            eigenaar__identifier="something-else",
+            eigenaar_groep=org_unit,
+        )
+
+        response = self.client.get(
+            reverse("api:publication-list"),
+            {"eigenaarGroep": "456", "eigenaar": "123"},
+            headers=AUDIT_HEADERS,
+        )
+
+        # we expect these filter parameters to be OR-ed together rather than AND,
+        # which results in both publications being returned/matched
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 2)
+
     def test_list_publication_filter_publication_status(self):
         published = PublicationFactory.create(
             publicatiestatus=PublicationStatusOptions.published

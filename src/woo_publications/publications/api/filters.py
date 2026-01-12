@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
+from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import FilterSet, filters
 from django_filters.widgets import CSVWidget
 
@@ -280,6 +281,30 @@ class PublicationFilterSet(FilterSet):
             "archiefactiedatum_tot_en_met",
             "sorteer",
         )
+
+    def filter_queryset(self, queryset):
+        """
+        Exclude the fields to OR-match rather than AND and apply separately.
+        """
+        owner = self.form.cleaned_data.pop("eigenaar", None)
+        owner_group = self.form.cleaned_data.pop("eigenaar_groep", None)
+        queryset = super().filter_queryset(queryset)
+
+        # build the OR-filter - see django_filters.filters.Filter.filter for the ref
+        or_q = Q()
+        for name, value in (
+            ("eigenaar", owner),
+            ("eigenaar_groep", owner_group),
+        ):
+            if value in EMPTY_VALUES:
+                continue
+            filter = self.filters[name]
+            assert not filter.distinct
+            lookup = f"{filter.field_name}__{filter.lookup_expr}"
+            or_q |= Q(**{lookup: value})
+        queryset = queryset.filter(or_q)
+
+        return queryset
 
     def search_official_and_short_title(self, queryset, name: str, value: str):
         return queryset.filter(
