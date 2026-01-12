@@ -27,7 +27,7 @@ class OrganisationUnitApiAuthorizationAndPermissionTests(
         self.client.force_authenticate(user=user)
         list_endpoint = reverse("api:organisationunit-list")
         detail_endpoint = reverse(
-            "api:organisationunit-detail", kwargs={"uuid": str(uuid4())}
+            "api:organisationunit-detail", kwargs={"identifier": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -61,7 +61,7 @@ class OrganisationUnitApiAuthorizationAndPermissionTests(
 
         detail_url = reverse(
             "api:organisationunit-detail",
-            kwargs={"uuid": str(org_unit.uuid)},
+            kwargs={"identifier": str(org_unit.identifier)},
         )
 
         self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url)
@@ -88,7 +88,8 @@ class OrganisationUnitApiReadTests(TokenAuthMixin, APITestCase):
             naam="VTH", identifier="org-unit-42"
         )
         endpoint = reverse(
-            "api:organisationunit-detail", kwargs={"uuid": organisation_unit.uuid}
+            "api:organisationunit-detail",
+            kwargs={"identifier": organisation_unit.identifier},
         )
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
@@ -97,7 +98,6 @@ class OrganisationUnitApiReadTests(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response.json(),
             {
-                "uuid": str(organisation_unit.uuid),
                 "identifier": "org-unit-42",
                 "naam": "VTH",
             },
@@ -124,12 +124,12 @@ class OrganisationUnitApiWriteTests(TokenAuthMixin, APITestCase):
         organisation_unit = OrganisationUnitFactory.create(
             naam="VTH", identifier="org-unit-42"
         )
-        original_uuid = organisation_unit.uuid
+        original_uuid = organisation_unit.identifier
         endpoint = reverse(
-            "api:organisationunit-detail", kwargs={"uuid": organisation_unit.uuid}
+            "api:organisationunit-detail",
+            kwargs={"identifier": organisation_unit.identifier},
         )
         body = {
-            "uuid": str(uuid4()),
             "identifier": "other-identifier",
             "naam": "Vergunning, toezicht en handhaving",
         }
@@ -138,6 +138,6 @@ class OrganisationUnitApiWriteTests(TokenAuthMixin, APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         organisation_unit.refresh_from_db()
-        self.assertEqual(organisation_unit.uuid, original_uuid)
+        self.assertEqual(organisation_unit.identifier, original_uuid)
         self.assertEqual(organisation_unit.identifier, "org-unit-42")
         self.assertEqual(organisation_unit.naam, "Vergunning, toezicht en handhaving")

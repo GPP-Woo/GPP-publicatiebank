@@ -1,5 +1,6 @@
 from typing import TypedDict
 
+from django.core.validators import validate_slug
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -81,9 +82,18 @@ class EigenaarGroepSerializer(serializers.ModelSerializer[OrganisationUnit]):
             "identifier",
             "weergave_naam",
         )
-        # Removed the none basic validators which are getting in the way for
+        # Removed the default (uniqueness) validators which are getting in the way for
         # update_or_create
-        extra_kwargs = {"identifier": {"validators": []}}
+        extra_kwargs = {
+            "identifier": {
+                "validators": [validate_slug],
+                "help_text": _(
+                    "The system identifier that uniquely identifies the organisation "
+                    "unit performing the action. Only letters, numbers, underscores or "
+                    "hyphens are allowed."
+                ),
+            },
+        }
 
     def validate(self, attrs):
         has_naam = bool(attrs.get("naam"))

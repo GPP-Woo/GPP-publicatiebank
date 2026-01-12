@@ -113,7 +113,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrganisationUnitList'
           description: ''
-  /api/v2/accounts/organisatie-eenheden/{uuid}:
+  /api/v2/accounts/organisatie-eenheden/{identifier}:
     get:
       operationId: accountsOrganisatieEenhedenRetrieve
       description: Retrieve a specific organisation unit.
@@ -146,10 +146,9 @@ paths:
           The display name of the user performing the action, to make them recognizable.
         required: true
       - in: path
-        name: uuid
+        name: identifier
         schema:
           type: string
-          format: uuid
         required: true
       tags:
       - Organisatie-eenheden
@@ -168,7 +167,6 @@ paths:
         Update the metadata of a specific organisation unit.
 
         The following properties cannot be modified after initial creation:
-        * `uuid`
         * `identifier`
       summary: Update the metadata of a specific organisation unit.
       parameters:
@@ -199,10 +197,9 @@ paths:
           The display name of the user performing the action, to make them recognizable.
         required: true
       - in: path
-        name: uuid
+        name: identifier
         schema:
           type: string
-          format: uuid
         required: true
       tags:
       - Organisatie-eenheden
@@ -227,7 +224,6 @@ paths:
         Update the metadata of a specific organisation unit partially.
 
         The following properties cannot be modified after initial creation:
-        * `uuid`
         * `identifier`
       summary: Update the metadata of a specific organisation unit partially.
       parameters:
@@ -258,10 +254,9 @@ paths:
           The display name of the user performing the action, to make them recognizable.
         required: true
       - in: path
-        name: uuid
+        name: identifier
         schema:
           type: string
-          format: uuid
         required: true
       tags:
       - Organisatie-eenheden
@@ -2805,13 +2800,14 @@ components:
           type: string
           title: Identificatie
           description: The system identifier that uniquely identifies the organisation
-            unit performing the action.
+            unit performing the action. Only letters, numbers, underscores or hyphens
+            are allowed.
+          pattern: ^[-a-zA-Z0-9_]+$
           maxLength: 255
         weergaveNaam:
           type: string
           description: The display name of the organisation unit.
       required:
-      - identifier
       - weergaveNaam
     FilePart:
       type: object
@@ -2960,16 +2956,13 @@ components:
     OrganisationUnit:
       type: object
       properties:
-        uuid:
-          type: string
-          format: uuid
-          readOnly: true
         identifier:
           type: string
           readOnly: true
           title: Identificatie
           description: The system identifier that uniquely identifies the organisation
             unit performing the action.
+          pattern: ^[-a-zA-Z0-9_]+$
         naam:
           type: string
           description: The display name of the organisation unit.
@@ -2977,7 +2970,6 @@ components:
       required:
       - identifier
       - naam
-      - uuid
     PaginatedDocumentList:
       type: object
       required:
@@ -3304,16 +3296,13 @@ components:
     PatchedOrganisationUnit:
       type: object
       properties:
-        uuid:
-          type: string
-          format: uuid
-          readOnly: true
         identifier:
           type: string
           readOnly: true
           title: Identificatie
           description: The system identifier that uniquely identifies the organisation
             unit performing the action.
+          pattern: ^[-a-zA-Z0-9_]+$
         naam:
           type: string
           description: The display name of the organisation unit.

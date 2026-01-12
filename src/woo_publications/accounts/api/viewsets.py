@@ -27,7 +27,6 @@ from .serializers import OrganisationUnitSerializer
         description=_(
             "Update the metadata of a specific organisation unit."
             "\n\nThe following properties cannot be modified after initial creation:"
-            "\n* `uuid`"
             "\n* `identifier`"
         ),
     ),
@@ -36,7 +35,6 @@ from .serializers import OrganisationUnitSerializer
         description=_(
             "Update the metadata of a specific organisation unit partially."
             "\n\nThe following properties cannot be modified after initial creation:"
-            "\n* `uuid`"
             "\n* `identifier`"
         ),
     ),
@@ -46,6 +44,6 @@ class OrganisationUnitViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     queryset = OrganisationUnit.objects.order_by("naam")
-    lookup_field = "uuid"
-    lookup_value_converter = "uuid"
+    lookup_field = "identifier"
+    lookup_value_converter = "slug"
     serializer_class = OrganisationUnitSerializer

@@ -6,7 +6,7 @@ from ..models import OrganisationUnit
 class OrganisationUnitSerializer(serializers.ModelSerializer):
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = OrganisationUnit
-        fields = ("uuid", "identifier", "naam")
+        fields = ("identifier", "naam")
         extra_kwargs = {
             "identifier": {
                 "read_only": True,
