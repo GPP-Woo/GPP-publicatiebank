@@ -108,6 +108,13 @@ class OrganisationMember(models.Model):
         return f"{self.naam} - ({self.identifier})"
 
 
+def uuid_slug() -> str:
+    """
+    Generated a stringified UUID to use as slug/identifier.
+    """
+    return str(uuid.uuid4())
+
+
 class OrganisationUnit(models.Model):
     """
     A logical group of people that can perform a task.
@@ -117,19 +124,14 @@ class OrganisationUnit(models.Model):
     member of that unit.
     """
 
-    uuid = models.UUIDField(
-        _("UUID"),
-        unique=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    identifier = models.CharField(
+    identifier = models.SlugField(
         _("identifier"),
         help_text=_(
             "The system identifier that uniquely identifies the organisation unit "
             "performing the action."
         ),
         max_length=255,
+        default=uuid_slug,
         unique=True,
     )
     naam = models.CharField(
