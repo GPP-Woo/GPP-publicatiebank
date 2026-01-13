@@ -729,6 +729,10 @@ python-ipware==3.0.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django-ipware
+python-magic==0.4.27
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 pytz==2025.2
     # via
     #   -c requirements/ci.txt

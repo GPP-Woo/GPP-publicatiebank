@@ -671,6 +671,10 @@ python-ipware==3.0.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   django-ipware
+python-magic==0.4.27
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 pytz==2025.2
     # via
     #   -c requirements/base.txt

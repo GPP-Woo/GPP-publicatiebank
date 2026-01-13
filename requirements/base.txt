@@ -348,6 +348,8 @@ python-dotenv==1.1.1
     #   pydantic-settings
 python-ipware==3.0.0
     # via django-ipware
+python-magic==0.4.27
+    # via -r requirements/base.in
 pytz==2025.2
     # via flower
 pyyaml==6.0.2
