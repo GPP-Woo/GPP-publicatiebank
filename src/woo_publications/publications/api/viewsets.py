@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-from functools import partial
 from typing import override
 from uuid import UUID
 
@@ -23,8 +21,8 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from woo_publications.api.exceptions import BadGateway, Conflict
-from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
+from woo_publications.api.exceptions import Conflict
+from woo_publications.contrib.documents_api.client import DocumentsAPIError
 from woo_publications.logging.api_tools import AuditTrailRetrieveMixin
 from woo_publications.logging.logevent import audit_api_document_delete
 from woo_publications.logging.service import (
@@ -35,7 +33,7 @@ from woo_publications.logging.service import (
 
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import index_document, process_source_document
+from ..tasks import process_source_document
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -47,12 +45,9 @@ from .serializers import (
     PublicationWriteSerializer,
     TopicSerializer,
 )
+from .utils import download_document, upload_file_part
 
 logger = structlog.stdlib.get_logger(__name__)
-
-DOWNLOAD_CHUNK_SIZE = (
-    8_192  # read 8 kB into memory at a time when downloading from upstream
-)
 
 
 @extend_schema(tags=["Documenten"])
@@ -196,6 +191,8 @@ class DocumentViewSet(
     def file_part(self, request: Request, part_uuid: UUID, *args, **kwargs) -> Response:
         document = self.get_object()
         assert isinstance(document, Document)
+        document_url = document.absolute_document_download_uri(self.request)
+
         serializer = FilePartSerializer(
             data=request.data,
             context={"request": request, "view": self},
@@ -208,7 +205,13 @@ class DocumentViewSet(
             document.set_file_type(file)
 
         try:
-            is_completed = document.upload_part_data(uuid=part_uuid, file=file)
+            is_completed = upload_file_part(
+                document=document,
+                part_uuid=part_uuid,
+                file=file,
+                base_url=self.request.build_absolute_uri("/"),
+                document_url=document_url,
+            )
         except RequestException as exc:
             # we can only handle HTTP 400 responses
             if (_response := exc.response) is None:
@@ -217,16 +220,6 @@ class DocumentViewSet(
                 raise
             # XXX: should we transform these error responses?
             raise serializers.ValidationError(detail=_response.json()) from exc
-
-        if is_completed:
-            document_url = document.absolute_document_download_uri(self.request)
-            transaction.on_commit(
-                partial(
-                    index_document.delay,
-                    document_id=document.pk,
-                    download_url=document_url,
-                )
-            )
 
         response_serializer = DocumentStatusSerializer(
             instance={"document_upload_voltooid": is_completed}
@@ -288,56 +281,36 @@ class DocumentViewSet(
             "Document must exist in upstream API"
         )
 
-        endpoint = f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
-        with get_client(document.document_service) as client:
-            upstream_response = client.get(endpoint, stream=True)
+        upstream_response, streaming_content = download_document(document)
 
-            if (_status := upstream_response.status_code) != status.HTTP_200_OK:
-                logger.warning(
-                    "file_contents_streaming_failed",
-                    document_id=str(document.document_uuid),
-                    status_code=_status,
-                    api_root=client.base_url,
-                )
-                raise BadGateway(detail=_("Could not download from the upstream."))
+        response = StreamingHttpResponse(
+            streaming_content,
+            # TODO: if we have format information, we can use it, but that's not
+            # part of BB-MVP
+            content_type="application/octet-stream",
+            headers={
+                "Content-Length": upstream_response.headers.get(
+                    "Content-Length", str(document.bestandsomvang)
+                ),
+                "Content-Disposition": content_disposition_header(
+                    as_attachment=True,
+                    filename=document.bestandsnaam,
+                ),
+                # nginx-specific header that prevents files being buffered, instead
+                # they will be sent synchronously to the nginx client.
+                "X-Accel-Buffering": "no",
+            },
+        )
 
-            # generator that produces the chunks
-            streaming_content: Iterable[bytes] = (
-                chunk
-                for chunk in upstream_response.iter_content(
-                    chunk_size=DOWNLOAD_CHUNK_SIZE
-                )
-                if chunk
-            )
+        user_id, user_repr, remarks = extract_audit_parameters(request)
+        audit_api_download(
+            content_object=document,
+            user_id=user_id,
+            user_display=user_repr,
+            remarks=remarks,
+        )
 
-            response = StreamingHttpResponse(
-                streaming_content,
-                # TODO: if we have format information, we can use it, but that's not
-                # part of BB-MVP
-                content_type="application/octet-stream",
-                headers={
-                    "Content-Length": upstream_response.headers.get(
-                        "Content-Length", str(document.bestandsomvang)
-                    ),
-                    "Content-Disposition": content_disposition_header(
-                        as_attachment=True,
-                        filename=document.bestandsnaam,
-                    ),
-                    # nginx-specific header that prevents files being buffered, instead
-                    # they will be sent synchronously to the nginx client.
-                    "X-Accel-Buffering": "no",
-                },
-            )
-
-            user_id, user_repr, remarks = extract_audit_parameters(request)
-            audit_api_download(
-                content_object=document,
-                user_id=user_id,
-                user_display=user_repr,
-                remarks=remarks,
-            )
-
-            return response
+        return response
 
 
 @extend_schema(tags=["Publicaties"])

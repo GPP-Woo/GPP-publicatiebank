@@ -883,7 +883,10 @@ class Document(ConcurrentTransitionMixin, models.Model):
         download_url = self.absolute_document_download_uri(request=request)
         transaction.on_commit(
             partial(
-                index_document.delay, document_id=self.pk, download_url=download_url
+                index_document.delay,
+                document_id=self.pk,
+                base_url=request.build_absolute_uri("/"),
+                download_url=download_url,
             )
         )
 

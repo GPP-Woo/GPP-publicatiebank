@@ -1,9 +1,16 @@
+import io
+from tempfile import NamedTemporaryFile
 from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
+from django.db import transaction
+from django.utils import timezone
+
 import structlog
+from pypdf import PdfWriter
 from requests import RequestException
+from rest_framework.reverse import reverse
 from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import User
@@ -18,9 +25,83 @@ from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_
 from woo_publications.logging.logevent import audit_admin_document_delete
 from woo_publications.publications.constants import PublicationStatusOptions
 
+from .api.utils import download_document, upload_file_part
 from .models import Document, Publication, Topic
 
 logger = structlog.stdlib.get_logger(__name__)
+
+DOWNLOAD_CHUNK_SIZE = (
+    8_192  # read 8 kB into memory at a time when downloading from upstream
+)
+
+
+@app.task
+@transaction.atomic()
+def strip_pdf(*, document_id: int, base_url: str):
+    document = Document.objects.get(pk=document_id)
+    uuid = document.document_uuid
+
+    if not uuid or not document.document_service:
+        return
+
+    with get_documents_client(document.document_service) as client:
+        source_document = client.retrieve_document(uuid=document.document_uuid)
+
+        upstream_response, streaming_content = download_document(document)
+
+        # create file in memory to store the stripped file
+        with io.BytesIO() as stripped_file:
+            stripped_file.name = source_document.file_name
+
+            # create temporary named file to create a pdf which we can strip
+            with NamedTemporaryFile(suffix=".pdf") as temp_file:
+                for chunk in streaming_content:
+                    temp_file.write(chunk)
+
+                writer = PdfWriter(temp_file)
+
+                # strip all metadata
+                writer.metadata = None
+
+                # save file
+                _, stripped_file = writer.write(stripped_file)
+
+            # delete document in documents api
+            client.destroy_document(uuid=document.document_uuid)
+
+            # create new document in documents api
+            document.bestandsomvang = stripped_file.tell()
+            document.metadata_gestript_op = timezone.now()
+            document.save(update_fields=("bestandsomvang", "metadata_gestript_op"))
+
+            # create document in documents api
+            document.register_in_documents_api(
+                build_absolute_uri=lambda abs_path: urljoin(base_url, abs_path[1:])
+            )
+
+            assert document.zgw_document is not None
+
+            # get file parts and order them
+            file_parts = document.zgw_document.file_parts
+            file_parts = sorted(file_parts, key=lambda x: x.order)
+
+            # create the path to the download url
+            download_path = reverse("api:document-download", kwargs={"uuid": str(uuid)})
+            download_url = urljoin(base_url, download_path)
+
+            # set stripped file back to the starting bytes
+            stripped_file.seek(0)
+
+            # upload file parts
+            for part in file_parts:
+                file_part = stripped_file.read(part.size)
+                upload_file_part(
+                    document=document,
+                    part_uuid=part.uuid,
+                    file=file_part,
+                    base_url=base_url,
+                    document_url=download_url,
+                )
 
 
 @app.task
@@ -108,7 +189,9 @@ def process_source_document(*, document_id: int, base_url: str) -> None:
 
 
 @app.task
-def index_document(*, document_id: int, download_url: str = "") -> str | None:
+def index_document(
+    *, document_id: int, base_url: str, download_url: str = ""
+) -> str | None:
     """
     Offer the document data to the gpp-zoeken service for indexing.
 
@@ -142,6 +225,7 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
 
     if document.is_pdf and not document.metadata_gestript_op:
         log.info("index_task_skipped", reason="pdf_not_stripped")
+        strip_pdf.delay(document_id=document.pk, base_url=base_url)
         return
 
     if (
