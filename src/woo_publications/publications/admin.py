@@ -651,6 +651,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "document_uuid",
                     "lock",
                     "upload_complete",
+                    "metadata_gestript_op",
                 )
             },
         ),
@@ -668,6 +669,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "laatst_gewijzigd_datum",
         "gepubliceerd_op",
         "ingetrokken_op",
+        "metadata_gestript_op",
         "source_url",
     )
     search_fields = (
