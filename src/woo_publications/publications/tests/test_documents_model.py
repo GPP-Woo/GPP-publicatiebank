@@ -122,7 +122,7 @@ class TestDocumentApi(VCRMixin, TestCase):
 
             published_document.revoke()
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
             uuid=self.DOCUMENT_TYPE_UUID
@@ -144,7 +144,7 @@ class TestDocumentApi(VCRMixin, TestCase):
             detail_data = detail.json()
             self.assertEqual(detail_data["bronorganisatie"], "000000000")
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
             uuid=self.DOCUMENT_TYPE_UUID

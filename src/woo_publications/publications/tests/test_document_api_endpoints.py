@@ -1124,7 +1124,9 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document_delay.assert_called_once_with(
-            document_id=document.pk, download_url=f"http://testserver{download_path}"
+            document_id=document.pk,
+            download_url=f"http://testserver{download_path}",
+            base_url="http://testserver/",
         )
 
     def test_partial_update_document(self):
@@ -1663,7 +1665,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists()
         )
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch("woo_publications.publications.tasks.index_document.delay")
     def test_upload_file_parts(self, mock_index_document_delay: MagicMock):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
@@ -1727,9 +1729,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             mock_index_document_delay.assert_called_once_with(
                 document_id=document.pk,
                 download_url=f"http://host.docker.internal:8000{download_url}",
+                base_url="http://host.docker.internal:8000/",
             )
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch("woo_publications.publications.tasks.index_document.delay")
     def test_upload_with_multiple_parts(self, mock_index_document_delay: MagicMock):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],

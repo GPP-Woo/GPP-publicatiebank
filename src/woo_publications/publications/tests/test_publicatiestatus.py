@@ -321,7 +321,9 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document.assert_called_once_with(
-            document_id=document.pk, download_url=f"http://testserver{download_path}"
+            document_id=document.pk,
+            download_url=f"http://testserver{download_path}",
+            base_url="http://testserver/",
         )
 
     @patch("woo_publications.publications.tasks.remove_publication_from_index.delay")
@@ -864,6 +866,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=document.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
         with self.subTest(
@@ -1029,6 +1032,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=added_item.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
     @patch("woo_publications.publications.admin.index_document.delay")
@@ -1091,6 +1095,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=document.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")

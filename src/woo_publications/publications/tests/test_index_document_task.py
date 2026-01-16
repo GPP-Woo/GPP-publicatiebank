@@ -32,7 +32,9 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             publicatiestatus=PublicationStatusOptions.published
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
+        remote_task_id = index_document(
+            document_id=doc.pk, base_url="http://testserver/"
+        )
 
         self.assertIsNone(remote_task_id)
 
@@ -53,7 +55,9 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
                 )
 
             with self.subTest(publication_status=publication_status):
-                remote_task_id = index_document(document_id=doc.pk)
+                remote_task_id = index_document(
+                    document_id=doc.pk, base_url="http://testserver/"
+                )
 
                 self.assertIsNone(remote_task_id)
 
@@ -63,7 +67,9 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             upload_complete=False,
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
+        remote_task_id = index_document(
+            document_id=doc.pk, base_url="http://testserver/"
+        )
 
         self.assertIsNone(remote_task_id)
 
@@ -73,7 +79,9 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             upload_complete=True,
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
+        remote_task_id = index_document(
+            document_id=doc.pk, base_url="http://testserver/"
+        )
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

@@ -376,6 +376,7 @@ class TestDocumentAdmin(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=added_item.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
     def test_document_admin_update(self):
@@ -466,6 +467,7 @@ class TestDocumentAdmin(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=document.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
     def test_document_cannot_update_when_revoked(self):
@@ -652,6 +654,7 @@ class TestDocumentAdmin(WebTest):
         mock_index_document_delay.assert_called_once_with(
             document_id=published_doc.pk,
             download_url=f"http://testserver{download_url}",
+            base_url="http://testserver/",
         )
 
     @patch("woo_publications.publications.admin.remove_document_from_index.delay")
