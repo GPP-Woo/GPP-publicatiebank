@@ -2,6 +2,7 @@
 celery
 furl
 Pillow
+pypdf
 python-magic
 structlog
 

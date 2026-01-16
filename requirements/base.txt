@@ -330,6 +330,8 @@ pyjwt==2.10.1
     #   zgw-consumers
 pyopenssl==25.1.0
     # via webauthn
+pypdf==6.6.0
+    # via -r requirements/base.in
 pypng==0.20220715.0
     # via qrcode
 python-creole==1.4.10
