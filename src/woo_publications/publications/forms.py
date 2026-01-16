@@ -180,7 +180,11 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
         if reindex_documents:
             for document in self.instance.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
                 transaction.on_commit(
-                    partial(index_document.delay, document_id=document.pk)
+                    partial(
+                        index_document.delay,
+                        base_url=self.request.build_absolute_uri("/"),
+                        document_id=document.pk,
+                    )
                 )
 
         if self.instance.pk and "publisher" in self.changed_data:
@@ -237,6 +241,7 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
                     partial(
                         index_document.delay,
                         document_id=self.instance.pk,
+                        base_url=self.request.build_absolute_uri("/"),
                         download_url=download_url,
                     )
                 )

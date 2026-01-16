@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
+import magic
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
     ConcurrentTransitionMixin,
@@ -715,6 +716,12 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    metadata_gestript_op = models.DateTimeField(
+        _("metadata stripped on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the document was stripped."),
+        null=True,
+    )
     ontvangstdatum = models.DateTimeField(
         _("date of reception"),
         help_text=_("The timestamp when the document is received by the organisatie."),
@@ -802,6 +809,16 @@ class Document(ConcurrentTransitionMixin, models.Model):
         return self.officiele_titel
 
     @property
+    def is_pdf(self):
+        if self.bestandsformaat == "application/pdf":
+            return True
+
+        if self.bestandsnaam.split(".")[-1] == "pdf":
+            return True
+
+        return False
+
+    @property
     def zgw_document(self) -> ZGWDocument | None:
         """
         The related ZGW Documents API document.
@@ -866,7 +883,10 @@ class Document(ConcurrentTransitionMixin, models.Model):
         download_url = self.absolute_document_download_uri(request=request)
         transaction.on_commit(
             partial(
-                index_document.delay, document_id=self.pk, download_url=download_url
+                index_document.delay,
+                document_id=self.pk,
+                base_url=request.build_absolute_uri("/"),
+                download_url=download_url,
             )
         )
 
@@ -1049,6 +1069,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
             self.upload_complete = True
             self.save(update_fields=("lock", "upload_complete"))
         return completed
+
+    def set_file_type(self, file: File):
+        document_mime = magic.from_buffer(file.read(2048), mime=True)
+
+        self.bestandsformaat = document_mime
+        self.save(update_fields=("bestandsformaat",))
+
+        file.seek(0)
 
 
 class DocumentIdentifier(models.Model):

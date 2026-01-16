@@ -365,6 +365,7 @@ class DocumentUpdateSerializer(DocumentSerializer):
                     partial(
                         index_document.delay,
                         document_id=instance.pk,
+                        base_url=request.build_absolute_uri("/"),
                         download_url=download_url,
                     )
                 )

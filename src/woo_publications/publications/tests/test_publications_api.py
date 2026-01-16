@@ -2387,8 +2387,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             mock_index_document_delay.assert_has_calls(
                 [
-                    call(document_id=document_1.pk),
-                    call(document_id=document_2.pk),
+                    call(document_id=document_1.pk, base_url="http://testserver/"),
+                    call(document_id=document_2.pk, base_url="http://testserver/"),
                 ],
                 any_order=True,
             )
@@ -2406,8 +2406,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             mock_index_document_delay.assert_has_calls(
                 [
-                    call(document_id=document_1.pk),
-                    call(document_id=document_2.pk),
+                    call(document_id=document_1.pk, base_url="http://testserver/"),
+                    call(document_id=document_2.pk, base_url="http://testserver/"),
                 ],
                 any_order=True,
             )

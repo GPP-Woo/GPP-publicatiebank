@@ -635,6 +635,10 @@ pyopenssl==25.1.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   webauthn
+pypdf==6.6.0
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 pypng==0.20220715.0
     # via
     #   -c requirements/base.txt
@@ -671,6 +675,10 @@ python-ipware==3.0.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   django-ipware
+python-magic==0.4.27
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 pytz==2025.2
     # via
     #   -c requirements/base.txt

@@ -381,6 +381,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
                     "ingetrokken_op": "2024-09-28T00:14:00Z",
+                    "metadata_gestript_op": None,
                 },
                 "_cached_object_repr": "title",
             }
@@ -513,6 +514,7 @@ class TestPublicationAdminAuditLogging(WebTest):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
                     "ingetrokken_op": "2024-09-28T00:14:00Z",
+                    "metadata_gestript_op": None,
                 },
                 "_cached_object_repr": "title",
             }
@@ -672,6 +674,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "datum_ondertekend": None,
                 "gepubliceerd_op": None,
                 "ingetrokken_op": None,
+                "metadata_gestript_op": None,
             },
             "_cached_object_repr": "The official title of this document",
         }
@@ -760,6 +763,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T14:00:00Z",
                     "ingetrokken_op": None,
+                    "metadata_gestript_op": None,
                 },
                 "_cached_object_repr": "changed official title",
             }
@@ -827,6 +831,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-25T14:00:00Z",
                     "ingetrokken_op": "2024-09-29T14:00:00Z",
+                    "metadata_gestript_op": None,
                 },
                 "_cached_object_repr": "title one",
             }
@@ -901,6 +906,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "datum_ondertekend": None,
                 "gepubliceerd_op": "2024-09-25T14:00:00Z",
                 "ingetrokken_op": None,
+                "metadata_gestript_op": None,
             },
             "_cached_object_repr": "title one",
         }
@@ -969,6 +975,7 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "ontvangstdatum": None,
                 "ingetrokken_op": None,
                 "gepubliceerd_op": "2024-09-25T14:00:00Z",
+                "metadata_gestript_op": None,
             },
             "_cached_object_repr": "title one",
         }
