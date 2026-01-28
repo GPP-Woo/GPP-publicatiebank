@@ -21,6 +21,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = INSTALLED_APPS + [
     # External applications.
+    "django_structlog",
     "capture_tag",
     "hijack",
     "hijack.contrib.admin",
@@ -38,6 +39,7 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "woo_publications.utils",
 ]
 
+INSTALLED_APPS.remove("django_markup")
 INSTALLED_APPS.remove("vng_api_common")
 INSTALLED_APPS.remove("notifications_api_common")
 
@@ -451,11 +453,6 @@ purposes:
         "url": "https://gpp-publicatiebank.readthedocs.io/",
     },
 }
-
-#
-# ZGW-CONSUMERS
-#
-ZGW_CONSUMERS_IGNORE_OAS_FIELDS = True
 
 #
 # DJANGO-SENDFILE2
