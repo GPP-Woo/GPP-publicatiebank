@@ -66,7 +66,7 @@ MIDDLEWARE.insert(
 
 # Override/fix the default -> TODO: check if there's an open-api-framework update
 # available
-LOG_LEVEL = config(
+LOG_LEVEL = config(  # pyright: ignore[reportCallIssue]
     "LOG_LEVEL",
     default="INFO",
     help_text=(
@@ -222,9 +222,9 @@ PROJECT_NAME = _("WOO Publications")
 ENABLE_ADMIN_NAV_SIDEBAR = config("ENABLE_ADMIN_NAV_SIDEBAR", default=False)
 
 # Displaying environment information
-ENVIRONMENT_LABEL = config("ENVIRONMENT_LABEL", ENVIRONMENT)
-ENVIRONMENT_BACKGROUND_COLOR = config("ENVIRONMENT_BACKGROUND_COLOR", "orange")
-ENVIRONMENT_FOREGROUND_COLOR = config("ENVIRONMENT_FOREGROUND_COLOR", "black")
+ENVIRONMENT_LABEL = config("ENVIRONMENT_LABEL", default=ENVIRONMENT)
+ENVIRONMENT_BACKGROUND_COLOR = config("ENVIRONMENT_BACKGROUND_COLOR", default="orange")
+ENVIRONMENT_FOREGROUND_COLOR = config("ENVIRONMENT_FOREGROUND_COLOR", default="black")
 SHOW_ENVIRONMENT = config("SHOW_ENVIRONMENT", default=True)
 
 # This setting is used by the csrf_failure view (accounts app).
@@ -243,7 +243,7 @@ INSPANNINGSVERPLICHTING_IDENTIFIER = (
 )
 
 # Image field validator settings
-ALLOWED_IMG_EXTENSIONS = config(
+ALLOWED_IMG_EXTENSIONS = config(  # pyright: ignore[reportCallIssue]
     "ALLOWED_IMG_EXTENSIONS",
     default=[
         "jpg",
@@ -259,19 +259,19 @@ assert set(ALLOWED_IMG_EXTENSIONS) <= set(
     validators.get_available_image_extensions()
 ), "img file type not supported"
 
-MAX_IMG_SIZE = config(
+MAX_IMG_SIZE = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_SIZE",
     default=1_000_000,
     help_text="The maximum size of images in bytes.",
     group="Image upload settings",
 )
-MAX_IMG_HEIGHT = config(
+MAX_IMG_HEIGHT = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_HEIGHT",
     default=600,
     help_text="The maximum image height of images in pixels.",
     group="Image upload settings",
 )
-MAX_IMG_WIDTH = config(
+MAX_IMG_WIDTH = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_WIDTH",
     default=600,
     help_text="The maximum image width of images in pixels.",
