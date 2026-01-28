@@ -68,7 +68,7 @@ def get_owner(apps: StateApps, obj):
         return (acting_user, obj.user)
 
     TimelineLogProxy = apps.get_model("logging", "timelinelogproxy")
-    qs = TimelineLogProxy.objects.filter(  # pyright: ignore[reportAttributeAccessIssue]
+    qs = TimelineLogProxy.objects.filter(
         content_type=get_contenttype(apps, obj),
         object_id=obj.pk,
     )

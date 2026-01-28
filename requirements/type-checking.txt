@@ -148,6 +148,7 @@ django==5.2.10
     #   django-axes
     #   django-cors-headers
     #   django-csp
+    #   django-debug-toolbar
     #   django-extensions
     #   django-filter
     #   django-formtools
@@ -215,6 +216,8 @@ django-csp==4.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+django-debug-toolbar==6.2.0
+    # via -r requirements/type-checking.in
 django-extensions==4.1
     # via
     #   -c requirements/ci.txt
@@ -819,6 +822,7 @@ sqlparse==0.5.5
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django
+    #   django-debug-toolbar
 structlog==25.5.0
     # via
     #   -c requirements/ci.txt

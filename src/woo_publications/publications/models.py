@@ -118,7 +118,7 @@ class Topic(models.Model):
         ),
     )
 
-    class Meta:  # pyright: ignore
+    class Meta:
         verbose_name = _("topic")
         verbose_name_plural = _("topics")
 
@@ -320,7 +320,7 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     get_available_publicatiestatus_transitions: GetAvailablePublicatiestatusTransitions
     publicationidentifier_set: models.QuerySet[PublicationIdentifier]
 
-    class Meta:  # pyright: ignore
+    class Meta:
         verbose_name = _("publication")
         verbose_name_plural = _("publications")
         constraints = [
@@ -792,7 +792,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
     # Private property managed by the getter and setter below.
     _zgw_document: ZGWDocument | None = None
 
-    class Meta:  # pyright: ignore
+    class Meta:
         verbose_name = _("document")
         verbose_name_plural = _("documents")
         constraints = [

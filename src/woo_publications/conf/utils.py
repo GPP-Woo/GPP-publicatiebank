@@ -19,7 +19,7 @@ def wrap_config[T, **P](wrapped: Callable[P, T]):
         _legacy_config(option, **_legacy_kwargs)  # type: ignore
 
         # can't handle the typing overlaods in a decorator...
-        return wrapped(*args, **kwargs)  # pyright:ignore[reportCallIssue]
+        return wrapped(*args, **kwargs)
 
     return inner
 

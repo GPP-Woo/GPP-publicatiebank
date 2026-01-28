@@ -460,7 +460,7 @@ class PublicationWriteSerializer(
         publication = super().update(instance, validated_data)
 
         if update_publicatie_identifiers:
-            publication.publicationidentifier_set.all().delete()  # pyright: ignore[reportAttributeAccessIssue]
+            publication.publicationidentifier_set.all().delete()
             PublicationIdentifier.objects.bulk_create(
                 PublicationIdentifier(publicatie=publication, **identifiers)
                 for identifiers in publication_identifiers

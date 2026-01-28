@@ -27,7 +27,7 @@ class PublicationStatusValidator:
     def __call__(self, value: PublicationStatusOptions, field: serializers.ChoiceField):
         serializer = field.parent
         assert isinstance(serializer, serializers.ModelSerializer)
-        model_cls = serializer.Meta.model  # pyright: ignore[reportGeneralTypeIssues]
+        model_cls = serializer.Meta.model
         assert model_cls in (Document, Publication), (
             "Validator applied to unexpected model/serializer."
         )
