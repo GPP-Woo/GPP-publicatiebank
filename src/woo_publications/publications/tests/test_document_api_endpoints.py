@@ -1,6 +1,8 @@
+import io
 from collections.abc import Iterator
 from datetime import date
 from io import BytesIO
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -50,6 +52,11 @@ AUDIT_HEADERS = {
     "AUDIT_USER_ID": "id",
     "AUDIT_REMARKS": "remark",
 }
+
+METADATA_PDF = (
+    Path(settings.DJANGO_PROJECT_DIR) / "publications" / "tests" / "files" / "amore.pdf"
+)
+METADATA_PDF_SIZE = 12_622
 
 
 class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCase):
@@ -1124,7 +1131,8 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document_delay.assert_called_once_with(
-            document_id=document.pk, download_url=f"http://testserver{download_path}"
+            document_id=document.pk,
+            download_url=f"http://testserver{download_path}",
         )
 
     def test_partial_update_document(self):
@@ -1663,8 +1671,11 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists()
         )
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
-    def test_upload_file_parts(self, mock_index_document_delay: MagicMock):
+    @patch("woo_publications.publications.api.viewsets.strip_pdf.si")
+    @patch("woo_publications.publications.api.viewsets.index_document.si")
+    def test_upload_file_parts(
+        self, mock_index_document: MagicMock, mock_strip_pdf: MagicMock
+    ):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=5,
@@ -1724,16 +1735,72 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertTrue(document.upload_complete)
 
         with self.subTest("document index task is scheduled"):
-            mock_index_document_delay.assert_called_once_with(
+            mock_index_document.assert_called_once_with(
                 document_id=document.pk,
                 download_url=f"http://host.docker.internal:8000{download_url}",
             )
+            mock_strip_pdf.assert_not_called()
 
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
-    def test_upload_with_multiple_parts(self, mock_index_document_delay: MagicMock):
+        with self.subTest("file type is set of unknown file"):
+            self.assertEqual(document.bestandsformaat, "text/plain")
+
+    @patch("woo_publications.publications.api.viewsets.strip_pdf.si")
+    @patch("woo_publications.publications.api.viewsets.index_document.si")
+    def test_upload_file_parts_pdf(
+        self, mock_index_document: MagicMock, mock_strip_pdf: MagicMock
+    ):
+        document: Document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            bestandsomvang=5,
+            bestandsformaat="application/pdf",
+        )
+        document.register_in_documents_api(
+            build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
+        )
+        assert document.zgw_document is not None
+        endpoint = reverse(
+            "api:document-filepart-detail",
+            kwargs={
+                "uuid": document.uuid,
+                "part_uuid": document.zgw_document.file_parts[0].uuid,
+            },
+        )
+        download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.put(
+                endpoint,
+                data={"inhoud": SimpleUploadedFile("dummy.txt", b"aAaAa")},
+                format="multipart",
+                headers={
+                    **AUDIT_HEADERS,
+                    "Host": "host.docker.internal:8000",
+                },
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.json()["documentUploadVoltooid"])
+
+        mock_index_document.assert_called_once_with(
+            document_id=document.pk,
+            download_url=f"http://host.docker.internal:8000{download_url}",
+        )
+        mock_strip_pdf.assert_called_once_with(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000/",
+        )
+
+    @patch("woo_publications.publications.models.Document.set_file_type")
+    @patch("woo_publications.publications.tasks.index_document.delay")
+    def test_upload_with_multiple_parts(
+        self, mock_index_document_delay: MagicMock, mock_set_file_type: MagicMock
+    ):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
             bestandsomvang=105,
+            bestandsformaat="text/plain",
         )
         document.register_in_documents_api(
             build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
@@ -1771,6 +1838,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 detail_data = detail.json()
                 self.assertTrue(detail_data["locked"])
                 self.assertEqual(len(detail_data["bestandsdelen"]), 2)
+
+        mock_set_file_type.assert_not_called()
 
     def test_upload_wrong_chunk_size(self):
         document: Document = DocumentFactory.create(
@@ -2116,10 +2185,79 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         self.assertTrue(response.streaming)
         self.assertEqual(response["Content-Length"], "5")
         self.assertIn("Content-Disposition", response)
+        self.assertEqual(response["content-type"], "application/octet-stream")
 
         assert isinstance(response.streaming_content, Iterator)
         content = b"".join(response.streaming_content)
         self.assertEqual(content, b"aAaAa")
+
+    def test_download_stripped_pdf_document(self):
+        with get_client(self.service) as client:
+            openzaak_document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=self.DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="File part test",
+                filesize=METADATA_PDF_SIZE,  # in bytes
+                filename="foobar.pdf",
+                content_type="application/pdf",
+            )
+
+            with open(METADATA_PDF, "rb") as pdf_file:
+                for part in openzaak_document.file_parts:
+                    file = File(io.BytesIO(pdf_file.read(part.size)))
+
+                    client.proxy_file_part_upload(
+                        file=file, file_part_uuid=part.uuid, lock=openzaak_document.lock
+                    )
+
+            # and unlock the document
+            client.unlock_document(
+                uuid=openzaak_document.uuid, lock=openzaak_document.lock
+            )
+
+            # Ensure that this api call retrieves the document from openzaak
+            # so we can see that it returns a 404 after deletion.
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
+            )
+            self.assertEqual(openzaak_response.status_code, status.HTTP_200_OK)
+
+        with freeze_time("2024-09-25T12:30:00-00:00"):
+            document = DocumentFactory.create(
+                publicatie__informatie_categorieen=[self.information_category],
+                bestandsomvang=METADATA_PDF_SIZE,
+                bestandsnaam="foobar.pdf",
+                bestandsformaat="application/pdf",
+                metadata_gestript_op=timezone.now(),
+                document_uuid=openzaak_document.uuid,
+                document_service=self.service,
+                upload_complete=True,
+            )
+
+        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["content-type"], "application/pdf")
+
+    def test_download_pdf_document_with_unstripped_metadata(self):
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            bestandsomvang=5,
+            bestandsnaam="test.pdf",
+        )
+        assert document.document_service is None
+        assert document.document_uuid is None
+        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
     def test_download_incomplete_document(self):
         document = DocumentFactory.create(
