@@ -216,3 +216,64 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
                 f"enkelvoudiginformatieobjecten/{document.uuid}"
             )
             self.assertEqual(openzaak_response.json()["bronorganisatie"], "112345670")
+
+    def test_download_document(self):
+        service = ServiceFactory.build(for_documents_api_docker_compose=True)
+
+        uploaded_file = File(BytesIO(b"1234567890"))
+
+        with get_client(service) as client:
+            # create document
+            document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="File part test",
+                filesize=10,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+            part = document.file_parts[0]
+
+            # "upload" the part
+            client.proxy_file_part_upload(
+                uploaded_file,
+                file_part_uuid=part.uuid,
+                lock=document.lock,
+            )
+
+            # and unlock the document
+            client.unlock_document(uuid=document.uuid, lock=document.lock)
+
+            upstream_response, streaming_content = client.download_document(
+                uuid=document.uuid
+            )
+            self.assertEqual(upstream_response.status_code, 200)
+            self.assertEqual(list(streaming_content), [b"1234567890"])
+
+    def test_download_document_none_200_returns_empty_binary(self):
+        service = ServiceFactory.build(for_documents_api_docker_compose=True)
+
+        with get_client(service) as client:
+            # create document
+            document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="123456782",
+                document_type_url=DOCUMENT_TYPE_URL,
+                creation_date=date.today(),
+                title="File part test",
+                filesize=10,  # in bytes
+                filename="data.txt",
+                content_type="text/plain",
+            )
+
+            upstream_response, streaming_content = client.download_document(
+                uuid=document.uuid
+            )
+            self.assertEqual(upstream_response.status_code, 500)
+            self.assertEqual(streaming_content, (b"",))

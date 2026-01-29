@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from datetime import date
 from io import BytesIO
@@ -17,7 +17,8 @@ from django.utils.translation import gettext as _
 
 import sentry_sdk
 from furl import furl
-from requests import RequestException
+from requests import RequestException, Response
+from rest_framework import status
 from zgw_consumers.client import build_client
 from zgw_consumers.models import Service
 from zgw_consumers.nlx import NLXClient
@@ -32,6 +33,11 @@ from .typing import (
 )
 
 __all__ = ["DocumentsAPIError", "get_client"]
+
+
+DOWNLOAD_CHUNK_SIZE = (
+    8_192  # read 8 kB into memory at a time when downloading from upstream
+)
 
 
 def get_client(service: Service) -> DocumentenClient:
@@ -229,6 +235,22 @@ class DocumentenClient(NLXClient):
             json={"lock": lock},
         )
         response.raise_for_status()
+
+    def download_document(self, *, uuid: UUID) -> tuple[Response, Iterable[bytes]]:
+        endpoint = f"enkelvoudiginformatieobjecten/{uuid}/download"
+        upstream_response = self.get(endpoint, stream=True)
+
+        if (_status := upstream_response.status_code) != status.HTTP_200_OK:
+            return upstream_response, (b"",)
+
+        # generator that produces the chunks
+        streaming_content: Iterable[bytes] = (
+            chunk
+            for chunk in upstream_response.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE)
+            if chunk
+        )
+
+        return upstream_response, streaming_content
 
 
 class FileFactory(Protocol):
