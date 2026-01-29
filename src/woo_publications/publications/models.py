@@ -809,6 +809,16 @@ class Document(ConcurrentTransitionMixin, models.Model):
         return self.officiele_titel
 
     @property
+    def is_pdf(self):
+        if self.bestandsformaat == "application/pdf":
+            return True
+
+        if Path(self.bestandsnaam).suffix.lower() == ".pdf":
+            return True
+
+        return False
+
+    @property
     def zgw_document(self) -> ZGWDocument | None:
         """
         The related ZGW Documents API document.

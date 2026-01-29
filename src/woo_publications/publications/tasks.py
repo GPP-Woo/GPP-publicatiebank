@@ -140,6 +140,10 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
         log.info("index_task_skipped", reason="upload_not_complete")
         return
 
+    if document.is_pdf and not document.metadata_gestript_op:
+        log.info("index_task_skipped", reason="pdf_not_stripped")
+        return
+
     if (
         not (pub_status := document.publicatie.publicatiestatus)
         == PublicationStatusOptions.published
