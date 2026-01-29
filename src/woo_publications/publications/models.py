@@ -716,6 +716,12 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    metadata_gestript_op = models.DateTimeField(
+        _("metadata stripped on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the document was stripped."),
+        null=True,
+    )
     ontvangstdatum = models.DateTimeField(
         _("date of reception"),
         help_text=_("The timestamp when the document is received by the organisatie."),
