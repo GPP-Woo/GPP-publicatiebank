@@ -203,6 +203,10 @@ class DocumentViewSet(
         serializer.is_valid(raise_exception=True)
 
         file = serializer.validated_data["inhoud"]
+
+        if (formaat := document.bestandsformaat) and formaat == "unknown":
+            document.set_file_type(file)
+
         try:
             is_completed = document.upload_part_data(uuid=part_uuid, file=file)
         except RequestException as exc:

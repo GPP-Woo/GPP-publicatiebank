@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
+import magic
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
     ConcurrentTransitionMixin,
@@ -1049,6 +1050,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
             self.upload_complete = True
             self.save(update_fields=("lock", "upload_complete"))
         return completed
+
+    def set_file_type(self, file: File) -> None:
+        document_mime = magic.from_buffer(file.read(2048), mime=True)
+
+        self.bestandsformaat = document_mime
+        self.save(update_fields=("bestandsformaat",))
+
+        file.seek(0)
 
 
 class DocumentIdentifier(models.Model):
