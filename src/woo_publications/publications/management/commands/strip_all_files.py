@@ -1,6 +1,6 @@
 from urllib.parse import urljoin
 
-from django.core.management.commands import loaddata
+from django.core.management import BaseCommand
 from django.urls import reverse
 
 import requests
@@ -8,8 +8,8 @@ import requests
 from ...file_processing import strip_all_files
 
 
-class Command(loaddata.Command):
-    help = "Load organisations from fixture file"
+class Command(BaseCommand):
+    help = "Strip the existing documents form it's metadata and re-index them."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -45,5 +45,6 @@ class Command(loaddata.Command):
             return
 
         self.stdout.write(
-            f"{counter} documents scheduled to strip its metadata.", self.style.SUCCESS
+            f"{counter} documents scheduled to strip their metadata.",
+            self.style.SUCCESS,
         )

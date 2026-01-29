@@ -240,7 +240,7 @@ class DocumentenClient(NLXClient):
         endpoint = f"enkelvoudiginformatieobjecten/{uuid}/download"
         upstream_response = self.get(endpoint, stream=True)
 
-        if (_status := upstream_response.status_code) != status.HTTP_200_OK:
+        if upstream_response.status_code != status.HTTP_200_OK:
             return upstream_response, (b"",)
 
         # generator that produces the chunks

@@ -2747,16 +2747,16 @@ interactions:
       Cross-Origin-Opener-Policy:
       - same-origin
       Date:
-      - Wed, 28 Jan 2026 10:52:17 GMT
+      - Thu, 29 Jan 2026 14:26:37 GMT
       Referrer-Policy:
       - same-origin
       Server:
       - WSGIServer/0.2 CPython/3.12.7
       Server-Timing:
-      - TimerPanel_utime;dur=45.818999999998056;desc="User CPU time", TimerPanel_stime;dur=4.612000000001615;desc="System
-        CPU time", TimerPanel_total;dur=50.43099999999967;desc="Total CPU time", TimerPanel_total_time;dur=50.40698600350879;desc="Elapsed
-        time", SQLPanel_sql_time;dur=0;desc="SQL 0 queries", CachePanel_total_time;dur=0;desc="Cache
-        0 Calls"
+      - TimerPanel_utime;dur=84.6669999999996;desc="User CPU time", TimerPanel_stime;dur=21.301000000001125;desc="System
+        CPU time", TimerPanel_total;dur=105.96800000000073;desc="Total CPU time",
+        TimerPanel_total_time;dur=116.62409201380797;desc="Elapsed time", SQLPanel_sql_time;dur=0;desc="SQL
+        0 queries", CachePanel_total_time;dur=0;desc="Cache 0 Calls"
       Vary:
       - Accept
       X-Content-Type-Options:
@@ -2764,7 +2764,7 @@ interactions:
       X-Frame-Options:
       - DENY
       djdt-store-id:
-      - 5f1de17e06ad414b8a097648dc7c3b25
+      - 693a7781da5d4c42b7b6aabd1ddb3e32
     status:
       code: 200
       message: OK

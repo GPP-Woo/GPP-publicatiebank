@@ -34,7 +34,7 @@ DOWNLOAD_CHUNK_SIZE = (
 
 @app.task
 @transaction.atomic()
-def strip_pdf(*, document_id: int, base_url: str) -> bool:
+def strip_pdf(*, document_id: int, base_url: str) -> None:
     """
     The celery task to strip the metadata of pdf files.
     This task does the following:
@@ -48,8 +48,6 @@ def strip_pdf(*, document_id: int, base_url: str) -> bool:
 
     :param document_id: The internal Document model reference.
     :param base_url: The base URL of the Documents API.
-
-    :return: indication that the uploading of the document has succeeded
     """
 
     document = Document.objects.get(pk=document_id)
@@ -118,13 +116,10 @@ def strip_pdf(*, document_id: int, base_url: str) -> bool:
         # set stripped file back to the starting bytes
         stripped_file.seek(0)
 
-        is_completed = False
         # upload file parts
         for part in file_parts:
             file_part = stripped_file.read(part.size)
-            is_completed = document.upload_part_data(uuid=part.uuid, file=file_part)
-
-        return is_completed
+            document.upload_part_data(uuid=part.uuid, file=file_part)
 
 
 @app.task

@@ -79,18 +79,12 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
             bestandsnaam="test.pdf",
         )
 
-        with (
-            self.subTest("check from bestandsformaat"),
-            self.captureOnCommitCallbacks(execute=True),
-        ):
+        with self.subTest("check from bestandsformaat"):
             remote_task_id = index_document(document_id=bestandsformaat.pk)
 
             self.assertIsNone(remote_task_id)
 
-        with (
-            self.subTest("check from bestandsnaam"),
-            self.captureOnCommitCallbacks(execute=True),
-        ):
+        with self.subTest("check from bestandsnaam"):
             remote_task_id = index_document(document_id=bestandsnaam.pk)
 
             self.assertIsNone(remote_task_id)

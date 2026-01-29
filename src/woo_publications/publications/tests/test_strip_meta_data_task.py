@@ -1,3 +1,4 @@
+import datetime
 import io
 from datetime import date
 from pathlib import Path
@@ -8,6 +9,7 @@ from django.core.files import File
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from freezegun.api import freeze_time
 from pypdf import PdfReader
 from rest_framework import status
 
@@ -135,6 +137,8 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         ):
             strip_pdf(document_id=doc.pk, base_url="http://testserver/")
 
+        self.assertEqual(doc.metadata_gestript_op, None)
+
     def test_strip_pdf_of_metadata(self):
         document_reference = self._create_document_in_documents_api()
         document = DocumentFactory.create(
@@ -146,13 +150,17 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             document_uuid=document_reference,
         )
 
-        completed = strip_pdf(
-            document_id=document.pk,
-            base_url="http://host.docker.internal:8000",
-        )
-        self.assertTrue(completed)
+        with freeze_time("2026-01-01T12:00:00-00:00"):
+            strip_pdf(
+                document_id=document.pk,
+                base_url="http://host.docker.internal:8000",
+            )
 
         document.refresh_from_db()
+        self.assertEqual(
+            document.metadata_gestript_op,
+            datetime.datetime(2026, 1, 1, 12, 0, 0, 0, tzinfo=datetime.UTC),
+        )
 
         with get_client(self.service) as client:
             documents_api_document = client.get(

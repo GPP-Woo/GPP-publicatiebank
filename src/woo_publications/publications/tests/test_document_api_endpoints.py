@@ -1082,7 +1082,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
 
 class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
-    @patch("woo_publications.publications.tasks.index_document.delay")
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
     def test_update_document_schedules_index_update_task(
         self,
         mock_index_document_delay: MagicMock,
@@ -1793,7 +1793,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
 
     @patch("woo_publications.publications.models.Document.set_file_type")
-    @patch("woo_publications.publications.tasks.index_document.delay")
+    @patch("woo_publications.publications.api.viewsets.index_document.delay")
     def test_upload_with_multiple_parts(
         self, mock_index_document_delay: MagicMock, mock_set_file_type: MagicMock
     ):
