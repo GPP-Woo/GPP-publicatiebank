@@ -50,10 +50,6 @@ from .serializers import (
 
 logger = structlog.stdlib.get_logger(__name__)
 
-DOWNLOAD_CHUNK_SIZE = (
-    8_192  # read 8 kB into memory at a time when downloading from upstream
-)
-
 
 @extend_schema(tags=["Documenten"])
 @extend_schema_view(
@@ -288,56 +284,46 @@ class DocumentViewSet(
             "Document must exist in upstream API"
         )
 
-        endpoint = f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
         with get_client(document.document_service) as client:
-            upstream_response = client.get(endpoint, stream=True)
-
-            if (_status := upstream_response.status_code) != status.HTTP_200_OK:
-                logger.warning(
-                    "file_contents_streaming_failed",
-                    document_id=str(document.document_uuid),
-                    status_code=_status,
-                    api_root=client.base_url,
-                )
-                raise BadGateway(detail=_("Could not download from the upstream."))
-
-            # generator that produces the chunks
-            streaming_content: Iterable[bytes] = (
-                chunk
-                for chunk in upstream_response.iter_content(
-                    chunk_size=DOWNLOAD_CHUNK_SIZE
-                )
-                if chunk
+            upstream_response, streaming_content = client.download_document(
+                uuid=document.document_uuid
             )
 
-            response = StreamingHttpResponse(
-                streaming_content,
-                # TODO: if we have format information, we can use it, but that's not
-                # part of BB-MVP
-                content_type="application/octet-stream",
-                headers={
-                    "Content-Length": upstream_response.headers.get(
-                        "Content-Length", str(document.bestandsomvang)
-                    ),
-                    "Content-Disposition": content_disposition_header(
-                        as_attachment=True,
-                        filename=document.bestandsnaam,
-                    ),
-                    # nginx-specific header that prevents files being buffered, instead
-                    # they will be sent synchronously to the nginx client.
-                    "X-Accel-Buffering": "no",
-                },
-            )
+        if upstream_response.status_code != status.HTTP_200_OK:
+            raise BadGateway(detail=_("Could not download from the upstream."))
 
-            user_id, user_repr, remarks = extract_audit_parameters(request)
-            audit_api_download(
-                content_object=document,
-                user_id=user_id,
-                user_display=user_repr,
-                remarks=remarks,
-            )
+        content_type = (
+            "application/octet-stream"
+            if document.bestandsformaat == "unknown"
+            else document.bestandsformaat
+        )
 
-            return response
+        response = StreamingHttpResponse(
+            streaming_content,
+            content_type=content_type,
+            headers={
+                "Content-Length": upstream_response.headers.get(
+                    "Content-Length", str(document.bestandsomvang)
+                ),
+                "Content-Disposition": content_disposition_header(
+                    as_attachment=True,
+                    filename=document.bestandsnaam,
+                ),
+                # nginx-specific header that prevents files being buffered, instead
+                # they will be sent synchronously to the nginx client.
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+        user_id, user_repr, remarks = extract_audit_parameters(request)
+        audit_api_download(
+            content_object=document,
+            user_id=user_id,
+            user_display=user_repr,
+            remarks=remarks,
+        )
+
+        return response
 
 
 @extend_schema(tags=["Publicaties"])
