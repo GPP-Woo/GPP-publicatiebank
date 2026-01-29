@@ -4,6 +4,7 @@ import uuid
 from collections.abc import Callable, Collection, Iterator
 from copy import copy
 from functools import partial
+from pathlib import Path
 from uuid import UUID
 
 from django.conf import settings
@@ -883,7 +884,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         download_url = self.absolute_document_download_uri(request=request)
         transaction.on_commit(
             partial(
-                index_document.delay, document_id=self.pk, download_url=download_url
+                index_document.delay,
+                document_id=self.pk,
+                download_url=download_url,
             )
         )
 

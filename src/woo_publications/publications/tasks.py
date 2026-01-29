@@ -1,8 +1,13 @@
+from tempfile import NamedTemporaryFile
 from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
+from django.db import transaction
+from django.utils import timezone
+
 import structlog
+from pypdf import PdfWriter
 from requests import RequestException
 from zgw_consumers.models import Service
 
@@ -21,6 +26,105 @@ from woo_publications.publications.constants import PublicationStatusOptions
 from .models import Document, Publication, Topic
 
 logger = structlog.stdlib.get_logger(__name__)
+
+DOWNLOAD_CHUNK_SIZE = (
+    8_192  # read 8 kB into memory at a time when downloading from upstream
+)
+
+
+@app.task
+@transaction.atomic()
+def strip_pdf(*, document_id: int, base_url: str) -> bool:
+    """
+    The celery task to strip the metadata of pdf files.
+    This task does the following:
+
+    - retrieves the document from the Documents API.
+    - strips the document metadata.
+    - destroys the document in the Documents API
+      (This is because updating a document doesn't generate new file parts).
+    - create a new document in the Documents API (this is to retrieve the file parts).
+    - upload the newly stripped document to the file parts
+
+    :param document_id: The internal Document model reference.
+    :param base_url: The base URL of the Documents API.
+
+    :return: indication that the uploading of the document has succeeded
+    """
+
+    document = Document.objects.get(pk=document_id)
+
+    assert document.document_uuid and document.document_service, (
+        "The document must have a Documents API object attached"
+    )
+
+    # - get client instance for the documents api
+    # - create temporary named file to create a pdf which we can strip
+    with (
+        get_documents_client(document.document_service) as client,
+        NamedTemporaryFile(suffix=".pdf") as temp_file,
+    ):
+        source_document = client.retrieve_document(uuid=document.document_uuid)
+        upstream_response, streaming_content = client.download_document(
+            uuid=document.document_uuid
+        )
+
+        upstream_response.raise_for_status()
+        temp_file.name = source_document.file_name
+
+        for chunk in streaming_content:
+            assert isinstance(chunk, bytes)
+            temp_file.write(chunk)
+
+        writer = PdfWriter(temp_file, strict=False, full=False)
+
+        # strip meta data fields
+        writer.add_metadata(
+            {
+                "/Author": "",
+                "/Title": "",
+                "/Subject": "",
+                "/Keywords": "",
+            },
+        )
+
+        if writer.xmp_metadata:  # pragma: no cover
+            writer.xmp_metadata.dc_creator = None
+            writer.xmp_metadata.pdf_keywords = None
+
+        # save file
+        _, stripped_file = writer.write(temp_file)
+
+        # delete document in documents api
+        client.destroy_document(uuid=document.document_uuid)
+
+        # create new document in documents api
+        document.bestandsomvang = stripped_file.tell()
+        document.metadata_gestript_op = timezone.now()
+        document.save(update_fields=("bestandsomvang", "metadata_gestript_op"))
+
+        # create document in documents api
+        document.register_in_documents_api(
+            build_absolute_uri=lambda abs_path: urljoin(base_url, abs_path[1:])
+        )
+        document.refresh_from_db()
+
+        assert document.zgw_document is not None
+
+        # get file parts and order them
+        file_parts = document.zgw_document.file_parts
+        file_parts = sorted(file_parts, key=lambda x: x.order)
+
+        # set stripped file back to the starting bytes
+        stripped_file.seek(0)
+
+        is_completed = False
+        # upload file parts
+        for part in file_parts:
+            file_part = stripped_file.read(part.size)
+            is_completed = document.upload_part_data(uuid=part.uuid, file=file_part)
+
+        return is_completed
 
 
 @app.task

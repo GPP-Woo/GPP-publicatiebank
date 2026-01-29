@@ -157,7 +157,9 @@ def sync_to_index(
             document_url = obj.absolute_document_download_uri(request)
             transaction.on_commit(
                 partial(
-                    index_document.delay, document_id=obj.pk, download_url=document_url
+                    index_document.delay,
+                    document_id=obj.pk,
+                    download_url=document_url,
                 )
             )
         elif model is Topic:
@@ -648,6 +650,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "document_uuid",
                     "lock",
                     "upload_complete",
+                    "metadata_gestript_op",
                 )
             },
         ),
@@ -665,6 +668,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "laatst_gewijzigd_datum",
         "gepubliceerd_op",
         "ingetrokken_op",
+        "metadata_gestript_op",
         "source_url",
     )
     search_fields = (

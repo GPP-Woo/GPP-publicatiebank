@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-from functools import partial
 from typing import override
 from uuid import UUID
 
@@ -9,6 +7,7 @@ from django.utils.http import content_disposition_header
 from django.utils.translation import gettext_lazy as _
 
 import structlog
+from celery import chain
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -35,7 +34,7 @@ from woo_publications.logging.service import (
 
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import index_document, process_source_document
+from ..tasks import index_document, process_source_document, strip_pdf
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -192,6 +191,7 @@ class DocumentViewSet(
     def file_part(self, request: Request, part_uuid: UUID, *args, **kwargs) -> Response:
         document = self.get_object()
         assert isinstance(document, Document)
+
         serializer = FilePartSerializer(
             data=request.data,
             context={"request": request, "view": self},
@@ -216,13 +216,20 @@ class DocumentViewSet(
 
         if is_completed:
             document_url = document.absolute_document_download_uri(self.request)
-            transaction.on_commit(
-                partial(
-                    index_document.delay,
-                    document_id=document.pk,
-                    download_url=document_url,
-                )
+            index_task = index_document.si(
+                document_id=document.pk, download_url=document_url
             )
+
+            if document.is_pdf:
+                strip_pdf_task = strip_pdf.si(
+                    document_id=document.pk,
+                    base_url=self.request.build_absolute_uri("/"),
+                )
+                tasks = chain(strip_pdf_task, index_task)
+            else:
+                tasks = index_task
+
+            transaction.on_commit(tasks.delay)
 
         response_serializer = DocumentStatusSerializer(
             instance={"document_upload_voltooid": is_completed}
