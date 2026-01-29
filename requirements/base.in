@@ -26,8 +26,8 @@ maykin-common[axes,mfa]
 zgw-consumers
 
 # DRF & other API tooling
-# optional dependencies required because of https://github.com/maykinmedia/open-api-framework/issues/201
-open-api-framework[cors,csp,commonground]
+open-api-framework
+djangorestframework-camel-case
 djangorestframework-recursive
 drf-polymorphic
 

@@ -6,7 +6,6 @@ import django_stubs_ext
 import structlog
 from open_api_framework.conf.base import *  # noqa
 from upgrade_check import UpgradeCheck, VersionRange
-from vng_api_common.conf.api import BASE_REST_FRAMEWORK
 
 from woo_publications.logging.processors import drop_user_agent_in_dev
 
@@ -39,10 +38,6 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "woo_publications.utils",
 ]
 
-INSTALLED_APPS.remove("django_markup")
-INSTALLED_APPS.remove("vng_api_common")
-INSTALLED_APPS.remove("notifications_api_common")
-
 MIDDLEWARE = MIDDLEWARE + [
     "hijack.middleware.HijackUserMiddleware",
     # NOTE: affects *all* requests, not just API calls. We can't subclass (yet) either
@@ -51,10 +46,6 @@ MIDDLEWARE = MIDDLEWARE + [
     # https://github.com/tfranzel/drf-spectacular/commit/71c7a04ee8921c01babb11fbe2938397a372dac7
     "djangorestframework_camel_case.middleware.CamelCaseMiddleWare",
 ]
-
-# Remove unused/irrelevant middleware added by OAF
-MIDDLEWARE.remove("corsheaders.middleware.CorsMiddleware")
-MIDDLEWARE.remove("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
 #
 # LOGGING
@@ -333,23 +324,43 @@ SUBPATH = (
 # DJANGO REST FRAMEWORK
 #
 
-REST_FRAMEWORK = BASE_REST_FRAMEWORK.copy()
-REST_FRAMEWORK["PAGE_SIZE"] = 10
-REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
-REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"] = (
-    "django_filters.rest_framework.DjangoFilterBackend",
-)
-REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = (
-    "woo_publications.api.pagination.DynamicPageSizePagination"
-)
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = (
-    "woo_publications.api.permissions.TokenAuthPermission",
-    "woo_publications.api.permissions.AuditHeaderPermission",
-)
-REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
-    "woo_publications.api.authorization.TokenAuthentication",
-)
-REST_FRAMEWORK["EXCEPTION_HANDLER"] = "woo_publications.api.views.exception_handler"
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
+    # there is no authentication of 'end-users', only authorization (via JWT)
+    # of applications
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "woo_publications.api.authorization.TokenAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "woo_publications.api.permissions.TokenAuthPermission",
+        "woo_publications.api.permissions.AuditHeaderPermission",
+    ),
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    #
+    # # Filtering
+    "ORDERING_PARAM": "ordering",  # 'ordering',
+    #
+    # Versioning
+    # NOT to be confused with API_VERSION - it's the major version part.
+    "DEFAULT_VERSION": "1",
+    "ALLOWED_VERSIONS": ("1",),
+    "VERSION_PARAM": "version",
+    #
+    # # Exception handling
+    "EXCEPTION_HANDLER": "woo_publications.api.views.exception_handler",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": (
+        "woo_publications.api.pagination.DynamicPageSizePagination"
+    ),
+}
 
 API_VERSION = "2.0.0"
 
