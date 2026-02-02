@@ -383,10 +383,10 @@ paths:
       - in: query
         name: publicatie
         schema:
-          type: integer
-        description: 'Filter documenten op basis van de unieke publicatie-identificatie
-          (UUID) waartoe ze horen. **Opmerkingen**: negeer het gedocumenteerde type
-          `integer`, het correcte type is `string` met formaat `uuid`.'
+          type: string
+          format: uuid
+        description: Search the document based on the unique identifier (UUID) that
+          represents a publication.
       - in: query
         name: publicatiestatus
         schema:
@@ -1025,7 +1025,7 @@ paths:
           Filter onderwerpen die bij een bepaald onderwerp horen. Als je meerdere publicaties opgeeft, dan krijg je alle onderwerpen die aan één van deze publicaties gerelateerd zijn.
 
           De filterwaarden zijn de UUIDs van de publicaties. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: true
+        explode: false
         style: form
       - in: query
         name: publicatiestatus
@@ -1522,7 +1522,7 @@ paths:
           Filter publicaties die bij een bepaald onderwerp horen. Als je meerdere onderwerpen opgeeft, dan krijg je alle publicaties die aan één van deze onderwerpen gerelateerd zijn.
 
           De filterwaarden zijn de UUIDs van de onderwerpen. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: true
+        explode: false
         style: form
       - name: page
         required: false

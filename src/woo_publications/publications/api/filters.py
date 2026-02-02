@@ -35,8 +35,7 @@ class DocumentFilterSet(FilterSet):
         to_field_name="uuid",
         help_text=_(
             "Search the document based on the unique identifier (UUID) that represents "
-            "a publication. **Disclaimer**: disregard the documented type `integer` "
-            "the correct type is `UUID`."
+            "a publication."
         ),
     )
     registratiedatum_vanaf = filters.DateTimeFilter(

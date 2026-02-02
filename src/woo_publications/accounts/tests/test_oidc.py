@@ -1,31 +1,25 @@
-from functools import partial
-
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from django_webtest import WebTest
-from mozilla_django_oidc_db.models import OpenIDConnectConfig
+from mozilla_django_oidc_db.constants import OIDC_ADMIN_CONFIG_IDENTIFIER
+from mozilla_django_oidc_db.tests.factories import OIDCClientFactory
+from mozilla_django_oidc_db.tests.mixins import OIDCMixin
+from mozilla_django_oidc_db.tests.utils import keycloak_login
 
-from woo_publications.utils.tests.keycloak import keycloak_login, mock_oidc_db_config
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..models import User
 from .factories import UserFactory
 
-mock_admin_oidc_config = partial(
-    mock_oidc_db_config,
-    id=1,  # required for the group queries because we're using in-memory objects
-    make_users_staff=True,
-    username_claim=["preferred_username"],
-)
 
-
-class OIDCLoginButtonTestCase(WebTest):
+class OIDCLoginButtonTestCase(OIDCMixin, WebTest):
     def test_oidc_button_disabled(self):
-        config = OpenIDConnectConfig.get_solo()
-        config.enabled = False
-        config.save()
-        self.addCleanup(config.clear_cache)
+        OIDCClientFactory.create(
+            identifier=OIDC_ADMIN_CONFIG_IDENTIFIER,
+            enabled=False,
+            with_admin_options=True,
+        )
 
         response = self.app.get(reverse("admin:login"))
 
@@ -37,14 +31,11 @@ class OIDCLoginButtonTestCase(WebTest):
         self.assertIsNone(oidc_login_link)
 
     def test_oidc_button_enabled(self):
-        config = OpenIDConnectConfig.get_solo()
-        config.enabled = True
-        config.oidc_op_token_endpoint = "https://some.endpoint.nl/"
-        config.oidc_op_user_endpoint = "https://some.endpoint.nl/"
-        config.oidc_rp_client_id = "id"
-        config.oidc_rp_client_secret = "secret"
-        config.save()
-        self.addCleanup(config.clear_cache)
+        OIDCClientFactory.create(
+            identifier=OIDC_ADMIN_CONFIG_IDENTIFIER,
+            enabled=True,
+            with_admin_options=True,
+        )
 
         response = self.app.get(reverse("admin:login"))
 
@@ -59,8 +50,32 @@ class OIDCLoginButtonTestCase(WebTest):
         )
 
 
-class OIDCFLowTests(VCRMixin, WebTest):
-    @mock_admin_oidc_config()
+class OIDCFLowTests(VCRMixin, OIDCMixin, WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.oidc_client = OIDCClientFactory.create(
+            identifier=OIDC_ADMIN_CONFIG_IDENTIFIER,
+            enabled=True,
+            with_admin_options=True,
+            oidc_rp_client_id="testid",
+            oidc_rp_client_secret="7DB3KUAAizYCcmZufpHRVOcD0TOkNO3I",
+            oidc_rp_sign_algo="RS256",
+            oidc_rp_scopes_list=["openid"],
+            oidc_provider__oidc_op_discovery_endpoint=(
+                "http://localhost:8080/realms/test/"
+            ),
+            # factory is broken
+            oidc_provider__oidc_op_authorization_endpoint=(
+                "http://localhost:8080/realms/test/protocol/openid-connect/auth"
+            ),
+        )
+        cls.oidc_client.options["user_settings"]["claim_mappings"]["username"] = [
+            "preferred_username"
+        ]
+        cls.oidc_client.save()
+
     def test_duplicate_email_unique_constraint_violated(self):
         # this user collides on the email address
         staff_user = UserFactory.create(
@@ -96,7 +111,6 @@ class OIDCFLowTests(VCRMixin, WebTest):
             self.assertEqual(staff_user.email, "admin@example.com")
             self.assertTrue(staff_user.is_staff)
 
-    @mock_admin_oidc_config()
     def test_happy_flow(self):
         login_page = self.app.get(reverse("admin:login"))
         start_response = login_page.click(
@@ -116,8 +130,10 @@ class OIDCFLowTests(VCRMixin, WebTest):
         user = User.objects.get()
         self.assertEqual(user.username, "admin")
 
-    @mock_admin_oidc_config(make_users_staff=False)
     def test_happy_flow_existing_user(self):
+        self.oidc_client.options["groups_settings"]["make_users_staff"] = False
+        self.oidc_client.save()
+
         staff_user = UserFactory.create(
             is_staff=True, username="admin", email="update-me"
         )

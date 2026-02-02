@@ -9,3 +9,5 @@ ignore = []
 
 pythonVersion = "3.12"
 pythonPlatform = "Linux"
+
+reportUnnecessaryTypeIgnoreComment = "error"

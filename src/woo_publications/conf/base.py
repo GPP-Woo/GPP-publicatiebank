@@ -6,7 +6,6 @@ import django_stubs_ext
 import structlog
 from open_api_framework.conf.base import *  # noqa
 from upgrade_check import UpgradeCheck, VersionRange
-from vng_api_common.conf.api import BASE_REST_FRAMEWORK
 
 from woo_publications.logging.processors import drop_user_agent_in_dev
 
@@ -21,6 +20,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = INSTALLED_APPS + [
     # External applications.
+    "django_structlog",
     "capture_tag",
     "hijack",
     "hijack.contrib.admin",
@@ -38,9 +38,6 @@ INSTALLED_APPS = INSTALLED_APPS + [
     "woo_publications.utils",
 ]
 
-INSTALLED_APPS.remove("vng_api_common")
-INSTALLED_APPS.remove("notifications_api_common")
-
 MIDDLEWARE = MIDDLEWARE + [
     "hijack.middleware.HijackUserMiddleware",
     # NOTE: affects *all* requests, not just API calls. We can't subclass (yet) either
@@ -49,10 +46,6 @@ MIDDLEWARE = MIDDLEWARE + [
     # https://github.com/tfranzel/drf-spectacular/commit/71c7a04ee8921c01babb11fbe2938397a372dac7
     "djangorestframework_camel_case.middleware.CamelCaseMiddleWare",
 ]
-
-# Remove unused/irrelevant middleware added by OAF
-MIDDLEWARE.remove("corsheaders.middleware.CorsMiddleware")
-MIDDLEWARE.remove("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
 #
 # LOGGING
@@ -64,7 +57,7 @@ MIDDLEWARE.insert(
 
 # Override/fix the default -> TODO: check if there's an open-api-framework update
 # available
-LOG_LEVEL = config(
+LOG_LEVEL = config(  # pyright: ignore[reportCallIssue]
     "LOG_LEVEL",
     default="INFO",
     help_text=(
@@ -220,9 +213,9 @@ PROJECT_NAME = _("WOO Publications")
 ENABLE_ADMIN_NAV_SIDEBAR = config("ENABLE_ADMIN_NAV_SIDEBAR", default=False)
 
 # Displaying environment information
-ENVIRONMENT_LABEL = config("ENVIRONMENT_LABEL", ENVIRONMENT)
-ENVIRONMENT_BACKGROUND_COLOR = config("ENVIRONMENT_BACKGROUND_COLOR", "orange")
-ENVIRONMENT_FOREGROUND_COLOR = config("ENVIRONMENT_FOREGROUND_COLOR", "black")
+ENVIRONMENT_LABEL = config("ENVIRONMENT_LABEL", default=ENVIRONMENT)
+ENVIRONMENT_BACKGROUND_COLOR = config("ENVIRONMENT_BACKGROUND_COLOR", default="orange")
+ENVIRONMENT_FOREGROUND_COLOR = config("ENVIRONMENT_FOREGROUND_COLOR", default="black")
 SHOW_ENVIRONMENT = config("SHOW_ENVIRONMENT", default=True)
 
 # This setting is used by the csrf_failure view (accounts app).
@@ -241,7 +234,7 @@ INSPANNINGSVERPLICHTING_IDENTIFIER = (
 )
 
 # Image field validator settings
-ALLOWED_IMG_EXTENSIONS = config(
+ALLOWED_IMG_EXTENSIONS = config(  # pyright: ignore[reportCallIssue]
     "ALLOWED_IMG_EXTENSIONS",
     default=[
         "jpg",
@@ -257,19 +250,19 @@ assert set(ALLOWED_IMG_EXTENSIONS) <= set(
     validators.get_available_image_extensions()
 ), "img file type not supported"
 
-MAX_IMG_SIZE = config(
+MAX_IMG_SIZE = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_SIZE",
     default=1_000_000,
     help_text="The maximum size of images in bytes.",
     group="Image upload settings",
 )
-MAX_IMG_HEIGHT = config(
+MAX_IMG_HEIGHT = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_HEIGHT",
     default=600,
     help_text="The maximum image height of images in pixels.",
     group="Image upload settings",
 )
-MAX_IMG_WIDTH = config(
+MAX_IMG_WIDTH = config(  # pyright: ignore[reportCallIssue]
     "MAX_IMG_WIDTH",
     default=600,
     help_text="The maximum image width of images in pixels.",
@@ -331,23 +324,43 @@ SUBPATH = (
 # DJANGO REST FRAMEWORK
 #
 
-REST_FRAMEWORK = BASE_REST_FRAMEWORK.copy()
-REST_FRAMEWORK["PAGE_SIZE"] = 10
-REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
-REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"] = (
-    "django_filters.rest_framework.DjangoFilterBackend",
-)
-REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = (
-    "woo_publications.api.pagination.DynamicPageSizePagination"
-)
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = (
-    "woo_publications.api.permissions.TokenAuthPermission",
-    "woo_publications.api.permissions.AuditHeaderPermission",
-)
-REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
-    "woo_publications.api.authorization.TokenAuthentication",
-)
-REST_FRAMEWORK["EXCEPTION_HANDLER"] = "woo_publications.api.views.exception_handler"
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
+    # there is no authentication of 'end-users', only authorization (via JWT)
+    # of applications
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "woo_publications.api.authorization.TokenAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "woo_publications.api.permissions.TokenAuthPermission",
+        "woo_publications.api.permissions.AuditHeaderPermission",
+    ),
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    #
+    # # Filtering
+    "ORDERING_PARAM": "ordering",  # 'ordering',
+    #
+    # Versioning
+    # NOT to be confused with API_VERSION - it's the major version part.
+    "DEFAULT_VERSION": "1",
+    "ALLOWED_VERSIONS": ("1",),
+    "VERSION_PARAM": "version",
+    #
+    # # Exception handling
+    "EXCEPTION_HANDLER": "woo_publications.api.views.exception_handler",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": (
+        "woo_publications.api.pagination.DynamicPageSizePagination"
+    ),
+}
 
 API_VERSION = "2.0.0"
 
@@ -451,11 +464,6 @@ purposes:
         "url": "https://gpp-publicatiebank.readthedocs.io/",
     },
 }
-
-#
-# ZGW-CONSUMERS
-#
-ZGW_CONSUMERS_IGNORE_OAS_FIELDS = True
 
 #
 # DJANGO-SENDFILE2

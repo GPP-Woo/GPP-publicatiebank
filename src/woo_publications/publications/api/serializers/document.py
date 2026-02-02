@@ -380,7 +380,7 @@ class DocumentUpdateSerializer(DocumentSerializer):
         document = super().update(instance, validated_data)
 
         if update_document_identifiers:
-            document.documentidentifier_set.all().delete()  # pyright: ignore[reportAttributeAccessIssue]
+            document.documentidentifier_set.all().delete()
             DocumentIdentifier.objects.bulk_create(
                 DocumentIdentifier(document=document, **identifiers)
                 for identifiers in document_identifiers

@@ -1,7 +1,9 @@
 # Pure python dependencies
 celery
+flower
 furl
 Pillow
+phonenumberslite
 pypdf
 python-magic
 structlog
@@ -12,6 +14,7 @@ django-axes[ipware]
 django-capture-tag
 django-fsm-2
 django-hijack
+django-redis
 django-rosetta
 django-solo
 django-structlog[celery]
@@ -20,8 +23,13 @@ django-timeline-logger
 django-treebeard
 django-upgrade-check
 maykin-common[axes,mfa]
+zgw-consumers
 
 # DRF & other API tooling
 open-api-framework
+djangorestframework-camel-case
 djangorestframework-recursive
 drf-polymorphic
+
+# app server
+uwsgi

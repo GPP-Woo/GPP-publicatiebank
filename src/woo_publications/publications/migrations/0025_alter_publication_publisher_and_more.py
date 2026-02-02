@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0003_organisationmember"),
         ("metadata", "0010_informationcategory_omschrijving"),
@@ -28,8 +27,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="publication",
-            constraint=models.CheckConstraint(  # pyright: ignore[reportCallIssue]
-                condition=models.Q(  # pyright: ignore[reportCallIssue]
+            constraint=models.CheckConstraint(
+                condition=models.Q(
                     ("publisher__isnull", False),
                     ("publicatiestatus", "concept"),
                     ("publicatiestatus", ""),

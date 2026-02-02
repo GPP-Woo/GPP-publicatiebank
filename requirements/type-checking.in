@@ -3,6 +3,7 @@
 
 pyright
 celery-types
+django-debug-toolbar
 django-stubs
 django-stubs-ext
 djangorestframework-stubs

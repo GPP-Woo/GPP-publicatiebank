@@ -1,26 +1,30 @@
-from decouple import Csv, Undefined, undefined
-from open_api_framework.conf.utils import config as _config
-from typing_extensions import deprecated
+from collections.abc import Callable
+
+from maykin_common.config import config as _config
+from open_api_framework.conf.utils import config as _legacy_config
 
 
-@deprecated("To be replaced with maykin_common.config")
-def config[T](option: str, default: T | Undefined = undefined, *args, **kwargs) -> T:
-    """
-    Pull a config parameter from the environment.
+def wrap_config[T, **P](wrapped: Callable[P, T]):
+    def inner(
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> T:
+        help_text = kwargs.pop("help_text", "")
+        group = kwargs.pop("group", "")
 
-    Read the config variable ``option``. If it's optional, use the ``default`` value.
-    Input is automatically cast to the correct type, where the type is derived from the
-    default value if possible.
+        # ensure the docs registration stuff is still happening
+        option = args[0]
+        assert isinstance(option, str)
+        _legacy_kwargs = {**kwargs, "help_text": help_text, "group": group}
+        _legacy_config(option, **_legacy_kwargs)  # type: ignore
 
-    Pass ``split=True`` to split the comma-separated input into a list.
-    """
-    if kwargs.get("split") is True:  # pragma: no cover
-        kwargs.pop("split")
-        kwargs["cast"] = Csv()
-        if default == []:
-            default = ""  # pyright: ignore
-    kwargs["default"] = default
-    return _config(option, *args, **kwargs)  # pyright: ignore
+        # can't handle the typing overlaods in a decorator...
+        return wrapped(*args, **kwargs)
+
+    return inner
+
+
+config = wrap_config(_config)
 
 
 def mute_logging(config: dict) -> None:  # pragma: no cover
