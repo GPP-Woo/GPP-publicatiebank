@@ -472,7 +472,10 @@ class PublicationWriteSerializer(
         if reindex_documents:
             for document in instance.document_set.iterator():  # pyright: ignore[reportAttributeAccessIssue]
                 transaction.on_commit(
-                    partial(index_document.delay, document_id=document.pk)
+                    partial(
+                        index_document.delay,
+                        document_id=document.pk,
+                    )
                 )
 
         if (

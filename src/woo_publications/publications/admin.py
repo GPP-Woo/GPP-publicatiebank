@@ -648,6 +648,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                     "document_uuid",
                     "lock",
                     "upload_complete",
+                    "metadata_gestript_op",
                 )
             },
         ),
@@ -665,6 +666,7 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "laatst_gewijzigd_datum",
         "gepubliceerd_op",
         "ingetrokken_op",
+        "metadata_gestript_op",
         "source_url",
     )
     search_fields = (
@@ -895,12 +897,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 )
 
         if is_published:
-            transaction.on_commit(
-                partial(
-                    index_topic.delay,
-                    topic_id=obj.pk,
-                )
-            )
+            transaction.on_commit(partial(index_topic.delay, topic_id=obj.pk))
 
     def delete_model(self, request: HttpRequest, obj: Document):
         super().delete_model(request, obj)

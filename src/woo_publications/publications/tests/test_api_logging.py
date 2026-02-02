@@ -345,6 +345,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "document_service": None,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "metadata_gestript_op": None,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-27T00:14:00Z",
@@ -484,6 +485,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                     "document_service": None,
                     "registratiedatum": "2024-09-27T00:14:00Z",
                     "laatst_gewijzigd_datum": "2024-09-28T00:14:00Z",
+                    "metadata_gestript_op": None,
                     "ontvangstdatum": None,
                     "datum_ondertekend": None,
                     "gepubliceerd_op": "2024-09-28T00:14:00Z",
@@ -657,6 +659,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
                 "datum_ondertekend": None,
                 "gepubliceerd_op": "2024-09-27T12:00:00Z",
                 "ingetrokken_op": None,
+                "metadata_gestript_op": None,
             },
             "_cached_object_repr": "changed officiele_title",
         }
@@ -665,10 +668,16 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
 
     @patch("woo_publications.publications.api.viewsets.get_client")
     def test_download_logging(self, mock_get_client):
+        class MockResponse:
+            headers = {"Content-Length": 0}
+            status_code = 200
+
         # mock out the actual download, we don't care about the main result, only about
         # the audit logs
-        mock_download = mock_get_client.return_value.__enter__.return_value.get
-        mock_download.return_value.status_code = 200
+        mock_download = (
+            mock_get_client.return_value.__enter__.return_value.download_document
+        )
+        mock_download.return_value = (MockResponse(), (b"",))
         information_category = InformationCategoryFactory.create()
         document = DocumentFactory.create(
             eigenaar=self.organisation_member,

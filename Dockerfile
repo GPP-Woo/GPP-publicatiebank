@@ -59,6 +59,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
         nano \
         mime-support \
         postgresql-client \
+        libmagic1 \
         gettext \
         shared-mime-info \
         libpcre3 \

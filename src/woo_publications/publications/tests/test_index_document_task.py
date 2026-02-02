@@ -67,13 +67,36 @@ class IndexDocumentTaskTests(VCRMixin, TestCase):
 
         self.assertIsNone(remote_task_id)
 
+    def test_index_skipped_for_none_stripped_metadata(self):
+        bestandsformaat = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            upload_complete=True,
+            bestandsformaat="application/pdf",
+        )
+        bestandsnaam = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            upload_complete=True,
+            bestandsnaam="test.pdf",
+        )
+
+        with self.subTest("check from bestandsformaat"):
+            remote_task_id = index_document(document_id=bestandsformaat.pk)
+
+            self.assertIsNone(remote_task_id)
+
+        with self.subTest("check from bestandsnaam"):
+            remote_task_id = index_document(document_id=bestandsnaam.pk)
+
+            self.assertIsNone(remote_task_id)
+
     def test_index_published_document(self):
         doc = DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
             upload_complete=True,
         )
 
-        remote_task_id = index_document(document_id=doc.pk)
+        with self.captureOnCommitCallbacks(execute=True):
+            remote_task_id = index_document(document_id=doc.pk)
 
         self.assertIsNotNone(remote_task_id)
         self.assertIsInstance(remote_task_id, str)

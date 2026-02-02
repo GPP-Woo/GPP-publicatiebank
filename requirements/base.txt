@@ -330,6 +330,8 @@ pyjwt==2.10.1
     #   zgw-consumers
 pyopenssl==25.1.0
     # via webauthn
+pypdf==6.6.0
+    # via -r requirements/base.in
 pypng==0.20220715.0
     # via qrcode
 python-creole==1.4.10
@@ -348,6 +350,8 @@ python-dotenv==1.1.1
     #   pydantic-settings
 python-ipware==3.0.0
     # via django-ipware
+python-magic==0.4.27
+    # via -r requirements/base.in
 pytz==2025.2
     # via flower
 pyyaml==6.0.2

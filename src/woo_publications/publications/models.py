@@ -4,6 +4,7 @@ import uuid
 from collections.abc import Callable, Collection, Iterator
 from copy import copy
 from functools import partial
+from pathlib import Path
 from uuid import UUID
 
 from django.conf import settings
@@ -17,6 +18,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
+import magic
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
     ConcurrentTransitionMixin,
@@ -715,6 +717,12 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "database."
         ),
     )
+    metadata_gestript_op = models.DateTimeField(
+        _("metadata stripped on"),
+        editable=False,
+        help_text=_("System timestamp reflecting when the document was stripped."),
+        null=True,
+    )
     ontvangstdatum = models.DateTimeField(
         _("date of reception"),
         help_text=_("The timestamp when the document is received by the organisatie."),
@@ -800,6 +808,16 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     def __str__(self):
         return self.officiele_titel
+
+    @property
+    def is_pdf(self):
+        if self.bestandsformaat == "application/pdf":
+            return True
+
+        if Path(self.bestandsnaam).suffix.lower() == ".pdf":
+            return True
+
+        return False
 
     @property
     def zgw_document(self) -> ZGWDocument | None:
@@ -1049,6 +1067,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
             self.upload_complete = True
             self.save(update_fields=("lock", "upload_complete"))
         return completed
+
+    def set_file_type(self, file: File) -> None:
+        document_mime = magic.from_buffer(file.read(2048), mime=True)
+
+        self.bestandsformaat = document_mime
+        self.save(update_fields=("bestandsformaat",))
+
+        file.seek(0)
 
 
 class DocumentIdentifier(models.Model):

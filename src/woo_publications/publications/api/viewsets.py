@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-from functools import partial
 from typing import override
 from uuid import UUID
 
@@ -9,6 +7,7 @@ from django.utils.http import content_disposition_header
 from django.utils.translation import gettext_lazy as _
 
 import structlog
+from celery import chain
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -35,7 +34,7 @@ from woo_publications.logging.service import (
 
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import index_document, process_source_document
+from ..tasks import index_document, process_source_document, strip_pdf
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -49,10 +48,6 @@ from .serializers import (
 )
 
 logger = structlog.stdlib.get_logger(__name__)
-
-DOWNLOAD_CHUNK_SIZE = (
-    8_192  # read 8 kB into memory at a time when downloading from upstream
-)
 
 
 @extend_schema(tags=["Documenten"])
@@ -196,6 +191,7 @@ class DocumentViewSet(
     def file_part(self, request: Request, part_uuid: UUID, *args, **kwargs) -> Response:
         document = self.get_object()
         assert isinstance(document, Document)
+
         serializer = FilePartSerializer(
             data=request.data,
             context={"request": request, "view": self},
@@ -203,6 +199,10 @@ class DocumentViewSet(
         serializer.is_valid(raise_exception=True)
 
         file = serializer.validated_data["inhoud"]
+
+        if (formaat := document.bestandsformaat) and formaat == "unknown":
+            document.set_file_type(file)
+
         try:
             is_completed = document.upload_part_data(uuid=part_uuid, file=file)
         except RequestException as exc:
@@ -216,13 +216,20 @@ class DocumentViewSet(
 
         if is_completed:
             document_url = document.absolute_document_download_uri(self.request)
-            transaction.on_commit(
-                partial(
-                    index_document.delay,
-                    document_id=document.pk,
-                    download_url=document_url,
-                )
+            index_task = index_document.si(
+                document_id=document.pk, download_url=document_url
             )
+
+            if document.is_pdf:
+                strip_pdf_task = strip_pdf.si(
+                    document_id=document.pk,
+                    base_url=self.request.build_absolute_uri("/"),
+                )
+                tasks = chain(strip_pdf_task, index_task)
+            else:
+                tasks = index_task
+
+            transaction.on_commit(tasks.delay)
 
         response_serializer = DocumentStatusSerializer(
             instance={"document_upload_voltooid": is_completed}
@@ -275,63 +282,55 @@ class DocumentViewSet(
         document = self.get_object()
         assert isinstance(document, Document)
 
-        if not document.upload_complete:
+        if not document.upload_complete or (
+            document.is_pdf and not document.metadata_gestript_op
+        ):
             raise Conflict(detail=_("The document upload is not yet completed."))
 
         assert document.document_service is not None, (
             "Document must exist in upstream API"
         )
 
-        endpoint = f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
         with get_client(document.document_service) as client:
-            upstream_response = client.get(endpoint, stream=True)
-
-            if (_status := upstream_response.status_code) != status.HTTP_200_OK:
-                logger.warning(
-                    "file_contents_streaming_failed",
-                    document_id=str(document.document_uuid),
-                    status_code=_status,
-                    api_root=client.base_url,
-                )
-                raise BadGateway(detail=_("Could not download from the upstream."))
-
-            # generator that produces the chunks
-            streaming_content: Iterable[bytes] = (
-                chunk
-                for chunk in upstream_response.iter_content(
-                    chunk_size=DOWNLOAD_CHUNK_SIZE
-                )
-                if chunk
+            upstream_response, streaming_content = client.download_document(
+                uuid=document.document_uuid
             )
 
-            response = StreamingHttpResponse(
-                streaming_content,
-                # TODO: if we have format information, we can use it, but that's not
-                # part of BB-MVP
-                content_type="application/octet-stream",
-                headers={
-                    "Content-Length": upstream_response.headers.get(
-                        "Content-Length", str(document.bestandsomvang)
-                    ),
-                    "Content-Disposition": content_disposition_header(
-                        as_attachment=True,
-                        filename=document.bestandsnaam,
-                    ),
-                    # nginx-specific header that prevents files being buffered, instead
-                    # they will be sent synchronously to the nginx client.
-                    "X-Accel-Buffering": "no",
-                },
-            )
+        if upstream_response.status_code != status.HTTP_200_OK:
+            raise BadGateway(detail=_("Could not download from the upstream."))
 
-            user_id, user_repr, remarks = extract_audit_parameters(request)
-            audit_api_download(
-                content_object=document,
-                user_id=user_id,
-                user_display=user_repr,
-                remarks=remarks,
-            )
+        content_type = (
+            "application/octet-stream"
+            if document.bestandsformaat == "unknown"
+            else document.bestandsformaat
+        )
 
-            return response
+        response = StreamingHttpResponse(
+            streaming_content,
+            content_type=content_type,
+            headers={
+                "Content-Length": upstream_response.headers.get(
+                    "Content-Length", str(document.bestandsomvang)
+                ),
+                "Content-Disposition": content_disposition_header(
+                    as_attachment=True,
+                    filename=document.bestandsnaam,
+                ),
+                # nginx-specific header that prevents files being buffered, instead
+                # they will be sent synchronously to the nginx client.
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+        user_id, user_repr, remarks = extract_audit_parameters(request)
+        audit_api_download(
+            content_object=document,
+            user_id=user_id,
+            user_display=user_repr,
+            remarks=remarks,
+        )
+
+        return response
 
 
 @extend_schema(tags=["Publicaties"])

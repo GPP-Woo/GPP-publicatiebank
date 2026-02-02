@@ -321,7 +321,8 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             "api:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document.assert_called_once_with(
-            document_id=document.pk, download_url=f"http://testserver{download_path}"
+            document_id=document.pk,
+            download_url=f"http://testserver{download_path}",
         )
 
     @patch("woo_publications.publications.tasks.remove_publication_from_index.delay")
