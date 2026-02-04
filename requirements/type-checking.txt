@@ -130,7 +130,7 @@ cssselect==1.3.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   pyquery
-django==5.2.10
+django==5.2.11
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
