@@ -237,8 +237,6 @@ orderedmultidict==1.0.2
     # via furl
 packaging==26.0
     # via kombu
-phonenumberslite==9.0.22
-    # via -r requirements/base.in
 pillow==12.1.0
     # via -r requirements/base.in
 polib==1.2.0
