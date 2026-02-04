@@ -441,7 +441,7 @@ mozilla-django-oidc-db==1.1.1
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   open-api-framework
-open-api-framework==0.13.3
+open-api-framework==0.13.4
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
