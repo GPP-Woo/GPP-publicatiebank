@@ -32,7 +32,11 @@ from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import User
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.constants import (
+    OPENDOCUMENTS,
+    ArchiveNominationChoices,
+    StrippableFileTypes,
+)
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
     DocumentenClient,
@@ -809,12 +813,37 @@ class Document(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
-    @property
-    def is_pdf(self):
+    def _is_pdf(self) -> bool:
         if self.bestandsformaat == "application/pdf":
             return True
 
         if Path(self.bestandsnaam).suffix.lower() == ".pdf":
+            return True
+
+        return False
+
+    def _is_open_document(self) -> bool:
+        for extension, mimetype in OPENDOCUMENTS:
+            if self.bestandsformaat == mimetype:
+                return True
+
+            if Path(self.bestandsnaam).suffix.lower() == extension:
+                return True
+
+        return False
+
+    def get_strippable_file_type(self):
+        if self._is_pdf():
+            return StrippableFileTypes.pdf
+
+        if self._is_open_document():
+            return StrippableFileTypes.open_document
+
+        return None
+
+    @property
+    def has_to_strip_metadata(self) -> bool:
+        if not self.metadata_gestript_op and self.get_strippable_file_type():
             return True
 
         return False
