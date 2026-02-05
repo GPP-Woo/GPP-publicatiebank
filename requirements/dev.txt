@@ -520,10 +520,6 @@ packaging==26.0
     #   -r requirements/ci.txt
     #   kombu
     #   sphinx
-phonenumberslite==9.0.22
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 pillow==12.1.0
     # via
     #   -c requirements/ci.txt

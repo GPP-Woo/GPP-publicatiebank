@@ -3,7 +3,6 @@
 from django.db import migrations, models
 
 import django_jsonform.models.fields
-import phonenumber_field.modelfields
 
 
 class Migration(migrations.Migration):
@@ -59,11 +58,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "phone_number",
-                    phonenumber_field.modelfields.PhoneNumberField(
+                    models.CharField(
                         blank=True,
                         help_text="Phonenumber of the person contact about this application and the associated credentials.",
                         max_length=128,
-                        region=None,
                         verbose_name="phone number",
                     ),
                 ),

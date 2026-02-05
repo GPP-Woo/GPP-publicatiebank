@@ -3,7 +3,6 @@ celery
 flower
 furl
 Pillow
-phonenumberslite
 pypdf
 python-magic
 structlog

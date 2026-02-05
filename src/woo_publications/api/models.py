@@ -5,7 +5,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from django_jsonform.models.fields import ArrayField
-from phonenumber_field.modelfields import PhoneNumberField
 
 from .constants import PermissionOptions
 
@@ -48,8 +47,9 @@ class Application(models.Model):  # noqa: DJ008
         ),
         blank=True,
     )
-    phone_number = PhoneNumberField(
+    phone_number = models.CharField(
         _("phone number"),
+        max_length=128,
         help_text=_(
             "Phonenumber of the person contact about this application and the "
             "associated credentials."
