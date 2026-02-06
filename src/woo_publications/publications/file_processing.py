@@ -95,18 +95,8 @@ def strip_pdf(file: IO[bytes]) -> None:
     writer = PdfWriter(file, strict=False, full=False)
 
     # strip meta data fields
-    writer.add_metadata(
-        {
-            "/Author": "",
-            "/Title": "",
-            "/Subject": "",
-            "/Keywords": "",
-        },
-    )
-
-    if writer.xmp_metadata:  # pragma: no cover
-        writer.xmp_metadata.dc_creator = None
-        writer.xmp_metadata.pdf_keywords = None
+    writer.metadata = None
+    writer.xmp_metadata = None
 
     writer.write(file)
 

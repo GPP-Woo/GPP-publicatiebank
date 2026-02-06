@@ -146,6 +146,8 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
             file_size = Path(pdf_file.name).stat().st_size
 
+            pdf_file.seek(0)
+
             document_reference = self._create_document_in_documents_api(
                 file=pdf_file, name=pdf_file.name, size=file_size
             )
@@ -174,23 +176,9 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             document_content = documents_api_document.content
 
         reader = PdfReader(io.BytesIO(document_content))
-        assert reader.metadata
-        # Ensure that the correct fields are stripped.
-        self.assertEqual(
-            reader.metadata,
-            {
-                "/Author": "",
-                "/Creator": "pypdf",
-                "/Title": "",
-                "/Subject": "",
-                "/Keywords": "",
-            },
-        )
-        xmp_metadata = reader.xmp_metadata
-        assert xmp_metadata
-        self.assertListEqual(xmp_metadata.dc_creator, [])  # pyright: ignore [reportArgumentType]
-        self.assertIsNone(xmp_metadata.pdf_keywords)
-        self.assertEqual(xmp_metadata.pdf_producer, "pypdf")
+
+        self.assertIsNone(reader.metadata)
+        self.assertIsNone(reader.xmp_metadata)
 
     @parametrize("file_type", ["odt", "ods", "odp", "odg"])
     def test_strip_open_documents_of_metadata(self, file_type):
