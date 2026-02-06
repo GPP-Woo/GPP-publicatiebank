@@ -1,6 +1,6 @@
 import uuid
 from io import StringIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from django.core.management import call_command
 from django.test import TestCase, override_settings
@@ -14,7 +14,7 @@ from .factories import DocumentFactory
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
-@patch("woo_publications.publications.tasks.strip_document.si")
+@patch("woo_publications.publications.tasks.strip_metadata.si")
 @patch("woo_publications.publications.tasks.index_document.si")
 class StripAllFilesTest(VCRMixin, TestCase):
     @classmethod
@@ -39,7 +39,7 @@ class StripAllFilesTest(VCRMixin, TestCase):
         self.addCleanup(GlobalConfiguration.clear_cache)
 
     def test_no_configuration(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         config = GlobalConfiguration.get_solo()
         config.gpp_search_service = None
@@ -55,11 +55,11 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         self.assertEqual(out.getvalue(), "Search API services not configured.\n")
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()
 
     def test_no_documents(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         out = StringIO()
 
@@ -131,23 +131,47 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         self.assertEqual(
-            out.getvalue(), "1 documents scheduled to strip their metadata.\n"
+            out.getvalue(), "2 documents scheduled to strip their metadata.\n"
         )
-        mock_strip_document.assert_called_once_with(
-            document_id=document.pk,
-            base_url="http://host.docker.internal:8000/",
+
+        mock_strip_metadata.assert_has_calls(
+            [
+                call(
+                    document_id=pdf.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
+                call(
+                    document_id=open_document.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
+            ],
+            any_order=True,
         )
-        download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+
+        pdf_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(pdf.uuid)}
         )
-        mock_index_document.assert_called_once_with(
-            document_id=document.pk,
-            download_url=f"http://host.docker.internal:8000{download_url}",
+        open_document_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(open_document.uuid)}
+        )
+
+        mock_index_document.assert_has_calls(
+            [
+                call(
+                    document_id=pdf.pk,
+                    download_url=f"http://host.docker.internal:8000{pdf_download_url}",
+                ),
+                call(
+                    document_id=open_document.pk,
+                    download_url=f"http://host.docker.internal:8000{open_document_download_url}",
+                ),
+            ],
+            any_order=True,
         )
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
-@patch("woo_publications.publications.tasks.strip_document.si")
+@patch("woo_publications.publications.tasks.strip_metadata.si")
 @patch("woo_publications.publications.tasks.index_document.si")
 class StripAllFileNoVCRTest(TestCase):
     @classmethod
@@ -172,7 +196,7 @@ class StripAllFileNoVCRTest(TestCase):
         self.addCleanup(GlobalConfiguration.clear_cache)
 
     def test_incorrect_url(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         out = StringIO()
 
@@ -187,5 +211,5 @@ class StripAllFileNoVCRTest(TestCase):
         self.assertEqual(
             out.getvalue(), "The provided base_url does not lead to this website.\n"
         )
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()

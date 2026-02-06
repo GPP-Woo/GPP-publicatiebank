@@ -34,7 +34,7 @@ from woo_publications.logging.service import (
 
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import index_document, process_source_document, strip_document
+from ..tasks import index_document, process_source_document, strip_metadata
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -221,11 +221,11 @@ class DocumentViewSet(
             )
 
             if document.has_to_strip_metadata:
-                strip_document_task = strip_document.si(
+                strip_metadata_task = strip_metadata.si(
                     document_id=document.pk,
                     base_url=self.request.build_absolute_uri("/"),
                 )
-                tasks = chain(strip_document_task, index_task)
+                tasks = chain(strip_metadata_task, index_task)
             else:
                 tasks = index_task
 

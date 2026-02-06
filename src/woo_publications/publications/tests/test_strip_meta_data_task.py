@@ -21,7 +21,7 @@ from ...contrib.documents_api.client import get_client
 from ...metadata.tests.factories import InformationCategoryFactory
 from ..constants import PublicationStatusOptions
 from ..file_processing import MIN_META
-from ..tasks import strip_document
+from ..tasks import strip_metadata
 from .factories import DocumentFactory
 
 METADATA_PDF = (
@@ -118,7 +118,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         with self.assertRaisesMessage(
             AssertionError, "The document must have a Documents API object attached"
         ):
-            strip_document(document_id=doc.pk, base_url="http://testserver/")
+            strip_metadata(document_id=doc.pk, base_url="http://testserver/")
 
         self.assertEqual(doc.metadata_gestript_op, None)
 
@@ -159,7 +159,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             document_uuid=document_reference,
         )
 
-        strip_document(
+        strip_metadata(
             document_id=document.pk,
             base_url="http://host.docker.internal:8000",
         )

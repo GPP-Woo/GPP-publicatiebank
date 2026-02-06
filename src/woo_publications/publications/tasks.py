@@ -37,7 +37,7 @@ DOWNLOAD_CHUNK_SIZE = (
 
 @app.task
 @transaction.atomic()
-def strip_document(*, document_id: int, base_url: str) -> None:
+def strip_metadata(*, document_id: int, base_url: str) -> None:
     """
     The celery task to strip the metadata of pdf files.
     This task does the following:

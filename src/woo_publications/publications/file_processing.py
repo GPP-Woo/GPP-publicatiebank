@@ -48,7 +48,7 @@ def _sync_files(src: IO[Any], dst: IO[Any]):
 
 
 def strip_all_files(base_url: str) -> int:
-    from .tasks import index_document, strip_document
+    from .tasks import index_document, strip_metadata
 
     config = GlobalConfiguration.get_solo()
 
@@ -73,7 +73,7 @@ def strip_all_files(base_url: str) -> int:
             document_url = urljoin(base_url, download_url)
 
             # define the strip and index tasks.
-            strip_document_task = strip_document.si(
+            strip_metadata_task = strip_metadata.si(
                 document_id=document.pk,
                 base_url=base_url,
             )
@@ -82,7 +82,7 @@ def strip_all_files(base_url: str) -> int:
             )
 
             # chain the tasks together and call it.
-            tasks = chain(strip_document_task, index_task)
+            tasks = chain(strip_metadata_task, index_task)
             transaction.on_commit(tasks.delay)
 
             # update the counter

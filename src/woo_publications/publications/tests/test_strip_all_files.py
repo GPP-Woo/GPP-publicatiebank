@@ -12,7 +12,7 @@ from woo_publications.publications.tests.factories import DocumentFactory
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
-@patch("woo_publications.publications.tasks.strip_document.si")
+@patch("woo_publications.publications.tasks.strip_metadata.si")
 @patch("woo_publications.publications.tasks.index_document.si")
 class TestUpdateThemeFromWaardenlijstCommand(TestCase):
     @classmethod
@@ -37,7 +37,7 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
         self.addCleanup(GlobalConfiguration.clear_cache)
 
     def test_no_configuration(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         config = GlobalConfiguration.get_solo()
         config.gpp_search_service = None
@@ -48,20 +48,20 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
         ):
             strip_all_files(base_url="http://host.docker.internal:8000/")
 
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()
 
     def test_no_documents(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         count = strip_all_files(base_url="http://host.docker.internal:8000/")
 
         self.assertEqual(count, 0)
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()
 
     def test_happy_flow_documents(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         document = DocumentFactory.create(
             document_service=self.service,
@@ -72,7 +72,7 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
         count = strip_all_files(base_url="http://host.docker.internal:8000/")
 
         self.assertEqual(count, 1)
-        mock_strip_document.assert_called_once_with(
+        mock_strip_metadata.assert_called_once_with(
             document_id=document.pk,
             base_url="http://host.docker.internal:8000/",
         )
@@ -85,7 +85,7 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
         )
 
     def test_documents_not_eligible_for_stripping(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         DocumentFactory.create(
             upload_complete=True,
@@ -115,5 +115,5 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
         count = strip_all_files(base_url="http://host.docker.internal:8000/")
 
         self.assertEqual(count, 0)
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()
