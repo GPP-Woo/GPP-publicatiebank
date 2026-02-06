@@ -6,6 +6,7 @@ coverage
 django-webtest
 factory-boy<3.3.3  # type annotations break stuff
 freezegun
+parametrize
 pyquery
 tblib
 vcrpy

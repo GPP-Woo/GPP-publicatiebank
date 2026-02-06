@@ -456,6 +456,8 @@ packaging==26.0
     #   -r requirements/base.txt
     #   kombu
     #   sphinx
+parametrize==0.1.1
+    # via -r requirements/test-tools.in
 pillow==12.1.0
     # via
     #   -c requirements/base.txt
