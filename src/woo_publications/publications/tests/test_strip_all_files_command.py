@@ -74,47 +74,19 @@ class StripAllFilesTest(VCRMixin, TestCase):
         self.assertEqual(
             out.getvalue(), "0 documents scheduled to strip their metadata.\n"
         )
-        mock_strip_document.assert_not_called()
+        mock_strip_metadata.assert_not_called()
         mock_index_document.assert_not_called()
 
-    def test_strip_pdf(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
+    def test_strip_documents(
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
-        document = DocumentFactory.create(
+        pdf = DocumentFactory.create(
             document_service=self.service,
             document_uuid=str(uuid.uuid4()),
             upload_complete=True,
             bestandsformaat="application/pdf",
         )
-        out = StringIO()
-
-        call_command(
-            "strip_all_files",
-            base_url="http://host.docker.internal:8000/",
-            verbosity=0,
-            stdout=out,
-            no_color=True,
-        )
-
-        self.assertEqual(
-            out.getvalue(), "1 documents scheduled to strip their metadata.\n"
-        )
-        mock_strip_document.assert_called_once_with(
-            document_id=document.pk,
-            base_url="http://host.docker.internal:8000/",
-        )
-        download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
-        )
-        mock_index_document.assert_called_once_with(
-            document_id=document.pk,
-            download_url=f"http://host.docker.internal:8000{download_url}",
-        )
-
-    def test_strip_open_document(
-        self, mock_index_document: MagicMock, mock_strip_document: MagicMock
-    ):
-        document = DocumentFactory.create(
+        open_document = DocumentFactory.create(
             document_service=self.service,
             document_uuid=str(uuid.uuid4()),
             upload_complete=True,

@@ -10,6 +10,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 import magic
+from parametrize import parametrize
 from pypdf import PdfReader
 from rest_framework import status
 
@@ -65,8 +66,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         return super()._get_vcr_kwargs(**kwargs)
 
     def _create_document_in_documents_api(self, file, name, size) -> UUID:
-        document_mime = magic.from_buffer(file.read(2048), mime=True)
-        bestandsformaat = document_mime
+        mime_type = magic.from_buffer(file.read(2048), mime=True)
 
         file.seek(0)
 
@@ -81,7 +81,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
                 title="strip metadata test",
                 filesize=size,  # in bytes
                 filename=name,
-                content_type=bestandsformaat,
+                content_type=mime_type,
             )
 
             for part in openzaak_document.file_parts:
@@ -103,7 +103,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             openzaak_response = client.get(
                 f"enkelvoudiginformatieobjecten/{openzaak_document.uuid}"
             )
-            self.assertEqual(openzaak_response.status_code, status.HTTP_200_OK)
+            assert openzaak_response.status_code == status.HTTP_200_OK
 
         return openzaak_document.uuid
 
@@ -192,57 +192,55 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         self.assertIsNone(xmp_metadata.pdf_keywords)
         self.assertEqual(xmp_metadata.pdf_producer, "pypdf")
 
-    def test_strip_open_documents_of_metadata(self):
-        OPEN_DOCUMENT_FOLDER = (
+    @parametrize("file_type", ["odt", "ods", "odp", "odg"])
+    def test_strip_open_documents_of_metadata(self, file_type):
+        open_document_path = (
             Path(settings.DJANGO_PROJECT_DIR)
             / "publications"
             / "tests"
             / "files"
             / "open_documents"
+            / f"hello_world.{file_type}"
         )
 
-        for file_type in ["odt", "ods", "odp", "odg"]:
-            with self.subTest(file_type):
-                open_document_path = OPEN_DOCUMENT_FOLDER / f"hello_world.{file_type}"
+        with zipfile.ZipFile(open_document_path) as open_document_zip:
+            meta_file_data = open_document_zip.read("meta.xml")
 
-                with zipfile.ZipFile(open_document_path) as open_document_zip:
-                    meta_file_data = open_document_zip.read("meta.xml")
+            assert meta_file_data
+            self.assertNotEqual(meta_file_data, MIN_META)
 
-                    assert meta_file_data
-                    self.assertNotEqual(meta_file_data, MIN_META)
+        file_size = open_document_path.stat().st_size
 
-                file_size = open_document_path.stat().st_size
+        with open(open_document_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name=f"hello_world.{file_type}", size=file_size
+            )
 
-                with open(open_document_path, "rb") as file:
-                    document_reference = self._create_document_in_documents_api(
-                        file=file, name=f"hello_world.{file_type}", size=file_size
-                    )
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam=f"hello_world.{file_type}",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
 
-                    document = DocumentFactory.create(
-                        publicatiestatus=PublicationStatusOptions.published,
-                        bestandsnaam=f"hello_world.{file_type}",
-                        bestandsomvang=file_size,
-                        document_service=self.service,
-                        document_uuid=document_reference,
-                    )
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
 
-                strip_document(
-                    document_id=document.pk,
-                    base_url="http://host.docker.internal:8000",
-                )
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
 
-                document.refresh_from_db()
-                self.assertIsNotNone(document.metadata_gestript_op)
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content
 
-                with get_client(self.service) as client:
-                    documents_api_document = client.get(
-                        f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
-                    )
-                    document_content = documents_api_document.content
+        with zipfile.ZipFile(io.BytesIO(document_content)) as open_document_zip:
+            for info in open_document_zip.infolist():
+                if info.filename == "meta.xml":
+                    meta_file_data = open_document_zip.read(info.filename)
 
-                with zipfile.ZipFile(io.BytesIO(document_content)) as open_document_zip:
-                    for info in open_document_zip.infolist():
-                        if info.filename == "meta.xml":
-                            meta_file_data = open_document_zip.read(info.filename)
-
-                    self.assertEqual(meta_file_data, MIN_META)
+            self.assertEqual(meta_file_data, MIN_META)

@@ -2,7 +2,7 @@ import os
 import shutil
 import zipfile
 from tempfile import NamedTemporaryFile
-from typing import IO, Any
+from typing import IO
 from urllib.parse import urljoin
 
 from django.db import transaction
@@ -33,7 +33,7 @@ class MetaDataStripError(Exception):
         super().__init__(message)
 
 
-def _sync_files(src: IO[Any], dst: IO[Any]):
+def _sync_files(src: IO[bytes], dst: IO[bytes]) -> None:
     # ensure writer is done
     src.flush()
     os.fsync(src.fileno())
@@ -91,7 +91,7 @@ def strip_all_files(base_url: str) -> int:
     return counter
 
 
-def strip_pdf(file: IO[Any]) -> None:
+def strip_pdf(file: IO[bytes]) -> None:
     writer = PdfWriter(file, strict=False, full=False)
 
     # strip meta data fields
@@ -111,7 +111,7 @@ def strip_pdf(file: IO[Any]) -> None:
     writer.write(file)
 
 
-def strip_open_document(file: IO[Any]):
+def strip_open_document(file: IO[bytes]) -> None:
     file.flush()
 
     with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
@@ -136,6 +136,7 @@ def strip_open_document(file: IO[Any]):
                 "of the open document file"
             ) from err
 
+    # overwrite the source file in-place with the processed file
     try:
         with open(stripped_file_name, "rb") as stripped_file:
             _sync_files(stripped_file, file)

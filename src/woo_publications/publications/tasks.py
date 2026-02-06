@@ -111,6 +111,7 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
 
         # upload file parts
         for part in file_parts:
+            # TODO: optimize to avoid loading large parts into memory
             file_part = File(BytesIO(temp_file.read(part.size)))
             document.upload_part_data(uuid=part.uuid, file=file_part)
 
