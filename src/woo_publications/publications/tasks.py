@@ -1,13 +1,14 @@
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import Literal, assert_never
 from urllib.parse import urljoin
 from uuid import UUID
 
+from django.core.files import File
 from django.db import transaction
 from django.utils import timezone
 
 import structlog
-from pypdf import PdfWriter
 from requests import RequestException
 from zgw_consumers.models import Service
 
@@ -23,6 +24,8 @@ from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_
 from woo_publications.logging.logevent import audit_admin_document_delete
 from woo_publications.publications.constants import PublicationStatusOptions
 
+from ..constants import StrippableFileTypes
+from .file_processing import strip_open_document, strip_pdf
 from .models import Document, Publication, Topic
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -34,7 +37,7 @@ DOWNLOAD_CHUNK_SIZE = (
 
 @app.task
 @transaction.atomic()
-def strip_pdf(*, document_id: int, base_url: str) -> None:
+def strip_metadata(*, document_id: int, base_url: str) -> None:
     """
     The celery task to strip the metadata of pdf files.
     This task does the following:
@@ -60,7 +63,7 @@ def strip_pdf(*, document_id: int, base_url: str) -> None:
     # - create temporary named file to create a pdf which we can strip
     with (
         get_documents_client(document.document_service) as client,
-        NamedTemporaryFile(suffix=".pdf") as temp_file,
+        NamedTemporaryFile() as temp_file,
     ):
         source_document = client.retrieve_document(uuid=document.document_uuid)
         upstream_response, streaming_content = client.download_document(
@@ -68,37 +71,28 @@ def strip_pdf(*, document_id: int, base_url: str) -> None:
         )
 
         upstream_response.raise_for_status()
-        temp_file.name = source_document.file_name
 
         for chunk in streaming_content:
             assert isinstance(chunk, bytes)
             temp_file.write(chunk)
 
-        writer = PdfWriter(temp_file, strict=False, full=False)
-
-        # strip meta data fields
-        writer.add_metadata(
-            {
-                "/Author": "",
-                "/Title": "",
-                "/Subject": "",
-                "/Keywords": "",
-            },
-        )
-
-        if writer.xmp_metadata:  # pragma: no cover
-            writer.xmp_metadata.dc_creator = None
-            writer.xmp_metadata.pdf_keywords = None
-
-        # save file
-        _, stripped_file = writer.write(temp_file)
+        # strip the metadata of the file
+        match document.get_strippable_file_type():
+            case StrippableFileTypes.pdf:
+                strip_pdf(temp_file)
+            case StrippableFileTypes.open_document:
+                strip_open_document(temp_file)
 
         # delete document in documents api
         client.destroy_document(uuid=document.document_uuid)
 
-        # create new document in documents api
-        document.bestandsomvang = stripped_file.tell()
+        # change document name to original name
+        temp_file.name = source_document.file_name
+
+        # document.bestandsomvang = os.path.getsize(source_document.file_name)
+        document.bestandsomvang = temp_file.tell()
         document.metadata_gestript_op = timezone.now()
+        # save data
         document.save(update_fields=("bestandsomvang", "metadata_gestript_op"))
 
         # create document in documents api
@@ -113,12 +107,12 @@ def strip_pdf(*, document_id: int, base_url: str) -> None:
         file_parts = document.zgw_document.file_parts
         file_parts = sorted(file_parts, key=lambda x: x.order)
 
-        # set stripped file back to the starting bytes
-        stripped_file.seek(0)
+        temp_file.seek(0)
 
         # upload file parts
         for part in file_parts:
-            file_part = stripped_file.read(part.size)
+            # TODO: optimize to avoid loading large parts into memory
+            file_part = File(BytesIO(temp_file.read(part.size)))
             document.upload_part_data(uuid=part.uuid, file=file_part)
 
 
@@ -239,7 +233,7 @@ def index_document(*, document_id: int, download_url: str = "") -> str | None:
         log.info("index_task_skipped", reason="upload_not_complete")
         return
 
-    if document.is_pdf and not document.metadata_gestript_op:
+    if document.has_to_strip_metadata:
         log.info("index_task_skipped", reason="pdf_not_stripped")
         return
 

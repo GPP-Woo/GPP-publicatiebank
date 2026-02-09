@@ -34,7 +34,7 @@ from woo_publications.logging.service import (
 
 from ..constants import DocumentDeliveryMethods
 from ..models import Document, Publication, Topic
-from ..tasks import index_document, process_source_document, strip_pdf
+from ..tasks import index_document, process_source_document, strip_metadata
 from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
 from .serializers import (
     DocumentCreateSerializer,
@@ -220,12 +220,12 @@ class DocumentViewSet(
                 document_id=document.pk, download_url=document_url
             )
 
-            if document.is_pdf:
-                strip_pdf_task = strip_pdf.si(
+            if document.has_to_strip_metadata:
+                strip_metadata_task = strip_metadata.si(
                     document_id=document.pk,
                     base_url=self.request.build_absolute_uri("/"),
                 )
-                tasks = chain(strip_pdf_task, index_task)
+                tasks = chain(strip_metadata_task, index_task)
             else:
                 tasks = index_task
 
@@ -282,9 +282,7 @@ class DocumentViewSet(
         document = self.get_object()
         assert isinstance(document, Document)
 
-        if not document.upload_complete or (
-            document.is_pdf and not document.metadata_gestript_op
-        ):
+        if not document.upload_complete or document.has_to_strip_metadata:
             raise Conflict(detail=_("The document upload is not yet completed."))
 
         assert document.document_service is not None, (

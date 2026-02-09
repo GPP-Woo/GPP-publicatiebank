@@ -1671,10 +1671,10 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists()
         )
 
-    @patch("woo_publications.publications.api.viewsets.strip_pdf.si")
+    @patch("woo_publications.publications.api.viewsets.strip_metadata.si")
     @patch("woo_publications.publications.api.viewsets.index_document.si")
     def test_upload_file_parts(
-        self, mock_index_document: MagicMock, mock_strip_pdf: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
@@ -1739,15 +1739,15 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 document_id=document.pk,
                 download_url=f"http://host.docker.internal:8000{download_url}",
             )
-            mock_strip_pdf.assert_not_called()
+            mock_strip_metadata.assert_not_called()
 
         with self.subTest("file type is set of unknown file"):
             self.assertEqual(document.bestandsformaat, "text/plain")
 
-    @patch("woo_publications.publications.api.viewsets.strip_pdf.si")
+    @patch("woo_publications.publications.api.viewsets.strip_metadata.si")
     @patch("woo_publications.publications.api.viewsets.index_document.si")
     def test_upload_file_parts_pdf(
-        self, mock_index_document: MagicMock, mock_strip_pdf: MagicMock
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[self.information_category],
@@ -1787,7 +1787,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             document_id=document.pk,
             download_url=f"http://host.docker.internal:8000{download_url}",
         )
-        mock_strip_pdf.assert_called_once_with(
+        mock_strip_metadata.assert_called_once_with(
             document_id=document.pk,
             base_url="http://host.docker.internal:8000/",
         )

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import functools
+import mimetypes
 import uuid
 from collections.abc import Callable, Collection, Iterator
 from copy import copy
@@ -32,7 +34,10 @@ from zgw_consumers.constants import APITypes
 
 from woo_publications.accounts.models import User
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.constants import (
+    ArchiveNominationChoices,
+    StrippableFileTypes,
+)
 from woo_publications.contrib.documents_api.client import (
     Document as ZGWDocument,
     DocumentenClient,
@@ -62,6 +67,20 @@ _DOCUMENT_SET = ~models.Q(document_service=None) & ~models.Q(document_uuid=None)
 
 # The method `get_available_publicatiestatus_transitions` is provided by django-fsm
 type GetAvailablePublicatiestatusTransitions = Callable[[], Iterator[Transition]]
+
+
+OPEN_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.oasis.opendocument."
+
+
+@functools.cache
+def get_open_document_extensions() -> Collection[str]:
+    # lazy - avoid doing IO on module import, which slows down application startup
+    mimetypes.init()
+    return {
+        ext
+        for ext, mimetype in mimetypes.types_map.items()
+        if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX)
+    }
 
 
 class Topic(models.Model):
@@ -809,12 +828,33 @@ class Document(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
-    @property
-    def is_pdf(self):
-        if self.bestandsformaat == "application/pdf":
-            return True
+    def get_strippable_file_type(self) -> StrippableFileTypes | None:
+        extension = Path(self.bestandsnaam).suffix.lower()
 
-        if Path(self.bestandsnaam).suffix.lower() == ".pdf":
+        # first, check the guessed mime type
+        match self.bestandsformaat:
+            case "application/pdf":
+                return StrippableFileTypes.pdf
+            case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
+                return StrippableFileTypes.open_document
+
+        # fall back to extension otherwise
+
+        # not sure about this one - these are the defaults/fallbacks when mime type
+        # detection fails
+        # assert self.bestandsformaat in ("application/octet-stream", "text/plain")
+
+        match extension:
+            case ".pdf":
+                return StrippableFileTypes.pdf
+            case str() if extension in get_open_document_extensions():
+                return StrippableFileTypes.open_document
+
+        return None
+
+    @property
+    def has_to_strip_metadata(self) -> bool:
+        if not self.metadata_gestript_op and self.get_strippable_file_type():
             return True
 
         return False
