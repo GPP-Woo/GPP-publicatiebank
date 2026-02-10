@@ -22,27 +22,12 @@ jobs:
     name: Set up the build variables
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.vars.outputs.tag }}
+      tag: ${{ steps.vars.outputs.version }}
       git_hash: ${{ steps.vars.outputs.git_hash }}
 
     steps:
-      - name: Extract version information
+      - uses: maykinmedia/open-api-workflows/actions/extract-version@v6
         id: vars
-        run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name (if present at all)
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
-
-          # PRs result in version 'merge' -> transform that into 'latest'
-          [ "$VERSION" == "merge" ] && VERSION=latest
-
-          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
-          echo "git_hash=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
   tests:
     name: Run the Django test suite
@@ -67,7 +52,7 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up backend environment
         uses: maykinmedia/setup-django-backend@v1.3
         with:
@@ -91,7 +76,7 @@ jobs:
           DB_PASSWORD: ''
 
       - name: Publish coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -100,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: maykinmedia/setup-django-backend@v1.3
         with:
           python-version: '3.12'
@@ -126,7 +111,7 @@ jobs:
       - setup
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build the production Docker image
         id: image_build
@@ -142,7 +127,7 @@ jobs:
 
       - run: docker image save -o image.tar $IMAGE_NAME:${{ needs.setup.outputs.tag }}
       - name: Store image artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docker-image
           path: image.tar
@@ -162,9 +147,9 @@ jobs:
     steps:
       # So the scanner gets commit meta-information
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download built image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docker-image
 
@@ -203,7 +188,7 @@ jobs:
 
     steps:
       - name: Download built image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docker-image
 

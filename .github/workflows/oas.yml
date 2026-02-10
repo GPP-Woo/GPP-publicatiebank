@@ -12,7 +12,7 @@ on:
 
 jobs:
   oas-shared-wf:
-    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@v5
+    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@v6
     with:
       python-version: '3.12'
       django-settings-module: woo_publications.conf.ci
