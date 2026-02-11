@@ -20,11 +20,28 @@ from .models import Document
 logger = structlog.stdlib.get_logger(__name__)
 
 
-MIN_META = b"""<?xml version="1.0" encoding="UTF-8"?>
+MIN_OPEN_DOCUMENT_META = b"""<?xml version="1.0" encoding="UTF-8"?>
 <office:document-meta xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
  xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" office:version="1.2">
   <office:meta/>
 </office:document-meta>"""
+
+MIN_MS_DOCUMENT_CORE_META = b"""
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties
+    xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:dcmitype="http://purl.org/dc/dcmitype/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+</cp:coreProperties>"""
+
+MIN_MS_DOCUMENT_CUSTOM_META = b"""
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties
+    xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
+    xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+</Properties>"""
 
 
 class MetaDataStripError(Exception):
@@ -114,7 +131,7 @@ def strip_open_document(file: IO[bytes]) -> None:
             ):
                 for info in zin.infolist():
                     if info.filename == "meta.xml":
-                        zout.writestr(info, MIN_META)
+                        zout.writestr(info, MIN_OPEN_DOCUMENT_META)
                     else:
                         with zin.open(info) as src, zout.open(info, "w") as dst:
                             shutil.copyfileobj(src, dst, 1024 * 1024)
@@ -124,6 +141,41 @@ def strip_open_document(file: IO[bytes]) -> None:
             raise MetaDataStripError(
                 message="Something went wrong while stripping the metadata "
                 "of the open document file"
+            ) from err
+
+    # overwrite the source file in-place with the processed file
+    try:
+        with open(stripped_file_name, "rb") as stripped_file:
+            _sync_files(stripped_file, file)
+    finally:
+        os.remove(stripped_file_name)
+
+
+def strip_ms_document(file: IO[bytes]) -> None:
+    file.flush()
+
+    with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
+        stripped_file_name = temp.name
+
+        try:
+            with (
+                zipfile.ZipFile(file.name) as zin,
+                zipfile.ZipFile(temp, "w") as zout,
+            ):
+                for info in zin.infolist():
+                    if info.filename == "docProps/core.xml":
+                        zout.writestr(info, MIN_MS_DOCUMENT_CORE_META)
+                    elif info.filename == "docProps/custom.xml":
+                        zout.writestr(info, MIN_MS_DOCUMENT_CUSTOM_META)
+                    else:
+                        with zin.open(info) as src, zout.open(info, "w") as dst:
+                            shutil.copyfileobj(src, dst, 1024 * 1024)
+
+        except Exception as err:
+            os.remove(stripped_file_name)
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata "
+                "of the MS document file"
             ) from err
 
     # overwrite the source file in-place with the processed file

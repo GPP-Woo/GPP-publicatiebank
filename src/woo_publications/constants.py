@@ -10,6 +10,7 @@ class ArchiveNominationChoices(TextChoices):
 class StrippableFileTypes(TextChoices):
     pdf = "pdf", _("PDF File")
     open_document = "open_document", _("Open Document")
+    ms_file = "ms_files", _("Microsoft Files")
 
 
 # https://mimetype.io/all-types

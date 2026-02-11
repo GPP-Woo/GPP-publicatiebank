@@ -25,7 +25,11 @@ from woo_publications.logging.logevent import audit_admin_document_delete
 from woo_publications.publications.constants import PublicationStatusOptions
 
 from ..constants import StrippableFileTypes
-from .file_processing import strip_open_document, strip_pdf
+from .file_processing import (
+    strip_ms_document,
+    strip_open_document,
+    strip_pdf,
+)
 from .models import Document, Publication, Topic
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -82,6 +86,8 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
                 strip_pdf(temp_file)
             case StrippableFileTypes.open_document:
                 strip_open_document(temp_file)
+            case StrippableFileTypes.ms_file:
+                strip_ms_document(temp_file)
 
         # delete document in documents api
         client.destroy_document(uuid=document.document_uuid)
