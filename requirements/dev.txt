@@ -124,7 +124,7 @@ coverage==7.13.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-cryptography==46.0.4
+cryptography==46.0.5
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -520,11 +520,11 @@ packaging==26.0
     #   -r requirements/ci.txt
     #   kombu
     #   sphinx
-pillow==12.1.0
+parametrize==0.1.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-parametrize==0.1.1
+pillow==12.1.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
