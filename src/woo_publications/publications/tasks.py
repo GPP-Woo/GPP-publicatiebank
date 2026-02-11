@@ -59,6 +59,9 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
         "The document must have a Documents API object attached"
     )
 
+    if not document.has_to_strip_metadata:
+        return  # bail out, task completes successfully
+
     # - get client instance for the documents api
     # - create temporary named file to create a pdf which we can strip
     with (
