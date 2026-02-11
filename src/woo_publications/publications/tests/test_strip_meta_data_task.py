@@ -126,6 +126,17 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         self.assertEqual(doc.metadata_gestript_op, None)
 
+    def test_skip_file_which_should_not_be_stripped(self):
+        doc = DocumentFactory.create(
+            publicatiestatus=PublicationStatusOptions.published,
+            document_service=self.service,
+            document_uuid=uuid4(),
+        )
+
+        strip_metadata(document_id=doc.pk, base_url="http://testserver/")
+
+        self.assertEqual(doc.metadata_gestript_op, None)
+
     def test_strip_pdf_of_metadata(self):
         with METADATA_PDF.open("rb") as pdf_file:
             reader = PdfReader(pdf_file)
