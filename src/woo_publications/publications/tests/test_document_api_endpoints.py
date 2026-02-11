@@ -1935,9 +1935,12 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 },
             )
 
-    @patch("woo_publications.publications.api.viewsets.process_source_document.delay")
+    @patch("woo_publications.publications.api.viewsets.index_document.si")
+    @patch("woo_publications.publications.api.viewsets.process_source_document.si")
     def test_create_document_with_external_document_url(
-        self, mock_process_source_document_delay: MagicMock
+        self,
+        mock_process_source_document: MagicMock,
+        mock_index_document: MagicMock,
     ):
         # create an actual document in the remote Open Zaak that we can point to
         with get_client(self.service) as client:
@@ -1988,9 +1991,16 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertFalse(data["uploadVoltooid"])
 
             document = Document.objects.get(uuid=data["uuid"])
-            mock_process_source_document_delay.assert_called_once_with(
+            mock_process_source_document.assert_called_once_with(
                 document_id=document.id,
                 base_url="http://host.docker.internal:8000/",
+            )
+            download_url = reverse(
+                "api:document-download", kwargs={"uuid": document.uuid}
+            )
+            mock_index_document(
+                document_id=document.id,
+                download_url=f"http://host.docker.internal:8000/{download_url}",
             )
 
             # check database state - we expect nothing to be done yet because a
@@ -2000,6 +2010,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             self.assertEqual(document.source_url, document_url)
             self.assertFalse(document.upload_complete)
             self.assertEqual(document.bestandsomvang, 0)  # will be set via Celery!
+
+            with self.subTest("Strip task skipped because of filetype"):
+                self.assertIsNone(document.metadata_gestript_op)
 
     def test_create_document_external_document_url_validation(self):
         # create an actual document in the remote Open Zaak that we can point to
