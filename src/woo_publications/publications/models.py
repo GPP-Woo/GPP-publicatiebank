@@ -72,7 +72,7 @@ type GetAvailablePublicatiestatusTransitions = Callable[[], Iterator[Transition]
 OPEN_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.oasis.opendocument."
 
 # This doesn't tackle legacy file formats
-MS_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.openxmlformats-officedocument."
+MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.openxmlformats-officedocument."
 
 
 @functools.cache
@@ -87,13 +87,13 @@ def get_open_document_extensions() -> Collection[str]:
 
 
 @functools.cache
-def get_ms_document_extensions() -> Collection[str]:
+def get_ms_office_document_extensions() -> Collection[str]:
     # lazy - avoid doing IO on module import, which slows down application startup
     mimetypes.init()
     return {
         ext
         for ext, mimetype in mimetypes.types_map.items()
-        if mimetype.startswith(MS_DOCUMENT_MIMETYPE_PREFIX)
+        if mimetype.startswith(MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX)
     }
 
 
@@ -851,8 +851,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.pdf
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
-            case str(mimetype) if mimetype.startswith(MS_DOCUMENT_MIMETYPE_PREFIX):
-                return StrippableFileTypes.ms_file
+            case str(mimetype) if mimetype.startswith(MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX):
+                return StrippableFileTypes.ms_office_file
 
         # fall back to extension otherwise
 
@@ -865,8 +865,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.pdf
             case str() if extension in get_open_document_extensions():
                 return StrippableFileTypes.open_document
-            case str() if extension in get_ms_document_extensions():
-                return StrippableFileTypes.ms_file
+            case str() if extension in get_ms_office_document_extensions():
+                return StrippableFileTypes.ms_office_file
 
         return None
 

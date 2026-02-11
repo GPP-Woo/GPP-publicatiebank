@@ -22,8 +22,8 @@ from ...contrib.documents_api.client import get_client
 from ...metadata.tests.factories import InformationCategoryFactory
 from ..constants import PublicationStatusOptions
 from ..file_processing import (
-    MIN_MS_DOCUMENT_CORE_META,
-    MIN_MS_DOCUMENT_CUSTOM_META,
+    MIN_MS_OFFICE_DOCUMENT_CORE_META,
+    MIN_MS_OFFICE_DOCUMENT_CUSTOM_META,
     MIN_OPEN_DOCUMENT_META,
 )
 from ..tasks import strip_metadata
@@ -252,10 +252,10 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             custom_meta_data = ms_document_zip.read("docProps/custom.xml")
 
             assert core_meta_data
-            self.assertNotEqual(core_meta_data, MIN_MS_DOCUMENT_CORE_META)
+            self.assertNotEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
 
             assert custom_meta_data
-            self.assertNotEqual(custom_meta_data, MIN_MS_DOCUMENT_CUSTOM_META)
+            self.assertNotEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
 
         file_size = ms_document_path.stat().st_size
 
@@ -290,5 +290,5 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             core_meta_data = open_ms_zip.read("docProps/core.xml")
             custom_meta_data = open_ms_zip.read("docProps/custom.xml")
 
-            self.assertEqual(core_meta_data, MIN_MS_DOCUMENT_CORE_META)
-            self.assertEqual(custom_meta_data, MIN_MS_DOCUMENT_CUSTOM_META)
+            self.assertEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
+            self.assertEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)

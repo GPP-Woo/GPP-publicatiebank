@@ -3,7 +3,11 @@ import tempfile
 
 from django.test import TestCase
 
-from ..file_processing import MetaDataStripError, strip_ms_document, strip_open_document
+from ..file_processing import (
+    MetaDataStripError,
+    strip_ms_office_document,
+    strip_open_document,
+)
 
 
 class StripMetaDataFunctionsRemoveTempFileOnErrorTests(TestCase):
@@ -33,6 +37,6 @@ class StripMetaDataFunctionsRemoveTempFileOnErrorTests(TestCase):
                 "Something went wrong while stripping the metadata "
                 "of the MS document file",
             ):
-                strip_ms_document(temp_file)
+                strip_ms_office_document(temp_file)
 
             self.assertEqual(before_tmp_dir_state, os.listdir(tempfile.gettempdir()))

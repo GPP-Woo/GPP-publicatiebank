@@ -26,7 +26,7 @@ MIN_OPEN_DOCUMENT_META = b"""<?xml version="1.0" encoding="UTF-8"?>
   <office:meta/>
 </office:document-meta>"""
 
-MIN_MS_DOCUMENT_CORE_META = b"""
+MIN_MS_OFFICE_DOCUMENT_CORE_META = b"""
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties
     xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
@@ -36,7 +36,7 @@ MIN_MS_DOCUMENT_CORE_META = b"""
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 </cp:coreProperties>"""
 
-MIN_MS_DOCUMENT_CUSTOM_META = b"""
+MIN_MS_OFFICE_DOCUMENT_CUSTOM_META = b"""
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties
     xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
@@ -151,7 +151,7 @@ def strip_open_document(file: IO[bytes]) -> None:
         os.remove(stripped_file_name)
 
 
-def strip_ms_document(file: IO[bytes]) -> None:
+def strip_ms_office_document(file: IO[bytes]) -> None:
     file.flush()
 
     with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
@@ -164,9 +164,9 @@ def strip_ms_document(file: IO[bytes]) -> None:
             ):
                 for info in zin.infolist():
                     if info.filename == "docProps/core.xml":
-                        zout.writestr(info, MIN_MS_DOCUMENT_CORE_META)
+                        zout.writestr(info, MIN_MS_OFFICE_DOCUMENT_CORE_META)
                     elif info.filename == "docProps/custom.xml":
-                        zout.writestr(info, MIN_MS_DOCUMENT_CUSTOM_META)
+                        zout.writestr(info, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
                     else:
                         with zin.open(info) as src, zout.open(info, "w") as dst:
                             shutil.copyfileobj(src, dst, 1024 * 1024)
