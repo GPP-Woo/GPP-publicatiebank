@@ -2746,25 +2746,14 @@ interactions:
       - application/vnd.oai.openapi+json
       Cross-Origin-Opener-Policy:
       - same-origin
-      Date:
-      - Fri, 06 Feb 2026 12:14:26 GMT
       Referrer-Policy:
       - same-origin
-      Server:
-      - WSGIServer/0.2 CPython/3.12.7
-      Server-Timing:
-      - TimerPanel_utime;dur=92.78699999999951;desc="User CPU time", TimerPanel_stime;dur=32.915000000000916;desc="System
-        CPU time", TimerPanel_total;dur=125.70200000000042;desc="Total CPU time",
-        TimerPanel_total_time;dur=115.47772097401321;desc="Elapsed time", SQLPanel_sql_time;dur=0;desc="SQL
-        0 queries", CachePanel_total_time;dur=0;desc="Cache 0 Calls"
       Vary:
       - Accept
       X-Content-Type-Options:
       - nosniff
       X-Frame-Options:
       - DENY
-      djdt-store-id:
-      - c4f193a9d67f475fab014b3448114ebe
     status:
       code: 200
       message: OK

@@ -21,7 +21,11 @@ from woo_publications.utils.tests.vcr import VCRMixin
 from ...contrib.documents_api.client import get_client
 from ...metadata.tests.factories import InformationCategoryFactory
 from ..constants import PublicationStatusOptions
-from ..file_processing import MIN_META
+from ..file_processing import (
+    MIN_MS_OFFICE_DOCUMENT_CORE_META,
+    MIN_MS_OFFICE_DOCUMENT_CUSTOM_META,
+    MIN_OPEN_DOCUMENT_META,
+)
 from ..tasks import strip_metadata
 from .factories import DocumentFactory
 
@@ -195,7 +199,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             meta_file_data = open_document_zip.read("meta.xml")
 
             assert meta_file_data
-            self.assertNotEqual(meta_file_data, MIN_META)
+            self.assertNotEqual(meta_file_data, MIN_OPEN_DOCUMENT_META)
 
         file_size = open_document_path.stat().st_size
 
@@ -231,4 +235,60 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
                 if info.filename == "meta.xml":
                     meta_file_data = open_document_zip.read(info.filename)
 
-            self.assertEqual(meta_file_data, MIN_META)
+            self.assertEqual(meta_file_data, MIN_OPEN_DOCUMENT_META)
+
+    def test_strip_ms_document_of_metadata(self):
+        ms_document_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "ms_documents"
+            / "word.docx"
+        )
+
+        with zipfile.ZipFile(ms_document_path) as ms_document_zip:
+            core_meta_data = ms_document_zip.read("docProps/core.xml")
+            custom_meta_data = ms_document_zip.read("docProps/custom.xml")
+
+            assert core_meta_data
+            self.assertNotEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
+
+            assert custom_meta_data
+            self.assertNotEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
+
+        file_size = ms_document_path.stat().st_size
+
+        with open(ms_document_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="word.docx", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="word.docx",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
+
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
+
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content
+
+        with zipfile.ZipFile(io.BytesIO(document_content)) as open_ms_zip:
+            core_meta_data = open_ms_zip.read("docProps/core.xml")
+            custom_meta_data = open_ms_zip.read("docProps/custom.xml")
+
+            self.assertEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
+            self.assertEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)

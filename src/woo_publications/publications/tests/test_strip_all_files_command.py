@@ -92,6 +92,12 @@ class StripAllFilesTest(VCRMixin, TestCase):
             upload_complete=True,
             bestandsformaat="application/vnd.oasis.opendocument.text",
         )
+        ms_document = DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/vnd.openxmlformats-officedocument.text",
+        )
         out = StringIO()
 
         call_command(
@@ -103,7 +109,7 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         self.assertEqual(
-            out.getvalue(), "2 documents scheduled to strip their metadata.\n"
+            out.getvalue(), "3 documents scheduled to strip their metadata.\n"
         )
 
         mock_strip_metadata.assert_has_calls(
@@ -116,6 +122,10 @@ class StripAllFilesTest(VCRMixin, TestCase):
                     document_id=open_document.pk,
                     base_url="http://host.docker.internal:8000/",
                 ),
+                call(
+                    document_id=ms_document.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
             ],
             any_order=True,
         )
@@ -125,6 +135,9 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
         open_document_download_url = reverse(
             "api:document-download", kwargs={"uuid": str(open_document.uuid)}
+        )
+        ms_document_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(ms_document.uuid)}
         )
 
         mock_index_document.assert_has_calls(
@@ -136,6 +149,10 @@ class StripAllFilesTest(VCRMixin, TestCase):
                 call(
                     document_id=open_document.pk,
                     download_url=f"http://host.docker.internal:8000{open_document_download_url}",
+                ),
+                call(
+                    document_id=ms_document.pk,
+                    download_url=f"http://host.docker.internal:8000{ms_document_download_url}",
                 ),
             ],
             any_order=True,
