@@ -21,6 +21,7 @@ from django.utils.timezone import localdate
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 import magic
+import structlog
 from dateutil.relativedelta import relativedelta
 from django_fsm import (
     ConcurrentTransitionMixin,
@@ -58,7 +59,10 @@ from woo_publications.utils.validators import (
 )
 
 from .archiving import get_retention_informatie_category
-from .constants import PublicationStatusOptions
+from .constants import LEGACY_MS_OFFICE_MIMETYPES, PublicationStatusOptions
+
+logger = structlog.stdlib.get_logger(__name__)
+
 
 # when the document isn't specified both the service and uuid needs to be unset
 _DOCUMENT_NOT_SET = models.Q(document_service=None, document_uuid=None)
@@ -71,6 +75,9 @@ type GetAvailablePublicatiestatusTransitions = Callable[[], Iterator[Transition]
 
 OPEN_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.oasis.opendocument."
 
+# This doesn't tackle legacy file formats
+MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX = "application/vnd.openxmlformats-officedocument."
+
 
 @functools.cache
 def get_open_document_extensions() -> Collection[str]:
@@ -80,6 +87,17 @@ def get_open_document_extensions() -> Collection[str]:
         ext
         for ext, mimetype in mimetypes.types_map.items()
         if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX)
+    }
+
+
+@functools.cache
+def get_ms_office_document_extensions() -> Collection[str]:
+    # lazy - avoid doing IO on module import, which slows down application startup
+    mimetypes.init()
+    return {
+        ext
+        for ext, mimetype in mimetypes.types_map.items()
+        if mimetype.startswith(MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX)
     }
 
 
@@ -837,6 +855,10 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.pdf
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
+            case str(mimetype) if mimetype.startswith(
+                MS_OFFICE_DOCUMENT_MIMETYPE_PREFIX
+            ):
+                return StrippableFileTypes.ms_office_file
 
         # fall back to extension otherwise
 
@@ -849,6 +871,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.pdf
             case str() if extension in get_open_document_extensions():
                 return StrippableFileTypes.open_document
+            case str() if extension in get_ms_office_document_extensions():
+                return StrippableFileTypes.ms_office_file
 
         return None
 
@@ -1110,6 +1134,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     def set_file_type(self, file: File) -> None:
         document_mime = magic.from_buffer(file.read(2048), mime=True)
+
+        if document_mime in LEGACY_MS_OFFICE_MIMETYPES:  # pragma: no cover
+            logger.info(
+                "ms_office_legacy_file_detected",
+                pk=self.pk,
+                filename=self.bestandsnaam,
+                mimetype=document_mime,
+            )
 
         self.bestandsformaat = document_mime
         self.save(update_fields=("bestandsformaat",))
