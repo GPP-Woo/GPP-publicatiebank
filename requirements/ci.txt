@@ -458,7 +458,7 @@ packaging==26.0
     #   sphinx
 parametrize==0.1.1
     # via -r requirements/test-tools.in
-pillow==12.1.0
+pillow==12.1.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt

@@ -511,7 +511,7 @@ parametrize==0.1.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-pillow==12.1.0
+pillow==12.1.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
