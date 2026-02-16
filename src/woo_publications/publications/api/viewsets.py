@@ -121,12 +121,24 @@ class DocumentViewSet(
                 )
             case DocumentDeliveryMethods.retrieve_url:
                 base_url = self.request.build_absolute_uri("/")
-                transaction.on_commit(
-                    lambda: process_source_document.delay(
+                document_url = woo_document.absolute_document_download_uri(self.request)
+
+                pipeline = chain(
+                    process_source_document.si(
                         document_id=woo_document.id,
                         base_url=base_url,
-                    )
+                    ),
+                    strip_metadata.si(
+                        document_id=woo_document.pk,
+                        base_url=self.request.build_absolute_uri("/"),
+                    ),
+                    index_document.si(
+                        document_id=woo_document.pk, download_url=document_url
+                    ),
                 )
+
+                transaction.on_commit(pipeline.delay)
+
             case _:  # pragma: no cover
                 raise AssertionError("Unreachable code")
 
