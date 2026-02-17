@@ -853,6 +853,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         match self.bestandsformaat:
             case "application/pdf":
                 return StrippableFileTypes.pdf
+            case "application/zip":
+                return StrippableFileTypes.zip
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
             case str(mimetype) if mimetype.startswith(
@@ -869,6 +871,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         match extension:
             case ".pdf":
                 return StrippableFileTypes.pdf
+            case ".zip":
+                return StrippableFileTypes.zip
             case str() if extension in get_open_document_extensions():
                 return StrippableFileTypes.open_document
             case str() if extension in get_ms_office_document_extensions():

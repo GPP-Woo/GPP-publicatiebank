@@ -184,3 +184,10 @@ def strip_ms_office_document(file: IO[bytes]) -> None:
             _sync_files(stripped_file, file)
     finally:
         os.remove(stripped_file_name)
+
+
+def strip_zip_files(file: IO[bytes]) -> None:
+    import zipfile
+
+    with zipfile.ZipFile(file, mode="a") as zip_file:
+        zip_file.comment = b""
