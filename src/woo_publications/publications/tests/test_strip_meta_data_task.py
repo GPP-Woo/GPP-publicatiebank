@@ -303,3 +303,51 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
             self.assertEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
             self.assertEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
+
+    def test_strip_zip_of_metadata(self):
+        zip_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "word.zip"
+        )
+
+        file_size = zip_path.stat().st_size
+
+        with zipfile.ZipFile(zip_path, mode="r") as zip_file:
+            self.assertEqual(zip_file.comment, b"a comment")
+            for file in zip_file.filelist:
+                self.assertIn(file.filename, ["legacy_word.doc", "word.docx"])
+
+        with open(zip_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="word.zip", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="word.zip",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
+
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
+
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content
+
+        with zipfile.ZipFile(io.BytesIO(document_content), mode="r") as zip_file:
+            self.assertEqual(zip_file.comment, b"")
+            for file in zip_file.filelist:
+                self.assertIn(file.filename, ["legacy_word.doc", "word.docx"])
