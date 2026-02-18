@@ -11,3 +11,4 @@ class StrippableFileTypes(TextChoices):
     pdf = "pdf", _("PDF File")
     open_document = "open_document", _("Open Document")
     ms_office_file = "ms_office_files", _("Microsoft Office Files")
+    rtf = "rtf", _("Rich Text Format File")

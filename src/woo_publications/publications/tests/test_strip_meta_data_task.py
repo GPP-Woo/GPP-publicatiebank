@@ -303,3 +303,58 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
             self.assertEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
             self.assertEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
+
+    def test_strip_rtf_file_of_metadata(self):
+        rtf_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "example.rtf"
+        )
+
+        file_size = rtf_path.stat().st_size
+
+        with open(rtf_path) as file:
+            data = file.read()
+            self.assertIn("\\author Some One", data)
+            self.assertIn("\\subject rtf example file", data)
+            self.assertIn("\\keywords rtf, metadata, stripping", data)
+            self.assertIn("\\creatim\\yr2026\\mo01\\dy01\\hr00\\min00", data)
+            self.assertIn("\\comment used for testing purposes", data)
+
+        with open(rtf_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="example.rtf", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="example.rtf",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
+
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
+
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content.decode("utf-8")
+
+        # previous metadat no longer presence
+        self.assertNotIn("\\author Some One", document_content)
+        self.assertNotIn("\\subject rtf example file", document_content)
+        self.assertNotIn("\\keywords rtf, metadata, stripping", document_content)
+        self.assertNotIn("\\creatim\\yr2026\\mo01\\dy01\\hr00\\min00", document_content)
+        self.assertNotIn("\\comment used for testing purposes", document_content)
+        # new metadata block
+        self.assertIn("{\\info}", document_content)
