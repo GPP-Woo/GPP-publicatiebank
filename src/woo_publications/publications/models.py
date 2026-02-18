@@ -853,7 +853,11 @@ class Document(ConcurrentTransitionMixin, models.Model):
         match self.bestandsformaat:
             case "application/pdf":
                 return StrippableFileTypes.pdf
-            case "application/zip":
+            case (
+                "application/zip"
+                | "application/zip-compressed"
+                | "application/x-zip-compressed"
+            ):
                 return StrippableFileTypes.zip
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
