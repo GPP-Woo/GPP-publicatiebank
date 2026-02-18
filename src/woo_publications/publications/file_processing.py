@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import zipfile
 from tempfile import NamedTemporaryFile
@@ -42,6 +43,8 @@ MIN_MS_OFFICE_DOCUMENT_CUSTOM_META = b"""
     xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
     xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
 </Properties>"""
+
+RTF_METADATA_REGEX_PATTERN = r"{\\\\?info\b(?:[^{}]|\{[^{}]*\})*\}"
 
 
 class MetaDataStripError(Exception):
@@ -176,6 +179,52 @@ def strip_ms_office_document(file: IO[bytes]) -> None:
             raise MetaDataStripError(
                 message="Something went wrong while stripping the metadata "
                 "of the MS document file"
+            ) from err
+
+    # overwrite the source file in-place with the processed file
+    try:
+        with open(stripped_file_name, "rb") as stripped_file:
+            _sync_files(stripped_file, file)
+    finally:
+        os.remove(stripped_file_name)
+
+
+def strip_rtf_file(file: IO[bytes]) -> None:
+    file.seek(0)
+
+    start_of_file = file.read(2048)
+    assert isinstance(start_of_file, bytes)
+    start_of_file = start_of_file.decode("utf-8")
+
+    # replace metadata with empty info block
+    new_start_of_file = re.sub(
+        pattern=RTF_METADATA_REGEX_PATTERN,
+        string=start_of_file,
+        repl="{\\\\info}",
+        flags=re.DOTALL,
+    )
+    new_start_of_file = new_start_of_file.encode("utf-8")
+
+    # create new document with the new info block
+    # the data is copied over 2048 bytes at a time to reduce memory consumption
+    with NamedTemporaryFile(delete=False) as temp:
+        stripped_file_name = temp.name
+
+        try:
+            temp.write(new_start_of_file)
+
+            while True:
+                data = file.read(2048)
+                if not data:
+                    break
+
+                temp.write(data)
+
+        except Exception as err:
+            os.remove(stripped_file_name)
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata "
+                "of the rtf document"
             ) from err
 
     # overwrite the source file in-place with the processed file
