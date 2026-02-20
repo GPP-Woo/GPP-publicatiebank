@@ -5,10 +5,6 @@
         <title>{% block title %}{{ settings.PROJECT_NAME }}{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="{% static 'ico/favicon.svg' %}" sizes="any" rel="icon" type="image/svg+xml" />
-        <link href="{% static 'ico/favicon-96x96.png' %}" sizes="96x96" rel="icon" type="image/png" />
-        <link href="{% static 'ico/favicon-32x32.png' %}" sizes="32x32" rel="icon" type="image/png" />
-        <link href="{% static 'ico/favicon.png' %}" sizes="16x16" rel="icon" type="image/png" />
-        <link href="{% static 'ico/favicon.png' %}" rel="shortcut icon">
         <link href="{% static 'bundles/screen.css' %}" media="all" rel="stylesheet" />
         {% block extra_css %}{% endblock %}
     </head>
