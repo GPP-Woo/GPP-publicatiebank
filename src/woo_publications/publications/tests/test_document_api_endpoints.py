@@ -1005,6 +1005,62 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(data["informatieCategorieen"], [error_message])
 
+    def test_list_document_filter_upload_complete(self):
+        complete_document = DocumentFactory.create(upload_complete=True)
+        incomplete_document = DocumentFactory.create(upload_complete=False)
+
+        list_url = reverse("api:document-list")
+
+        with self.subTest("no filters provided return all documents"):
+            response = self.client.get(
+                list_url,
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(
+                data["results"], "uuid", str(complete_document.uuid), 1
+            )
+            self.assertItemInResults(
+                data["results"], "uuid", str(incomplete_document.uuid), 1
+            )
+
+        with self.subTest("filter complete documents"):
+            response = self.client.get(
+                list_url,
+                {"completedDocument": "True"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(
+                data["results"], "uuid", str(complete_document.uuid), 1
+            )
+
+        with self.subTest("filter incomplete documents"):
+            response = self.client.get(
+                list_url,
+                {"completedDocument": "False"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(
+                data["results"], "uuid", str(incomplete_document.uuid), 1
+            )
+
     def test_detail_document(self):
         publication = PublicationFactory.create()
         with freeze_time("2024-09-25T12:30:00-00:00"):
