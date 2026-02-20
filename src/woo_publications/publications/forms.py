@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 import structlog
 
-from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.typing import is_authenticated_request
 
 from .constants import PublicationStatusOptions
@@ -63,6 +63,37 @@ class ChangeOwnerForm(forms.Form):
                 self.add_error("naam", error=_("This field is required."))
             case (False, False, True):
                 self.add_error("identifier", error=_("This field is required."))
+
+        return cleaned_data
+
+
+class ChangeOwnerGroepForm(forms.Form):
+    eigenaar_groep = forms.ModelChoiceField(
+        label=_("Owner groep"),
+        queryset=OrganisationUnit.objects.order_by("naam"),
+        required=False,
+    )
+    naam = forms.CharField(
+        label=_("Name"),
+        max_length=255,
+        required=False,
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        assert isinstance(cleaned_data, dict)
+
+        has_eigenaar_groep = bool(cleaned_data.get("eigenaar_groep"))
+        has_naam = bool(cleaned_data.get("naam"))
+
+        if has_eigenaar_groep == has_naam:
+            self.add_error(
+                None,
+                error=_(
+                    "You need to provide a valid 'owner group' or 'name'. "
+                    "You can't provide neither nor both."
+                ),
+            )
 
         return cleaned_data
 
