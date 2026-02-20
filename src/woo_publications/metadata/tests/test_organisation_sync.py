@@ -30,7 +30,7 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
             update_organisation(file_path)
 
             with self.subTest("database populated"):
-                self.assertEqual(Organisation.objects.count(), 1137)
+                self.assertEqual(Organisation.objects.count(), 1381)
 
             with self.subTest("user content does not cause conflicts"):
                 organisation = Organisation.objects.order_by("pk").last()
@@ -42,7 +42,7 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
 
                 call_command("loaddata", file_path, stdout=StringIO())
 
-                self.assertEqual(Organisation.objects.count(), 1138)
+                self.assertEqual(Organisation.objects.count(), 1382)
 
     def test_data_update_existing_data(self):
         assert not Organisation.objects.exists()
@@ -58,7 +58,7 @@ class UpdateOrganisationTestCase(VCRMixin, TestCase):
             update_organisation(file_path)
 
             with self.subTest("database hasn't added extra items."):
-                self.assertEqual(Organisation.objects.count(), 1137)
+                self.assertEqual(Organisation.objects.count(), 1381)
 
             with self.subTest("organisation has updated back to original data"):
                 organisation.refresh_from_db()
