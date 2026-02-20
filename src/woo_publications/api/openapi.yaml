@@ -1171,9 +1171,13 @@ paths:
         schema:
           type: string
           enum:
+          - caribischelijst
           - gemeentelijst
           - oorglijst
+          - provincielijst
           - solijst
+          - waterschaplijst
+          - zbolijst
           - zelf_toegevoegd
         description: |-
           Zoek organisaties op basis van de oorsprong van de gegevens.
@@ -1181,6 +1185,10 @@ paths:
           * `gemeentelijst` - Register gemeenten compleet
           * `solijst` - Register samenwerkingsorganisaties compleet
           * `oorglijst` - Register overige overheidsorganisaties compleet
+          * `caribischelijst` - Caribbean organisations
+          * `provincielijst` - Province list
+          * `waterschaplijst` - Water Board list
+          * `zbolijst` - ZBO list
           * `zelf_toegevoegd` - Zelf-toegevoegd item
       - name: page
         required: false
@@ -2932,6 +2940,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
+            * `caribischelijst` - Caribbean organisations
+            * `provincielijst` - Province list
+            * `waterschaplijst` - Water Board list
+            * `zbolijst` - ZBO list
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
@@ -2946,12 +2958,20 @@ components:
       - gemeentelijst
       - solijst
       - oorglijst
+      - caribischelijst
+      - provincielijst
+      - waterschaplijst
+      - zbolijst
       - zelf_toegevoegd
       type: string
       description: |-
         * `gemeentelijst` - Register gemeenten compleet
         * `solijst` - Register samenwerkingsorganisaties compleet
         * `oorglijst` - Register overige overheidsorganisaties compleet
+        * `caribischelijst` - Caribbean organisations
+        * `provincielijst` - Province list
+        * `waterschaplijst` - Water Board list
+        * `zbolijst` - ZBO list
         * `zelf_toegevoegd` - Zelf-toegevoegd item
     OrganisationUnit:
       type: object
@@ -3288,6 +3308,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
+            * `caribischelijst` - Caribbean organisations
+            * `provincielijst` - Province list
+            * `waterschaplijst` - Water Board list
+            * `zbolijst` - ZBO list
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
