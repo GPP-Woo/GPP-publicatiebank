@@ -21,4 +21,8 @@ class OrganisationOrigins(TextChoices):
     municipality_list = "gemeentelijst", _("Municipality list")
     so_list = "solijst", _("Collaborative organisations list")
     oorg_list = "oorglijst", _("Alternative government organisations")
+    caribbean_list = "caribischelijst", _("Caribbean organisations")
+    province_list = "provincielijst", _("Province list")
+    water_board_list = "waterschaplijst", _("Water Board list")
+    zbo_list = "zbolijst", _("ZBO list")
     custom_entry = "zelf_toegevoegd", _("Custom entry")
