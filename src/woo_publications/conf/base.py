@@ -209,7 +209,7 @@ CSRF_FAILURE_VIEW = "maykin_common.views.csrf_failure"
 #
 # Custom settings
 #
-PROJECT_NAME = _("WOO Publications")
+PROJECT_NAME = _("GPP Publications")
 ENABLE_ADMIN_NAV_SIDEBAR = config("ENABLE_ADMIN_NAV_SIDEBAR", default=False)
 
 # Displaying environment information
@@ -371,7 +371,7 @@ assert isinstance(EXCLUDED_API_PATH_PREFIXES, str | tuple), (
 
 SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v2",
-    "TITLE": "WOO Publications",
+    "TITLE": "GPP Publications",
     "DESCRIPTION": _(
         """
 ## Documentation
