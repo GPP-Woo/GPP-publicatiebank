@@ -117,6 +117,10 @@ class DocumentFilterSet(FilterSet):
         widget=CSVWidget(),
         method=_filter_informatie_categorieen,
     )
+    completed_document = filters.BooleanFilter(
+        help_text=_("Filter documents that are either fully uploaded or not."),
+        field_name="upload_complete",
+    )
     sorteer = filters.OrderingFilter(
         help_text=_("Order on."),
         fields=(
@@ -142,6 +146,7 @@ class DocumentFilterSet(FilterSet):
             "laatst_gewijzigd_datum_vanaf",
             "laatst_gewijzigd_datum_tot",
             "laatst_gewijzigd_datum_tot_en_met",
+            "completed_document",
             "sorteer",
         )
 

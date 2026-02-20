@@ -308,6 +308,11 @@ paths:
           The display name of the user performing the action, to make them recognizable.
         required: true
       - in: query
+        name: completedDocument
+        schema:
+          type: boolean
+        description: Filter documents that are either fully uploaded or not.
+      - in: query
         name: creatiedatumTot
         schema:
           type: string
