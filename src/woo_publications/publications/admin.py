@@ -18,7 +18,7 @@ from django.utils.translation import gettext_lazy as _, ngettext
 
 from furl import furl
 
-from woo_publications.accounts.models import OrganisationMember, User
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit, User
 from woo_publications.logging.logevent import (
     audit_admin_update,
 )
@@ -28,7 +28,12 @@ from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.admin import PastAndFutureDateFieldFilter
 
 from .constants import PublicationStatusOptions
-from .forms import ChangeOwnerForm, DocumentAdminForm, PublicationAdminForm
+from .forms import (
+    ChangeOwnerForm,
+    ChangeOwnerGroepForm,
+    DocumentAdminForm,
+    PublicationAdminForm,
+)
 from .models import (
     Document,
     DocumentIdentifier,
@@ -123,6 +128,85 @@ def change_owner(
     return TemplateResponse(
         request,
         "admin/change_owner.html",
+        context,
+    )
+
+
+@admin.action(
+    description=_("Change %(verbose_name_plural)s owner group(s)"),
+    permissions=["change"],
+)
+def change_owner_group(
+    modeladmin: PublicationAdmin,
+    request: HttpRequest,
+    queryset: models.QuerySet[Publication],
+):
+    assert isinstance(request.user, User)
+    model_name = str(model_ngettext(queryset))
+    opts = modeladmin.model._meta
+    form = ChangeOwnerGroepForm(request.POST if request.POST.get("post") else None)
+
+    changeable_objects = [
+        format_html(
+            '<a href="{}">{}</a>',
+            reverse(
+                f"admin:{opts.app_label}_{opts.model_name}_change",
+                kwargs={"object_id": item.id},
+            ),
+            item.officiele_titel,
+        )
+        for item in queryset
+    ]
+
+    if (post := request.POST) and post.get("post"):
+        if form.is_valid():
+            owner_groep = form.cleaned_data["eigenaar_groep"]
+            if not owner_groep:
+                owner_groep = OrganisationUnit.objects.create(
+                    naam=form.cleaned_data["naam"],
+                )
+
+            for obj in queryset:
+                obj.eigenaar_groep = owner_groep
+                obj.save()
+
+                audit_admin_update(
+                    content_object=obj,
+                    object_data=serialize_instance(obj),
+                    django_user=request.user,
+                )
+
+            modeladmin.message_user(
+                request,
+                _("Successfully changed %(count)d owner group(s) of %(items)s.")
+                % {
+                    "count": queryset.count(),
+                    "items": model_ngettext(modeladmin.opts, queryset.count()),
+                },
+                messages.SUCCESS,
+            )
+
+            modeladmin.model.objects.bulk_update(queryset, ["eigenaar_groep"])
+            return
+
+    context = {
+        **modeladmin.admin_site.each_context(request),
+        "title": _("Change owner groep"),
+        "objects_name": model_name,
+        "queryset": queryset,
+        "changeable_objects": changeable_objects,
+        "opts": opts,
+        "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+        "media": modeladmin.media,
+        "form": form,
+    }
+
+    request.current_app = modeladmin.admin_site.name
+
+    # Display the confirmation page
+    return TemplateResponse(
+        request,
+        "admin/change_owner_group.html",
         context,
     )
 
@@ -471,6 +555,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         reassess_retention_policy,
         revoke,
         change_owner,
+        change_owner_group,
     ]
 
     def has_change_permission(self, request, obj=None):

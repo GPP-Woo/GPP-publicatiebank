@@ -7,7 +7,7 @@ from django_webtest import WebTest
 from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
-from woo_publications.accounts.models import OrganisationMember
+from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
@@ -1174,6 +1174,85 @@ class TestPublicationsAdmin(WebTest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(pub1.eigenaar, org_member_1)
             self.assertEqual(pub2.eigenaar, org_member_1)
+
+    def test_change_owner_group_action(self):
+        org_member_1 = OrganisationUnit.objects.create(naam="test-naam")
+        org_member_2 = OrganisationUnit.objects.create(
+            naam="test-naam-2",
+        )
+        pub1 = PublicationFactory.create(eigenaar_groep=org_member_2)
+        pub2 = PublicationFactory.create(eigenaar_groep=org_member_2)
+        changelist = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+
+        form = changelist.forms["changelist-form"]
+        form["_selected_action"] = [pub1.pk, pub2.pk]
+        form["action"] = "change_owner_group"
+
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 200)
+
+        with self.subTest("no data supplied"):
+            confirmation_form = response.forms[1]
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"],
+                None,
+                _(
+                    "You need to provide a valid 'owner group' or 'name'. "
+                    "You can't provide neither nor both."
+                ),
+            )
+
+        with self.subTest("both fields supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar_groep"].select(text=str(org_member_1))
+            confirmation_form["naam"] = "some data"
+
+            error_response = confirmation_form.submit()
+
+            self.assertFormError(
+                error_response.context["form"],
+                None,
+                _(
+                    "You need to provide a valid 'owner group' or 'name'. "
+                    "You can't provide neither nor both."
+                ),
+            )
+
+        with self.subTest("naam supplied"):
+            self.assertFalse(OrganisationUnit.objects.filter(naam="admin").exists())
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar_groep"].force_value([])
+            confirmation_form["naam"] = "admin"
+            confirmation_form.submit()
+
+            pub1.refresh_from_db()
+            pub2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+            org_member_2 = OrganisationUnit.objects.get(naam="admin")
+            self.assertEqual(pub1.eigenaar_groep, org_member_2)
+            self.assertEqual(pub2.eigenaar_groep, org_member_2)
+
+        with self.subTest("eigenaar group supplied"):
+            confirmation_form = response.forms[1]
+            confirmation_form["eigenaar_groep"].select(text=str(org_member_1))
+            confirmation_form["naam"] = ""
+
+            confirmation_form.submit()
+
+            pub1.refresh_from_db()
+            pub2.refresh_from_db()
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(pub1.eigenaar_groep, org_member_1)
+            self.assertEqual(pub2.eigenaar_groep, org_member_1)
 
     @patch("woo_publications.publications.tasks.update_document_rsin.delay")
     def test_publication_update_publisher_schedules_document_rsin_update_task(
