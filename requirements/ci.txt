@@ -522,7 +522,7 @@ pyopenssl==25.3.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   webauthn
-pypdf==6.6.2
+pypdf==6.7.2
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt

@@ -594,7 +594,7 @@ pyopenssl==25.3.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webauthn
-pypdf==6.6.2
+pypdf==6.7.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt

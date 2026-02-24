@@ -263,7 +263,7 @@ pyjwt==2.10.1
     # via zgw-consumers
 pyopenssl==25.3.0
     # via webauthn
-pypdf==6.6.2
+pypdf==6.7.2
     # via -r requirements/base.in
 python-dateutil==2.9.0.post0
     # via
