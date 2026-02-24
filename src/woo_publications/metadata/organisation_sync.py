@@ -10,18 +10,35 @@ from woo_publications.metadata.models import Organisation
 
 MUNICIPALITY_WAARDENLIJST_URL = (
     "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
-    "rwc_gemeenten_compleet/4/json/"
-    "rwc_gemeenten_compleet_4.json"
+    "rwc_gemeenten_compleet/5/json/"
+    "rwc_gemeenten_compleet_5.json"
 )
 SO_WAARDENLIJST_URL = (
     "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
-    "rwc_samenwerkingsorganisaties_compleet/1/json/"
-    "rwc_samenwerkingsorganisaties_compleet_1.json"
+    "rwc_samenwerkingsorganisaties_compleet/3/json/"
+    "rwc_samenwerkingsorganisaties_compleet_3.json"
 )
 OORG_WAARDENLIJST_URL = (
     "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
-    "rwc_overige_overheidsorganisaties_compleet/8/json/"
-    "rwc_overige_overheidsorganisaties_compleet_8.json"
+    "rwc_overige_overheidsorganisaties_compleet/13/json/"
+    "rwc_overige_overheidsorganisaties_compleet_13.json"
+)
+CARIBBEAN_URL = (
+    "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
+    "rwc_caribische_openbare_lichamen_compleet/1/json/"
+    "rwc_caribische_openbare_lichamen_compleet_1.json"
+)
+PROVINCE_URL = (
+    "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
+    "rwc_provincies_compleet/1/json/rwc_provincies_compleet_1.json"
+)
+WATER_BOARD_URL = (
+    "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
+    "rwc_waterschappen_compleet/2/json/rwc_waterschappen_compleet_2.json"
+)
+ZBO_URL = (
+    "https://repository.officiele-overheidspublicaties.nl/waardelijsten/"
+    "rwc_zbo_compleet/6/json/rwc_zbo_compleet_6.json"
 )
 
 MUNICIPALITY_WAARDENLIJST_TYPE = "https://identifier.overheid.nl/tooi/def/ont/Gemeente"
@@ -31,11 +48,13 @@ SO_WAARDENLIJST_TYPE = (
 OORG_WAARDENLIJST_TYPE = (
     "https://identifier.overheid.nl/tooi/def/ont/Overheidsorganisatie"
 )
-WAARDENLIJST_URLS = [
-    MUNICIPALITY_WAARDENLIJST_URL,
-    SO_WAARDENLIJST_URL,
-    OORG_WAARDENLIJST_URL,
-]
+
+CARIBBEAN_WAARDENLIJST_TYPE = (
+    "https://identifier.overheid.nl/tooi/def/ont/CaribischOpenbaarLichaam"
+)
+PROVINCE_WAARDENLIJST_TYPE = "https://identifier.overheid.nl/tooi/def/ont/Provincie"
+WATER_BOARD_WAARDENLIJST_TYPE = "https://identifier.overheid.nl/tooi/def/ont/Waterschap"
+ZBO_WAARDENLIJST_TYPE = "https://identifier.overheid.nl/tooi/def/ont/Zbo"
 
 TYPE_MAPPING = [
     (
@@ -45,6 +64,14 @@ TYPE_MAPPING = [
     ),
     (SO_WAARDENLIJST_URL, SO_WAARDENLIJST_TYPE, OrganisationOrigins.so_list),
     (OORG_WAARDENLIJST_URL, OORG_WAARDENLIJST_TYPE, OrganisationOrigins.oorg_list),
+    (CARIBBEAN_URL, CARIBBEAN_WAARDENLIJST_TYPE, OrganisationOrigins.caribbean_list),
+    (PROVINCE_URL, PROVINCE_WAARDENLIJST_TYPE, OrganisationOrigins.province_list),
+    (
+        WATER_BOARD_URL,
+        WATER_BOARD_WAARDENLIJST_TYPE,
+        OrganisationOrigins.water_board_list,
+    ),
+    (ZBO_URL, ZBO_WAARDENLIJST_TYPE, OrganisationOrigins.zbo_list),
 ]
 
 SPEC = {
