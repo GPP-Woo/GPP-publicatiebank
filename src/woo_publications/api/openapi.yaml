@@ -61,8 +61,8 @@ paths:
   /api/v2/accounts/organisatie-eenheden:
     get:
       operationId: accountsOrganisatieEenhedenList
-      description: Returns a paginated result list of existing organisation units.
-      summary: All available organisation units.
+      description: Geeft een lijst (met paginering) terug van alle bestaande organisatie-eenheden.
+      summary: Alle beschikbare organisatie-eenheden.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -116,8 +116,8 @@ paths:
   /api/v2/accounts/organisatie-eenheden/{identifier}:
     get:
       operationId: accountsOrganisatieEenhedenRetrieve
-      description: Retrieve a specific organisation unit.
-      summary: Retrieve a specific organisation unit.
+      description: Haal een specifieke organisatie-eenheid op.
+      summary: Haal een specifieke organisatie-eenheid op.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -164,11 +164,11 @@ paths:
     put:
       operationId: accountsOrganisatieEenhedenUpdate
       description: |-
-        Update the metadata of a specific organisation unit.
+        Werk de metadata van een specifieke organisatie-eenheid bij.
 
-        The following properties cannot be modified after initial creation:
+        The volgende attributen mogen niet aangepast worden na de initiële creatie:
         * `identifier`
-      summary: Update the metadata of a specific organisation unit.
+      summary: Werk de metadata van een specifieke organisatie-eenheid bij.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -221,11 +221,12 @@ paths:
     patch:
       operationId: accountsOrganisatieEenhedenPartialUpdate
       description: |-
-        Update the metadata of a specific organisation unit partially.
+        Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk bij.
 
-        The following properties cannot be modified after initial creation:
+        The volgende attributen mogen niet aangepast worden na de initiële creatie:
         * `identifier`
-      summary: Update the metadata of a specific organisation unit partially.
+      summary: Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk
+        bij.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -385,8 +386,8 @@ paths:
         schema:
           type: string
           format: uuid
-        description: Search the document based on the unique identifier (UUID) that
-          represents a publication.
+        description: Filter documenten op basis van de unieke publicatie-identificatie
+          (UUID) waartoe ze horen.
       - in: query
         name: publicatiestatus
         schema:
@@ -1185,10 +1186,10 @@ paths:
           * `gemeentelijst` - Register gemeenten compleet
           * `solijst` - Register samenwerkingsorganisaties compleet
           * `oorglijst` - Register overige overheidsorganisaties compleet
-          * `caribischelijst` - Caribbean organisations
-          * `provincielijst` - Province list
-          * `waterschaplijst` - Water Board list
-          * `zbolijst` - ZBO list
+          * `caribischelijst` - Caribische organisaties
+          * `provincielijst` - Provincielijst
+          * `waterschaplijst` - Waterschaplijst
+          * `zbolijst` - ZBO-lijst
           * `zelf_toegevoegd` - Zelf-toegevoegd item
       - name: page
         required: false
@@ -1419,9 +1420,9 @@ paths:
     get:
       operationId: publicatiesList
       description: |-
-        Returns a paginated result list of existing publications.
+        Geeft een gepagineerde lijst van bestaande publicaties terug.
 
-        **Note**: when filtering on both `eigenaar` and `eigenaarGroep`, publications matching any kind of owner will be returned. These parameters have OR-behaviour when combined.
+        **Opmerking**: wanneer je tegelijk op `eigenaar` en `eigenaarGroep` filtert, dan worden de publicaties waar één van beide condities geldt teruggegeven. De parameters hebben OF-gedrag wanneer ze gecombineerd worden.
       summary: Alle beschikbare publicaties.
       parameters:
       - in: header
@@ -1500,8 +1501,8 @@ paths:
         name: eigenaarGroep
         schema:
           type: string
-        description: Filter publications based on the owner group identifier of the
-          object.
+        description: Filter publicaties op basis van de identificatie van de eigenaar
+          (groep).
       - in: query
         name: informatieCategorieen
         schema:
@@ -2197,9 +2198,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/EigenaarGroep'
           nullable: true
-          title: owner (group)
-          description: Optional organisation unit that also owns the publication,
-            in addition to the `eigenaar` property.
+          title: eigenaar (groep)
+          description: Niet-verplichte organisatie-eenheid die ook eigenaar is van
+            de publicatie, naast de `eigenaar` (op persoonlijke titel).
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -2807,14 +2808,13 @@ components:
         identifier:
           type: string
           title: Identificatie
-          description: The system identifier that uniquely identifies the organisation
-            unit performing the action. Only letters, numbers, underscores or hyphens
-            are allowed.
+          description: De (unieke) identificatie waarmee de gebruiker (groep) die
+            de actie uitvoert achterhaald kan worden.
           pattern: ^[-a-zA-Z0-9_]+$
           maxLength: 255
         weergaveNaam:
           type: string
-          description: The display name of the organisation unit.
+          description: De weergavenaam van de organisatie-eenheid.
       required:
       - weergaveNaam
     FilePart:
@@ -2940,10 +2940,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
-            * `caribischelijst` - Caribbean organisations
-            * `provincielijst` - Province list
-            * `waterschaplijst` - Water Board list
-            * `zbolijst` - ZBO list
+            * `caribischelijst` - Caribische organisaties
+            * `provincielijst` - Provincielijst
+            * `waterschaplijst` - Waterschaplijst
+            * `zbolijst` - ZBO-lijst
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
@@ -2968,10 +2968,10 @@ components:
         * `gemeentelijst` - Register gemeenten compleet
         * `solijst` - Register samenwerkingsorganisaties compleet
         * `oorglijst` - Register overige overheidsorganisaties compleet
-        * `caribischelijst` - Caribbean organisations
-        * `provincielijst` - Province list
-        * `waterschaplijst` - Water Board list
-        * `zbolijst` - ZBO list
+        * `caribischelijst` - Caribische organisaties
+        * `provincielijst` - Provincielijst
+        * `waterschaplijst` - Waterschaplijst
+        * `zbolijst` - ZBO-lijst
         * `zelf_toegevoegd` - Zelf-toegevoegd item
     OrganisationUnit:
       type: object
@@ -2980,12 +2980,12 @@ components:
           type: string
           readOnly: true
           title: Identificatie
-          description: The system identifier that uniquely identifies the organisation
-            unit performing the action.
+          description: De (unieke) identificatie waarmee de organisatie-eenheid die
+            de actie uitvoert achterhaald kan worden.
           pattern: ^[-a-zA-Z0-9_]+$
         naam:
           type: string
-          description: The display name of the organisation unit.
+          description: De weergavenaam van de organisatie-eenheid.
           maxLength: 255
       required:
       - identifier
@@ -3308,10 +3308,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
-            * `caribischelijst` - Caribbean organisations
-            * `provincielijst` - Province list
-            * `waterschaplijst` - Water Board list
-            * `zbolijst` - ZBO list
+            * `caribischelijst` - Caribische organisaties
+            * `provincielijst` - Provincielijst
+            * `waterschaplijst` - Waterschaplijst
+            * `zbolijst` - ZBO-lijst
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
@@ -3324,12 +3324,12 @@ components:
           type: string
           readOnly: true
           title: Identificatie
-          description: The system identifier that uniquely identifies the organisation
-            unit performing the action.
+          description: De (unieke) identificatie waarmee de organisatie-eenheid die
+            de actie uitvoert achterhaald kan worden.
           pattern: ^[-a-zA-Z0-9_]+$
         naam:
           type: string
-          description: The display name of the organisation unit.
+          description: De weergavenaam van de organisatie-eenheid.
           maxLength: 255
     PatchedPublicationWrite:
       oneOf:
@@ -3517,9 +3517,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/EigenaarGroep'
           nullable: true
-          title: owner (group)
-          description: Optional organisation unit that also owns the publication,
-            in addition to the `eigenaar` property.
+          title: eigenaar (groep)
+          description: Niet-verplichte organisatie-eenheid die ook eigenaar is van
+            de publicatie, naast de `eigenaar` (op persoonlijke titel).
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
@@ -3783,9 +3783,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/EigenaarGroep'
           nullable: true
-          title: owner (group)
-          description: Optional organisation unit that also owns the publication,
-            in addition to the `eigenaar` property.
+          title: eigenaar (groep)
+          description: Niet-verplichte organisatie-eenheid die ook eigenaar is van
+            de publicatie, naast de `eigenaar` (op persoonlijke titel).
         publicatiestatus:
           allOf:
           - $ref: '#/components/schemas/PublicatiestatusEnum'
