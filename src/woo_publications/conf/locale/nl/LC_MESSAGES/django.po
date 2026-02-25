@@ -2275,7 +2275,7 @@ msgstr "GPP-Publicatiebank-API"
 
 #: woo_publications/templates/index.html:7
 msgid "Repository and JSON-based API for WOO publications."
-msgstr "Opslag en JSON-API voor WOO-Publicaties."
+msgstr "Opslag en JSON-API voor WOO-publicaties."
 
 #: woo_publications/templates/maykin_2fa/login.html:13
 msgid "or"
@@ -2290,12 +2290,12 @@ msgid "Contact support"
 msgstr "Contacteer support"
 
 #: woo_publications/urls.py:13 woo_publications/urls.py:14
-msgid "WOO publications"
-msgstr "WOO-Publicatiebank"
+msgid "GPP publications"
+msgstr "GPP-publicatiebank"
 
 #: woo_publications/urls.py:15
-msgid "WOO publications dashboard"
-msgstr "Dashboard WOO-Publicatiebank"
+msgid "GPP publications dashboard"
+msgstr "Dashboard GPP-publicatiebank"
 
 #: woo_publications/utils/admin.py:10
 msgid "Any date"
@@ -2353,7 +2353,7 @@ msgid ""
 "\n"
 "## Documentation\n"
 "\n"
-"The Woo Publications API enables client applications to consult and manage\n"
+"The GPP-Publications API enables client applications to consult and manage\n"
 "the publications of documents for transparency of governance. This API\n"
 "documentation contains three logical 'domains'.\n"
 "\n"
@@ -2417,7 +2417,7 @@ msgstr ""
 "\n"
 "## Documentatie\n"
 "\n"
-"De Woo-Publicatiebank API stelt client-applicaties in staat om publicaties van documenten te raadplegen en te beheren in het kader van een open overheid. Deze API-documentatie bevat drie logische 'domeinen'.\n"
+"De GPP-publicatiebank API stelt client-applicaties in staat om publicaties van documenten te raadplegen en te beheren in het kader van een open overheid. Deze API-documentatie bevat drie logische 'domeinen'.\n"
 "\n"
 "### Domeinen\n"
 "\n"

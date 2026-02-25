@@ -376,7 +376,7 @@ SPECTACULAR_SETTINGS = {
         """
 ## Documentation
 
-The Woo Publications API enables client applications to consult and manage
+The GPP-Publications API enables client applications to consult and manage
 the publications of documents for transparency of governance. This API
 documentation contains three logical 'domains'.
 
