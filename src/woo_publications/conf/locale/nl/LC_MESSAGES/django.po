@@ -594,19 +594,19 @@ msgstr "Register overige overheidsorganisaties compleet"
 #: woo_publications/metadata/constants.py:24
 #| msgid "Create an organisation."
 msgid "Caribbean organisations"
-msgstr "Caribische organisaties"
+msgstr "Register Caribische openbare lichamen compleet"
 
 #: woo_publications/metadata/constants.py:25
 msgid "Province list"
-msgstr "Provincielijst"
+msgstr "Register provincies compleet"
 
 #: woo_publications/metadata/constants.py:26
 msgid "Water Board list"
-msgstr "Waterschaplijst"
+msgstr "Register waterschappen compleet"
 
 #: woo_publications/metadata/constants.py:27
 msgid "ZBO list"
-msgstr "ZBO-lijst"
+msgstr "Register zbo's compleet"
 
 #: woo_publications/metadata/models.py:38
 #: woo_publications/metadata/models.py:126
