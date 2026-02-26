@@ -1005,6 +1005,65 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(data["informatieCategorieen"], [error_message])
 
+    def test_list_document_filter_upload_complete(self):
+        # files which are ready for publication
+        completed_document = DocumentFactory.create(
+            upload_complete=True, metadata_gestript_op=timezone.now()
+        )
+        incomplete_document = DocumentFactory.create(upload_complete=False)
+
+        list_url = reverse("api:document-list")
+
+        with self.subTest("no filters provided return all documents"):
+            response = self.client.get(
+                list_url,
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 2)
+            self.assertItemInResults(
+                data["results"], "uuid", str(completed_document.uuid), 1
+            )
+            self.assertItemInResults(
+                data["results"], "uuid", str(incomplete_document.uuid), 1
+            )
+
+        with self.subTest("filter ready for publication"):
+            response = self.client.get(
+                list_url,
+                {"isGereedVoorPublicatie": "True"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(
+                data["results"], "uuid", str(completed_document.uuid), 1
+            )
+
+        with self.subTest("filter not ready for publication"):
+            response = self.client.get(
+                list_url,
+                {"isGereedVoorPublicatie": "False"},
+                headers=AUDIT_HEADERS,
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(data["count"], 1)
+            self.assertItemInResults(
+                data["results"], "uuid", str(incomplete_document.uuid), 1
+            )
+
     def test_detail_document(self):
         publication = PublicationFactory.create()
         with freeze_time("2024-09-25T12:30:00-00:00"):
@@ -1464,10 +1523,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             "bestandsomvang": 10,
         }
 
-        with (
-            freeze_time("2024-11-13T15:00:00-00:00"),
-            self.captureOnCommitCallbacks(execute=True),
-        ):
+        with self.captureOnCommitCallbacks(execute=True):
             response = self.client.post(
                 endpoint,
                 data=body,
@@ -1782,6 +1838,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["documentUploadVoltooid"])
+        document.refresh_from_db()
+        # upload didn't complete yet because the document isn't stripped yet.
+        self.assertFalse(document.upload_complete)
 
         mock_index_document.assert_called_once_with(
             document_id=document.pk,
