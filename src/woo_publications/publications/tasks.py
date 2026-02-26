@@ -106,7 +106,6 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
         # change document name to original name
         temp_file.name = source_document.file_name
 
-        # document.bestandsomvang = os.path.getsize(source_document.file_name)
         document.bestandsomvang = temp_file.tell()
         document.metadata_gestript_op = timezone.now()
         # save data
@@ -130,6 +129,7 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
         for part in file_parts:
             # TODO: optimize to avoid loading large parts into memory
             file_part = File(BytesIO(temp_file.read(part.size)))
+            # when the upload is complete the upload_complete flag will be set to True
             document.upload_part_data(uuid=part.uuid, file=file_part)
 
 

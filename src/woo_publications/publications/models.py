@@ -1136,7 +1136,10 @@ class Document(ConcurrentTransitionMixin, models.Model):
             client.unlock_document(uuid=self.document_uuid, lock=self.lock)
 
             self.lock = ""
-            self.upload_complete = True
+
+            if not self.has_to_strip_metadata:
+                self.upload_complete = True
+
             self.save(update_fields=("lock", "upload_complete"))
         return completed
 
