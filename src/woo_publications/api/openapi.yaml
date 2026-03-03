@@ -1191,10 +1191,10 @@ paths:
           * `gemeentelijst` - Register gemeenten compleet
           * `solijst` - Register samenwerkingsorganisaties compleet
           * `oorglijst` - Register overige overheidsorganisaties compleet
-          * `caribischelijst` - Caribische organisaties
-          * `provincielijst` - Provincielijst
-          * `waterschaplijst` - Waterschaplijst
-          * `zbolijst` - ZBO-lijst
+          * `caribischelijst` - Register Caribische openbare lichamen compleet
+          * `provincielijst` - Register provincies compleet
+          * `waterschaplijst` - Register waterschappen compleet
+          * `zbolijst` - Register zbo's compleet
           * `zelf_toegevoegd` - Zelf-toegevoegd item
       - name: page
         required: false
@@ -2945,10 +2945,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
-            * `caribischelijst` - Caribische organisaties
-            * `provincielijst` - Provincielijst
-            * `waterschaplijst` - Waterschaplijst
-            * `zbolijst` - ZBO-lijst
+            * `caribischelijst` - Register Caribische openbare lichamen compleet
+            * `provincielijst` - Register provincies compleet
+            * `waterschaplijst` - Register waterschappen compleet
+            * `zbolijst` - Register zbo's compleet
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
@@ -2973,10 +2973,10 @@ components:
         * `gemeentelijst` - Register gemeenten compleet
         * `solijst` - Register samenwerkingsorganisaties compleet
         * `oorglijst` - Register overige overheidsorganisaties compleet
-        * `caribischelijst` - Caribische organisaties
-        * `provincielijst` - Provincielijst
-        * `waterschaplijst` - Waterschaplijst
-        * `zbolijst` - ZBO-lijst
+        * `caribischelijst` - Register Caribische openbare lichamen compleet
+        * `provincielijst` - Register provincies compleet
+        * `waterschaplijst` - Register waterschappen compleet
+        * `zbolijst` - Register zbo's compleet
         * `zelf_toegevoegd` - Zelf-toegevoegd item
     OrganisationUnit:
       type: object
@@ -3313,10 +3313,10 @@ components:
             * `gemeentelijst` - Register gemeenten compleet
             * `solijst` - Register samenwerkingsorganisaties compleet
             * `oorglijst` - Register overige overheidsorganisaties compleet
-            * `caribischelijst` - Caribische organisaties
-            * `provincielijst` - Provincielijst
-            * `waterschaplijst` - Waterschaplijst
-            * `zbolijst` - ZBO-lijst
+            * `caribischelijst` - Register Caribische openbare lichamen compleet
+            * `provincielijst` - Register provincies compleet
+            * `waterschaplijst` - Register waterschappen compleet
+            * `zbolijst` - Register zbo's compleet
             * `zelf_toegevoegd` - Zelf-toegevoegd item
         isActief:
           type: boolean
