@@ -79,7 +79,6 @@ def strip_all_files(base_url: str) -> int:
         publicatiestatus=PublicationStatusOptions.published,
         metadata_gestript_op__isnull=True,
         document_uuid__isnull=False,
-        upload_complete=True,
         lock="",
     ).iterator():
         if document.has_to_strip_metadata:

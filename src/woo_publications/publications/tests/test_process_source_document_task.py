@@ -259,3 +259,36 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
 
         woo_document.refresh_from_db()
         self.assertTrue(woo_document.upload_complete)
+
+    def test_upload_metadata_strippable_document_does_not_mark_upload_as_complete(self):
+        with get_client(self.service) as client:
+            oz_uuid = _create_initial_document(
+                client=client,
+                creation_date=date(2025, 1, 1),
+                content=b"12345",
+                filename="data.pdf",
+                content_type="application/pdf",
+            )
+
+        source_url = (
+            "http://openzaak.docker.internal:8001/documenten/api/v1/"
+            f"enkelvoudiginformatieobjecten/{oz_uuid}"
+        )
+        woo_document = DocumentFactory.create(
+            source_url=source_url,
+            creatiedatum=date(2025, 1, 1),
+            bestandsomvang=5,
+            bestandsformaat="application/pdf",
+            bestandsnaam="data.pdf",
+        )
+        woo_document.register_in_documents_api(
+            build_absolute_uri=lambda abs_path: f"http://host.docker.internal:8000{abs_path}"
+        )
+        assert not woo_document.upload_complete
+
+        process_source_document(
+            document_id=woo_document.id, base_url="http://host.docker.internal:8000/"
+        )
+
+        woo_document.refresh_from_db()
+        self.assertFalse(woo_document.upload_complete)

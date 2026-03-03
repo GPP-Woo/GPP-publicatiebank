@@ -349,6 +349,11 @@ paths:
         explode: true
         style: form
       - in: query
+        name: isGereedVoorPublicatie
+        schema:
+          type: boolean
+        description: Filter documents that are either fully uploaded or not.
+      - in: query
         name: laatstGewijzigdDatumTot
         schema:
           type: string

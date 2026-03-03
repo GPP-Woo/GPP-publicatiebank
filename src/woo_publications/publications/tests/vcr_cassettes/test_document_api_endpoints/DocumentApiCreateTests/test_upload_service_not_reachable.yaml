@@ -1,52 +1,53 @@
 interactions:
 - request:
-    body: '{"identificatie": "a93c4f5f-7313-4dd5-b44e-284e04c82421", "bronorganisatie":
+    body: '{"identificatie": "74f43059-0f4b-4f27-adc7-c8622869c2d5", "bronorganisatie":
       "000000000", "informatieobjecttype": "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8",
-      "creatiedatum": "2024-10-22", "titel": "entire", "auteur": "GPP-Woo/GPP-publicatiebank", "status":
-      "definitief", "formaat": "application/octet-stream", "taal": "dut", "bestandsnaam":
-      "unknown.bin", "inhoud": null, "bestandsomvang": 5, "beschrijving": "", "indicatieGebruiksrecht":
-      false}'
+      "creatiedatum": "2026-02-24", "titel": "third", "auteur": "GPP-Woo/GPP-publicatiebank",
+      "status": "definitief", "formaat": "application/octet-stream", "taal": "dut",
+      "bestandsnaam": "unknown.bin", "inhoud": null, "bestandsomvang": 5, "beschrijving":
+      "", "indicatieGebruiksrecht": false}'
     headers:
       Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
-      Authorization:
-      - Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3b28tcHVibGljYXRpb25zLWRldiIsImlhdCI6MTczMTA1MTU4MCwiY2xpZW50X2lkIjoid29vLXB1YmxpY2F0aW9ucy1kZXYiLCJ1c2VyX2lkIjoiIiwidXNlcl9yZXByZXNlbnRhdGlvbiI6IiJ9.5JBNRHlWYn2W1PATcGgUuf3z_JsL9LsgRwQsoaN2j4U
       Connection:
       - keep-alive
       Content-Length:
-      - '498'
+      - '511'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.32.5
     method: POST
     uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/98125a93-a58e-4a9d-92e5-1b098526a19a","identificatie":"a93c4f5f-7313-4dd5-b44e-284e04c82421","bronorganisatie":"000000000","creatiedatum":"2024-10-22","titel":"entire","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2024-11-08T07:39:41.084404Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":{"soort":"","datum":null},"integriteit":{"algoritme":"","waarde":"","datum":null},"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/1876e0c3-b9f4-44c3-9142-c21115d2cf2a","volgnummer":1,"omvang":5,"voltooid":false,"lock":"b2a459036db04286af78924faea621dc"}],"trefwoorden":[],"lock":"b2a459036db04286af78924faea621dc"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d3d2becb-544b-4171-bf80-dace3ee46e0d","identificatie":"74f43059-0f4b-4f27-adc7-c8622869c2d5","bronorganisatie":"000000000","creatiedatum":"2026-02-24","titel":"third","vertrouwelijkheidaanduiding":"openbaar","auteur":"GPP-Woo/GPP-publicatiebank","status":"definitief","formaat":"application/octet-stream","taal":"dut","versie":1,"beginRegistratie":"2026-02-26T13:01:14.600995Z","bestandsnaam":"unknown.bin","inhoud":null,"bestandsomvang":5,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":null,"integriteit":null,"informatieobjecttype":"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/c7a6126b-aea3-47c1-85b1-14f69785993f","volgnummer":1,"omvang":5,"voltooid":false,"lock":"918e51da88bf44afa072fc03ae2a1393"}],"trefwoorden":[],"lock":"918e51da88bf44afa072fc03ae2a1393"}'
     headers:
       API-version:
       - 1.4.2
       Allow:
       - GET, POST, HEAD, OPTIONS
       Content-Length:
-      - '1167'
+      - '1122'
       Content-Security-Policy:
-      - style-src 'self'; script-src 'self'; frame-src 'self'; base-uri 'self'; frame-ancestors
-        'none'; default-src 'self'; form-action 'self'; object-src 'none'; img-src
-        'self'
+      - 'frame-ancestors ''none''; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; script-src ''self'' ''unsafe-inline'' cdnjs.cloudflare.com
+        cdn.jsdelivr.net; object-src ''none''; form-action ''self''; base-uri ''self'';
+        default-src ''self''; font-src ''self'' fonts.gstatic.com; style-src ''self''
+        ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net;
+        frame-src ''self''; worker-src ''self'' blob:'
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
       Location:
-      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/98125a93-a58e-4a9d-92e5-1b098526a19a
+      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/d3d2becb-544b-4171-bf80-dace3ee46e0d
       Referrer-Policy:
       - same-origin
       Vary:
-      - origin
+      - origin, Cookie
       X-Content-Type-Options:
       - nosniff
       X-Frame-Options:

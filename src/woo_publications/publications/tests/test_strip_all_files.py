@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -63,25 +63,53 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
     def test_happy_flow_documents(
         self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
-        document = DocumentFactory.create(
+        upload_complete = DocumentFactory.create(
             document_service=self.service,
             document_uuid=str(uuid.uuid4()),
             upload_complete=True,
             bestandsformaat="application/pdf",
         )
+        upload_incomplete = DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=False,
+            bestandsformaat="application/pdf",
+        )
         count = strip_all_files(base_url="http://host.docker.internal:8000/")
 
-        self.assertEqual(count, 1)
-        mock_strip_metadata.assert_called_once_with(
-            document_id=document.pk,
-            base_url="http://host.docker.internal:8000/",
+        self.assertEqual(count, 2)
+        mock_strip_metadata.assert_has_calls(
+            [
+                call(
+                    document_id=upload_complete.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
+                call(
+                    document_id=upload_incomplete.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
+            ],
+            any_order=True,
         )
-        download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+        complete_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(upload_complete.uuid)}
         )
-        mock_index_document.assert_called_once_with(
-            document_id=document.pk,
-            download_url=f"http://host.docker.internal:8000{download_url}",
+        incomplete_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(upload_incomplete.uuid)}
+        )
+
+        mock_index_document.assert_has_calls(
+            [
+                call(
+                    document_id=upload_complete.pk,
+                    download_url=f"http://host.docker.internal:8000{complete_download_url}",
+                ),
+                call(
+                    document_id=upload_incomplete.pk,
+                    download_url=f"http://host.docker.internal:8000{incomplete_download_url}",
+                ),
+            ],
+            any_order=True,
         )
 
     def test_documents_not_eligible_for_stripping(
@@ -89,12 +117,6 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
     ):
         DocumentFactory.create(
             upload_complete=True,
-            bestandsformaat="application/pdf",
-        )
-        DocumentFactory.create(
-            document_service=self.service,
-            document_uuid=str(uuid.uuid4()),
-            upload_complete=False,
             bestandsformaat="application/pdf",
         )
         DocumentFactory.create(

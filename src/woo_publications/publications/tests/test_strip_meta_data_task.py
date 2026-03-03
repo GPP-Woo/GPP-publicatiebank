@@ -124,7 +124,9 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         ):
             strip_metadata(document_id=doc.pk, base_url="http://testserver/")
 
+        doc.refresh_from_db()
         self.assertEqual(doc.metadata_gestript_op, None)
+        self.assertFalse(doc.upload_complete)
 
     def test_skip_file_which_should_not_be_stripped(self):
         doc = DocumentFactory.create(
@@ -135,7 +137,9 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         strip_metadata(document_id=doc.pk, base_url="http://testserver/")
 
+        doc.refresh_from_db()
         self.assertEqual(doc.metadata_gestript_op, None)
+        self.assertFalse(doc.upload_complete)
 
     def test_strip_pdf_of_metadata(self):
         with METADATA_PDF.open("rb") as pdf_file:
@@ -183,6 +187,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         document.refresh_from_db()
         self.assertIsNotNone(document.metadata_gestript_op)
+        self.assertTrue(document.upload_complete)
 
         with get_client(self.service) as client:
             documents_api_document = client.get(
@@ -234,6 +239,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         document.refresh_from_db()
         self.assertIsNotNone(document.metadata_gestript_op)
+        self.assertTrue(document.upload_complete)
 
         with get_client(self.service) as client:
             documents_api_document = client.get(
@@ -290,6 +296,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         document.refresh_from_db()
         self.assertIsNotNone(document.metadata_gestript_op)
+        self.assertTrue(document.upload_complete)
 
         with get_client(self.service) as client:
             documents_api_document = client.get(
@@ -340,6 +347,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         document.refresh_from_db()
         self.assertIsNotNone(document.metadata_gestript_op)
+        self.assertTrue(document.upload_complete)
 
         with get_client(self.service) as client:
             documents_api_document = client.get(
