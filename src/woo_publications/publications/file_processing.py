@@ -5,11 +5,13 @@ from tempfile import NamedTemporaryFile
 from typing import IO
 from urllib.parse import urljoin
 
+from django.conf import settings
 from django.db import transaction
 from django.urls import reverse
 
 import structlog
 from celery import chain
+from lxml import html
 from pypdf import PdfWriter
 
 from woo_publications.config.models import GlobalConfiguration
@@ -186,8 +188,30 @@ def strip_ms_office_document(file: IO[bytes]) -> None:
         os.remove(stripped_file_name)
 
 
-def strip_zip_files(file: IO[bytes]) -> None:
+def strip_zip_file(file: IO[bytes]) -> None:
     import zipfile
 
     with zipfile.ZipFile(file, mode="a") as zip_file:
         zip_file.comment = b""
+
+
+def strip_html(file: IO[bytes]) -> None:
+    if os.path.getsize(file.name) > settings.STRIP_METADATA_HTML_MAX_FILE_SIZE:
+        raise MetaDataStripError(message="The file is to large for us to process.")
+
+    file.seek(0)
+    tree = html.fromstring(file.read())
+
+    for meta in tree.xpath("//meta"):
+        if meta.get("charset"):
+            continue
+
+        meta.getparent().remove(meta)
+
+    stripped_data = html.tostring(tree, pretty_print=True, method="html")
+    del tree
+
+    file.seek(0)
+    assert isinstance(stripped_data, bytes)
+    file.write(stripped_data)
+    file.flush()

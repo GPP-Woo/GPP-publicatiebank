@@ -10,5 +10,6 @@ class ArchiveNominationChoices(TextChoices):
 class StrippableFileTypes(TextChoices):
     pdf = "pdf", _("PDF File")
     open_document = "open_document", _("Open Document")
-    ms_office_file = "ms_office_files", _("Microsoft Office Files")
+    ms_office_file = "ms_office_files", _("Microsoft Office File")
     zip = "zip", _("Zip File")
+    html = "html", _("HTML (HyperText Markup Language) File")

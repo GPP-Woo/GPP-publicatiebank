@@ -29,10 +29,11 @@ from woo_publications.publications.constants import (
 
 from ..constants import StrippableFileTypes
 from .file_processing import (
+    strip_html,
     strip_ms_office_document,
     strip_open_document,
     strip_pdf,
-    strip_zip_files,
+    strip_zip_file,
 )
 from .models import Document, Publication, Topic
 
@@ -96,7 +97,9 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
             case StrippableFileTypes.ms_office_file:
                 strip_ms_office_document(temp_file)
             case StrippableFileTypes.zip:
-                strip_zip_files(temp_file)
+                strip_zip_file(temp_file)
+            case StrippableFileTypes.html:
+                strip_html(temp_file)
             case _:  # pragma: no cover
                 pass
 
