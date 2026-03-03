@@ -2,6 +2,7 @@
 celery
 flower
 furl
+lxml
 Pillow
 pypdf
 python-magic

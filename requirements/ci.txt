@@ -419,7 +419,10 @@ kombu==5.6.2
     #   -r requirements/base.txt
     #   celery
 lxml==6.0.2
-    # via pyquery
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
+    #   pyquery
 markupsafe==3.0.3
     # via jinja2
 maykin-2fa==2.0.1
