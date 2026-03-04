@@ -10,6 +10,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 import magic
+from lxml import html
 from parametrize import parametrize
 from pypdf import PdfReader
 from rest_framework import status
@@ -359,3 +360,50 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             self.assertEqual(zip_file.comment, b"")
             for file in zip_file.filelist:
                 self.assertIn(file.filename, ["legacy_word.doc", "word.docx"])
+
+    def test_strip_html_of_metadata(self):
+        html_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "test.html"
+        )
+
+        with html_path.open("r") as html_file:
+            tree = html.fromstring(html_file.read())
+            self.assertEqual(len(tree.xpath("//meta")), 2)
+
+        file_size = html_path.stat().st_size
+
+        with open(html_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="test.html", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="test.html",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
+
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
+
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content
+
+        tree = html.fromstring(document_content)
+        metadata = tree.xpath("//meta")
+        self.assertEqual(len(metadata), 1)
+        self.assertEqual(metadata[0].keys(), ["charset"])

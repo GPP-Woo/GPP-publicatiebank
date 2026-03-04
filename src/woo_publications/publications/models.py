@@ -859,6 +859,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 | "application/x-zip-compressed"
             ):
                 return StrippableFileTypes.zip
+            case "text/html":
+                return StrippableFileTypes.html
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
             case str(mimetype) if mimetype.startswith(
@@ -877,6 +879,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.pdf
             case ".zip":
                 return StrippableFileTypes.zip
+            case ".html" | ".htm":
+                return StrippableFileTypes.html
             case str() if extension in get_open_document_extensions():
                 return StrippableFileTypes.open_document
             case str() if extension in get_ms_office_document_extensions():
