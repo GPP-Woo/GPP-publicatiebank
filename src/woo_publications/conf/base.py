@@ -270,7 +270,7 @@ MAX_IMG_WIDTH = config(  # pyright: ignore[reportCallIssue]
 )
 
 STRIP_METADATA_HTML_MAX_FILE_SIZE: int = config(  # pyright: ignore[reportCallIssue]
-    "STRIP_METADATA_MAX_FILE_SIZE",
+    "STRIP_METADATA_HTML_MAX_FILE_SIZE",
     default=1024 * 1024 * 5,  # 5MB
     help_text="The maximum file size (5MB by default) in bytes for HTML files. Adapt "
     "this value based on the memory limits of your celery workers. ",
