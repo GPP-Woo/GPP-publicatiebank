@@ -27,6 +27,8 @@ The backend contains the storage and exposes the API.
    =============== ===========
    Backend version API version
    =============== ===========
+   2.1.0           2.1.0
+   2.0.0           2.0.0
    1.2.0           1.1.0
    1.1.0           1.0.0
    1.0.0           1.0.0
@@ -49,9 +51,11 @@ PostgreSQL is the database used. PostgreSQL 13 and newer are supported.
    =============  ==========================
    PostgreSQL     Status
    =============  ==========================
-   14             Supported
-   15             Supported
+   18             Supported
+   17             Supported
    16             Automatically tested in CI
+   15             Supported
+   14             Supported
    =============  ==========================
 
 Redis
@@ -65,9 +69,10 @@ Redis is a key-value store used for caching purposes. Redis 5 and newer are supp
    =============  ==========================
    Redis          Status
    =============  ==========================
-   5              Should work
-   6              Automatically tested in CI
+   8              Automatically tested in CI
    7              Supported (tested via docker compose)
+   6              Supported
+   5              Supported
    =============  ==========================
 
 Documenten API
@@ -89,8 +94,8 @@ uploads mechanism.
    ==============  ==========================
    Documenten API  Status
    ==============  ==========================
-   1.4             Tested in CI (based on Open Zaak 1.16)
    1.5             Should work
+   1.4             Tested in CI (based on Open Zaak 1.16)
    ==============  ==========================
 
 .. note:: Version 1.1 - 1.3 mostly work, though you may see failures attempting to
@@ -112,5 +117,5 @@ GPP-zoeken manages the search index to facilitate full text and faceted search.
    =============== ==========================
    GPP-zoeken API  Status
    =============== ==========================
-   2.0.0-rc.0      Tested in CI
+   2.0.0           Tested in CI
    =============== ==========================

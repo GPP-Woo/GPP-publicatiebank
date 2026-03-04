@@ -2,6 +2,98 @@
 Release notes
 =============
 
+2.1.0-rc.0 (2026-03-04)
+=======================
+
+GPP-publicatiebank 2.1.0-rc.0 is a feature release.
+
+Upgrade procedure
+-----------------
+
+The metadata stripping is not automatically applied to existing documents already present
+in GPP-publicatiebank. We've added a command line interface to perform this in bulk. In
+short, this will check all existing documents that are not marked as "metadata stripped",
+check if they can be stripped and if so, strip the metadata + upload the modified
+documents to the document storage. Finally, the updated documents will be offered to
+the search index for re-indexing.
+
+.. note::
+
+    In a Kubernetes pod or docker container, call the management command:
+
+    .. code-block:: bash
+
+      python src/manage.py strip_all_files --base-url https://publicatiebank.example.com
+
+    The base URL is the root URL where your GPP-publicatiebank instance is hosted.
+
+Features
+--------
+
+* You can now specify organisation units as "group owners" for publications.
+
+    - [:issue:`369`] Define organisation units in the admin and expose them via the API.
+    - [:issue:`370`] Support organisation units as publication owner in the admin and API.
+    - [:issue:`371`] Added support for filtering publications in the API based on the
+      owning group.
+    - [:issue:`372`] Added bulk action in the admin to (re)assign the owner group of
+      publications.
+
+* The files added to the publications are now stripped of their internal metadata (on a
+  best-effort basis).
+
+    - [:issue:`386`] Added metadata stripping of PDF files.
+    - [:issue:`388`] Added metadata stripping of "Open Document"-type documents (e.g.
+      from LibreOffice and OpenOffice).
+    - [:issue:`387`] Added metadata stripping of MS Office (2007+) files.
+    - [:issue:`390`] Added metadata stripping of ZIP files.
+    - [:issue:`391`] Added metadata stripping of HTML files.
+
+* [:issue:`290`] The "organisations" fixture now includes additional value lists from
+  overheid.nl:
+
+    - Caribische openbare lichamen
+    - Provincies
+    - Waterschappen
+    - zbo's
+
+* [:issue:`290`] Existing organisations are updated based on the updated value lists
+  versions, applying some corrections and additions.
+* [:issue:`393`] Updated the branding (favicon + titles) with the GPP-Woo assets.
+* [:issue:`167`] You can now filter documents in the API that are ready or not ready
+  for publication, where ready is defined as "upload complete and metadata stripped
+  if applicable".
+
+Bugfixes
+--------
+
+* Fixed the API schema documenation for UUID-filter parameters that reported wrong
+  parameter types.
+* [:issue:`384`] Fixed phone number validation for API credential contact details being
+  too strict.
+* [:issue:`413`] Fixed documents retrieved from external Documents APIs not being queued
+  for indexing to GPP-Zoeken.
+
+Project maintenance
+-------------------
+
+* Upgraded dependencies to their latest security releases.
+* Ignore npmjs links in the docs build, as they block bots now.
+* Upgraded deprecated Github Actions to their latest versions.
+* Upgraded dependencies to their latest versions, preparing for OTel integration.
+* Updated uwsgi logs to not use the ``event`` key due to the associated high cardinality.
+* [:issue:`399`] Upgrade to the latest Celery version.
+* Documentation updates:
+
+    - Added documentation for the automated publishing flow from external systems.
+    - Added missing municipalities to financiers.
+    - Updated the CVE link to the new CVE-website.
+
+* Refactored some internal tooling to use more shared-library utilities.
+* Removed optional and unused dependencies.
+* Simplified the frontend build system by using esbuild.
+* Optimized the memory usage of flower.
+
 2.0.0 (2025-09-01)
 ==================
 

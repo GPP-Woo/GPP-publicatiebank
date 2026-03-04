@@ -272,8 +272,13 @@ MAX_IMG_WIDTH = config(  # pyright: ignore[reportCallIssue]
 STRIP_METADATA_HTML_MAX_FILE_SIZE: int = config(  # pyright: ignore[reportCallIssue]
     "STRIP_METADATA_HTML_MAX_FILE_SIZE",
     default=1024 * 1024 * 5,  # 5MB
-    help_text="The maximum file size (5MB by default) in bytes for HTML files. Adapt "
-    "this value based on the memory limits of your celery workers. ",
+    help_text=(
+        "The maximum file size (5MB by default) in bytes for HTML files. Adapt "
+        "this value based on the memory limits of your celery workers. For practical "
+        "reasons, you can assume that a given file size will consume about 10x as "
+        "much memory (1MB file -> uses 10MB)."
+    ),
+    group="Metadata stripping settings",
 )
 
 ##############################
@@ -369,7 +374,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-API_VERSION = "2.0.0"
+API_VERSION = "2.1.0"
 
 EXCLUDED_API_PATH_PREFIXES = ("/api/v1",)
 assert isinstance(EXCLUDED_API_PATH_PREFIXES, str | tuple), (
