@@ -114,7 +114,7 @@ div.breadcrumbs {
 
 /* Icons */
 .addlink {
-  @include icon-override('../img/admin/plus-square-regular.svg');
+  @include icon-override('../../img/admin/plus-square-regular.svg');
 }
 
 .object-tools a.addlink {
@@ -125,18 +125,18 @@ div.breadcrumbs {
 
 .changelink,
 .inlinechangelink {
-  @include icon-override('../img/admin/edit-regular.svg');
+  @include icon-override('../../img/admin/edit-regular.svg');
 }
 .deletelink {
-  background: url("../img/admin/trash-alt-regular.svg") 0 0/14px 14px no-repeat;
+  background: url("../../img/admin/trash-alt-regular.svg") 0 0/14px 14px no-repeat;
 }
 .datetimeshortcuts .clock-icon {
   background: none !important;
-  @include icon-override('../img/admin/clock-regular.svg');
+  @include icon-override('../../img/admin/clock-regular.svg');
 }
 .datetimeshortcuts .date-icon {
   background: none !important;
-  @include icon-override('../img/admin/calendar-alt-regular.svg');
+  @include icon-override('../../img/admin/calendar-alt-regular.svg');
 }
 
 /**
