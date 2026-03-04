@@ -58,6 +58,12 @@ Image upload settings
 * ``MAX_IMG_WIDTH``: The maximum image width of images in pixels. Defaults to: ``600``.
 
 
+Metadata stripping settings
+---------------------------
+
+* ``STRIP_METADATA_HTML_MAX_FILE_SIZE``: The maximum file size (5MB by default) in bytes for HTML files. Adapt this value based on the memory limits of your celery workers. For practical reasons, you can assume that a given file size will consume about 10x as much memory (1MB file -> uses 10MB). Defaults to: ``5242880``.
+
+
 Optional
 --------
 
