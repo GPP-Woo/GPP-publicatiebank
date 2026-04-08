@@ -33,6 +33,7 @@ from .file_processing import (
     strip_ms_office_document,
     strip_open_document,
     strip_pdf,
+    strip_rtf_file,
     strip_zip_file,
 )
 from .models import Document, Publication, Topic
@@ -100,6 +101,8 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
                 strip_zip_file(temp_file)
             case StrippableFileTypes.html:
                 strip_html(temp_file)
+            case StrippableFileTypes.rtf:
+                strip_rtf_file(temp_file)
             case _:  # pragma: no cover
                 pass
 

@@ -13,3 +13,4 @@ class StrippableFileTypes(TextChoices):
     ms_office_file = "ms_office_files", _("Microsoft Office File")
     zip = "zip", _("Zip File")
     html = "html", _("HTML (HyperText Markup Language) File")
+    rtf = "rtf", _("Rich Text Format File")
