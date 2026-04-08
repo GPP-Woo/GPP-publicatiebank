@@ -24,7 +24,7 @@ boltons==25.0.0
     # via
     #   face
     #   glom
-cbor2==5.8.0
+cbor2==5.9.0
     # via webauthn
 celery==5.6.2
     # via
@@ -52,14 +52,14 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==46.0.5
+cryptography==46.0.7
     # via
     #   django-simple-certmanager
     #   josepy
     #   mozilla-django-oidc
     #   pyopenssl
     #   webauthn
-django==5.2.11
+django==5.2.13
     # via
     #   -r requirements/base.in
     #   django-admin-index
@@ -261,11 +261,11 @@ pydantic-core==2.41.5
     # via pydantic
 pydantic-settings==2.12.0
     # via django-setup-configuration
-pyjwt==2.10.1
+pyjwt==2.12.1
     # via zgw-consumers
-pyopenssl==25.3.0
+pyopenssl==26.0.0
     # via webauthn
-pypdf==6.7.5
+pypdf==6.9.2
     # via -r requirements/base.in
 python-dateutil==2.9.0.post0
     # via
@@ -297,7 +297,7 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.5
+requests==2.33.1
     # via
     #   ape-pie
     #   django-log-outgoing-requests
@@ -326,7 +326,7 @@ structlog==25.5.0
     # via
     #   -r requirements/base.in
     #   django-structlog
-tornado==6.5.4
+tornado==6.5.5
     # via flower
 typing-extensions==4.15.0
     # via
