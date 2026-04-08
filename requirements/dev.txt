@@ -66,7 +66,7 @@ bracex==2.6
     # via wcmatch
 bump-my-version==1.2.6
     # via -r requirements/dev.in
-cbor2==5.8.0
+cbor2==5.9.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -124,7 +124,7 @@ coverage==7.13.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-cryptography==46.0.5
+cryptography==46.0.7
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -138,7 +138,7 @@ cssselect==1.3.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   pyquery
-django==5.2.11
+django==5.2.13
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -577,24 +577,24 @@ pydantic-settings==2.12.0
     #   -r requirements/ci.txt
     #   bump-my-version
     #   django-setup-configuration
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   rich
     #   sphinx
     #   sphinx-tabs
-pyjwt==2.10.1
+pyjwt==2.12.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   zgw-consumers
-pyopenssl==25.3.0
+pyopenssl==26.0.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webauthn
-pypdf==6.7.5
+pypdf==6.9.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -660,7 +660,7 @@ referencing==0.37.0
     #   -r requirements/ci.txt
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.5
+requests==2.33.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -800,7 +800,7 @@ tblib==3.2.2
     #   -r requirements/ci.txt
 tomlkit==0.14.0
     # via bump-my-version
-tornado==6.5.4
+tornado==6.5.5
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
