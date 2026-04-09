@@ -307,10 +307,12 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         with zipfile.ZipFile(io.BytesIO(document_content)) as open_ms_zip:
             core_meta_data = open_ms_zip.read("docProps/core.xml")
-            custom_meta_data = open_ms_zip.read("docProps/custom.xml")
-
             self.assertEqual(core_meta_data, MIN_MS_OFFICE_DOCUMENT_CORE_META)
+            self.assertFalse(core_meta_data.startswith(b"\n"))
+
+            custom_meta_data = open_ms_zip.read("docProps/custom.xml")
             self.assertEqual(custom_meta_data, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
+            self.assertFalse(custom_meta_data.startswith(b"\n"))
 
     def test_strip_zip_of_metadata(self):
         zip_path = (
