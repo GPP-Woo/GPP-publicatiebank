@@ -4,8 +4,6 @@
     "pk": 1,
     "fields": {
         "label": "Documenten API [Open Zaak]",
-        "oas": "http://openzaak.docker.internal:8001/documenten/api/v1/openapi.yaml",
-        "oas_file": "",
         "uuid": "4f88855e-e0a3-4d4b-80fb-c7774d965a92",
         "slug": "documenten-api",
         "api_type": "drc",
