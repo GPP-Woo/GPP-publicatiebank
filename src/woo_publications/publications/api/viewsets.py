@@ -294,7 +294,7 @@ class DocumentViewSet(
         document = self.get_object()
         assert isinstance(document, Document)
 
-        if not document.upload_complete or document.has_to_strip_metadata:
+        if not document.upload_complete:
             raise Conflict(detail=_("The document upload is not yet completed."))
 
         assert document.document_service is not None, (
