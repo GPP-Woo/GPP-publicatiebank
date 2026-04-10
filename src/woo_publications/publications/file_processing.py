@@ -36,14 +36,17 @@ MIN_MS_OFFICE_DOCUMENT_CORE_META = b"""
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:dcmitype="http://purl.org/dc/dcmitype/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-</cp:coreProperties>"""
+</cp:coreProperties>""".strip()
 
 MIN_MS_OFFICE_DOCUMENT_CUSTOM_META = b"""
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties
     xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
     xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
-</Properties>"""
+</Properties>""".strip()
+
+assert not MIN_MS_OFFICE_DOCUMENT_CORE_META.startswith(b"\n")
+assert not MIN_MS_OFFICE_DOCUMENT_CUSTOM_META.startswith(b"\n")
 
 
 class MetaDataStripError(Exception):
