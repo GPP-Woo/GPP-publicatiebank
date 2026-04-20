@@ -41,33 +41,43 @@ Hierop zien we:
 
 Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-**Algemene velden**
+**Beschrijving**
 
 * ``Publicatie``. Het *document* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*
-* ``Identificatie``. Het unieke kenmerk dat intern aan het *document* is toegekend, bijvoorbeeld door het zaaksysteem of het DMS. (DiWoo: ``identifier``)
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het document. (DiWoo: ``officieleTitel``)
 * ``Verkorte titel``. De verkorte titel / citeertitel van het document. (DiWoo: ``verkorteTitel``)
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van de inhoud van het document. (DiWoo: ``omschrijving``)
-* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo: ``creatiedatum``)
-* ``Bestandsformaat``. *In ontwikkeling* (DiWoo: ``format``)
-* ``Bestandsnaam``. Naam van het bestand zoals deze op de harde schijf opgeslagen wordt.
-* ``Bestandsomvang`` Bestandsgrootte, in aantal bytes.
 * ``Status``. De publicatiestatus van het document. "Gepubliceerd" betekent dat het document online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
+
+**Handelingen**
+
+* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo: ``creatiedatum``)
+* ``Ontvangstdatum``. De datum en tijd waarop het document in ontvangst is genomen.
+* ``Datum ondertekening``. De datum en tijd waarop het document intern is ondertekend.
+* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop het document is gepubliceerd.
 * ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop het document is ingetrokken.
-* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het document voor het laatst gewijzigd is.
-* ``Ontvangen op``. De datum waarop het document in ontvangst is genomen.
-* ``Ondertekend op``. De datum waarop het document intern is ondertekend.
+
+**Actoren**
+
 * ``Eigenaar``. Deze wordt doorgaans afegeleid van de gekoppelde *publicatie*. In de GPP-app kan alleen de "eigenaar" de publicatie wijzigen. De "eigenaar" is altijd een medewerker.
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
+
+**Bestand**
+
+* ``Bron-URL``. Wanneer het document afkomstig is uit een Documenten API, dan is deze URL een unieke identificatie voor de overeenkomstige resource. De waarde is leeg voor handmatige uploads.
+* ``Bestandsnaam``. Naam van het bestand zoals deze op de harde schijf opgeslagen wordt.
+* ``Bestandsformaat``. *In ontwikkeling* (DiWoo: ``format``)
+* ``Bestandsomvang`` Bestandsgrootte, in aantal bytes.
 
 **Documenten-API-koppeling**
 
 * ``Documents API Service``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Document UUID``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Documentvergrendelingscode``. Systeemveld, bevat de vergrendelingscode van een bestand in de Documenten API.
-* ``Upload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
+* ``Documentupload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
+* ``Metadata verwijderd op``. Systeemdatum en -tijd wanneer de metadata van het document weggehaald is.
 
 **Kenmerken**
 
