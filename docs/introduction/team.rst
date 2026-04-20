@@ -15,6 +15,7 @@ Brought together by Dimpact, the following ten municipalities contributed knowle
 
 * `'s-Hertogenbosch <https://www.s-hertogenbosch.nl/>`__
 *  `Assen <https://www.assen.nl/>`__
+* `Culemborg <https://www.culemborg.nl/>`__
 * `Enschede <https://www.enschede.nl/>`__
 * `Groningen <https://gemeente.groningen.nl/>`__
 * `Haarlemmermeer <https://haarlemmermeer.nl/>`__
@@ -24,7 +25,9 @@ Brought together by Dimpact, the following ten municipalities contributed knowle
 * `Maastricht <https://www.gemeentemaastricht.nl/>`__
 * `Rotterdam <https://www.rotterdam.nl/>`__
 * `Sittard-Geleen <https://sittard-geleen.nl/>`__
+* `Tiel <https://www.tiel.nl/>`__
 * `Waterland <https://www.waterland.nl/>`__
+* `West Betuwe <https://www.westbetuwe.nl/>`__
 * `Zaanstad <https://www.zaanstad.nl/>`__
 
 Development
