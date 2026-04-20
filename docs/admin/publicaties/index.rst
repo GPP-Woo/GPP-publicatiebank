@@ -18,6 +18,11 @@ Documenten
 
 Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *document* hoort altijd bij een :ref:`publicatie <admin_publicaties_index_publicaties>`.
 
+.. tip::
+
+    Bij de volgende bestadnstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten: 
+    PDF, DOCX, XLSX, PPTX, PPSX, ODF, ODP, ODS, ODT, HTML, ZIP (alleen op de container) en 7z (alleen op de container).
+
 In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in de GPP-publicatiebank.
 Op dit scherm zijn de volgende acties mogelijk:
 
