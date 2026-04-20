@@ -20,7 +20,7 @@ Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *
 
 .. tip::
 
-    Bij de volgende bestadnstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten: 
+    Bij de volgende bestandstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten: 
     PDF, DOCX, XLSX, PPTX, PPSX, ODF, ODP, ODS, ODT, HTML, ZIP (alleen op de container) en 7z (alleen op de container).
 
 In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in de GPP-publicatiebank.
