@@ -11,7 +11,11 @@ van de GPP-publicatiebank beïnvloeden, waaronder:
    will not be visible anyway.
 
 * :ref:`admin_configuratie_index_alg_inst`
+* :ref:`admin_configuratie_applicatiegroepen`
+* :ref:`admin_configuratie_certificates`
+* :ref:`admin_configuratie_NLX_configuration`
 * :ref:`admin_configuratie_index_services`
+* :ref:`admin_configuratie_uitgaande_request-logging_configuratie`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
