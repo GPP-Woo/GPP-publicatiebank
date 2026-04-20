@@ -11,11 +11,11 @@ van de GPP-publicatiebank beïnvloeden, waaronder:
    will not be visible anyway.
 
 * :ref:`admin_configuratie_index_alg_inst`
-* :ref:`admin_configuratie_applicatiegroepen`
-* :ref:`admin_configuratie_certificates`
-* :ref:`admin_configuratie_NLX_configuration`
+* :ref:`admin_configuratie_index_applicatiegroepen`
+* :ref:`admin_configuratie_index_certificates`
+* :ref:`admin_configuratie_index_NLX_configuration`
 * :ref:`admin_configuratie_index_services`
-* :ref:`admin_configuratie_uitgaande_request-logging_configuratie`
+* :ref:`admin_configuratie_index_uitgaande_request-logging_configuratie`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -75,21 +75,21 @@ worden weergegeven.
 
 * ``GPP-burgerportaal publication-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
 
-.. _admin_configuratie_applicatiegroepen:
+.. _admin_configuratie_index_applicatiegroepen:
 
 Applicatiegroepen
 -----------------
 
 .. todo:: Aanvullen.
 
-.. _admin_configuratie_certificates:
+.. _admin_configuratie_index_certificates:
 
 Certificates
 ------------
 
 .. todo:: Aanvullen.
 
-.. _admin_configuratie_NLX_configuration:
+.. _admin_configuratie_index_NLX_configuration:
 
 NLX configuration
 -----------------
@@ -103,7 +103,7 @@ Services
 
 .. todo:: Aanvullen.
 
-.. _admin_configuratie_uitgaande_request-logging_configuratie:
+.. _admin_configuratie_index_uitgaande_request-logging_configuratie:
 
 Uitgaande request-logging configuratie
 --------------------------------------
