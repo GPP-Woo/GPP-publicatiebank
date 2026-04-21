@@ -461,7 +461,7 @@ packaging==26.0
     #   sphinx
 parametrize==0.1.1
     # via -r requirements/test-tools.in
-pillow==12.1.1
+pillow==12.2.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -525,7 +525,7 @@ pyopenssl==26.0.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   webauthn
-pypdf==6.10.0
+pypdf==6.10.2
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
