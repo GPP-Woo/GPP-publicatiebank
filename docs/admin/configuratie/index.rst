@@ -10,12 +10,10 @@ van de GPP-publicatiebank beïnvloeden, waaronder:
    expose global configuration + services (maybe certificates if needed), so those items
    will not be visible anyway.
 
-* :ref:`admin_configuratie_index_alg_inst`
-* :ref:`admin_configuratie_index_applicatiegroepen`
-* :ref:`admin_configuratie_index_certificates`
-* :ref:`admin_configuratie_index_NLX_configuration`
-* :ref:`admin_configuratie_index_services`
-* :ref:`admin_configuratie_index_uitgaande_request-logging_configuratie`
+.. contents:: Inhoud
+   :backlinks: none
+   :depth: 1
+   :local:
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -80,32 +78,62 @@ worden weergegeven.
 Applicatiegroepen
 -----------------
 
-.. todo:: Aanvullen.
+Applicatiegroepen worden gebruikt om de menustructuur te beheren. Je kan deze niet
+aanpassen - aanpassingen worden bij het herstarten van de applicatie op de server
+teruggedraaid.
 
 .. _admin_configuratie_index_certificates:
 
 Certificates
 ------------
 
-.. todo:: Aanvullen.
+.. note:: Certificaatbeheer is voor de GPP-Publicatiebank niet relevant.
 
 .. _admin_configuratie_index_NLX_configuration:
 
 NLX configuration
 -----------------
 
-.. todo:: Aanvullen.
+.. note:: NLX-instellingen zijn voor de GPP-Publicatiebank niet relevant.
 
 .. _admin_configuratie_index_services:
 
 Services
 --------
 
-.. todo:: Aanvullen.
+Onder "Services" kan je de connectie-parameters met externe services/API's instellen,
+zoals Documenten API's en GPP-Zoeken. Zie :ref:`configuration_services` voor de
+services die GPP-Publicatiebank nodig heeft.
 
-.. _admin_configuratie_index_uitgaande_request-logging_configuratie:
+.. _admin_configuratie_index_uitgaande_request_logging_configuratie:
 
 Uitgaande request-logging configuratie
 --------------------------------------
 
-.. todo:: Aanvullen.
+GPP-Publicatiebank maakt gebruik van externe API's om gegevens op te halen en op te
+slaan. Via uitgaande request-logging kunnen fouten in dit netwerkverkeer onderzocht
+worden.
+
+.. warning::
+
+  Standaard staat het loggen van netwerkverkeer uit. Loggen van uitgaand verkeer is van
+  nature gevoelig, deze instellingen resetten dan ook automatisch na verloop van tijd.
+  Schakel dit alleen in als je specifieke problemen aan het onderzoeken bent.
+
+Beheerscherm
+~~~~~~~~~~~~
+
+Het beheerscherm gaat meteen naar de log-instellingen, waar de volgende velden
+beschikbaar zijn:
+
+* ``Logs opslaan in de database``. Stel expliciet in of uitgaande verzoeken in de
+  databank moeten opgeslagen worden ("Ja") of dat hiervoor de server-instellingen
+  gebruikt moeten worden ("Gebruik standaardconfiguratie").
+* ``Sla de inhoud van request en/of response op in de database``. Maak een keuze om
+  naast de metadata van een verzoek/antwoord ook de inhoud op te slaan.
+* ``Maximale content-grootte``. Berichtinhoud die groter is dan deze instelling (in
+  bytes) wordt niet opgeslagen. Dit is een veiligheidsmechanisme.
+* ``Reset opslaan van logs in de database``. Gebruik een aangepaste timing dan de
+  server-instelling voor het automatisch herstellen van de configuratie, in aantal
+  minuten. Na deze tijd wordt de configuratie teruggezet en aanpassingen ongedaan
+  gemaakt.
