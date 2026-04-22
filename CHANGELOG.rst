@@ -2,6 +2,24 @@
 Release notes
 =============
 
+2.1.0 (2026-04-22)
+==================
+
+The release candidate is now released as stable version.
+
+Bugfixes
+--------
+
+* [:issue:`435`] Fixed MS Office files being corrupted by the metadata stripping.
+* [:issue:`433`] Fixed the download endpoint for legacy documents created before
+  the metadata stripping feature was introduced.
+* Fixed broken asset references.
+
+Project maintenance
+-------------------
+
+* Upgraded dependencies to their latest security releases.
+
 2.1.0-rc.0 (2026-03-04)
 =======================
 
