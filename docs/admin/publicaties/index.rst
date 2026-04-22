@@ -18,6 +18,11 @@ Documenten
 
 Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *document* hoort altijd bij een :ref:`publicatie <admin_publicaties_index_publicaties>`.
 
+.. tip::
+
+    Bij de volgende bestandstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten: 
+    PDF, DOCX, XLSX, PPTX, PPSX, ODF, ODP, ODS, ODT, HTML, ZIP (alleen op de container) en 7z (alleen op de container).
+
 In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in de GPP-publicatiebank.
 Op dit scherm zijn de volgende acties mogelijk:
 
@@ -41,33 +46,43 @@ Hierop zien we:
 
 Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-**Algemene velden**
+**Beschrijving**
 
 * ``Publicatie``. Het *document* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*
-* ``Identificatie``. Het unieke kenmerk dat intern aan het *document* is toegekend, bijvoorbeeld door het zaaksysteem of het DMS. (DiWoo: ``identifier``)
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het document. (DiWoo: ``officieleTitel``)
 * ``Verkorte titel``. De verkorte titel / citeertitel van het document. (DiWoo: ``verkorteTitel``)
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van de inhoud van het document. (DiWoo: ``omschrijving``)
-* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo: ``creatiedatum``)
-* ``Bestandsformaat``. *In ontwikkeling* (DiWoo: ``format``)
-* ``Bestandsnaam``. Naam van het bestand zoals deze op de harde schijf opgeslagen wordt.
-* ``Bestandsomvang`` Bestandsgrootte, in aantal bytes.
 * ``Status``. De publicatiestatus van het document. "Gepubliceerd" betekent dat het document online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
+
+**Handelingen**
+
+* ``Creatiedatum``. De datum waarop het document gecreëerd is. Deze ligt doorgaans voor of op de registratiedatum.  (DiWoo: ``creatiedatum``)
+* ``Ontvangstdatum``. De datum en tijd waarop het document in ontvangst is genomen. (DiWoo: ``documenthandeling``)
+* ``Datum ondertekening``. De datum en tijd waarop het document intern is ondertekend. (DiWoo: ``documenthandeling``)
+* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop het document is gepubliceerd.
 * ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop het document is ingetrokken.
-* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het document nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het document voor het laatst gewijzigd is.
-* ``Ontvangen op``. De datum waarop het document in ontvangst is genomen.
-* ``Ondertekend op``. De datum waarop het document intern is ondertekend.
+
+**Actoren**
+
 * ``Eigenaar``. Deze wordt doorgaans afegeleid van de gekoppelde *publicatie*. In de GPP-app kan alleen de "eigenaar" de publicatie wijzigen. De "eigenaar" is altijd een medewerker.
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
+
+**Bestand**
+
+* ``Bron-URL``. Wanneer het document is opgehaald uit een Documenten API, dan is deze URL een unieke identificatie voor de overeenkomstige resource. De waarde is leeg voor handmatige uploads.
+* ``Bestandsnaam``. Naam van het bestand zoals deze op de harde schijf opgeslagen wordt.
+* ``Bestandsformaat``. *In ontwikkeling* (DiWoo: ``format``)
+* ``Bestandsomvang`` Bestandsgrootte, in aantal bytes.
 
 **Documenten-API-koppeling**
 
 * ``Documents API Service``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Document UUID``. Systeemveld, bevat de verwijzing naar het bestand in de Documenten API.
 * ``Documentvergrendelingscode``. Systeemveld, bevat de vergrendelingscode van een bestand in de Documenten API.
-* ``Upload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
+* ``Documentupload voltooid``. Systeemveld, houdt bij of het bestand volledig naar de Documenten API doorgezet is.
+* ``Metadata verwijderd op``. Systeemdatum en -tijd wanneer de embedded metadata van het document weggehaald is.
 
 **Kenmerken**
 
@@ -104,7 +119,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtboven zit een knop **publicatie toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiejaar**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex**, **Trek gepubliceerde publicaties in**, **Geselecteerde publicaties herwaarderen** en **Wijzig de eigenaren van de publicaties** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere publicaties**. Op dit moment worden de acties **Geselecteerde publicaties verwijderen**, **Verstuur de geselecteerde publicaties naar de zoekindex**, **Verwijder de geselecteerde publicaties uit de zoekindex**, **Herbeoordeel de bewaartermijn van de geslecteerde publicaties**, **Trek gepubliceerde publicaties in**, **Wijzig de eigenaar van de publicaties** en **Wijzig de eigenaar (groep) van de publicaties** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *publicatie*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *publicatie*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op registratiedatum, publicatiestatus, archiefnominatie en/of archiefactiedatum**.
 * Bij een *publicatie*-registratie kan op de `officiële titel` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
@@ -126,29 +141,36 @@ Hierop zien we:
 
 Op een *publicatie*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
-**Algemene velden**
+**Beschrijving**
 
 * ``Informatiecategorieën`` De informatiecategorieën die het soort informatie verduidelijken binnen de publicatie (DiWoo: ``informatieCategorieen``)
 * ``Onderwerpen`` Onderwerpen omvatten maatschappelijk relevante kwesties waar meerdere publicaties aan gekoppeld zijn. Onderwerpen kunnen tientallen jaren relevant blijven.
-* ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo: ``publisher``)
-* ``Verantwoordelijke`` De organisatie die de verantwoordelijk is voor de publicatie. (DiWoo: ``verantwoordelijke``)
-* ``Opsteller`` De organisatie die de publicatie opgesteld heeft. (DiWoo: ``opsteller``)
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van de publicatie. (DiWoo: ``officieleTitel``)
 * ``Verkorte titel``. De verkorte titel / citeertitel van de publicatie. (DiWoo: ``verkorteTitel``)
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van de publicatie. (DiWoo: ``omschrijving``)
-* ``Status``. De status van de publicatie. "Gepubliceerd" betekent dat de publicatie online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
-  Let op, als je een publicatie intrekt, dan worden de documenten met de huidige status "Gepubliceerd" automatisch ook ingetrokken!
-* ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop de publicatie is gepubliceerd.
-* ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop de publicatie is ingetrokken.
-* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop de publicatie nieuw is toegevoegd.
-* ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
 * ``Datum begin geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten in werking treden.
 *  ``Datum einde geldigheid``. De datum waarop de rechten en plichten vastgelegd in deze documenten (zijn) komen te vervallen.
+* ``Status``. De status van de publicatie. "Gepubliceerd" betekent dat de publicatie online vindbaar en raadpleegbaar is. "Concept" en "Ingetrokken" zijn offline voor de buitenwereld.
+  Let op, als je een publicatie intrekt, dan worden de documenten met de huidige status "Gepubliceerd" automatisch ook ingetrokken!
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
+
+**Handelingen**
+
+
+* ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop de publicatie nieuw is toegevoegd.
+* ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop de publicatie is gepubliceerd.
+* ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop de publicatie is ingetrokken.
+* ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop de publicatie voor het laatst gewijzigd was.
+
+**Actoren**
+
+* ``Publisher`` De organisatie die de publicatie heeft gepubliceerd. (DiWoo: ``publisher``)
+* ``Verantwoordelijke organsiatie`` De organisatie die de verantwoordelijk is voor de publicatie. (DiWoo: ``verantwoordelijke``)
+* ``Opsteller`` De organisatie die de publicatie opgesteld heeft. (DiWoo: ``opsteller``)
 * ``Eigenaar``. De medewerker die wordt beschouwd als de "eigenaar" van de publicatie. In de GPP-app kan alleen de "eigenaar" de publicatie wijzigen.
 * ``Eigenaar (groep)``. De :ref:`organisatie-eenheid <admin_accounts_index_organisation_units>` die ook de publicatie
-  mag beheren, naast de medewerker-gebonden eigenaar. De GPP-app laat toe dat andere organisatieleden dan de eigenaar
+  mag beheren, naast de medewerker-gebonden eigenaar. De GPP-app laat toe dat andere organisatieleden (c.q. leden van dezelfde gebruikersgroep) dan de eigenaar
   de publicatie wijzigen, zolang ze bij deze organisatie-eenheid horen.
-* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk. (DiWoo: ``identifier``)
 
 **Archivering**
 
@@ -204,11 +226,20 @@ Hierop zien we:
 
 Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
+**Beschrijving**
+
 * ``Afbeelding``. De afbeelding van het onderwerp die getoond kan worden in de GPP-burgerportaal.
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het onderwerp.
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van het onderwerp.
 * ``Status``. De status van het onderwerp. "Gepubliceerd" betekent dat het onderwerp online vindbaar en raadpleegbaar is. "Ingetrokken" is offline voor de buitenwereld.
 * ``Promoot``. Geeft aan of het onderwerp wordt gepromoot in de webapplicatie. Als je gegbruik maakt van het GPP-burgerportaal, dan worden gepromote onderwerpen op de thuispagina en bovenaan op de *onderwerpen*-pagina getoond.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
+
+**Handelingen**
+
 * ``Geregistreerd op``. De niet-wijzigbare datum en tijd waarop het onderwerp nieuw is toegevoegd.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het onderwerp voor het laatst gewijzigd was.
+
+**Publicaties**
+
+* Een lijst met publicaties die aan dit onderwerp zijn gekoppeld.

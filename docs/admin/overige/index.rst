@@ -5,15 +5,39 @@ Overige
 
 Onder het menu-item "Overige" en op het dashboard onder het kopje "Overige" wordt toegang geboden tot het beheer van:
 
+* :ref:`admin_overige_index_oidc_providers`
+* :ref:`admin_overige_index_oidc_clients`     
 * :ref:`admin_overige_index_session_profiles`
+* :ref:`admin_overige_index_signing requests`
 * :ref:`admin_overige_index_static_devices`
 * :ref:`admin_overige_index_versions`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
+.. _admin_overige_index_oidc_providers:
+
+OIDC Providers
+--------------
+
+.. todo:: Korte toelichting toevoegen.
+
+.. _admin_overige_index_oidc_clients:
+
+OIDC clients
+------------
+
+.. todo:: Korte toelichting toevoegen.
+
 .. _admin_overige_index_session_profiles:
 
 Session profiles
+----------------
+
+.. todo:: Korte toelichting toevoegen.
+
+.. _admin_overige_index_signing requests:
+
+Signing requests
 ----------------
 
 .. todo:: Korte toelichting toevoegen.

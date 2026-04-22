@@ -113,6 +113,10 @@ Standaard staan organisaties uit de volgende drie officiële waardelijsten al in
 
 * `Gemeenten <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_gemeenten_compleet>`_
 * `Samenwerkingsorganisaties <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_samenwerkingsorganisaties_compleet>`_
+* `Provincies <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_provincies_compleet>`_
+* `Waterschappen <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_waterschappen_compleet>`_
+* `Caribische openbare lichamen <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_caribische_openbare_lichamen_compleet>`_
+* `ZBO's <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_zbo_compleet>`_
 * `Overige overheidsorganisaties <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_overige_overheidsorganisaties_compleet>`_
 
 .. warning:: Let op! In de admin-interface bestaat de mogelijkheid om *extra organisaties*
