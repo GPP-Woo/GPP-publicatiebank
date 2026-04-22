@@ -853,6 +853,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         match self.bestandsformaat:
             case "application/pdf":
                 return StrippableFileTypes.pdf
+            case "application/rtf":
+                return StrippableFileTypes.rtf
             case (
                 "application/zip"
                 | "application/zip-compressed"
@@ -877,6 +879,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
         match extension:
             case ".pdf":
                 return StrippableFileTypes.pdf
+            case ".rtf":
+                return StrippableFileTypes.rtf
             case ".zip":
                 return StrippableFileTypes.zip
             case ".html" | ".htm":
