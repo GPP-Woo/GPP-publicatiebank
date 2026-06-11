@@ -10,8 +10,17 @@ export PGPORT=${DB_PORT:-5432}
 fixtures_dir=${FIXTURES_DIR:-/app/fixtures}
 
 uwsgi_port=${UWSGI_PORT:-8000}
-uwsgi_processes=${UWSGI_PROCESSES:-4}
-uwsgi_threads=${UWSGI_THREADS:-1}
+
+# uwsgi reads UWSGI_* environment variables natively, but explicit CLI flags take
+# precedence over them - so export defaults instead of passing flags, allowing the
+# infra-layer to override any of these without code changes.
+# processes & threads are needed for concurrency without nginx sitting inbetween.
+export UWSGI_PROCESSES=${UWSGI_PROCESSES:-4}
+export UWSGI_THREADS=${UWSGI_THREADS:-1}
+export UWSGI_HTTP_TIMEOUT=${UWSGI_HTTP_TIMEOUT:-1800}
+export UWSGI_HARAKIRI=${UWSGI_HARAKIRI:-1800}
+export UWSGI_POST_BUFFERING=${UWSGI_POST_BUFFERING:-8192}
+export UWSGI_BUFFER_SIZE=${UWSGI_BUFFER_SIZE:-65535}
 
 mountpoint=${SUBPATH:-/}
 
@@ -68,16 +77,9 @@ exec uwsgi \
     --master \
     --http :$uwsgi_port \
     --http-keepalive \
-    --http-timeout=1800 \
     --manage-script-name \
     --mount $mountpoint=woo_publications.wsgi:application \
     --static-map /static=/app/static \
     --static-map /media=/app/media  \
     --chdir src \
-    --enable-threads \
-    --processes $uwsgi_processes \
-    --threads $uwsgi_threads \
-    --post-buffering=8192 \
-    --buffer-size=65535 \
-    --harakiri=1800
-    # processes & threads are needed for concurrency without nginx sitting inbetween
+    --enable-threads
