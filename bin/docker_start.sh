@@ -12,6 +12,10 @@ fixtures_dir=${FIXTURES_DIR:-/app/fixtures}
 uwsgi_port=${UWSGI_PORT:-8000}
 uwsgi_processes=${UWSGI_PROCESSES:-4}
 uwsgi_threads=${UWSGI_THREADS:-1}
+uwsgi_http_timeout=${UWSGI_HTTP_TIMEOUT:-1800}
+uwsgi_harakiri=${UWSGI_HARAKIRI:-1800}
+uwsgi_post_buffering=${UWSGI_POST_BUFFERING:-8192}
+uwsgi_buffer_size=${UWSGI_BUFFER_SIZE:-65535}
 
 mountpoint=${SUBPATH:-/}
 
@@ -68,7 +72,7 @@ exec uwsgi \
     --master \
     --http :$uwsgi_port \
     --http-keepalive \
-    --http-timeout=1800 \
+    --http-timeout=$uwsgi_http_timeout \
     --manage-script-name \
     --mount $mountpoint=woo_publications.wsgi:application \
     --static-map /static=/app/static \
@@ -77,7 +81,7 @@ exec uwsgi \
     --enable-threads \
     --processes $uwsgi_processes \
     --threads $uwsgi_threads \
-    --post-buffering=8192 \
-    --buffer-size=65535 \
-    --harakiri=1800
+    --post-buffering=$uwsgi_post_buffering \
+    --buffer-size=$uwsgi_buffer_size \
+    --harakiri=$uwsgi_harakiri
     # processes & threads are needed for concurrency without nginx sitting inbetween
