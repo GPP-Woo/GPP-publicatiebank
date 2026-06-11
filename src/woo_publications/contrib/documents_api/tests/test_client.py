@@ -33,7 +33,7 @@ from requests import RequestException
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ..client import DocumentsAPIError, get_client
+from ..client import DocumentenClient, DocumentsAPIError, get_client
 
 DOCUMENT_TYPE_URL = (
     "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
@@ -360,3 +360,18 @@ class SlowOperationsTimeoutTests(TestCase):
             client.lock_document(uuid4())
 
         self.assertEqual(m.last_request.timeout, 10)
+
+    def test_tuple_configured_timeout_falls_back_to_floor(self):
+        # request_kwargs may carry a (connect, read) timeout tuple instead of a
+        # number — there is no meaningful comparison then, so the floor applies.
+        client = DocumentenClient(
+            "https://documents.example.com/api/v1/",
+            request_kwargs={"timeout": (10, 30)},
+        )
+
+        with client, requests_mock.Mocker() as m:
+            m.post(requests_mock.ANY, status_code=204)
+
+            client.unlock_document(uuid=uuid4(), lock="a-lock-value")
+
+        self.assertEqual(m.last_request.timeout, 300)
