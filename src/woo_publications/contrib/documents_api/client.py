@@ -7,6 +7,7 @@ from io import BytesIO
 from typing import Protocol
 from uuid import UUID
 
+from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import (
     InMemoryUploadedFile,
@@ -94,6 +95,22 @@ class DocumentenClient(NLXClient):
 
     Requires Documenten API 1.1+ since we use the large file uploads mechanism.
     """
+
+    def _slow_operations_timeout(self) -> float | int:
+        """
+        Return the read timeout for calls whose duration scales with document size.
+
+        Uploading a file part and unlocking a document (which makes the Documents
+        API merge all uploaded parts server-side) take longer the larger the
+        document and the slower its storage backend. The generic per-service
+        timeout (default: 10 seconds) aborts these calls for large documents, so
+        apply a dedicated floor while still respecting a higher timeout configured
+        on the service.
+        """
+        configured = self._request_kwargs.get("timeout")
+        if not isinstance(configured, (int, float)):
+            configured = 0
+        return max(configured, settings.DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT)
 
     def retrieve_document(self, *, url: str = "", uuid: UUID | None = None) -> Document:
         assert url or uuid
@@ -207,6 +224,7 @@ class DocumentenClient(NLXClient):
             f"bestandsdelen/{file_part_uuid}",
             data=encoder,
             headers={"Content-Type": encoder.content_type},
+            timeout=self._slow_operations_timeout(),
         )
         response.raise_for_status()
 
@@ -233,6 +251,7 @@ class DocumentenClient(NLXClient):
         response = self.post(
             f"enkelvoudiginformatieobjecten/{uuid}/unlock",
             json={"lock": lock},
+            timeout=self._slow_operations_timeout(),
         )
         response.raise_for_status()
 

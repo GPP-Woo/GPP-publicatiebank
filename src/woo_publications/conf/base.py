@@ -227,6 +227,17 @@ LOGIN_URLS = [reverse_lazy("admin:login")]
 # Default (connection timeout, read timeout) for the requests library (in seconds)
 REQUESTS_DEFAULT_TIMEOUT = (10, 30)
 
+DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT = config(  # pyright: ignore[reportCallIssue]
+    "DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT",
+    default=5 * 60,
+    help_text=(
+        "Read timeout (in seconds) for Documents API calls whose duration scales "
+        "with document size and storage speed: uploading a file part, and unlocking "
+        "a document (which merges the uploaded parts server-side). A higher timeout "
+        "configured on the Documents API service itself takes precedence."
+    ),
+)
+
 # The Identifier of `inspanningsverplichting` from the gov origins list for the
 # Information Categories.
 INSPANNINGSVERPLICHTING_IDENTIFIER = (
