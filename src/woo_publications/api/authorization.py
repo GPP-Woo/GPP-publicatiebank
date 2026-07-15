@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions
@@ -13,4 +14,11 @@ class TokenAuthentication(_TokenAuthentication):
         except Application.DoesNotExist as exc:
             raise exceptions.AuthenticationFailed(_("Invalid token.")) from exc
 
-        return (None, token)
+        # Return an AnonymousUser rather than None: the Application token is not
+        # tied to a user, but sessionprofile's middleware reads
+        # ``request.user.is_authenticated`` on every response, which raises
+        # ``AttributeError`` on a ``None`` user whenever a session profile exists
+        # (i.e. while any admin session is active). AnonymousUser is falsy for
+        # ``is_authenticated`` and keeps permissions (which key off ``request.auth``)
+        # unchanged.
+        return (AnonymousUser(), token)
