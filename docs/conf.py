@@ -88,6 +88,7 @@ linkcheck_ignore = [
     r"https://.*sentry.*",
     r"https://www\.miniwebtool\.com/django-secret-key-generator",
     r"https://gemeente\.groningen\.nl/",
+    r"https://wetten.overheid.nl*",
     # our changelog generates many such links that slow down the link checks :)
     r"https://github\.com/GPP-Woo/GPP-publicatiebank/issues/[0-9]+",
     r"https://(www\.)?npmjs\.com.*",  # IP/UA blocking...
