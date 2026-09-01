@@ -27,12 +27,13 @@ from uuid import UUID, uuid4
 from django.core.files import File
 from django.test import TestCase, override_settings
 
+import requests_mock
 from requests import RequestException
 
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ..client import DocumentsAPIError, get_client
+from ..client import DocumentenClient, DocumentsAPIError, get_client
 
 DOCUMENT_TYPE_URL = (
     "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
@@ -277,3 +278,100 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
             )
             self.assertEqual(upstream_response.status_code, 500)
             self.assertEqual(streaming_content, (b"",))
+
+
+class SlowOperationsTimeoutTests(TestCase):
+    """
+    Uploading file parts and unlocking documents must not use the generic
+    (short) service timeout — their duration scales with document size and
+    storage speed on the Documents API side.
+
+    These tests assert on the ``timeout`` passed to the transport, so no VCR
+    cassettes are involved.
+    """
+
+    def _do_upload_and_unlock(self, client) -> None:
+        client.proxy_file_part_upload(
+            File(BytesIO(b"content")),
+            file_part_uuid=uuid4(),
+            lock="a-lock-value",
+        )
+        client.unlock_document(uuid=uuid4(), lock="a-lock-value")
+
+    def test_slow_operations_get_dedicated_read_timeout(self):
+        service = ServiceFactory.build(
+            api_root="https://documents.example.com/api/v1/",
+            timeout=10,
+        )
+
+        with get_client(service) as client, requests_mock.Mocker() as m:
+            m.put(requests_mock.ANY, status_code=200)
+            m.post(requests_mock.ANY, status_code=204)
+
+            self._do_upload_and_unlock(client)
+
+        self.assertEqual(len(m.request_history), 2)
+        for request in m.request_history:
+            with self.subTest(method=request.method, url=request.url):
+                self.assertEqual(request.timeout, 300)
+
+    def test_higher_configured_service_timeout_takes_precedence(self):
+        service = ServiceFactory.build(
+            api_root="https://documents.example.com/api/v1/",
+            timeout=900,
+        )
+
+        with get_client(service) as client, requests_mock.Mocker() as m:
+            m.put(requests_mock.ANY, status_code=200)
+            m.post(requests_mock.ANY, status_code=204)
+
+            self._do_upload_and_unlock(client)
+
+        for request in m.request_history:
+            with self.subTest(method=request.method, url=request.url):
+                self.assertEqual(request.timeout, 900)
+
+    @override_settings(DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT=42)
+    def test_timeout_is_configurable(self):
+        service = ServiceFactory.build(
+            api_root="https://documents.example.com/api/v1/",
+            timeout=10,
+        )
+
+        with get_client(service) as client, requests_mock.Mocker() as m:
+            m.put(requests_mock.ANY, status_code=200)
+            m.post(requests_mock.ANY, status_code=204)
+
+            self._do_upload_and_unlock(client)
+
+        for request in m.request_history:
+            with self.subTest(method=request.method, url=request.url):
+                self.assertEqual(request.timeout, 42)
+
+    def test_other_calls_keep_the_service_timeout(self):
+        service = ServiceFactory.build(
+            api_root="https://documents.example.com/api/v1/",
+            timeout=10,
+        )
+
+        with get_client(service) as client, requests_mock.Mocker() as m:
+            m.post(requests_mock.ANY, status_code=200, json={"lock": "a-lock-value"})
+
+            client.lock_document(uuid4())
+
+        self.assertEqual(m.last_request.timeout, 10)
+
+    def test_tuple_configured_timeout_falls_back_to_floor(self):
+        # request_kwargs may carry a (connect, read) timeout tuple instead of a
+        # number — there is no meaningful comparison then, so the floor applies.
+        client = DocumentenClient(
+            "https://documents.example.com/api/v1/",
+            request_kwargs={"timeout": (10, 30)},
+        )
+
+        with client, requests_mock.Mocker() as m:
+            m.post(requests_mock.ANY, status_code=204)
+
+            client.unlock_document(uuid=uuid4(), lock="a-lock-value")
+
+        self.assertEqual(m.last_request.timeout, 300)
