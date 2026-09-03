@@ -63,9 +63,9 @@ COPY ./bin/celery_worker.sh \
     ./bin/celery_beat.sh \
     ./bin/celery_flower.sh \
     /
-RUN mkdir /app/bin /app/log /app/media
+RUN mkdir /app/bin /app/log /app/media /app/static
 
-VOLUME ["/app/log", "/app/media"]
+VOLUME ["/app/log", "/app/media", "/app/static"]
 
 # copy backend build deps
 COPY --from=backend-build /usr/local/lib/python3.12 /usr/local/lib/python3.12
