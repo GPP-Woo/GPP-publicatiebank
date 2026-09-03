@@ -416,6 +416,10 @@ glom==25.12.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   mozilla-django-oidc-db
+gunicorn==26.2.0
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 humanize==4.15.0
     # via
     #   -c requirements/ci.txt
@@ -832,10 +836,6 @@ urllib3==2.6.3
     #   requests
     #   sentry-sdk
     #   types-requests
-uwsgi==2.0.31
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 vcrpy==8.1.1
     # via
     #   -c requirements/ci.txt
