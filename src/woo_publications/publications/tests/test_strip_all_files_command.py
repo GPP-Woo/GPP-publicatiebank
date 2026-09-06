@@ -110,6 +110,12 @@ class StripAllFilesTest(VCRMixin, TestCase):
             upload_complete=True,
             bestandsformaat="text/html",
         )
+        rtf_file = DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/rtf",
+        )
 
         out = StringIO()
 
@@ -122,7 +128,7 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         self.assertEqual(
-            out.getvalue(), "5 documents scheduled to strip their metadata.\n"
+            out.getvalue(), "6 documents scheduled to strip their metadata.\n"
         )
 
         mock_strip_metadata.assert_has_calls(
@@ -147,6 +153,10 @@ class StripAllFilesTest(VCRMixin, TestCase):
                     document_id=html_file.pk,
                     base_url="http://host.docker.internal:8000/",
                 ),
+                call(
+                    document_id=rtf_file.pk,
+                    base_url="http://host.docker.internal:8000/",
+                ),
             ],
             any_order=True,
         )
@@ -165,6 +175,9 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
         html_file_download_url = reverse(
             "api:document-download", kwargs={"uuid": str(html_file.uuid)}
+        )
+        rtf_file_download_url = reverse(
+            "api:document-download", kwargs={"uuid": str(rtf_file.uuid)}
         )
 
         mock_index_document.assert_has_calls(
@@ -188,6 +201,10 @@ class StripAllFilesTest(VCRMixin, TestCase):
                 call(
                     document_id=html_file.pk,
                     download_url=f"http://host.docker.internal:8000{html_file_download_url}",
+                ),
+                call(
+                    document_id=rtf_file.pk,
+                    download_url=f"http://host.docker.internal:8000{rtf_file_download_url}",
                 ),
             ],
             any_order=True,

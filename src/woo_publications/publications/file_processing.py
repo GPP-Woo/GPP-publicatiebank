@@ -18,6 +18,7 @@ from woo_publications.config.models import GlobalConfiguration
 
 from .constants import PublicationStatusOptions
 from .models import Document
+from .strip_rtf import StripRtf
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -217,3 +218,28 @@ def strip_html(file: IO[bytes]) -> None:
     assert isinstance(stripped_data, bytes)
     file.write(stripped_data)
     file.flush()
+
+
+def strip_rtf_file(file: IO[bytes]) -> None:
+    file.seek(0)
+    file.flush()
+
+    with NamedTemporaryFile(
+        suffix=".rtf", dir=os.path.dirname(file.name), delete=False
+    ) as temp:
+        stripped_file_name = temp.name
+
+        try:
+            StripRtf(file, temp).strip_file()
+        except Exception as err:
+            os.remove(stripped_file_name)
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata "
+                "of the rich textfield file"
+            ) from err
+
+        try:
+            with open(stripped_file_name, "rb") as stripped_file:
+                _sync_files(stripped_file, file)
+        finally:
+            os.remove(stripped_file_name)
