@@ -52,6 +52,11 @@ class GlobalConfiguration(SingletonModel):
         blank=False,
         related_name="+",
     )
+    document_meta_data_stripping = models.BooleanField(
+        _("Strip document metadata"),
+        help_text=_("Enable the meta data stripping functionality of documents."),
+        default=True,
+    )
     gpp_app_publication_url_template = models.URLField(
         _("GPP-app publication URL template"),
         max_length=500,
