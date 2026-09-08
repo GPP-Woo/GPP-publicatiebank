@@ -59,7 +59,11 @@ from woo_publications.utils.validators import (
 )
 
 from .archiving import get_retention_informatie_category
-from .constants import LEGACY_MS_OFFICE_MIMETYPES, PublicationStatusOptions
+from .constants import (
+    LEGACY_MS_OFFICE_MIMETYPES,
+    LegalRemedyOptions,
+    PublicationStatusOptions,
+)
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -1197,3 +1201,76 @@ class DocumentIdentifier(models.Model):
 
     def __str__(self):
         return f"{self.bron}: {self.kenmerk}"
+
+
+class InzageProcedure(models.Model):
+    id: int  # implicitly provided by django
+    uuid = models.UUIDField(
+        _("UUID"),
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    publicatie = models.OneToOneField(
+        Publication,
+        verbose_name=_("publication"),
+        help_text=_("The publication that this access procedure belongs to."),
+        on_delete=models.CASCADE,
+    )
+    url_bekendmaking = models.URLField(
+        _("announcement URL"),
+        help_text=_(
+            "The online location where the announcement is "
+            "published, for example on 'officielebekendmakingen.nl'."
+        ),
+        max_length=1000,
+        blank=True,
+    )
+    toelichting = models.TextField(
+        _("description"),
+        help_text=_("The description of the announcement."),
+    )
+    beschikbaar_rechtsmiddel = models.TextField(
+        _("available legal remedy"),
+        help_text=_(
+            "The legal remedy that a citizen can employ to oppose "
+            "the (predisposed) decision."
+        ),
+        choices=LegalRemedyOptions.choices,
+        max_length=20,
+    )
+    url_reactieformulier = models.URLField(
+        _("announcement URL"),
+        help_text=_(
+            "The URL to the web form where citizens can submit the legal remedy."
+        ),
+        max_length=1000,
+        blank=True,
+    )
+    datum_begin_inzagetermijn = models.DateField(
+        _("in effect from"),
+        help_text=_("The date when the inspection period starts."),
+    )
+    datum_einde_inzagetermijn = models.DateField(
+        _("in effect until"),
+        help_text=_(
+            "The date when the inspection period comes to an end."
+            "If the end date falls on a saturday, sunday or holiday we automatically "
+            "push the date back to the first available workday."
+        ),
+    )
+    automatisch_intrekken = models.BooleanField(
+        _("automatically redact"),
+        help_text=_(
+            "When enabled, ensure that the publication gets "
+            "redacted on the configured end date."
+        ),
+        default=False,
+    )
+
+    class Meta:
+        verbose_name = _("access procedure")
+        verbose_name_plural = _("access procedures")
+
+    def __str__(self):
+        return str(self.publicatie)
