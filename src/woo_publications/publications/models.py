@@ -890,7 +890,13 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
     @property
     def has_to_strip_metadata(self) -> bool:
-        if not self.metadata_gestript_op and self.get_strippable_file_type():
+        config = GlobalConfiguration.get_solo()
+
+        if (
+            config.document_meta_data_stripping
+            and not self.metadata_gestript_op
+            and self.get_strippable_file_type()
+        ):
             return True
 
         return False
