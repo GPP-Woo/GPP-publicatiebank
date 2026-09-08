@@ -14,7 +14,7 @@ from woo_publications.publications.tests.factories import DocumentFactory
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 @patch("woo_publications.publications.tasks.strip_metadata.si")
 @patch("woo_publications.publications.tasks.index_document.si")
-class TestUpdateThemeFromWaardenlijstCommand(TestCase):
+class StripAllFilesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -111,6 +111,31 @@ class TestUpdateThemeFromWaardenlijstCommand(TestCase):
             ],
             any_order=True,
         )
+
+    def test_stripping_disabled(
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
+    ):
+        config = GlobalConfiguration.get_solo()
+        config.document_meta_data_stripping = False
+        config.save()
+
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/pdf",
+        )
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=False,
+            bestandsformaat="application/pdf",
+        )
+        count = strip_all_files(base_url="http://host.docker.internal:8000/")
+
+        self.assertEqual(count, 0)
+        mock_strip_metadata.assert_not_called()
+        mock_index_document.assert_not_called()
 
     def test_documents_not_eligible_for_stripping(
         self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
