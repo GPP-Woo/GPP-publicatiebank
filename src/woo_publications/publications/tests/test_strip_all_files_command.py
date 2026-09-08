@@ -193,6 +193,60 @@ class StripAllFilesTest(VCRMixin, TestCase):
             any_order=True,
         )
 
+    def test_disable_strip_documents(
+        self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
+    ):
+        config = GlobalConfiguration.get_solo()
+        config.document_meta_data_stripping = False
+        config.save()
+
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/pdf",
+        )
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/vnd.oasis.opendocument.text",
+        )
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/vnd.openxmlformats-officedocument.text",
+        )
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="application/zip",
+        )
+        DocumentFactory.create(
+            document_service=self.service,
+            document_uuid=str(uuid.uuid4()),
+            upload_complete=True,
+            bestandsformaat="text/html",
+        )
+
+        out = StringIO()
+
+        call_command(
+            "strip_all_files",
+            base_url="http://host.docker.internal:8000/",
+            verbosity=0,
+            stdout=out,
+            no_color=True,
+        )
+
+        self.assertEqual(
+            out.getvalue(), "0 documents scheduled to strip their metadata.\n"
+        )
+        mock_strip_metadata.assert_not_called()
+        mock_index_document.assert_not_called()
+
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 @patch("woo_publications.publications.tasks.strip_metadata.si")
