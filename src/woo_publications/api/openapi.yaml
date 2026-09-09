@@ -975,6 +975,316 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
+  /api/v2/inzageprocedure:
+    get:
+      operationId: inzageprocedureList
+      description: Returns a paginated result list of existing access procedures.
+      summary: All available access procedures.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: publicatie
+        schema:
+          type: string
+          format: uuid
+        description: Search the access procedure based on the unique identifier (UUID)
+          that represents a publication.
+      tags:
+      - Inzage Procedure
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInzageProcedureList'
+          description: ''
+    post:
+      operationId: inzageprocedureCreate
+      description: Create a access procedure.
+      summary: Create a access procedure.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      tags:
+      - Inzage Procedure
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InzageProcedure'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InzageProcedure'
+          description: ''
+  /api/v2/inzageprocedure/{uuid}:
+    get:
+      operationId: inzageprocedureRetrieve
+      description: Retrieve a specific access procedure.
+      summary: Retrieve a specific access procedure.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Inzage Procedure
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InzageProcedure'
+          description: ''
+    put:
+      operationId: inzageprocedureUpdate
+      description: Update a access procedure entirely.
+      summary: Update a access procedure entirely.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Inzage Procedure
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InzageProcedure'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InzageProcedure'
+          description: ''
+    patch:
+      operationId: inzageprocedurePartialUpdate
+      description: Werk een publicatie (gedeeltelijk) bij.
+      summary: Update a access procedure partially.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Inzage Procedure
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedInzageProcedure'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InzageProcedure'
+          description: ''
+    delete:
+      operationId: inzageprocedureDestroy
+      description: Destroy a access procedure.
+      summary: Destroy a access procedure.
+      parameters:
+      - in: header
+        name: Audit-Remarks
+        schema:
+          type: string
+        description: |2
+
+          Any additional information describing the action performed by the user.
+        required: true
+      - in: header
+        name: Audit-User-ID
+        schema:
+          type: string
+        description: |2
+
+          The system identifier that uniquely identifies the user performing the action.
+          Ideally, this is obtained from some Identity and Access Management
+          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
+        required: true
+      - in: header
+        name: Audit-User-Representation
+        schema:
+          type: string
+        description: |2
+
+          The display name of the user performing the action, to make them recognizable.
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Inzage Procedure
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v2/onderwerpen:
     get:
       operationId: onderwerpenList
@@ -2032,6 +2342,14 @@ components:
       description: |-
         * `blijvend_bewaren` - Blijvend bewaren
         * `vernietigen` - Vernietigen
+    BeschikbaarRechtsmiddelEnum:
+      enum:
+      - zienswijze
+      - bezwaar
+      type: string
+      description: |-
+        * `zienswijze` - Perspective
+        * `bezwaar` - Objection
     BlankEnum:
       enum:
       - ''
@@ -2915,6 +3233,68 @@ components:
       description: |-
         * `waardelijst` - Waardelijst
         * `zelf_toegevoegd` - Zelf-toegevoegd item
+    InzageProcedure:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        publicatie:
+          type: string
+          format: uuid
+          description: De unieke identificatie van de publicatie.
+        urlBekendmaking:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The online location where the announcement is published, for
+            example on 'officielebekendmakingen.nl'.
+          maxLength: 1000
+        toelichting:
+          type: string
+          title: Omschrijving
+          description: The description of the announcement.
+        beschikbaarRechtsmiddel:
+          allOf:
+          - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
+          title: Available legal remedy
+          description: |-
+            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+
+            * `zienswijze` - Perspective
+            * `bezwaar` - Objection
+        urlReactieformulier:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The URL to the web form where citizens can submit the legal
+            remedy.
+          maxLength: 1000
+        datumBeginInzagetermijn:
+          type: string
+          format: date
+          title: Datum begin geldigheid
+          description: The date when the inspection period starts.
+        datumEindeInzagetermijn:
+          type: string
+          format: date
+          title: Datum einde geldigheid
+          description: The date when the inspection period comes to an end.If the
+            end date falls on a saturday, sunday or holiday we automatically push
+            the date back to the first available workday.
+        automatischIntrekken:
+          type: boolean
+          title: Automatically redact
+          description: When enabled, ensure that the publication gets redacted on
+            the configured end date.
+      required:
+      - beschikbaarRechtsmiddel
+      - datumBeginInzagetermijn
+      - datumEindeInzagetermijn
+      - publicatie
+      - toelichting
+      - uuid
     Organisation:
       type: object
       properties:
@@ -3041,6 +3421,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InformationCategory'
+    PaginatedInzageProcedureList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InzageProcedure'
     PaginatedOrganisationList:
       type: object
       required:
@@ -3283,6 +3686,61 @@ components:
           description: Geeft aan of alle bestandsdelen van het bestand ontvangen zijn
             en het document ontgrendeld en klaar voor gebruik is in de achterliggende
             Documenten-API.
+    PatchedInzageProcedure:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        publicatie:
+          type: string
+          format: uuid
+          description: De unieke identificatie van de publicatie.
+        urlBekendmaking:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The online location where the announcement is published, for
+            example on 'officielebekendmakingen.nl'.
+          maxLength: 1000
+        toelichting:
+          type: string
+          title: Omschrijving
+          description: The description of the announcement.
+        beschikbaarRechtsmiddel:
+          allOf:
+          - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
+          title: Available legal remedy
+          description: |-
+            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+
+            * `zienswijze` - Perspective
+            * `bezwaar` - Objection
+        urlReactieformulier:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The URL to the web form where citizens can submit the legal
+            remedy.
+          maxLength: 1000
+        datumBeginInzagetermijn:
+          type: string
+          format: date
+          title: Datum begin geldigheid
+          description: The date when the inspection period starts.
+        datumEindeInzagetermijn:
+          type: string
+          format: date
+          title: Datum einde geldigheid
+          description: The date when the inspection period comes to an end.If the
+            end date falls on a saturday, sunday or holiday we automatically push
+            the date back to the first available workday.
+        automatischIntrekken:
+          type: boolean
+          title: Automatically redact
+          description: When enabled, ensure that the publication gets redacted on
+            the configured end date.
     PatchedOrganisation:
       type: object
       properties:
