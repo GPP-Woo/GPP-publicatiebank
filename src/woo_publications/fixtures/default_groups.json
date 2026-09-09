@@ -115,6 +115,11 @@
                 "contenttype"
             ],
             [
+                "view_timelinelogproxy",
+                "logging",
+                "timelinelogproxy"
+            ],
+            [
                 "view_outgoingrequestslog",
                 "log_outgoing_requests",
                 "outgoingrequestslog"
@@ -123,11 +128,6 @@
                 "view_outgoingrequestslogconfig",
                 "log_outgoing_requests",
                 "outgoingrequestslogconfig"
-            ],
-            [
-                "view_timelinelogproxy",
-                "logging",
-                "timelinelogproxy"
             ],
             [
                 "add_informationcategory",
@@ -228,6 +228,26 @@
                 "view_document",
                 "publications",
                 "document"
+            ],
+            [
+                "add_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "change_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "delete_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "view_inzageprocedure",
+                "publications",
+                "inzageprocedure"
             ],
             [
                 "add_publication",
@@ -486,6 +506,26 @@
                 "view_document",
                 "publications",
                 "document"
+            ],
+            [
+                "add_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "change_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "delete_inzageprocedure",
+                "publications",
+                "inzageprocedure"
+            ],
+            [
+                "view_inzageprocedure",
+                "publications",
+                "inzageprocedure"
             ],
             [
                 "add_publication",
