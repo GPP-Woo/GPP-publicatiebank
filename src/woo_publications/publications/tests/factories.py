@@ -10,10 +10,11 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
-from ..constants import PublicationStatusOptions
+from ..constants import LegalRemedyOptions, PublicationStatusOptions
 from ..models import (
     Document,
     DocumentIdentifier,
+    InzageProcedure,
     Publication,
     PublicationIdentifier,
     Topic,
@@ -180,3 +181,14 @@ class TopicFactory(factory.django.DjangoModelFactory[Topic]):
 
     class Meta:  # pyright: ignore
         model = Topic
+
+
+class InzageProcedureFactory(factory.django.DjangoModelFactory[InzageProcedure]):
+    publicatie = factory.SubFactory(PublicationFactory)
+    toelichting = factory.Faker("word")
+    beschikbaar_rechtsmiddel = LegalRemedyOptions.perspective
+    datum_begin_inzagetermijn = factory.Faker("past_date")
+    datum_einde_inzagetermijn = factory.Faker("future_date")
+
+    class Meta:  # pyright: ignore
+        model = InzageProcedure
