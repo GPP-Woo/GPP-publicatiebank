@@ -3,14 +3,12 @@ from uuid import uuid4
 
 from django.urls import reverse
 
-from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.api.tests.mixins import (
     APIKeyUnAuthorizedMixin,
-    APITestCaseMixin,
     TokenAuthMixin,
 )
 
@@ -76,7 +74,7 @@ class InzageProcedureApiAuthorizationAndPermissionTests(
         self.assertWrongApiKeyProhibitsPostEndpointAccess(list_url)
 
 
-class InzageProcedureApiTests(TokenAuthMixin, APITestCaseMixin, APITestCase):
+class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
     def test_list_inzage_procedure(self):
         publication_1, publication_2 = PublicationFactory.create_batch(2)
         inzage_procedure_1 = InzageProcedureFactory.create(
@@ -181,7 +179,6 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCaseMixin, APITestCase):
             },
         )
 
-    @freeze_time("2024-09-24T12:00:00-00:00")
     def test_detail_inzage_procedure(self):
         publication = PublicationFactory.create()
         inzage_procedure = InzageProcedureFactory.create(
