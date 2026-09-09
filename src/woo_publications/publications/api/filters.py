@@ -334,3 +334,14 @@ class TopicFilterSet(FilterSet):
         choices=PublicationStatusOptions.choices,
         widget=CSVWidget(),
     )
+
+
+class InzageProcedureFilterSet(FilterSet):
+    publicatie = filters.ModelChoiceFilter(
+        queryset=Publication.objects.all(),
+        to_field_name="uuid",
+        help_text=_(
+            "Search the access procedure based on the unique identifier (UUID) that "
+            "represents a publication."
+        ),
+    )

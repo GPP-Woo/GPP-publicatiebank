@@ -12,6 +12,7 @@ from woo_publications.metadata.api.viewsets import (
 )
 from woo_publications.publications.api.viewsets import (
     DocumentViewSet,
+    InzageProcedureViewSet,
     PublicationViewSet,
     TopicViewSet,
 )
@@ -24,6 +25,7 @@ router.include_format_suffixes = False
 router.register("accounts/organisatie-eenheden", OrganisationUnitViewSet)
 router.register("documenten", DocumentViewSet)
 router.register("informatiecategorieen", InformationCategoryViewSet)
+router.register("inzageprocedure", InzageProcedureViewSet)
 router.register("organisaties", OrganisationViewSet)
 router.register("publicaties", PublicationViewSet)
 router.register("themas", ThemeViewSet)

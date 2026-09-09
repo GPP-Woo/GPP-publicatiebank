@@ -5,6 +5,7 @@ from .document import (
     DocumentUpdateSerializer,
     FilePartSerializer,
 )
+from .inzage_procedure import InzageProcedureSerializer
 from .publication import PublicationReadSerializer, PublicationWriteSerializer
 from .topic import TopicSerializer
 
@@ -14,6 +15,7 @@ __all__ = [
     "DocumentStatusSerializer",
     "DocumentUpdateSerializer",
     "FilePartSerializer",
+    "InzageProcedureSerializer",
     "PublicationReadSerializer",
     "PublicationWriteSerializer",
     "TopicSerializer",
