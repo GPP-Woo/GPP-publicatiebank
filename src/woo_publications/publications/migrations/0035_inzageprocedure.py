@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "beschikbaar_rechtsmiddel",
-                    models.TextField(
+                    models.CharField(
                         choices=[
                             ("zienswijze", "Perspective"),
                             ("bezwaar", "Objection"),

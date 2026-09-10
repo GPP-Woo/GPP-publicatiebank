@@ -1230,7 +1230,7 @@ class InzageProcedure(models.Model):
         _("description"),
         help_text=_("The description of the announcement."),
     )
-    beschikbaar_rechtsmiddel = models.TextField(
+    beschikbaar_rechtsmiddel = models.CharField(
         _("available legal remedy"),
         help_text=_(
             "The legal remedy that a citizen can employ to oppose "
