@@ -409,3 +409,41 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         metadata = tree.xpath("//meta")
         self.assertEqual(len(metadata), 1)
         self.assertEqual(metadata[0].keys(), ["charset"])
+
+    def test_skip_file_when_task_disabled(self):
+        config = GlobalConfiguration.get_solo()
+        config.document_meta_data_stripping = False
+        config.save()
+
+        html_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "test.html"
+        )
+
+        with html_path.open("r") as html_file:
+            tree = html.fromstring(html_file.read())
+            self.assertEqual(len(tree.xpath("//meta")), 2)
+
+        file_size = html_path.stat().st_size
+
+        with open(html_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="test.html", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="test.html",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(document_id=document.pk, base_url="http://testserver/")
+
+        document.refresh_from_db()
+        self.assertEqual(document.metadata_gestript_op, None)
+        self.assertFalse(document.upload_complete)
