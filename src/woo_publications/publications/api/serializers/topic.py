@@ -7,7 +7,7 @@ from ...models import Publication, Topic
 
 class TopicSerializer(serializers.ModelSerializer[Topic]):
     publicaties = serializers.SlugRelatedField(
-        queryset=Publication.objects.all(),
+        queryset=Publication.objects.only("uuid"),
         slug_field="uuid",
         help_text=_("The publication attached to this topic."),
         many=True,

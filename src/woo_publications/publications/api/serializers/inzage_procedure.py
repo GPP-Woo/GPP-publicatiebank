@@ -7,7 +7,7 @@ from ...models import InzageProcedure, Publication
 
 class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
     publicatie = serializers.SlugRelatedField(
-        queryset=Publication.objects.all(),
+        queryset=Publication.objects.only("uuid"),
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )

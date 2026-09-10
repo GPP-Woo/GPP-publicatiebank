@@ -95,7 +95,7 @@ class DocumentIdentifierSerializer(serializers.ModelSerializer[DocumentIdentifie
 @extend_schema_serializer(deprecate_fields=("identifier",))
 class DocumentSerializer(serializers.ModelSerializer[Document]):
     publicatie = serializers.SlugRelatedField(
-        queryset=Publication.objects.all(),
+        queryset=Publication.objects.only("uuid"),
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )
