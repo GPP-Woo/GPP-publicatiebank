@@ -101,6 +101,11 @@ click-repl==0.3.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
+convertdate==2.4.1
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
+    #   workalendar
 coverage==7.13.2
     # via -r requirements/test-tools.in
 cryptography==46.0.7
@@ -418,6 +423,11 @@ kombu==5.6.2
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
+lunardate==0.3.0
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
+    #   workalendar
 lxml==6.1.0
     # via
     #   -c requirements/base.txt
@@ -520,6 +530,16 @@ pyjwt==2.12.1
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   zgw-consumers
+pyluach==2.3.0
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
+    #   workalendar
+pymeeus==0.5.12
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
+    #   convertdate
 pyopenssl==26.0.0
     # via
     #   -c requirements/base.txt
@@ -538,6 +558,7 @@ python-dateutil==2.9.0.post0
     #   celery
     #   django-relativedelta
     #   freezegun
+    #   workalendar
 python-decouple==3.8
     # via
     #   -c requirements/base.txt
@@ -751,6 +772,10 @@ webob==1.8.9
     # via webtest
 webtest==3.0.7
     # via django-webtest
+workalendar==17.0.0
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 wrapt==2.0.1
     # via
     #   -c requirements/base.txt
