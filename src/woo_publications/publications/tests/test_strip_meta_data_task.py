@@ -202,7 +202,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         self.assertIsNone(reader.xmp_metadata)
 
     @parametrize("file_type", ["odt", "ods", "odp", "odg"])
-    def test_strip_open_documents_of_metadata(self, file_type: str):
+    def test_strip_open_documents_of_metadata(self, file_type):
         open_document_path = (
             Path(settings.DJANGO_PROJECT_DIR)
             / "publications"
