@@ -207,8 +207,6 @@ furl==2.1.4
     #   ape-pie
 glom==25.12.0
     # via mozilla-django-oidc-db
-gunicorn==26.2.0
-    # via -r requirements/base.in
 humanize==4.15.0
     # via flower
 idna==3.11
@@ -356,6 +354,8 @@ urllib3==2.6.3
     #   elastic-apm
     #   requests
     #   sentry-sdk
+uwsgi==2.0.31
+    # via -r requirements/base.in
 vine==5.1.0
     # via
     #   amqp
