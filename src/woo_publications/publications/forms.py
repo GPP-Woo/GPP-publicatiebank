@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Callable
 from functools import partial
 from typing import Literal
@@ -14,9 +15,10 @@ import structlog
 
 from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.typing import is_authenticated_request
+from woo_publications.utils.date import get_workday
 
 from .constants import PublicationStatusOptions
-from .models import Document, Publication
+from .models import Document, InzageProcedure, Publication
 from .tasks import index_document, index_publication
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -290,3 +292,14 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
             post_save_callback()
 
         return document
+
+
+class InzageProcedureAdminForm(forms.ModelForm[InzageProcedure]):
+    def clean_datum_einde_inzagetermijn(self):
+        end_date = self.cleaned_data.get("datum_einde_inzagetermijn")
+        assert isinstance(end_date, datetime.date)
+
+        if "datum_einde_inzagetermijn" in self.changed_data:
+            end_date = get_workday(end_date)
+
+        return end_date
