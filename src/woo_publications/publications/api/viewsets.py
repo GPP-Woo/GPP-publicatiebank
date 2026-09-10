@@ -438,24 +438,24 @@ class TopicViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
         description=_("Returns a paginated result list of existing access procedures."),
     ),
     retrieve=extend_schema(
-        summary=_("Retrieve a specific access procedure."),
-        description=_("Retrieve a specific access procedure."),
+        summary=_("Retrieve an specific access procedure."),
+        description=_("Retrieve an specific access procedure."),
     ),
     create=extend_schema(
-        summary=_("Create a access procedure."),
-        description=_("Create a access procedure."),
+        summary=_("Create an access procedure."),
+        description=_("Create an access procedure."),
     ),
     partial_update=extend_schema(
-        summary=_("Update a access procedure partially."),
-        description=_("Update a publication partially."),
+        summary=_("Update an access procedure partially."),
+        description=_("Update an access procedure partially."),
     ),
     update=extend_schema(
-        summary=_("Update a access procedure entirely."),
-        description=_("Update a access procedure entirely."),
+        summary=_("Update an access procedure entirely."),
+        description=_("Update an access procedure entirely."),
     ),
     destroy=extend_schema(
-        summary=_("Destroy a access procedure."),
-        description=_("Destroy a access procedure."),
+        summary=_("Destroy an access procedure."),
+        description=_("Destroy an access procedure."),
     ),
 )
 class InzageProcedureViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):

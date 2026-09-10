@@ -1039,8 +1039,8 @@ paths:
           description: ''
     post:
       operationId: inzageprocedureCreate
-      description: Create a access procedure.
-      summary: Create a access procedure.
+      description: Create an access procedure.
+      summary: Create an access procedure.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1088,8 +1088,8 @@ paths:
   /api/v2/inzageprocedure/{uuid}:
     get:
       operationId: inzageprocedureRetrieve
-      description: Retrieve a specific access procedure.
-      summary: Retrieve a specific access procedure.
+      description: Retrieve an specific access procedure.
+      summary: Retrieve an specific access procedure.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1136,8 +1136,8 @@ paths:
           description: ''
     put:
       operationId: inzageprocedureUpdate
-      description: Update a access procedure entirely.
-      summary: Update a access procedure entirely.
+      description: Update an access procedure entirely.
+      summary: Update an access procedure entirely.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1190,8 +1190,8 @@ paths:
           description: ''
     patch:
       operationId: inzageprocedurePartialUpdate
-      description: Werk een publicatie (gedeeltelijk) bij.
-      summary: Update a access procedure partially.
+      description: Update an access procedure partially.
+      summary: Update an access procedure partially.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1243,8 +1243,8 @@ paths:
           description: ''
     delete:
       operationId: inzageprocedureDestroy
-      description: Destroy a access procedure.
-      summary: Destroy a access procedure.
+      description: Destroy an access procedure.
+      summary: Destroy an access procedure.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -4473,6 +4473,16 @@ components:
       in: header
       name: Authorization
       description: Token-based authentication with required prefix "Token"
+tags:
+- name: Catalogi API
+- name: Documenten
+- name: Informatiecategorieën
+- name: Inzage Procedure
+- name: Onderwerpen
+- name: Organisatie-eenheden
+- name: Organisaties
+- name: Publicaties
+- name: Themas
 externalDocs:
   description: Functional and technical documentation
   url: https://gpp-publicatiebank.readthedocs.io/

@@ -481,7 +481,18 @@ purposes:
         "url": "https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md",
     },
     "VERSION": API_VERSION,
-    "TAGS": [],
+    # TODO: remove this in favor for automated tag detection #478
+    "TAGS": [
+        {"name": "Catalogi API"},
+        {"name": "Documenten"},
+        {"name": "Informatiecategorieën"},
+        {"name": "Inzage Procedure"},
+        {"name": "Onderwerpen"},
+        {"name": "Organisatie-eenheden"},
+        {"name": "Organisaties"},
+        {"name": "Publicaties"},
+        {"name": "Themas"},
+    ],
     "EXTERNAL_DOCS": {
         "description": "Functional and technical documentation",
         "url": "https://gpp-publicatiebank.readthedocs.io/",
