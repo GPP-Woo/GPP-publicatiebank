@@ -226,26 +226,52 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
             "urlReactieformulier": "https://www.example.com/reactieformulier",
             "datumBeginInzagetermijn": "2020-01-01",
-            "datumEindeInzagetermijn": "2025-01-01",
+            "datumEindeInzagetermijn": "2025-01-02",
             "automatischIntrekken": True,
         }
 
         response = self.client.post(url, data=body, headers=AUDIT_HEADERS)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         # checks if the object was successfully created.
-        inzage_procedure = InzageProcedure.objects.get(
+        inzage_procedure = InzageProcedure.objects.filter(
             publicatie=publication,
             url_bekendmaking="https://www.example.com/bekendmaking",
             toelichting="toelichting",
             beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
             url_reactieformulier="https://www.example.com/reactieformulier",
             datum_begin_inzagetermijn="2020-01-01",
-            datum_einde_inzagetermijn="2025-01-01",
+            datum_einde_inzagetermijn="2025-01-02",
         )
+        self.assertTrue(inzage_procedure.exists())
+
+        inzage_procedure = inzage_procedure.first()
+        assert inzage_procedure
         response_data = response.json()
 
         self.assertEqual(response_data, {"uuid": str(inzage_procedure.uuid), **body})
+
+    def test_end_date_auto_selects_workday(self):
+        assert InzageProcedure.objects.count() == 0
+
+        publication = PublicationFactory.create()
+        url = reverse("api:inzageprocedure-list")
+        body = {
+            "publicatie": str(publication.uuid),
+            "urlBekendmaking": "https://www.example.com/bekendmaking",
+            "toelichting": "toelichting",
+            "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
+            "urlReactieformulier": "https://www.example.com/reactieformulier",
+            "datumBeginInzagetermijn": "2020-01-01",
+            "datumEindeInzagetermijn": "2026-04-27",
+            "automatischIntrekken": True,
+        }
+
+        response = self.client.post(url, data=body, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()["datumEindeInzagetermijn"], "2026-04-28")
 
     def test_update_inzage_procedure(self):
         assert InzageProcedure.objects.count() == 0
@@ -258,7 +284,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
             url_reactieformulier="https://www.example.com/reactieformulier/one",
             datum_begin_inzagetermijn=datetime.date(2020, 1, 1),
-            datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
+            datum_einde_inzagetermijn=datetime.date(2025, 1, 2),
             automatisch_intrekken=False,
         )
         detail_url = reverse(
@@ -272,7 +298,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             "beschikbaarRechtsmiddel": LegalRemedyOptions.perspective,
             "urlReactieformulier": "https://www.example.com/reactieformulier/changed",
             "datumBeginInzagetermijn": "2000-01-01",
-            "datumEindeInzagetermijn": "2010-01-01",
+            "datumEindeInzagetermijn": "2015-01-02",
             "automatischIntrekken": True,
         }
 
