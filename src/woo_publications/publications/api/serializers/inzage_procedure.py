@@ -1,3 +1,5 @@
+import datetime
+
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -40,3 +42,37 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
                 "read_only": True,
             },
         }
+
+    def validate(self, attrs):
+        # user submitted data -> database data -> None (will never happen
+        # since it's a required field)
+        start_date: datetime.date | None = (
+            attrs["datum_begin_inzagetermijn"]
+            if "datum_begin_inzagetermijn" in attrs
+            else self.instance.datum_begin_inzagetermijn
+            if self.instance
+            else None
+        )
+        # user submitted data -> database data -> None (will never happen
+        # since it's a required field)
+        end_date: datetime.date | None = (
+            attrs["datum_einde_inzagetermijn"]
+            if "datum_einde_inzagetermijn" in attrs
+            else self.instance.datum_einde_inzagetermijn
+            if self.instance
+            else None
+        )
+
+        assert start_date
+        assert end_date
+
+        if start_date > end_date:
+            raise serializers.ValidationError(
+                {
+                    "datum_einde_inzagetermijn": _(
+                        "The end date cannot happen before the start date."
+                    )
+                }
+            )
+
+        return attrs

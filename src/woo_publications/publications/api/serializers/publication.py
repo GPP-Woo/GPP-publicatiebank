@@ -1,3 +1,4 @@
+import datetime
 from collections.abc import Sequence
 from functools import partial
 from typing import Literal
@@ -214,6 +215,35 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     def validate_kenmerken(self, value: Sequence[Kenmerk]) -> Sequence[Kenmerk]:
         validate_duplicated_kenmerken(value)
         return value
+
+    def validate(self, attrs):
+        # user submitted data -> database data -> None
+        start_date: datetime.date | None = (
+            attrs.get("datum_begin_geldigheid")
+            if "datum_begin_geldigheid" in attrs
+            else self.instance.datum_begin_geldigheid
+            if self.instance
+            else None
+        )
+        # user submitted data -> database data -> None
+        end_date: datetime.date | None = (
+            attrs.get("datum_einde_geldigheid")
+            if "datum_einde_geldigheid" in attrs
+            else self.instance.datum_einde_geldigheid
+            if self.instance
+            else None
+        )
+
+        if start_date and end_date and start_date > end_date:
+            raise serializers.ValidationError(
+                {
+                    "datum_einde_geldigheid": _(
+                        "The end date cannot happen before the start date."
+                    )
+                }
+            )
+
+        return attrs
 
     @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
     def get_url_publicatie_intern(self, obj: Publication) -> str:
