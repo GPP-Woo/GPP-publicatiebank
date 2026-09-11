@@ -53,6 +53,7 @@ from woo_publications.logging.typing import ActingUser
 from woo_publications.metadata.constants import InformationCategoryOrigins
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.metadata.service import get_inspannings_verplichting
+from woo_publications.utils.constraints import start_end_date_constraint
 from woo_publications.utils.validators import (
     max_img_size_validator,
     max_img_width_and_height_validator,
@@ -383,6 +384,9 @@ class Publication(ConcurrentTransitionMixin, models.Model):
                     "The publisher is only allowed to be unset if the publication "
                     "is a concept."
                 ),
+            ),
+            start_end_date_constraint(
+                start_date="datum_begin_geldigheid", end_date="datum_einde_geldigheid"
             ),
         ]
 
@@ -1271,6 +1275,12 @@ class InzageProcedure(models.Model):
     class Meta:
         verbose_name = _("access procedure")
         verbose_name_plural = _("access procedures")
+        constraints = (
+            start_end_date_constraint(
+                start_date="datum_begin_inzagetermijn",
+                end_date="datum_einde_inzagetermijn",
+            ),
+        )
 
     def __str__(self):
         return str(self.publicatie)
