@@ -6,6 +6,7 @@ from functools import partial
 from typing import Literal
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.choices import BaseChoiceIterator
@@ -136,6 +137,21 @@ class PublicationAdminForm(PublicationStatusForm[Publication]):
                 # Ensure that officiele_titel remains required.
                 if field != "officiele_titel":
                     self.fields[field].required = False
+
+    def clean_datum_einde_geldigheid(self):
+        start_date: datetime.date | None = self.cleaned_data.get(
+            "datum_begin_geldigheid"
+        )
+        end_date: datetime.date | None = self.cleaned_data.get("datum_einde_geldigheid")
+
+        # since both fields are fully optional, we add this check to see if
+        # both fields are filled out.
+        if start_date and end_date and start_date > end_date:
+            raise ValidationError(
+                _("The end date cannot happen before the start date.")
+            )
+
+        return end_date
 
     def save(self, commit=True):
         assert is_authenticated_request(self.request)
@@ -296,10 +312,17 @@ class DocumentAdminForm(PublicationStatusForm[Document]):
 
 class InzageProcedureAdminForm(forms.ModelForm[InzageProcedure]):
     def clean_datum_einde_inzagetermijn(self):
+        start_date = self.cleaned_data.get("datum_begin_inzagetermijn")
         end_date = self.cleaned_data.get("datum_einde_inzagetermijn")
+        assert isinstance(start_date, datetime.date)
         assert isinstance(end_date, datetime.date)
 
         if "datum_einde_inzagetermijn" in self.changed_data:
             end_date = get_workday(end_date)
+
+        if start_date > end_date:
+            raise ValidationError(
+                _("The end date cannot happen before the start date.")
+            )
 
         return end_date
