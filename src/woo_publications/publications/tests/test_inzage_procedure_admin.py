@@ -253,6 +253,33 @@ class InzageProcedureAdminWebTest(WebTest):
                 inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
             )
 
+    def test_end_date_cannot_be_earlier_then_start_day(self):
+        publication = PublicationFactory.create()
+        url = reverse("admin:publications_inzageprocedure_add")
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms["inzageprocedure_form"]
+
+        with self.subTest("create inzage procedure"):
+            form["publicatie"].force_value(publication.id)
+            form["url_bekendmaking"] = "https://example.com/bekendmaking"
+            form["toelichting"] = "bla"
+            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["url_reactieformulier"] = "https://example.com/reactieformulier"
+            form["datum_begin_inzagetermijn"] = "2008-09-10"
+            form["datum_einde_inzagetermijn"] = "2008-07-10"
+            form["automatisch_intrekken"] = True
+
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 200)
+            self.assertFormError(
+                submit_response.context["adminform"],
+                "datum_einde_inzagetermijn",
+                _("The end date cannot happen before the start date."),
+            )
+
     def test_inzage_procedure_admin_update(self):
         publication_1, publication_2 = PublicationFactory.create_batch(2)
         inzage_procedure = InzageProcedureFactory.create(

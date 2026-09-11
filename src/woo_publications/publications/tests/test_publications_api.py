@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 from unittest.mock import MagicMock, call, patch
 from uuid import uuid4
@@ -1544,6 +1545,24 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             self.assertEqual(response_data["publisher"], [_("This field is required.")])
 
+        with self.subTest("start date before end date"):
+            data = {
+                "publisher": str(organisation.uuid),
+                "informatieCategorieen": [str(ic.uuid)],
+                "officieleTitel": "bla",
+                "verkorteTitel": "bla",
+                "omschrijving": "bla",
+                "datumBeginGeldigheid": "2025-09-19",
+                "datumEindeGeldigheid": "2025-06-19",
+            }
+            response = self.client.post(url, data, headers=AUDIT_HEADERS)
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(
+                response.json()["datumEindeGeldigheid"],
+                [_("The end date cannot happen before the start date.")],
+            )
+
         with self.subTest("complete data"):
             data = {
                 "informatieCategorieen": [str(ic.uuid), str(ic2.uuid)],
@@ -1968,6 +1987,42 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         # test that only officiele_titel got changed
         self.assertEqual(response_data, expected_data)
+
+    @freeze_time("2024-09-24T12:00:00-00:00")
+    def test_partial_update_publication_end_date_before_start_date(self):
+        ic = InformationCategoryFactory.create(
+            oorsprong=InformationCategoryOrigins.value_list
+        )
+        topic = TopicFactory.create()
+        organisation = OrganisationFactory.create(is_actief=True)
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            eigenaar=self.organisation_member,
+            onderwerpen=[topic],
+            publisher=organisation,
+            officiele_titel="title one",
+            verkorte_titel="one",
+            omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            archiefactiedatum="2034-09-24",
+            datum_begin_geldigheid=datetime.date(2025, 6, 19),
+            datum_einde_geldigheid=datetime.date(2025, 6, 19),
+        )
+        detail_url = reverse(
+            "api:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        data = {
+            "datumEindeGeldigheid": "2025-01-02",
+        }
+
+        response = self.client.patch(detail_url, data, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()["datumEindeGeldigheid"],
+            [_("The end date cannot happen before the start date.")],
+        )
 
     def test_partial_publication_kenmerken(self):
         publication = PublicationFactory.create()
