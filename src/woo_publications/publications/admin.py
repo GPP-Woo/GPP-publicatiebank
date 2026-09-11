@@ -37,6 +37,7 @@ from .forms import (
 from .models import (
     Document,
     DocumentIdentifier,
+    InzageProcedure,
     Publication,
     PublicationIdentifier,
     Topic,
@@ -1027,3 +1028,53 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             '<a href="{}">{}</a>',
             actions,
         )
+
+
+@admin.register(InzageProcedure)
+class InzageProcedureAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    fieldsets = [
+        (
+            _("Description"),
+            {
+                "fields": (
+                    "publicatie",
+                    "url_bekendmaking",
+                    "toelichting",
+                    "beschikbaar_rechtsmiddel",
+                    "url_reactieformulier",
+                    "uuid",
+                )
+            },
+        ),
+        (
+            _("Actions"),
+            {
+                "fields": (
+                    "datum_begin_inzagetermijn",
+                    "datum_einde_inzagetermijn",
+                    "automatisch_intrekken",
+                ),
+            },
+        ),
+    ]
+    list_display = (
+        "publicatie",
+        "beschikbaar_rechtsmiddel",
+        "datum_begin_inzagetermijn",
+        "datum_einde_inzagetermijn",
+        "automatisch_intrekken",
+        "uuid",
+    )
+    readonly_fields = ("uuid",)
+    search_fields = (
+        "uuid",
+        "publicatie__uuid",
+        "publicatie__officiele_titel",
+    )
+    list_filter = (
+        "automatisch_intrekken",
+        "beschikbaar_rechtsmiddel",
+        "datum_begin_inzagetermijn",
+        "datum_einde_inzagetermijn",
+    )
+    autocomplete_fields = ("publicatie",)

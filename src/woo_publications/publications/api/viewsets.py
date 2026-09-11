@@ -33,15 +33,21 @@ from woo_publications.logging.service import (
 )
 
 from ..constants import DocumentDeliveryMethods
-from ..models import Document, Publication, Topic
+from ..models import Document, InzageProcedure, Publication, Topic
 from ..tasks import index_document, process_source_document, strip_metadata
-from .filters import DocumentFilterSet, PublicationFilterSet, TopicFilterSet
+from .filters import (
+    DocumentFilterSet,
+    InzageProcedureFilterSet,
+    PublicationFilterSet,
+    TopicFilterSet,
+)
 from .serializers import (
     DocumentCreateSerializer,
     DocumentSerializer,
     DocumentStatusSerializer,
     DocumentUpdateSerializer,
     FilePartSerializer,
+    InzageProcedureSerializer,
     PublicationReadSerializer,
     PublicationWriteSerializer,
     TopicSerializer,
@@ -421,5 +427,40 @@ class TopicViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = TopicSerializer
     filterset_class = TopicFilterSet
+    lookup_field = "uuid"
+    lookup_value_converter = "uuid"
+
+
+@extend_schema(tags=["Inzage Procedure"])
+@extend_schema_view(
+    list=extend_schema(
+        summary=_("All available access procedures."),
+        description=_("Returns a paginated result list of existing access procedures."),
+    ),
+    retrieve=extend_schema(
+        summary=_("Retrieve an specific access procedure."),
+        description=_("Retrieve an specific access procedure."),
+    ),
+    create=extend_schema(
+        summary=_("Create an access procedure."),
+        description=_("Create an access procedure."),
+    ),
+    partial_update=extend_schema(
+        summary=_("Update an access procedure partially."),
+        description=_("Update an access procedure partially."),
+    ),
+    update=extend_schema(
+        summary=_("Update an access procedure entirely."),
+        description=_("Update an access procedure entirely."),
+    ),
+    destroy=extend_schema(
+        summary=_("Destroy an access procedure."),
+        description=_("Destroy an access procedure."),
+    ),
+)
+class InzageProcedureViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
+    queryset = InzageProcedure.objects.order_by("-pk")
+    serializer_class = InzageProcedureSerializer
+    filterset_class = InzageProcedureFilterSet
     lookup_field = "uuid"
     lookup_value_converter = "uuid"

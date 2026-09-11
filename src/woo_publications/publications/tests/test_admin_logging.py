@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 import uuid
 
@@ -21,9 +22,15 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import PublicationStatusOptions
-from ..models import Document, Publication, Topic
-from .factories import TEST_IMG_PATH, DocumentFactory, PublicationFactory, TopicFactory
+from ..constants import LegalRemedyOptions, PublicationStatusOptions
+from ..models import Document, InzageProcedure, Publication, Topic
+from .factories import (
+    TEST_IMG_PATH,
+    DocumentFactory,
+    InzageProcedureFactory,
+    PublicationFactory,
+    TopicFactory,
+)
 
 
 @disable_admin_mfa()
@@ -1196,6 +1203,186 @@ class TestTopicAdminAuditLogging(WebTest):
                 "promoot": True,
                 "registratiedatum": "2024-09-24T12:00:00Z",
                 "laatst_gewijzigd_datum": "2024-09-24T12:00:00Z",
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+        self.assertEqual(log.extra_data, expected_data)
+
+
+@disable_admin_mfa()
+class TestInzageProcedureAdminAuditLogging(WebTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create(superuser=True)
+
+    def test_inzage_procedure_admin_log_create(self):
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        url = reverse("admin:publications_inzageprocedure_add")
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms["inzageprocedure_form"]
+        form["publicatie"].force_value(publication.id)
+        form["url_bekendmaking"] = "https://example.com/bekendmaking"
+        form["toelichting"] = "bla"
+        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["url_reactieformulier"] = "https://example.com/reactieformulier"
+        form["datum_begin_inzagetermijn"] = "2008-09-10"
+        form["datum_einde_inzagetermijn"] = "2010-09-8"
+        form["automatisch_intrekken"] = True
+
+        form.submit(name="_save")
+
+        added_item = InzageProcedure.objects.get()
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.create,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": added_item.pk,
+                "uuid": str(added_item.uuid),
+                "publicatie": publication.pk,
+                "url_bekendmaking": "https://example.com/bekendmaking",
+                "toelichting": "bla",
+                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "url_reactieformulier": "https://example.com/reactieformulier",
+                "datum_begin_inzagetermijn": "2008-09-10",
+                "datum_einde_inzagetermijn": "2010-09-08",
+                "automatisch_intrekken": True,
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_inzage_procedure_admin_log_update(self):
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://example.com/",
+            toelichting="some data",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            url_reactieformulier="https://example.com/",
+            datum_begin_inzagetermijn=datetime.date(1908, 9, 10),
+            datum_einde_inzagetermijn=datetime.date(1910, 9, 8),
+            automatisch_intrekken=False,
+        )
+
+        reverse_url = reverse(
+            "admin:publications_inzageprocedure_change",
+            kwargs={"object_id": inzage_procedure.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["inzageprocedure_form"]
+        form["publicatie"].force_value(publication.id)
+        form["url_bekendmaking"] = "https://example.com/bekendmaking"
+        form["toelichting"] = "bla"
+        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["url_reactieformulier"] = "https://example.com/reactieformulier"
+        form["datum_begin_inzagetermijn"] = "2008-09-10"
+        form["datum_einde_inzagetermijn"] = "2010-09-8"
+        form["automatisch_intrekken"] = True
+
+        response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(TimelineLogProxy.objects.count(), 2)
+
+        inzage_procedure.refresh_from_db()
+
+        read_log, update_log = TimelineLogProxy.objects.order_by("pk")
+
+        with self.subTest("read audit logging"):
+            expected_data = {
+                "event": Events.read,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "_cached_object_repr": "Lorem Ipsum",
+            }
+
+            self.assertEqual(read_log.extra_data, expected_data)
+
+        with self.subTest("update audit logging"):
+            expected_data = {
+                "event": Events.update,
+                "acting_user": {
+                    "identifier": self.user.id,
+                    "display_name": self.user.get_full_name(),
+                },
+                "object_data": {
+                    "id": inzage_procedure.pk,
+                    "uuid": str(inzage_procedure.uuid),
+                    "publicatie": publication.pk,
+                    "url_bekendmaking": "https://example.com/bekendmaking",
+                    "toelichting": "bla",
+                    "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                    "url_reactieformulier": "https://example.com/reactieformulier",
+                    "datum_begin_inzagetermijn": "2008-09-10",
+                    "datum_einde_inzagetermijn": "2010-09-08",
+                    "automatisch_intrekken": True,
+                },
+                "_cached_object_repr": "Lorem Ipsum",
+            }
+
+            self.assertEqual(update_log.extra_data, expected_data)
+
+    def test_inzage_procedure_admin_log_delete(self):
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://example.com/bekendmaking",
+            toelichting="bla",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            url_reactieformulier="https://example.com/reactieformulier",
+            datum_begin_inzagetermijn=datetime.date(2008, 9, 10),
+            datum_einde_inzagetermijn=datetime.date(2010, 9, 8),
+            automatisch_intrekken=True,
+        )
+
+        reverse_url = reverse(
+            "admin:publications_inzageprocedure_delete",
+            kwargs={"object_id": inzage_procedure.pk},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms[1]
+        response = form.submit()
+
+        self.assertEqual(response.status_code, 302)
+
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.delete,
+            "acting_user": {
+                "identifier": self.user.id,
+                "display_name": self.user.get_full_name(),
+            },
+            "object_data": {
+                "id": inzage_procedure.pk,
+                "uuid": str(inzage_procedure.uuid),
+                "publicatie": publication.pk,
+                "url_bekendmaking": "https://example.com/bekendmaking",
+                "toelichting": "bla",
+                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "url_reactieformulier": "https://example.com/reactieformulier",
+                "datum_begin_inzagetermijn": "2008-09-10",
+                "datum_einde_inzagetermijn": "2010-09-08",
+                "automatisch_intrekken": True,
             },
             "_cached_object_repr": "Lorem Ipsum",
         }

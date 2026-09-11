@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 from datetime import date
 from unittest.mock import patch
@@ -19,9 +20,14 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import PublicationStatusOptions
-from ..models import Publication
-from .factories import DocumentFactory, PublicationFactory, TopicFactory
+from ..constants import LegalRemedyOptions, PublicationStatusOptions
+from ..models import InzageProcedure, Publication
+from .factories import (
+    DocumentFactory,
+    InzageProcedureFactory,
+    PublicationFactory,
+    TopicFactory,
+)
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "username",
@@ -698,5 +704,184 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             "remarks": "remark",
             "acting_user": {"identifier": "id", "display_name": "username"},
             "_cached_object_repr": document.officiele_titel,
+        }
+        self.assertEqual(log.extra_data, expected_data)
+
+
+class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
+    maxDiff = None
+
+    def test_detail_inzage_procedure_logging(self):
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://www.example.com/bekendmaking/one",
+            toelichting="Some information about the first inzage procedure",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            url_reactieformulier="https://www.example.com/reactieformulier/one",
+            datum_begin_inzagetermijn=datetime.date(2020, 1, 1),
+            datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
+        )
+        detail_url = reverse(
+            "api:inzageprocedure-detail",
+            kwargs={"uuid": str(inzage_procedure.uuid)},
+        )
+
+        response = self.client.get(detail_url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        log = TimelineLogProxy.objects.get()
+        expected_data = {
+            "event": Events.read,
+            "remarks": "remark",
+            "acting_user": {"identifier": "id", "display_name": "username"},
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_create_inzage_procedure_logging(self):
+        assert InzageProcedure.objects.count() == 0
+
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        url = reverse("api:inzageprocedure-list")
+        body = {
+            "publicatie": str(publication.uuid),
+            "urlBekendmaking": "https://www.example.com/bekendmaking",
+            "toelichting": "toelichting",
+            "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
+            "urlReactieformulier": "https://www.example.com/reactieformulier",
+            "datumBeginInzagetermijn": "2020-01-01",
+            "datumEindeInzagetermijn": "2025-01-01",
+            "automatischIntrekken": True,
+        }
+
+        response = self.client.post(url, data=body, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        added_item = InzageProcedure.objects.get()
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.create,
+            "remarks": "remark",
+            "acting_user": {"identifier": "id", "display_name": "username"},
+            "object_data": {
+                "id": added_item.pk,
+                "uuid": str(added_item.uuid),
+                "publicatie": publication.pk,
+                "url_bekendmaking": "https://www.example.com/bekendmaking",
+                "toelichting": "toelichting",
+                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "url_reactieformulier": "https://www.example.com/reactieformulier",
+                "datum_begin_inzagetermijn": "2020-01-01",
+                "datum_einde_inzagetermijn": "2025-01-01",
+                "automatisch_intrekken": True,
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_update_inzage_procedure_logging(self):
+        assert InzageProcedure.objects.count() == 0
+
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://www.example.com/bekendmaking/one",
+            toelichting="Some information about the first inzage procedure",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            url_reactieformulier="https://www.example.com/reactieformulier/one",
+            datum_begin_inzagetermijn=datetime.date(2020, 1, 1),
+            datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
+            automatisch_intrekken=False,
+        )
+        detail_url = reverse(
+            "api:inzageprocedure-detail",
+            kwargs={"uuid": str(inzage_procedure.uuid)},
+        )
+        body = {
+            "publicatie": str(publication.uuid),
+            "urlBekendmaking": "https://www.example.com/bekendmaking/changed",
+            "toelichting": "changed",
+            "beschikbaarRechtsmiddel": LegalRemedyOptions.perspective,
+            "urlReactieformulier": "https://www.example.com/reactieformulier/changed",
+            "datumBeginInzagetermijn": "2000-01-01",
+            "datumEindeInzagetermijn": "2010-01-01",
+            "automatischIntrekken": True,
+        }
+
+        response = self.client.put(detail_url, data=body, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        inzage_procedure.refresh_from_db()
+
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.update,
+            "remarks": "remark",
+            "acting_user": {"identifier": "id", "display_name": "username"},
+            "object_data": {
+                "id": inzage_procedure.pk,
+                "uuid": str(inzage_procedure.uuid),
+                "publicatie": publication.pk,
+                "url_bekendmaking": "https://www.example.com/bekendmaking/changed",
+                "toelichting": "changed",
+                "beschikbaar_rechtsmiddel": LegalRemedyOptions.perspective,
+                "url_reactieformulier": "https://www.example.com/reactieformulier/changed",
+                "datum_begin_inzagetermijn": "2000-01-01",
+                "datum_einde_inzagetermijn": "2010-01-01",
+                "automatisch_intrekken": True,
+            },
+            "_cached_object_repr": "Lorem Ipsum",
+        }
+
+        self.assertEqual(log.extra_data, expected_data)
+
+    def test_destroy_inzage_procedure_logging(self):
+        publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://example.com/bekendmaking",
+            toelichting="bla",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            url_reactieformulier="https://example.com/reactieformulier",
+            datum_begin_inzagetermijn=datetime.date(2008, 9, 10),
+            datum_einde_inzagetermijn=datetime.date(2010, 9, 8),
+            automatisch_intrekken=True,
+        )
+
+        detail_url = reverse(
+            "api:inzageprocedure-detail",
+            kwargs={"uuid": str(inzage_procedure.uuid)},
+        )
+
+        response = self.client.delete(detail_url, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        log = TimelineLogProxy.objects.get()
+
+        expected_data = {
+            "event": Events.delete,
+            "remarks": "remark",
+            "acting_user": {"identifier": "id", "display_name": "username"},
+            "object_data": {
+                "id": inzage_procedure.pk,
+                "uuid": str(inzage_procedure.uuid),
+                "publicatie": publication.pk,
+                "url_bekendmaking": "https://example.com/bekendmaking",
+                "toelichting": "bla",
+                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "url_reactieformulier": "https://example.com/reactieformulier",
+                "datum_begin_inzagetermijn": "2008-09-10",
+                "datum_einde_inzagetermijn": "2010-09-08",
+                "automatisch_intrekken": True,
+            },
+            "_cached_object_repr": "Lorem Ipsum",
         }
         self.assertEqual(log.extra_data, expected_data)

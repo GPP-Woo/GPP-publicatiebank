@@ -74,7 +74,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         ),
     )
     informatie_categorieen = serializers.SlugRelatedField(
-        queryset=InformationCategory.objects.all(),
+        queryset=InformationCategory.objects.only("uuid"),
         slug_field="uuid",
         help_text=_(
             "The information categories clarify the kind of information present in "
@@ -91,7 +91,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         read_only=True,
     )
     onderwerpen = serializers.SlugRelatedField(
-        queryset=Topic.objects.all(),
+        queryset=Topic.objects.only("uuid"),
         slug_field="uuid",
         help_text=_(
             "Topics capture socially relevant information that spans multiple "
@@ -103,14 +103,14 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         required=False,
     )
     publisher = serializers.SlugRelatedField(
-        queryset=Organisation.objects.filter(is_actief=True),
+        queryset=Organisation.objects.only("uuid").filter(is_actief=True),
         slug_field="uuid",
         help_text=_("The organisation which publishes the publication."),
         many=False,
         allow_null=True,
     )
     verantwoordelijke = serializers.SlugRelatedField(
-        queryset=Organisation.objects.filter(is_actief=True),
+        queryset=Organisation.objects.only("uuid").filter(is_actief=True),
         slug_field="uuid",
         help_text=_(
             "The organisation which is liable for the publication and its contents."
@@ -120,7 +120,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         required=False,
     )
     opsteller = serializers.SlugRelatedField(
-        queryset=Organisation.objects.all(),
+        queryset=Organisation.objects.only("uuid"),
         slug_field="uuid",
         help_text=_("The organisation which drafted the publication and its content."),
         many=False,

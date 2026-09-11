@@ -13,6 +13,11 @@ class DocumentDeliveryMethods(models.TextChoices):
     retrieve_url = "ophalen", _("Retrieve")  # we download the file from a provided URL
 
 
+class LegalRemedyOptions(models.TextChoices):
+    perspective = "zienswijze", _("Perspective")
+    objection = "bezwaar", _("Objection")
+
+
 LEGACY_MS_OFFICE_MIMETYPES = [
     "application/msword",
     "application/vnd.ms-excel",

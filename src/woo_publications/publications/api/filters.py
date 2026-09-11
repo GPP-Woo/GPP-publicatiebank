@@ -31,7 +31,7 @@ def _filter_informatie_categorieen(
 class DocumentFilterSet(FilterSet):
     # TODO: change this filter to custom named filter with `@extend_schema_field(UUID)`
     publicatie = filters.ModelChoiceFilter(
-        queryset=Publication.objects.all(),
+        queryset=Publication.objects.only("uuid"),
         to_field_name="uuid",
         help_text=_(
             "Search the document based on the unique identifier (UUID) that represents "
@@ -113,7 +113,7 @@ class DocumentFilterSet(FilterSet):
         ),
         field_name="publicatie__informatie_categorieen",
         to_field_name="uuid",
-        queryset=InformationCategory.objects.all(),
+        queryset=InformationCategory.objects.only("uuid"),
         widget=CSVWidget(),
         method=_filter_informatie_categorieen,
     )
@@ -239,7 +239,7 @@ class PublicationFilterSet(FilterSet):
         ),
         field_name="informatie_categorieen",
         to_field_name="uuid",
-        queryset=InformationCategory.objects.all(),
+        queryset=InformationCategory.objects.only("uuid"),
         widget=CSVWidget(),
         method=_filter_informatie_categorieen,
     )
@@ -252,7 +252,7 @@ class PublicationFilterSet(FilterSet):
         ),
         field_name="onderwerpen__uuid",
         to_field_name="uuid",
-        queryset=Topic.objects.all(),
+        queryset=Topic.objects.only("uuid"),
         widget=CSVWidget(),
     )
 
@@ -326,11 +326,22 @@ class TopicFilterSet(FilterSet):
         ),
         field_name="publication__uuid",
         to_field_name="uuid",
-        queryset=Publication.objects.all(),
+        queryset=Publication.objects.only("uuid"),
         widget=CSVWidget(),
     )
     publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter topics based on the publication status."),
         choices=PublicationStatusOptions.choices,
         widget=CSVWidget(),
+    )
+
+
+class InzageProcedureFilterSet(FilterSet):
+    publicatie = filters.ModelChoiceFilter(
+        queryset=Publication.objects.only("uuid"),
+        to_field_name="uuid",
+        help_text=_(
+            "Search the access procedure based on the unique identifier (UUID) that "
+            "represents a publication."
+        ),
     )
