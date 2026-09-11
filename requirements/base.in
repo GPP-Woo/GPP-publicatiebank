@@ -32,4 +32,4 @@ djangorestframework-recursive
 drf-polymorphic
 
 # app server
-uwsgi
+gunicorn

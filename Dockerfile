@@ -12,9 +12,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
         build-essential \
         libpq-dev \
         shared-mime-info \
-        # required for (log) routing support in uwsgi
-        libpcre3 \
-        libpcre3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -65,15 +62,14 @@ COPY ./bin/docker_start.sh /start.sh
 COPY ./bin/celery_worker.sh \
     ./bin/celery_beat.sh \
     ./bin/celery_flower.sh \
-    ./bin/uwsgi.ini \
     /
-RUN mkdir /app/bin /app/log /app/media
+RUN mkdir /app/bin /app/log /app/media /app/static
 
-VOLUME ["/app/log", "/app/media"]
+VOLUME ["/app/log", "/app/media", "/app/static"]
 
 # copy backend build deps
 COPY --from=backend-build /usr/local/lib/python3.12 /usr/local/lib/python3.12
-COPY --from=backend-build /usr/local/bin/uwsgi /usr/local/bin/uwsgi
+COPY --from=backend-build /usr/local/bin/gunicorn /usr/local/bin/gunicorn
 COPY --from=backend-build /usr/local/bin/celery /usr/local/bin/celery
 COPY --from=backend-build /app/src/ /app/src/
 
