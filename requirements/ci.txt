@@ -379,6 +379,10 @@ glom==25.12.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   mozilla-django-oidc-db
+gunicorn==26.2.0
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 humanize==4.15.0
     # via
     #   -c requirements/base.txt
@@ -722,10 +726,6 @@ urllib3==2.6.3
     #   elastic-apm
     #   requests
     #   sentry-sdk
-uwsgi==2.0.31
-    # via
-    #   -c requirements/base.txt
-    #   -r requirements/base.txt
 vcrpy==8.1.1
     # via -r requirements/test-tools.in
 vine==5.1.0
