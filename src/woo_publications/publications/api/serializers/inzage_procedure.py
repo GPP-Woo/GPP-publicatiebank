@@ -30,3 +30,13 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
                 "read_only": True,
             },
         }
+
+
+class NestedInzageProcedureSerializer(InzageProcedureSerializer):
+    class Meta(InzageProcedureSerializer.Meta):
+        # Keep all the fields except Publication.
+        fields = [
+            field
+            for field in InzageProcedureSerializer.Meta.fields
+            if field != "publicatie"
+        ]
