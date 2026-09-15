@@ -2620,10 +2620,16 @@ components:
           description: '**Opmerking** handmatig opgegeven waarden worden bij het aanmaken
             (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
             de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
+        inzageProcedure:
+          allOf:
+          - $ref: '#/components/schemas/NestedInzageProcedure'
+          readOnly: true
+          description: The inzage procedure attached to this publication.
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp
       - ingetrokkenOp
+      - inzageProcedure
       - laatstGewijzigdDatum
       - officieleTitel
       - registratiedatum
@@ -3293,6 +3299,63 @@ components:
       - datumBeginInzagetermijn
       - datumEindeInzagetermijn
       - publicatie
+      - toelichting
+      - uuid
+    NestedInzageProcedure:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        urlBekendmaking:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The online location where the announcement is published, for
+            example on 'officielebekendmakingen.nl'.
+          maxLength: 1000
+        toelichting:
+          type: string
+          title: Omschrijving
+          description: The description of the announcement.
+        beschikbaarRechtsmiddel:
+          allOf:
+          - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
+          title: Available legal remedy
+          description: |-
+            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+
+            * `zienswijze` - Perspective
+            * `bezwaar` - Objection
+        urlReactieformulier:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The URL to the web form where citizens can submit the legal
+            remedy.
+          maxLength: 1000
+        datumBeginInzagetermijn:
+          type: string
+          format: date
+          title: Datum begin geldigheid
+          description: The date when the inspection period starts.
+        datumEindeInzagetermijn:
+          type: string
+          format: date
+          title: Datum einde geldigheid
+          description: The date when the inspection period comes to an end.If the
+            end date falls on a saturday, sunday or holiday we automatically push
+            the date back to the first available workday.
+        automatischIntrekken:
+          type: boolean
+          title: Automatically redact
+          description: When enabled, ensure that the publication gets redacted on
+            the configured end date.
+      required:
+      - beschikbaarRechtsmiddel
+      - datumBeginInzagetermijn
+      - datumEindeInzagetermijn
       - toelichting
       - uuid
     Organisation:
@@ -4072,6 +4135,11 @@ components:
             zal worden.
         toelichtingBewaartermijn:
           type: string
+        inzageProcedure:
+          allOf:
+          - $ref: '#/components/schemas/NestedInzageProcedure'
+          readOnly: true
+          description: The inzage procedure attached to this publication.
       required:
       - archiefactiedatum
       - archiefnominatie
@@ -4084,6 +4152,7 @@ components:
       - gepubliceerdOp
       - informatieCategorieen
       - ingetrokkenOp
+      - inzageProcedure
       - kenmerken
       - laatstGewijzigdDatum
       - officieleTitel
@@ -4345,11 +4414,17 @@ components:
           description: '**Opmerking** handmatig opgegeven waarden worden bij het aanmaken
             (of wanneer de informatiecategorieën bijgewerkt worden) overschreven met
             de automatisch afgeleide waarden uit de gekoppelde informatiecategorie(ën).'
+        inzageProcedure:
+          allOf:
+          - $ref: '#/components/schemas/NestedInzageProcedure'
+          readOnly: true
+          description: The inzage procedure attached to this publication.
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp
       - informatieCategorieen
       - ingetrokkenOp
+      - inzageProcedure
       - laatstGewijzigdDatum
       - officieleTitel
       - publisher
