@@ -752,7 +752,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
             "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
             "urlReactieformulier": "https://www.example.com/reactieformulier",
             "datumBeginInzagetermijn": "2020-01-01",
-            "datumEindeInzagetermijn": "2025-01-01",
+            "datumEindeInzagetermijn": "2025-01-02",
             "automatischIntrekken": True,
         }
 
@@ -776,7 +776,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
                 "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
                 "url_reactieformulier": "https://www.example.com/reactieformulier",
                 "datum_begin_inzagetermijn": "2020-01-01",
-                "datum_einde_inzagetermijn": "2025-01-01",
+                "datum_einde_inzagetermijn": "2025-01-02",
                 "automatisch_intrekken": True,
             },
             "_cached_object_repr": "Lorem Ipsum",
@@ -809,7 +809,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
             "beschikbaarRechtsmiddel": LegalRemedyOptions.perspective,
             "urlReactieformulier": "https://www.example.com/reactieformulier/changed",
             "datumBeginInzagetermijn": "2000-01-01",
-            "datumEindeInzagetermijn": "2010-01-01",
+            "datumEindeInzagetermijn": "2015-01-02",
             "automatischIntrekken": True,
         }
 
@@ -834,7 +834,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
                 "beschikbaar_rechtsmiddel": LegalRemedyOptions.perspective,
                 "url_reactieformulier": "https://www.example.com/reactieformulier/changed",
                 "datum_begin_inzagetermijn": "2000-01-01",
-                "datum_einde_inzagetermijn": "2010-01-01",
+                "datum_einde_inzagetermijn": "2015-01-02",
                 "automatisch_intrekken": True,
             },
             "_cached_object_repr": "Lorem Ipsum",

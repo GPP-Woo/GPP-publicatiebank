@@ -32,6 +32,7 @@ from .forms import (
     ChangeOwnerForm,
     ChangeOwnerGroepForm,
     DocumentAdminForm,
+    InzageProcedureAdminForm,
     PublicationAdminForm,
 )
 from .models import (
@@ -1032,6 +1033,7 @@ class TopicAdmin(AdminAuditLogMixin, admin.ModelAdmin):
 
 @admin.register(InzageProcedure)
 class InzageProcedureAdmin(AdminAuditLogMixin, admin.ModelAdmin):
+    form = InzageProcedureAdminForm
     fieldsets = [
         (
             _("Description"),

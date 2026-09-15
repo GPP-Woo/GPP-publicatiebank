@@ -52,6 +52,8 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
+convertdate==2.4.1
+    # via workalendar
 cryptography==46.0.7
     # via
     #   django-simple-certmanager
@@ -221,6 +223,8 @@ jsonschema-specifications==2025.9.1
     # via jsonschema
 kombu==5.6.2
     # via celery
+lunardate==0.3.0
+    # via workalendar
 lxml==6.1.0
     # via -r requirements/base.in
 maykin-2fa==2.0.1
@@ -263,6 +267,10 @@ pydantic-settings==2.12.0
     # via django-setup-configuration
 pyjwt==2.12.1
     # via zgw-consumers
+pyluach==2.3.0
+    # via workalendar
+pymeeus==0.5.12
+    # via convertdate
 pyopenssl==26.0.0
     # via webauthn
 pypdf==6.10.2
@@ -271,6 +279,7 @@ python-dateutil==2.9.0.post0
     # via
     #   celery
     #   django-relativedelta
+    #   workalendar
 python-decouple==3.8
     # via
     #   maykin-common
@@ -365,6 +374,8 @@ wcwidth==0.5.0
     # via prompt-toolkit
 webauthn==2.7.0
     # via django-two-factor-auth
+workalendar==17.0.0
+    # via -r requirements/base.in
 wrapt==2.0.1
     # via elastic-apm
 zgw-consumers==1.1.2

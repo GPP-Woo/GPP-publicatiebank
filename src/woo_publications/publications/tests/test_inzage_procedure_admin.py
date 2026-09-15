@@ -222,6 +222,37 @@ class InzageProcedureAdminWebTest(WebTest):
                 "Access procedure with this Publication already exists.",
             )
 
+    def test_end_date_auto_selects_workday(self):
+        publication = PublicationFactory.create()
+        url = reverse("admin:publications_inzageprocedure_add")
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms["inzageprocedure_form"]
+
+        with self.subTest("create inzage procedure"):
+            form["publicatie"].force_value(publication.id)
+            form["url_bekendmaking"] = "https://example.com/bekendmaking"
+            form["toelichting"] = "bla"
+            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["url_reactieformulier"] = "https://example.com/reactieformulier"
+            form["datum_begin_inzagetermijn"] = "2008-09-10"
+            form["datum_einde_inzagetermijn"] = "2026-04-27"
+            form["automatisch_intrekken"] = True
+
+            submit_response = form.submit(name="_save")
+
+            self.assertRedirects(
+                submit_response,
+                reverse("admin:publications_inzageprocedure_changelist"),
+            )
+
+            inzage_procedure = InzageProcedure.objects.get()
+
+            self.assertEqual(
+                inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
+            )
+
     def test_inzage_procedure_admin_update(self):
         publication_1, publication_2 = PublicationFactory.create_batch(2)
         inzage_procedure = InzageProcedureFactory.create(
