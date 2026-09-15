@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 from unittest.mock import MagicMock, call, patch
 from uuid import uuid4
@@ -31,10 +32,11 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import PublicationStatusOptions
+from ..constants import LegalRemedyOptions, PublicationStatusOptions
 from ..models import Publication, PublicationIdentifier
 from .factories import (
     DocumentFactory,
+    InzageProcedureFactory,
     PublicationFactory,
     PublicationIdentifierFactory,
     TopicFactory,
@@ -197,6 +199,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "archiefnominatie": ArchiveNominationChoices.retain,
                 "archiefactiedatum": "2025-01-01",
                 "toelichtingBewaartermijn": "",
+                "inzageProcedure": None,
             }
 
             self.assertEqual(data["results"][0], expected_first_item_data)
@@ -234,6 +237,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "archiefnominatie": ArchiveNominationChoices.retain,
                 "archiefactiedatum": "2025-01-01",
                 "toelichtingBewaartermijn": "",
+                "inzageProcedure": None,
             }
 
             self.assertEqual(data["results"][1], expected_second_item_data)
@@ -296,6 +300,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefnominatie": ArchiveNominationChoices.retain,
             "archiefactiedatum": "2025-01-01",
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": None,
         }
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
@@ -329,6 +334,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefnominatie": ArchiveNominationChoices.retain,
             "archiefactiedatum": "2025-01-01",
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": None,
         }
 
         # registratiedatum
@@ -984,6 +990,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
             "ingetrokkenOp": None,
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": None,
         }
         expected_second_item_data = {
             "uuid": str(publication2.uuid),
@@ -1014,6 +1021,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
             "ingetrokkenOp": None,
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": None,
         }
 
         with (
@@ -1282,6 +1290,16 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             archiefnominatie=ArchiveNominationChoices.retain,
             archiefactiedatum="2025-01-01",
         )
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication,
+            url_bekendmaking="https://example.com/",
+            toelichting="some data",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            url_reactieformulier="https://example.com/",
+            datum_begin_inzagetermijn=datetime.date(1908, 9, 10),
+            datum_einde_inzagetermijn=datetime.date(1910, 9, 8),
+            automatisch_intrekken=False,
+        )
         detail_url = reverse(
             "api:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
@@ -1323,6 +1341,16 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefnominatie": ArchiveNominationChoices.retain,
             "archiefactiedatum": "2025-01-01",
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": {
+                "uuid": str(inzage_procedure.uuid),
+                "urlBekendmaking": "https://example.com/",
+                "toelichting": "some data",
+                "beschikbaarRechtsmiddel": LegalRemedyOptions.perspective,
+                "urlReactieformulier": "https://example.com/",
+                "datumBeginInzagetermijn": "1908-09-10",
+                "datumEindeInzagetermijn": "1910-09-08",
+                "automatischIntrekken": False,
+            },
         }
 
         self.assertEqual(data, expected_first_item_data)
@@ -1611,6 +1639,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "archiefnominatie": ArchiveNominationChoices.destroy,
                 "archiefactiedatum": "3000-01-01",
                 "toelichtingBewaartermijn": "THIS VALUE WILL BE USED",
+                "inzageProcedure": None,
             }
 
             # diWooInformatieCategorieen ordering is done on the UUID field to make
@@ -1793,6 +1822,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "archiefnominatie": ArchiveNominationChoices.destroy,
                 "archiefactiedatum": "2025-09-24",
                 "toelichtingBewaartermijn": "changed",
+                "inzageProcedure": None,
             }
 
             self.assertEqual(response_data, expected_data)
@@ -1964,6 +1994,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "archiefnominatie": "",
             "archiefactiedatum": "2034-09-24",
             "toelichtingBewaartermijn": "",
+            "inzageProcedure": None,
         }
 
         # test that only officiele_titel got changed
