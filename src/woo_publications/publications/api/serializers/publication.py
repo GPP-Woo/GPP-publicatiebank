@@ -159,6 +159,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         help_text=_("The inzage procedure attached to this publication."),
         read_only=True,
         many=False,
+        allow_null=True,
     )
 
     class Meta:  # pyright: ignore
