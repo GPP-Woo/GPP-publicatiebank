@@ -81,7 +81,8 @@ class TestRevokePublications(TestCase):
         self.assertEqual(TimelineLogProxy.objects.count(), 0)
 
         # call the task
-        revoke_inzage_procedure_publications()
+        with self.captureOnCommitCallbacks(execute=True):
+            revoke_inzage_procedure_publications()
 
         should_revoke.refresh_from_db()
         should_have_already_been_revoked.refresh_from_db()

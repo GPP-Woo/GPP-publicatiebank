@@ -1,3 +1,4 @@
+from functools import partial
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import Literal, assert_never
@@ -557,7 +558,6 @@ def update_document_rsin(*, document_id: int, rsin: str):
 
 
 @app.task
-@transaction.atomic()
 def revoke_inzage_procedure_publications():
     publications = Publication.objects.filter(
         inzageprocedure__datum_einde_inzagetermijn__lte=timezone.now(),
@@ -566,11 +566,15 @@ def revoke_inzage_procedure_publications():
     )
 
     for publication in publications:
-        publication.revoke(user=SYSTEM_USER)
-        audit_system_update(
-            content_object=publication, object_data=serialize_instance(publication)
-        )
-
-    Publication.objects.bulk_update(
-        publications, fields=["publicatiestatus", "ingetrokken_op"]
-    )
+        with transaction.atomic():
+            # revoke the publication (and the attached documents)
+            publication.revoke(user=SYSTEM_USER)
+            publication.save()
+            # only add log if the transaction succeeds.
+            transaction.on_commit(
+                partial(
+                    audit_system_update,
+                    content_object=publication,
+                    object_data=serialize_instance(publication),
+                )
+            )
