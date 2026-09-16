@@ -8,7 +8,7 @@ from django.db import models
 from woo_publications.accounts.models import User
 from woo_publications.typing import JSONObject
 
-from .constants import Events
+from .constants import SYSTEM_USER, Events
 from .models import TimelineLogProxy
 from .typing import MetadataDict
 
@@ -26,6 +26,8 @@ __all__ = [
     "audit_api_delete",
     "audit_api_download",
     "audit_api_document_delete",
+    # system
+    "audit_system_update",
 ]
 
 
@@ -268,4 +270,23 @@ def audit_api_document_delete(
             "service_uuid": service_uuid,
             "document_uuid": document_uuid,
         },
+    )
+
+
+# System tooling:
+
+
+def audit_system_update(
+    *,
+    content_object: models.Model,
+    object_data: JSONObject,
+) -> None:
+    assert isinstance(SYSTEM_USER["identifier"], str)
+
+    _audit_event(
+        content_object=content_object,
+        event=Events.update,
+        user_id=SYSTEM_USER["identifier"],
+        user_display=SYSTEM_USER["display_name"],
+        object_data=object_data,
     )

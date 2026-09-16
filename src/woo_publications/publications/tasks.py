@@ -1,3 +1,4 @@
+from functools import partial
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import Literal, assert_never
@@ -21,13 +22,18 @@ from woo_publications.contrib.documents_api.client import (
     get_client as get_documents_client,
 )
 from woo_publications.contrib.gpp_zoeken.client import get_client as get_zoeken_client
-from woo_publications.logging.logevent import audit_admin_document_delete
+from woo_publications.logging.logevent import (
+    audit_admin_document_delete,
+    audit_system_update,
+)
+from woo_publications.logging.serializing import serialize_instance
 from woo_publications.publications.constants import (
     LEGACY_MS_OFFICE_MIMETYPES,
     PublicationStatusOptions,
 )
 
 from ..constants import StrippableFileTypes
+from ..logging.constants import SYSTEM_USER
 from .file_processing import (
     strip_html,
     strip_ms_office_document,
@@ -549,3 +555,26 @@ def update_document_rsin(*, document_id: int, rsin: str):
             client.unlock_document(uuid=uuid, lock=lock)
             document.lock = ""
             document.save(update_fields=("lock",))
+
+
+@app.task
+def revoke_inzage_procedure_publications():
+    publications = Publication.objects.filter(
+        inzageprocedure__datum_einde_inzagetermijn__lte=timezone.now(),
+        inzageprocedure__automatisch_intrekken=True,
+        publicatiestatus=PublicationStatusOptions.published,
+    )
+
+    for publication in publications:
+        with transaction.atomic():
+            # revoke the publication (and the attached documents)
+            publication.revoke(user=SYSTEM_USER)
+            publication.save()
+            # only add log if the transaction succeeds.
+            transaction.on_commit(
+                partial(
+                    audit_system_update,
+                    content_object=publication,
+                    object_data=serialize_instance(publication),
+                )
+            )
