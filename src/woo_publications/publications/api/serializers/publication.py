@@ -28,6 +28,7 @@ from ...tasks import index_document, index_publication
 from ...typing import Kenmerk
 from ..utils import _get_fsm_help_text
 from ..validators import PublicationStatusValidator, validate_duplicated_kenmerken
+from .inzage_procedure import NestedInzageProcedureSerializer
 from .owner import (
     EigenaarGroepSerializer,
     EigenaarSerializer,
@@ -152,6 +153,14 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         allow_null=True,
         required=False,
     )
+    inzage_procedure = NestedInzageProcedureSerializer(
+        source="inzageprocedure",
+        label=_("inzage procedure"),
+        help_text=_("The inzage procedure attached to this publication."),
+        read_only=True,
+        many=False,
+        allow_null=True,
+    )
 
     class Meta:  # pyright: ignore
         model = Publication
@@ -183,6 +192,7 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
             "archiefnominatie",
             "archiefactiedatum",
             "toelichting_bewaartermijn",
+            "inzage_procedure",
         )
         extra_kwargs = {
             "uuid": {"read_only": True},
