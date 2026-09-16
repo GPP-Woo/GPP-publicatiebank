@@ -281,6 +281,8 @@ def audit_system_update(
     content_object: models.Model,
     object_data: JSONObject,
 ) -> None:
+    assert isinstance(SYSTEM_USER["identifier"], str)
+
     _audit_event(
         content_object=content_object,
         event=Events.update,
