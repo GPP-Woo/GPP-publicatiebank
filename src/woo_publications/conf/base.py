@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 import django_stubs_ext
 import structlog
+from celery.schedules import crontab
 from open_api_framework.conf.base import *  # noqa
 from upgrade_check import UpgradeCheck, VersionRange
 
@@ -518,7 +519,13 @@ CELERY_TASK_SOFT_TIME_LIMIT = config(
     "CELERY_TASK_SOFT_TIME_LIMIT", default=1 * 60
 )  # soft
 
-CELERY_BEAT_SCHEDULE = {}
+# https://docs.celeryproject.org/en/stable/userguide/periodic-tasks.html#crontab-schedules
+CELERY_BEAT_SCHEDULE = {
+    "revoke-inzage-procedure-publications": {
+        "task": "woo_publications.publications.tasks.revoke_inzage_procedure_publications",  # noqa: E501
+        "schedule": crontab(minute=1, hour=0),
+    },
+}
 
 # Only ACK when the task has been executed. This prevents tasks from getting lost, with
 # the drawback that tasks should be idempotent (if they execute partially, the mutations
