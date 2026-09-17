@@ -1,5 +1,3 @@
-import datetime
-
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -46,22 +44,10 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
     def validate(self, attrs):
         # user submitted data -> database data -> None (will never happen
         # since it's a required field)
-        start_date: datetime.date | None = (
-            attrs["datum_begin_inzagetermijn"]
-            if "datum_begin_inzagetermijn" in attrs
-            else self.instance.datum_begin_inzagetermijn
-            if self.instance
-            else None
-        )
-        # user submitted data -> database data -> None (will never happen
-        # since it's a required field)
-        end_date: datetime.date | None = (
-            attrs["datum_einde_inzagetermijn"]
-            if "datum_einde_inzagetermijn" in attrs
-            else self.instance.datum_einde_inzagetermijn
-            if self.instance
-            else None
-        )
+        start_field = "datum_begin_inzagetermijn"
+        start_date = attrs.get(start_field, getattr(self.instance, start_field, None))
+        end_field = "datum_einde_inzagetermijn"
+        end_date = attrs.get(end_field, getattr(self.instance, end_field, None))
 
         assert start_date
         assert end_date

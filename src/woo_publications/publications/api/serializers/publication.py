@@ -1,4 +1,3 @@
-import datetime
 from collections.abc import Sequence
 from functools import partial
 from typing import Literal
@@ -228,21 +227,10 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
 
     def validate(self, attrs):
         # user submitted data -> database data -> None
-        start_date: datetime.date | None = (
-            attrs.get("datum_begin_geldigheid")
-            if "datum_begin_geldigheid" in attrs
-            else self.instance.datum_begin_geldigheid
-            if self.instance
-            else None
-        )
-        # user submitted data -> database data -> None
-        end_date: datetime.date | None = (
-            attrs.get("datum_einde_geldigheid")
-            if "datum_einde_geldigheid" in attrs
-            else self.instance.datum_einde_geldigheid
-            if self.instance
-            else None
-        )
+        start_field = "datum_begin_geldigheid"
+        start_date = attrs.get(start_field, getattr(self.instance, start_field, None))
+        end_field = "datum_einde_geldigheid"
+        end_date = attrs.get(end_field, getattr(self.instance, end_field, None))
 
         if start_date and end_date and start_date > end_date:
             raise serializers.ValidationError(
