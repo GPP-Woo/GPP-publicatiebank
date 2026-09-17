@@ -1080,3 +1080,18 @@ class InzageProcedureAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "datum_einde_inzagetermijn",
     )
     autocomplete_fields = ("publicatie",)
+
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: InzageProcedure,
+        form: forms.Form,
+        change: bool,
+    ):
+        if not obj.url_reactieformulier:
+            obj.set_url_reactieformulier(
+                beschikbaar_rechtsmiddel=obj.beschikbaar_rechtsmiddel,
+                url_reactieformulier=None,
+            )
+
+        super().save_model(request, obj, form, change)
