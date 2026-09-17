@@ -1290,3 +1290,36 @@ class InzageProcedure(models.Model):
 
     def __str__(self):
         return str(self.publicatie)
+
+    def set_url_reactieformulier(
+        self,
+        *,
+        beschikbaar_rechtsmiddel: LegalRemedyOptions | None,
+        url_reactieformulier: str | None,
+    ):
+        """
+        Set the `url_reactieformulier` based on the provided data if provided,
+        or fall back on the global configured url fields based on the
+        `beschikbaar_rechtsmiddel`.
+        """
+
+        if not beschikbaar_rechtsmiddel and not url_reactieformulier:
+            return
+
+        global_config = GlobalConfiguration.get_solo()
+
+        match (bool(url_reactieformulier), beschikbaar_rechtsmiddel):
+            case (True, _):
+                self.url_reactieformulier = url_reactieformulier
+            case (False, LegalRemedyOptions.objection):
+                if (
+                    objection_reaction_form_url
+                    := global_config.objection_reaction_form_url
+                ):
+                    self.url_reactieformulier = objection_reaction_form_url
+            case (False, LegalRemedyOptions.perspective):
+                if (
+                    perspective_reaction_form_url
+                    := global_config.perspective_reaction_form_url
+                ):
+                    self.url_reactieformulier = perspective_reaction_form_url
