@@ -26,8 +26,8 @@ class InzageProcedureAdminWebTest(WebTest):
         GlobalConfiguration.objects.update_or_create(
             pk=GlobalConfiguration.singleton_instance_id,
             defaults={
-                "perspective_reaction_form_url": "http:www.example.com/perspective",
-                "objection_reaction_form_url": "http:www.example.com/objection",
+                "perspective_reaction_form_url": "http://www.example.com/perspective",
+                "objection_reaction_form_url": "http://www.example.com/objection",
             },
         )
 
@@ -234,7 +234,7 @@ class InzageProcedureAdminWebTest(WebTest):
                 "Access procedure with this Publication already exists.",
             )
 
-    def test_inzage_procedure_auto_fills_url_reactieformulier_field(self):
+    def test_inzage_procedure_admin_create_auto_fills_url_reactieformulier_field(self):
         publication = PublicationFactory.create()
         url = reverse("admin:publications_inzageprocedure_add")
 
@@ -261,7 +261,7 @@ class InzageProcedureAdminWebTest(WebTest):
         inzage_procedure = InzageProcedure.objects.get()
 
         self.assertEqual(
-            inzage_procedure.url_reactieformulier, "http:www.example.com/perspective"
+            inzage_procedure.url_reactieformulier, "http://www.example.com/perspective"
         )
 
     def test_end_date_auto_selects_workday(self):
@@ -399,6 +399,84 @@ class InzageProcedureAdminWebTest(WebTest):
                 submit_response.context["adminform"],
                 "publicatie",
                 "Access procedure with this Publication already exists.",
+            )
+
+    def test_inzage_procedure_admin_update_auto_fills_url_reactieformulier_field(self):
+        inzage_procedure = InzageProcedureFactory.create(
+            url_reactieformulier="https://example.com/bekendmaking/",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+        )
+
+        url = reverse(
+            "admin:publications_inzageprocedure_change",
+            kwargs={"object_id": inzage_procedure.pk},
+        )
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["inzageprocedure_form"]
+
+        with self.subTest(
+            "update url_bekendmaking while providing beschikbaar_rechtsmiddel "
+            "doesn't fall back on global settings"
+        ):
+            form["url_reactieformulier"] = "https://example.com/bekendmaking/changed/"
+            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 302)
+            inzage_procedure.refresh_from_db()
+            self.assertEqual(
+                inzage_procedure.url_reactieformulier,
+                "https://example.com/bekendmaking/changed/",
+            )
+            self.assertEqual(
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalRemedyOptions.perspective,
+            )
+
+        with self.subTest(
+            "updating beschikbaar_rechtsmiddel without changing url_bekendmaking "
+            "doesn't alter the url field"
+        ):
+            # explicitly state that the url_bekendmaking's field contains data
+            form["url_reactieformulier"] = "https://example.com/bekendmaking/changed/"
+            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 302)
+            inzage_procedure.refresh_from_db()
+            self.assertEqual(
+                inzage_procedure.url_reactieformulier,
+                "https://example.com/bekendmaking/changed/",
+            )
+            self.assertEqual(
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalRemedyOptions.objection,
+            )
+
+        with self.subTest(
+            "updating beschikbaar_rechtsmiddel without setting url_bekendmaking "
+            "to be empty does alter the url field"
+        ):
+            # explicitly state that the url_bekendmaking's field contains data
+            form["url_reactieformulier"] = ""
+            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+
+            submit_response = form.submit(name="_save")
+
+            self.assertEqual(submit_response.status_code, 302)
+            inzage_procedure.refresh_from_db()
+            self.assertEqual(
+                inzage_procedure.url_reactieformulier,
+                "http://www.example.com/perspective",
+            )
+            self.assertEqual(
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalRemedyOptions.perspective,
             )
 
     def test_inzage_procedure_admin_delete(self):
