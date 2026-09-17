@@ -1,6 +1,13 @@
+from functools import partial
+
+from django import forms
 from django.contrib import admin
+from django.db import transaction
+from django.http import HttpRequest
 
 from solo.admin import SingletonModelAdmin
+
+from woo_publications.publications.models import InzageProcedure
 
 from .models import GlobalConfiguration
 
@@ -26,3 +33,33 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
                 )
 
         return field
+
+    @staticmethod
+    def _back_fill_url_reactieformulier():
+        objects = InzageProcedure.objects.filter(url_reactieformulier="")
+
+        for inzage_procedure in objects:
+            inzage_procedure.set_url_reactieformulier(
+                beschikbaar_rechtsmiddel=inzage_procedure.beschikbaar_rechtsmiddel,
+                url_reactieformulier=inzage_procedure.url_reactieformulier,
+            )
+
+        InzageProcedure.objects.bulk_update(objects, fields=["url_reactieformulier"])
+
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: GlobalConfiguration,
+        form: forms.Form,
+        change: bool,
+    ):
+        # since these fields are required we just need to check if the
+        # initial was originally empty. This function will only trigger
+        # once and then never again.
+        if (
+            not form.initial["perspective_reaction_form_url"]
+            and not form.initial["objection_reaction_form_url"]
+        ):
+            transaction.on_commit(partial(self._back_fill_url_reactieformulier))
+
+        super().save_model(request, obj, form, change)
