@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -62,6 +63,24 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
             )
 
         return attrs
+
+    @transaction.atomic
+    def create(self, validated_data):
+        inzage_procedure = super().create(validated_data)
+        inzage_procedure.set_url_reactieformulier(
+            beschikbaar_rechtsmiddel=inzage_procedure.beschikbaar_rechtsmiddel,
+            url_reactieformulier=inzage_procedure.url_reactieformulier,
+        )
+        inzage_procedure.save()
+        return inzage_procedure
+
+    @transaction.atomic
+    def update(self, instance: InzageProcedure, validated_data):
+        instance.set_url_reactieformulier(
+            beschikbaar_rechtsmiddel=validated_data.get("beschikbaar_rechtsmiddel"),
+            url_reactieformulier=validated_data.get("url_reactieformulier"),
+        )
+        return super().update(instance, validated_data)
 
 
 class NestedInzageProcedureSerializer(InzageProcedureSerializer):
