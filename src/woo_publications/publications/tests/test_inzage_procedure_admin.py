@@ -9,6 +9,7 @@ from freezegun import freeze_time
 from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
+from woo_publications.config.models import GlobalConfiguration
 
 from ..constants import LegalRemedyOptions
 from ..models import InzageProcedure
@@ -22,6 +23,17 @@ class InzageProcedureAdminWebTest(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create(superuser=True)
+        GlobalConfiguration.objects.update_or_create(
+            pk=GlobalConfiguration.singleton_instance_id,
+            defaults={
+                "perspective_reaction_form_url": "http:www.example.com/perspective",
+                "objection_reaction_form_url": "http:www.example.com/objection",
+            },
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
 
     def test_inzage_procedure_admin_shows_items(self):
         InzageProcedureFactory.create_batch(2)
@@ -222,6 +234,36 @@ class InzageProcedureAdminWebTest(WebTest):
                 "Access procedure with this Publication already exists.",
             )
 
+    def test_inzage_procedure_auto_fills_url_reactieformulier_field(self):
+        publication = PublicationFactory.create()
+        url = reverse("admin:publications_inzageprocedure_add")
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms["inzageprocedure_form"]
+
+        form["publicatie"].force_value(publication.id)
+        form["url_bekendmaking"] = "https://example.com/bekendmaking"
+        form["toelichting"] = "bla"
+        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+        form["url_reactieformulier"] = ""
+        form["datum_begin_inzagetermijn"] = "2008-09-10"
+        form["datum_einde_inzagetermijn"] = "2026-04-27"
+        form["automatisch_intrekken"] = True
+
+        submit_response = form.submit(name="_save")
+
+        self.assertRedirects(
+            submit_response,
+            reverse("admin:publications_inzageprocedure_changelist"),
+        )
+
+        inzage_procedure = InzageProcedure.objects.get()
+
+        self.assertEqual(
+            inzage_procedure.url_reactieformulier, "http:www.example.com/perspective"
+        )
+
     def test_end_date_auto_selects_workday(self):
         publication = PublicationFactory.create()
         url = reverse("admin:publications_inzageprocedure_add")
@@ -230,28 +272,27 @@ class InzageProcedureAdminWebTest(WebTest):
         self.assertEqual(response.status_code, 200)
         form = response.forms["inzageprocedure_form"]
 
-        with self.subTest("create inzage procedure"):
-            form["publicatie"].force_value(publication.id)
-            form["url_bekendmaking"] = "https://example.com/bekendmaking"
-            form["toelichting"] = "bla"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
-            form["url_reactieformulier"] = "https://example.com/reactieformulier"
-            form["datum_begin_inzagetermijn"] = "2008-09-10"
-            form["datum_einde_inzagetermijn"] = "2026-04-27"
-            form["automatisch_intrekken"] = True
+        form["publicatie"].force_value(publication.id)
+        form["url_bekendmaking"] = "https://example.com/bekendmaking"
+        form["toelichting"] = "bla"
+        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["url_reactieformulier"] = "https://example.com/reactieformulier"
+        form["datum_begin_inzagetermijn"] = "2008-09-10"
+        form["datum_einde_inzagetermijn"] = "2026-04-27"
+        form["automatisch_intrekken"] = True
 
-            submit_response = form.submit(name="_save")
+        submit_response = form.submit(name="_save")
 
-            self.assertRedirects(
-                submit_response,
-                reverse("admin:publications_inzageprocedure_changelist"),
-            )
+        self.assertRedirects(
+            submit_response,
+            reverse("admin:publications_inzageprocedure_changelist"),
+        )
 
-            inzage_procedure = InzageProcedure.objects.get()
+        inzage_procedure = InzageProcedure.objects.get()
 
-            self.assertEqual(
-                inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
-            )
+        self.assertEqual(
+            inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
+        )
 
     def test_end_date_cannot_be_earlier_then_start_day(self):
         publication = PublicationFactory.create()

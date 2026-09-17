@@ -12,6 +12,7 @@ from woo_publications.api.tests.mixins import (
     APIKeyUnAuthorizedMixin,
     TokenAuthMixin,
 )
+from woo_publications.config.models import GlobalConfiguration
 
 from ..constants import LegalRemedyOptions
 from ..models import InzageProcedure
@@ -76,6 +77,22 @@ class InzageProcedureApiAuthorizationAndPermissionTests(
 
 
 class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        GlobalConfiguration.objects.update_or_create(
+            pk=GlobalConfiguration.singleton_instance_id,
+            defaults={
+                "perspective_reaction_form_url": "http:www.example.com/perspective",
+                "objection_reaction_form_url": "http:www.example.com/objection",
+            },
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
     def test_list_inzage_procedure(self):
         publication_1, publication_2 = PublicationFactory.create_batch(2)
         inzage_procedure_1 = InzageProcedureFactory.create(
@@ -298,6 +315,27 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.json()["datumEindeInzagetermijn"], "2026-04-28")
 
+    def test_create_inzage_procedure_auto_fills_url_reactieformulier_field(self):
+        publication = PublicationFactory.create()
+        url = reverse("api:inzageprocedure-list")
+        body = {
+            "publicatie": str(publication.uuid),
+            "urlBekendmaking": "https://www.example.com/bekendmaking",
+            "toelichting": "toelichting",
+            "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
+            "urlReactieformulier": "",
+            "datumBeginInzagetermijn": "2020-01-01",
+            "datumEindeInzagetermijn": "2026-04-27",
+            "automatischIntrekken": True,
+        }
+
+        response = self.client.post(url, data=body, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.json()["urlReactieformulier"], "http:www.example.com/objection"
+        )
+
     def test_update_inzage_procedure(self):
         assert InzageProcedure.objects.count() == 0
 
@@ -398,6 +436,27 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         self.assertEqual(
             response.json()["datumEindeInzagetermijn"],
             [_("The end date cannot happen before the start date.")],
+        )
+
+    def test_update_inzage_procedure_auto_fills_url_reactieformulier_field(self):
+        assert InzageProcedure.objects.count() == 0
+
+        inzage_procedure = InzageProcedureFactory.create()
+        detail_url = reverse(
+            "api:inzageprocedure-detail",
+            kwargs={"uuid": str(inzage_procedure.uuid)},
+        )
+
+        response = self.client.patch(
+            detail_url,
+            data={"beschikbaarRechtsmiddel": LegalRemedyOptions.perspective},
+            headers=AUDIT_HEADERS,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(
+            response_data["urlReactieformulier"], "http:www.example.com/perspective"
         )
 
     def test_destroy_inzage_procedure(self):
