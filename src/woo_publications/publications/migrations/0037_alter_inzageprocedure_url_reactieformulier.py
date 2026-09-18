@@ -4,9 +4,11 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("publications", "0035_inzageprocedure"),
+        (
+            "publications",
+            "0036_inzageprocedure_datum_einde_inzagetermijn_cannot_be_before_datum_einde_inzagetermijn_and_more",
+        ),
     ]
 
     operations = [
