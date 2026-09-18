@@ -78,6 +78,16 @@ class GlobalConfiguration(SingletonModel):
             "publication."
         ),
     )
+    perspective_reaction_form_url = models.URLField(
+        _("perspective reaction form URL"),
+        max_length=500,
+        help_text=_("The URL to the default perspective reaction form."),
+    )
+    objection_reaction_form_url = models.URLField(
+        _("objection reaction form URL"),
+        max_length=500,
+        help_text=_("The URL to the default objection reaction form."),
+    )
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         verbose_name = _("global configuration")

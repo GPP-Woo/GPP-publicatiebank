@@ -1252,7 +1252,9 @@ class InzageProcedure(models.Model):
     url_reactieformulier = models.URLField(
         _("announcement URL"),
         help_text=_(
-            "The URL to the web form where citizens can submit the legal remedy."
+            "The URL to the web form where citizens can submit the legal remedy. "
+            "This field gets populated based on the 'available legal remedy' field "
+            "and the global config when left empty."
         ),
         max_length=1000,
         blank=True,
@@ -1290,3 +1292,32 @@ class InzageProcedure(models.Model):
 
     def __str__(self):
         return str(self.publicatie)
+
+    def set_url_reactieformulier(
+        self,
+        *,
+        beschikbaar_rechtsmiddel: LegalRemedyOptions | None,
+        url_reactieformulier: str | None,
+    ):
+        """
+        Set the `url_reactieformulier` based on the provided data if provided,
+        or fall back on the global configured url fields based on the
+        `beschikbaar_rechtsmiddel`.
+        """
+
+        if not beschikbaar_rechtsmiddel and not url_reactieformulier:
+            return
+
+        global_config = GlobalConfiguration.get_solo()
+
+        match (url_reactieformulier, beschikbaar_rechtsmiddel):
+            case (url, _) if url:
+                self.url_reactieformulier = url
+            case (_, LegalRemedyOptions.objection) if (
+                global_config.objection_reaction_form_url
+            ):
+                self.url_reactieformulier = global_config.objection_reaction_form_url
+            case (_, LegalRemedyOptions.perspective) if (
+                global_config.perspective_reaction_form_url
+            ):
+                self.url_reactieformulier = global_config.perspective_reaction_form_url
