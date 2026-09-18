@@ -25,6 +25,7 @@ class TestRevokePublications(TestCase):
         InzageProcedureFactory.create(
             publicatie=should_revoke,
             automatisch_intrekken=True,
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
             datum_einde_inzagetermijn=datetime.date(2026, 9, 1),
         )
         # should_have_already_been_revoked
@@ -34,6 +35,7 @@ class TestRevokePublications(TestCase):
         InzageProcedureFactory.create(
             publicatie=should_have_already_been_revoked,
             automatisch_intrekken=True,
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
             datum_einde_inzagetermijn=datetime.date(2026, 1, 1),
         )
         # does_not_automatically_revoke
@@ -43,6 +45,7 @@ class TestRevokePublications(TestCase):
         InzageProcedureFactory.create(
             publicatie=does_not_automatically_revoke,
             automatisch_intrekken=False,
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
             datum_einde_inzagetermijn=datetime.date(2026, 9, 1),
         )
         # date_does_not_match_today
@@ -52,6 +55,7 @@ class TestRevokePublications(TestCase):
         InzageProcedureFactory.create(
             publicatie=date_does_not_match_today,
             automatisch_intrekken=True,
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
             datum_einde_inzagetermijn=datetime.date(2026, 12, 23),
         )
         # concept
@@ -61,6 +65,7 @@ class TestRevokePublications(TestCase):
         InzageProcedureFactory.create(
             publicatie=concept,
             automatisch_intrekken=True,
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
             datum_einde_inzagetermijn=datetime.date(2026, 9, 1),
         )
         # already_revoked
@@ -75,6 +80,7 @@ class TestRevokePublications(TestCase):
             InzageProcedureFactory.create(
                 publicatie=already_revoked,
                 automatisch_intrekken=True,
+                datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
                 datum_einde_inzagetermijn=datetime.date(2026, 9, 1),
             )
 

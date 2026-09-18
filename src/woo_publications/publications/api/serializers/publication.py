@@ -225,6 +225,24 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
         validate_duplicated_kenmerken(value)
         return value
 
+    def validate(self, attrs):
+        # user submitted data -> database data -> None
+        start_field = "datum_begin_geldigheid"
+        start_date = attrs.get(start_field, getattr(self.instance, start_field, None))
+        end_field = "datum_einde_geldigheid"
+        end_date = attrs.get(end_field, getattr(self.instance, end_field, None))
+
+        if start_date and end_date and start_date > end_date:
+            raise serializers.ValidationError(
+                {
+                    "datum_einde_geldigheid": _(
+                        "The end date cannot happen before the start date."
+                    )
+                }
+            )
+
+        return attrs
+
     @extend_schema_field(OpenApiTypes.URI | Literal[""])  # pyright: ignore[reportArgumentType]
     def get_url_publicatie_intern(self, obj: Publication) -> str:
         return obj.gpp_app_url

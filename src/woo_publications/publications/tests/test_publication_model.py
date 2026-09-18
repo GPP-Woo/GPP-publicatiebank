@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 
 from django.db.utils import IntegrityError
@@ -218,6 +219,45 @@ class TestPublicationModel(TestCase):
         with self.subTest("published with no publisher (raises errors)"):
             publication.publicatiestatus = PublicationStatusOptions.published
             publication.publisher = None
+
+            with self.assertRaises(IntegrityError):
+                publication.save()
+
+    def test_start_end_date_constraint(self):
+        publication = PublicationFactory.build(
+            eigenaar=OrganisationMemberFactory.create(),
+            publicatiestatus=PublicationStatusOptions.concept,
+            publisher=None,
+        )
+
+        with self.subTest("no dates"):
+            publication.datum_begin_geldigheid = None
+            publication.datum_einde_geldigheid = None
+            publication.save()
+
+        with self.subTest("no start date"):
+            publication.datum_begin_geldigheid = None
+            publication.datum_einde_geldigheid = datetime.date(2020, 2, 2)
+            publication.save()
+
+        with self.subTest("no end date"):
+            publication.datum_begin_geldigheid = datetime.date(2020, 2, 2)
+            publication.datum_einde_geldigheid = None
+            publication.save()
+
+        with self.subTest("start date before end date"):
+            publication.datum_begin_geldigheid = datetime.date(2020, 2, 2)
+            publication.datum_einde_geldigheid = datetime.date(2020, 12, 2)
+            publication.save()
+
+        with self.subTest("same dates"):
+            publication.datum_begin_geldigheid = datetime.date(2020, 2, 2)
+            publication.datum_einde_geldigheid = datetime.date(2020, 2, 2)
+            publication.save()
+
+        with self.subTest("end date before start date"):
+            publication.datum_begin_geldigheid = datetime.date(2020, 12, 2)
+            publication.datum_einde_geldigheid = datetime.date(2020, 2, 2)
 
             with self.assertRaises(IntegrityError):
                 publication.save()

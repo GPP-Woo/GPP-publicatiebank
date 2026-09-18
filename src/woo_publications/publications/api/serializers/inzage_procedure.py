@@ -41,6 +41,28 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
             },
         }
 
+    def validate(self, attrs):
+        # user submitted data -> database data -> None (will never happen
+        # since it's a required field)
+        start_field = "datum_begin_inzagetermijn"
+        start_date = attrs.get(start_field, getattr(self.instance, start_field, None))
+        end_field = "datum_einde_inzagetermijn"
+        end_date = attrs.get(end_field, getattr(self.instance, end_field, None))
+
+        assert start_date
+        assert end_date
+
+        if start_date > end_date:
+            raise serializers.ValidationError(
+                {
+                    "datum_einde_inzagetermijn": _(
+                        "The end date cannot happen before the start date."
+                    )
+                }
+            )
+
+        return attrs
+
 
 class NestedInzageProcedureSerializer(InzageProcedureSerializer):
     class Meta(InzageProcedureSerializer.Meta):

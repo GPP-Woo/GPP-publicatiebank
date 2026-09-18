@@ -404,6 +404,25 @@ class TestPublicationsAdmin(WebTest):
         self.assertEqual(submit_response.status_code, 302)
         self.assertTrue(Publication.objects.exists())
 
+    def test_end_date_cannot_be_earlier_then_start_day(self):
+        reverse_url = reverse("admin:publications_publication_add")
+        response = self.app.get(reverse_url, user=self.user)
+
+        form = response.forms["publication_form"]
+        form["publicatiestatus"].select(text=PublicationStatusOptions.concept.label)
+        form["officiele_titel"] = "test"
+        form["datum_begin_geldigheid"] = "2024-09-24"
+        form["datum_einde_geldigheid"] = "2024-02-24"
+
+        submit_response = form.submit(name="_save")
+
+        self.assertEqual(submit_response.status_code, 200)
+        self.assertFormError(
+            submit_response.context["adminform"],
+            "datum_einde_geldigheid",
+            _("The end date cannot happen before the start date."),
+        )
+
     @patch("woo_publications.publications.admin.index_publication.delay")
     def test_publication_create_schedules_index_task(
         self, mock_index_publication_delay: MagicMock

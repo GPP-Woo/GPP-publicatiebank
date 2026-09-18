@@ -2,6 +2,7 @@ import datetime
 from uuid import uuid4
 
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -252,6 +253,30 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
 
         self.assertEqual(response_data, {"uuid": str(inzage_procedure.uuid), **body})
 
+    def test_create_inzage_procedure_start_date_before_end_date(self):
+        assert InzageProcedure.objects.count() == 0
+
+        publication = PublicationFactory.create()
+        url = reverse("api:inzageprocedure-list")
+        body = {
+            "publicatie": str(publication.uuid),
+            "urlBekendmaking": "https://www.example.com/bekendmaking",
+            "toelichting": "toelichting",
+            "beschikbaarRechtsmiddel": LegalRemedyOptions.objection,
+            "urlReactieformulier": "https://www.example.com/reactieformulier",
+            "datumBeginInzagetermijn": "2026-04-01",
+            "datumEindeInzagetermijn": "2026-01-01",
+            "automatischIntrekken": True,
+        }
+
+        response = self.client.post(url, data=body, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()["datumEindeInzagetermijn"],
+            [_("The end date cannot happen before the start date.")],
+        )
+
     def test_end_date_auto_selects_workday(self):
         assert InzageProcedure.objects.count() == 0
 
@@ -309,8 +334,6 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         self.assertEqual(response_data, {"uuid": str(inzage_procedure.uuid), **body})
 
     def test_partially_update_inzage_procedure(self):
-        assert InzageProcedure.objects.count() == 0
-
         publication_1, publication_2 = PublicationFactory.create_batch(2)
         inzage_procedure = InzageProcedureFactory.create(
             publicatie=publication_1,
@@ -347,6 +370,35 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data, expected_data)
+
+    def test_partially_update_inzage_procedure_start_date_before_end_date(self):
+        publication_1, publication_2 = PublicationFactory.create_batch(2)
+        inzage_procedure = InzageProcedureFactory.create(
+            publicatie=publication_1,
+            url_bekendmaking="https://www.example.com/bekendmaking",
+            toelichting="Some information",
+            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            url_reactieformulier="https://www.example.com/reactieformulier",
+            datum_begin_inzagetermijn=datetime.date(2025, 1, 1),
+            datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
+            automatisch_intrekken=False,
+        )
+        detail_url = reverse(
+            "api:inzageprocedure-detail",
+            kwargs={"uuid": str(inzage_procedure.uuid)},
+        )
+
+        response = self.client.patch(
+            detail_url,
+            data={"datumEindeInzagetermijn": "2020-01-01"},
+            headers=AUDIT_HEADERS,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()["datumEindeInzagetermijn"],
+            [_("The end date cannot happen before the start date.")],
+        )
 
     def test_destroy_inzage_procedure(self):
         inzage_procedure = InzageProcedureFactory.create()
