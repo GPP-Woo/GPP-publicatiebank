@@ -3275,8 +3275,10 @@ components:
           type: string
           format: uri
           title: Announcement URL
-          description: The URL to the web form where citizens can submit the legal
-            remedy.
+          description: "The URL to the web form where citizens can submit the legal
+            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            field and the global config. If you do not want to this field to get populated
+            in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
@@ -3333,8 +3335,10 @@ components:
           type: string
           format: uri
           title: Announcement URL
-          description: The URL to the web form where citizens can submit the legal
-            remedy.
+          description: "The URL to the web form where citizens can submit the legal
+            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            field and the global config. If you do not want to this field to get populated
+            in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
@@ -3785,8 +3789,10 @@ components:
           type: string
           format: uri
           title: Announcement URL
-          description: The URL to the web form where citizens can submit the legal
-            remedy.
+          description: "The URL to the web form where citizens can submit the legal
+            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            field and the global config. If you do not want to this field to get populated
+            in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string

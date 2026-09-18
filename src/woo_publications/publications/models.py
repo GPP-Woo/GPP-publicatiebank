@@ -1252,7 +1252,9 @@ class InzageProcedure(models.Model):
     url_reactieformulier = models.URLField(
         _("announcement URL"),
         help_text=_(
-            "The URL to the web form where citizens can submit the legal remedy."
+            "The URL to the web form where citizens can submit the legal remedy. "
+            "This field gets populated based on the 'available legal remedy' field "
+            "and the global config when left empty."
         ),
         max_length=1000,
         blank=True,
