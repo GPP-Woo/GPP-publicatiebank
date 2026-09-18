@@ -327,11 +327,6 @@ paths:
           format: date
         description: Filter documenten op creatiedatum op of na de opgegeven datumtijd.
       - in: query
-        name: eigenaar
-        schema:
-          type: string
-        description: Filter documenten op basis van de identificatie van de eigenaar.
-      - in: query
         name: identifier
         schema:
           type: string
@@ -2735,14 +2730,6 @@ components:
           minimum: 0
           format: int64
           description: Bestandsgrootte op de harde schijf, in bytes.
-        eigenaar:
-          allOf:
-          - $ref: '#/components/schemas/Eigenaar'
-          nullable: true
-          description: |-
-            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
-
-            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2888,14 +2875,6 @@ components:
           minimum: 0
           format: int64
           description: Bestandsgrootte op de harde schijf, in bytes.
-        eigenaar:
-          allOf:
-          - $ref: '#/components/schemas/Eigenaar'
-          nullable: true
-          description: |-
-            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
-
-            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -3074,14 +3053,6 @@ components:
           type: integer
           readOnly: true
           description: Bestandsgrootte op de harde schijf, in bytes.
-        eigenaar:
-          allOf:
-          - $ref: '#/components/schemas/Eigenaar'
-          nullable: true
-          description: |-
-            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
-
-            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -3724,14 +3695,6 @@ components:
           type: integer
           readOnly: true
           description: Bestandsgrootte op de harde schijf, in bytes.
-        eigenaar:
-          allOf:
-          - $ref: '#/components/schemas/Eigenaar'
-          nullable: true
-          description: |-
-            De persoon die het document aangemaakt heeft, afgeleid uit de auditlogs.
-
-            **Pas op**: Als je het veld opgeeft tijdens het aanmaken of bijwerken van het object, dan zal de eigenaarinformatie afwijken van de audit headers.
         registratiedatum:
           type: string
           format: date-time

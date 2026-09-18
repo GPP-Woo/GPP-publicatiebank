@@ -678,12 +678,6 @@ class Document(ConcurrentTransitionMixin, models.Model):
         ),
         on_delete=models.CASCADE,
     )
-    eigenaar = models.ForeignKey(
-        "accounts.OrganisationMember",
-        verbose_name=_("owner"),
-        help_text=_("The owner of this document from gpp-app or gpp-publicatiebank."),
-        on_delete=models.PROTECT,
-    )
     # TODO: remove this field in future release because it is deprecated
     identifier = models.CharField(
         _("identifier"),

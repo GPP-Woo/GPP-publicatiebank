@@ -265,7 +265,6 @@ class TestPublicationAdminAuditLogging(WebTest):
             )
             published_document = DocumentFactory.create(
                 publicatie=publication,
-                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 identifier="http://example.com/1",
                 officiele_titel="title",
@@ -366,7 +365,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": published_document.pk,
                     "lock": "",
-                    "eigenaar": self.organisation_member.pk,
                     "upload_complete": False,
                     "uuid": str(published_document.uuid),
                     "identifier": "http://example.com/1",
@@ -419,7 +417,6 @@ class TestPublicationAdminAuditLogging(WebTest):
             published_document = DocumentFactory.create(
                 publicatie=publication,
                 publicatiestatus=PublicationStatusOptions.published,
-                eigenaar=self.organisation_member,
                 identifier="http://example.com/1",
                 officiele_titel="title",
                 creatiedatum="2024-10-17",
@@ -498,7 +495,6 @@ class TestPublicationAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": published_document.pk,
                     "lock": "",
-                    "eigenaar": self.organisation_member.pk,
                     "upload_complete": False,
                     "uuid": str(published_document.uuid),
                     "identifier": "http://example.com/1",
@@ -610,10 +606,6 @@ class TestDocumentAdminAuditLogging(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create(superuser=True)
-        cls.organisation_member = OrganisationMemberFactory.create(
-            identifier=cls.user.pk,
-            naam=cls.user.get_full_name(),
-        )
 
     def test_document_admin_create(self):
         publication = PublicationFactory.create(
@@ -655,7 +647,6 @@ class TestDocumentAdminAuditLogging(WebTest):
             "object_data": {
                 "id": added_item.pk,
                 "lock": "",
-                "eigenaar": self.organisation_member.pk,
                 "upload_complete": False,
                 "uuid": str(added_item.uuid),
                 "identifier": identifier,
@@ -693,7 +684,6 @@ class TestDocumentAdminAuditLogging(WebTest):
         with freeze_time("2024-09-25T14:00:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
-                eigenaar=self.organisation_member,
                 officiele_titel="title one",
                 verkorte_titel="one",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -748,7 +738,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": document.pk,
                     "lock": "",
-                    "eigenaar": self.organisation_member.pk,
                     "upload_complete": False,
                     "uuid": str(document.uuid),
                     "identifier": identifier,
@@ -784,7 +773,6 @@ class TestDocumentAdminAuditLogging(WebTest):
             document = DocumentFactory.create(
                 publicatie=publication,
                 identifier=identifier,
-                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -815,7 +803,6 @@ class TestDocumentAdminAuditLogging(WebTest):
                 "object_data": {
                     "id": document.pk,
                     "lock": "",
-                    "eigenaar": self.organisation_member.pk,
                     "upload_complete": False,
                     "uuid": str(document.uuid),
                     "identifier": identifier,
@@ -844,81 +831,6 @@ class TestDocumentAdminAuditLogging(WebTest):
             }
             self.assertEqual(update_log.extra_data, expected_data)
 
-    def test_document_change_owner_log(self):
-        publication = PublicationFactory.create()
-        org_member_1 = OrganisationMemberFactory.create(
-            naam="test-naam", identifier="test-identifier"
-        )
-        identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
-        with freeze_time("2024-09-25T14:00:00-00:00"):
-            document = DocumentFactory.create(
-                publicatie=publication,
-                identifier=identifier,
-                eigenaar=self.organisation_member,
-                publicatiestatus=PublicationStatusOptions.published,
-                officiele_titel="title one",
-                verkorte_titel="one",
-                omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                creatiedatum="2024-11-11",
-            )
-
-        changelist = self.app.get(
-            reverse("admin:publications_document_changelist"),
-            user=self.user,
-        )
-        form = changelist.forms["changelist-form"]
-        form["_selected_action"] = [document.pk]
-        form["action"] = "change_owner"
-
-        response = form.submit()
-
-        self.assertEqual(response.status_code, 200)
-
-        confirmation_form = response.forms[1]
-        confirmation_form["eigenaar"].select(text=str(org_member_1))
-
-        with freeze_time("2024-09-29T14:00:00-00:00"):
-            confirmation_form.submit()
-
-        update_log = TimelineLogProxy.objects.get()
-        expected_data = {
-            "event": Events.update,
-            "acting_user": {
-                "identifier": self.user.id,
-                "display_name": self.user.get_full_name(),
-            },
-            "object_data": {
-                "id": document.pk,
-                "lock": "",
-                "eigenaar": org_member_1.pk,  # updated
-                "upload_complete": False,
-                "uuid": str(document.uuid),
-                "identifier": identifier,
-                "publicatie": publication.pk,
-                "publicatiestatus": PublicationStatusOptions.published,
-                "bestandsnaam": "unknown.bin",
-                "creatiedatum": "2024-11-11",
-                "omschrijving": "Lorem ipsum dolor sit amet, "
-                "consectetur adipiscing elit.",
-                "document_uuid": None,
-                "bestandsomvang": 0,
-                "source_url": "",
-                "verkorte_titel": "one",
-                "bestandsformaat": "unknown",
-                "officiele_titel": "title one",
-                "document_service": None,
-                "registratiedatum": "2024-09-25T14:00:00Z",
-                "laatst_gewijzigd_datum": "2024-09-29T14:00:00Z",
-                "ontvangstdatum": None,
-                "datum_ondertekend": None,
-                "gepubliceerd_op": "2024-09-25T14:00:00Z",
-                "ingetrokken_op": None,
-                "metadata_gestript_op": None,
-            },
-            "_cached_object_repr": "title one",
-        }
-        self.assertEqual(update_log.extra_data, expected_data)
-
     def test_document_admin_delete(self):
         publication = PublicationFactory.create()
         identifier = f"https://www.openzaak.nl/documenten/{str(uuid.uuid4())}"
@@ -926,7 +838,6 @@ class TestDocumentAdminAuditLogging(WebTest):
             document = DocumentFactory.create(
                 publicatie=publication,
                 identifier=identifier,
-                eigenaar=self.organisation_member,
                 publicatiestatus=PublicationStatusOptions.published,
                 officiele_titel="title one",
                 verkorte_titel="one",
@@ -958,7 +869,6 @@ class TestDocumentAdminAuditLogging(WebTest):
             "object_data": {
                 "id": document.pk,
                 "lock": "",
-                "eigenaar": self.organisation_member.pk,
                 "upload_complete": False,
                 "uuid": str(document.uuid),
                 "identifier": identifier,
