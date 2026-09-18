@@ -1310,18 +1310,14 @@ class InzageProcedure(models.Model):
 
         global_config = GlobalConfiguration.get_solo()
 
-        match (bool(url_reactieformulier), beschikbaar_rechtsmiddel):
-            case (True, _):
-                self.url_reactieformulier = url_reactieformulier
-            case (False, LegalRemedyOptions.objection):
-                if (
-                    objection_reaction_form_url
-                    := global_config.objection_reaction_form_url
-                ):
-                    self.url_reactieformulier = objection_reaction_form_url
-            case (False, LegalRemedyOptions.perspective):
-                if (
-                    perspective_reaction_form_url
-                    := global_config.perspective_reaction_form_url
-                ):
-                    self.url_reactieformulier = perspective_reaction_form_url
+        match (url_reactieformulier, beschikbaar_rechtsmiddel):
+            case (url, _) if url:
+                self.url_reactieformulier = url
+            case (_, LegalRemedyOptions.objection) if (
+                global_config.objection_reaction_form_url
+            ):
+                self.url_reactieformulier = global_config.objection_reaction_form_url
+            case (_, LegalRemedyOptions.perspective) if (
+                global_config.perspective_reaction_form_url
+            ):
+                self.url_reactieformulier = global_config.perspective_reaction_form_url
