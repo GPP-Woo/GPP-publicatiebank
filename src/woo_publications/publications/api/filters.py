@@ -91,11 +91,6 @@ class DocumentFilterSet(FilterSet):
         field_name="laatst_gewijzigd_datum",
         lookup_expr="lte",
     )
-    eigenaar = filters.CharFilter(
-        help_text=_("Filter documents based on the owner identifier of the object."),
-        field_name="eigenaar__identifier",
-        lookup_expr="exact",
-    )
     publicatiestatus = filters.MultipleChoiceFilter(
         help_text=_("Filter documents based on the publication status."),
         choices=PublicationStatusOptions.choices,
@@ -134,7 +129,6 @@ class DocumentFilterSet(FilterSet):
         model = Document
         fields = (
             "publicatie",
-            "eigenaar",
             "publicatiestatus",
             "identifier",
             "registratiedatum_vanaf",

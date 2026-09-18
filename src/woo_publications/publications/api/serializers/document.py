@@ -12,7 +12,6 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.request import Request
 
-from woo_publications.accounts.models import OrganisationMember
 from woo_publications.contrib.documents_api.client import FilePart
 
 from ...constants import DocumentDeliveryMethods, PublicationStatusOptions
@@ -29,7 +28,6 @@ from ..validators import (
     SourceDocumentURLValidator,
     validate_duplicated_kenmerken,
 )
-from .owner import EigenaarSerializer, update_or_create_organisation_member
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -99,16 +97,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )
-    eigenaar = EigenaarSerializer(
-        label=_("owner"),
-        help_text=_(
-            "The creator of the document, derived from the audit headers.\n"
-            "Disclaimer**: If you use this field during creation/updating actions the "
-            "owner data will differ from the audit headers provided during creation."
-        ),
-        allow_null=True,
-        required=False,
-    )
     kenmerken = DocumentIdentifierSerializer(
         help_text=_("The document identifiers attached to this document."),
         many=True,
@@ -144,7 +132,6 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "bestandsformaat",
             "bestandsnaam",
             "bestandsomvang",
-            "eigenaar",
             "registratiedatum",
             "laatst_gewijzigd_datum",
             "upload_voltooid",
@@ -276,10 +263,6 @@ class DocumentCreateSerializer(PolymorphicSerializer, DocumentSerializer):
         publication: Publication = validated_data["publicatie"]
         validated_data["publicatiestatus"] = publication.publicatiestatus
 
-        validated_data["eigenaar"] = update_or_create_organisation_member(
-            self.context["request"], validated_data.get("eigenaar")
-        )
-
         if validated_data["publicatiestatus"] == PublicationStatusOptions.published:
             validated_data["gepubliceerd_op"] = timezone.now()
 
@@ -315,7 +298,6 @@ class DocumentUpdateSerializer(DocumentSerializer):
                 "verkorte_titel",
                 "omschrijving",
                 "publicatiestatus",
-                "eigenaar",
                 "creatiedatum",
                 "ontvangstdatum",
                 "datum_ondertekend",
@@ -338,12 +320,6 @@ class DocumentUpdateSerializer(DocumentSerializer):
     def update(self, instance, validated_data):
         update_document_identifiers = "documentidentifier_set" in validated_data
         document_identifiers = validated_data.pop("documentidentifier_set", [])
-
-        if "eigenaar" in validated_data:
-            eigenaar = validated_data.pop("eigenaar")
-            validated_data["eigenaar"] = OrganisationMember.objects.get_and_sync(
-                identifier=eigenaar["identifier"], naam=eigenaar["naam"]
-            )
 
         # pop the target state from the validate data to avoid setting it directly,
         # instead apply the state transitions based on old -> new state

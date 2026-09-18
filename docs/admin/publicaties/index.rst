@@ -20,7 +20,7 @@ Een *document* bestaat uit een bestand (bijvoorbeeld een PDF) en metadata. Een *
 
 .. tip::
 
-    Bij de volgende bestandstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten: 
+    Bij de volgende bestandstypen wordt embedded metadata gewist om te voorkomen dat deze privacy-gebonden informatie bevatten:
     PDF, DOCX, XLSX, PPTX, PPSX, ODF, ODP, ODS, ODT, HTML, ZIP (alleen op de container) en 7z (alleen op de container).
 
 In het beheerscherm van de *documenten* wordt een lijst getoond van alle *document*-registraties, die zijn opgeslagen in de GPP-publicatiebank.
@@ -64,10 +64,6 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 * ``Gepubliceerd Op``. De niet-wijzigbare datum en tijd waarop het document is gepubliceerd.
 * ``Ingetrokken Op``. De niet-wijzigbare datum en tijd waarop het document is ingetrokken.
 * ``Laatst gewijzigd op``. De niet-wijzigbare datum en tijd waarop het document voor het laatst gewijzigd is.
-
-**Actoren**
-
-* ``Eigenaar``. Deze wordt doorgaans afegeleid van de gekoppelde *publicatie*. In de GPP-app kan alleen de "eigenaar" de publicatie wijzigen. De "eigenaar" is altijd een medewerker.
 
 **Bestand**
 

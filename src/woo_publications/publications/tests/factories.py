@@ -99,7 +99,6 @@ class PublicationIdentifierFactory(
 
 class DocumentFactory(factory.django.DjangoModelFactory[Document]):
     publicatie = factory.SubFactory(PublicationFactory)
-    eigenaar = factory.SubFactory(OrganisationMemberFactory)
     officiele_titel = factory.Faker("word")
     creatiedatum = factory.Faker("past_date")
     publicatiestatus = PublicationStatusOptions.published
