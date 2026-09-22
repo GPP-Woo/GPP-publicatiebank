@@ -32,7 +32,7 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import LegalRemedyOptions, PublicationStatusOptions
+from ..constants import LegalProcedureOptions, PublicationStatusOptions
 from ..models import Publication, PublicationIdentifier
 from .factories import (
     DocumentFactory,
@@ -1294,7 +1294,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publicatie=publication,
             url_bekendmaking="https://example.com/",
             toelichting="some data",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
             url_reactieformulier="https://example.com/",
             datum_begin_inzagetermijn=datetime.date(1908, 9, 10),
             datum_einde_inzagetermijn=datetime.date(1910, 9, 8),
@@ -1345,7 +1345,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "uuid": str(inzage_procedure.uuid),
                 "urlBekendmaking": "https://example.com/",
                 "toelichting": "some data",
-                "beschikbaarRechtsmiddel": LegalRemedyOptions.perspective,
+                "beschikbaarRechtsmiddel": LegalProcedureOptions.perspective,
                 "urlReactieformulier": "https://example.com/",
                 "datumBeginInzagetermijn": "1908-09-10",
                 "datumEindeInzagetermijn": "1910-09-08",

@@ -9,7 +9,7 @@ from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.contrib.tests.factories import ServiceFactory
-from woo_publications.publications.constants import LegalRemedyOptions
+from woo_publications.publications.constants import LegalProcedureOptions
 from woo_publications.publications.tests.factories import InzageProcedureFactory
 
 from ..models import GlobalConfiguration
@@ -40,19 +40,19 @@ class SmokeTests(WebTest):
     def test_back_filling_urls(self):
         empty_perspective = InzageProcedureFactory.create(
             url_reactieformulier="",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
         )
         filled_perspective = InzageProcedureFactory.create(
             url_reactieformulier="http://www.example.com/perspective",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
         )
         empty_objection = InzageProcedureFactory.create(
             url_reactieformulier="",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
         )
         filled_objection = InzageProcedureFactory.create(
             url_reactieformulier="http://www.example.com/objection",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
         )
         document_service = ServiceFactory.create(for_documents_api_docker_compose=True)
         search_service = ServiceFactory.create(for_gpp_search_docker_compose=True)
@@ -98,11 +98,11 @@ class SmokeTests(WebTest):
         with self.subTest("Save with url values does not trigger back fill function"):
             new_empty_perspective = InzageProcedureFactory.create(
                 url_reactieformulier="",
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
             )
             new_empty_objection = InzageProcedureFactory.create(
                 url_reactieformulier="",
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
             )
 
             form["perspective_reaction_form_url"] = "http://www.changed.org/perspective"

@@ -22,7 +22,7 @@ from woo_publications.metadata.tests.factories import (
     OrganisationFactory,
 )
 
-from ..constants import LegalRemedyOptions, PublicationStatusOptions
+from ..constants import LegalProcedureOptions, PublicationStatusOptions
 from ..models import Document, InzageProcedure, Publication, Topic
 from .factories import (
     TEST_IMG_PATH,
@@ -1136,7 +1136,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
         form["publicatie"].force_value(publication.id)
         form["url_bekendmaking"] = "https://example.com/bekendmaking"
         form["toelichting"] = "bla"
-        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
         form["url_reactieformulier"] = "https://example.com/reactieformulier"
         form["datum_begin_inzagetermijn"] = "2008-09-10"
         form["datum_einde_inzagetermijn"] = "2010-09-8"
@@ -1159,7 +1159,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
                 "publicatie": publication.pk,
                 "url_bekendmaking": "https://example.com/bekendmaking",
                 "toelichting": "bla",
-                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "beschikbaar_rechtsmiddel": LegalProcedureOptions.objection,
                 "url_reactieformulier": "https://example.com/reactieformulier",
                 "datum_begin_inzagetermijn": "2008-09-10",
                 "datum_einde_inzagetermijn": "2010-09-08",
@@ -1176,7 +1176,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
             publicatie=publication,
             url_bekendmaking="https://example.com/",
             toelichting="some data",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
             url_reactieformulier="https://example.com/",
             datum_begin_inzagetermijn=datetime.date(1908, 9, 10),
             datum_einde_inzagetermijn=datetime.date(1910, 9, 8),
@@ -1196,7 +1196,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
         form["publicatie"].force_value(publication.id)
         form["url_bekendmaking"] = "https://example.com/bekendmaking"
         form["toelichting"] = "bla"
-        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
         form["url_reactieformulier"] = "https://example.com/reactieformulier"
         form["datum_begin_inzagetermijn"] = "2008-09-10"
         form["datum_einde_inzagetermijn"] = "2010-09-8"
@@ -1236,7 +1236,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
                     "publicatie": publication.pk,
                     "url_bekendmaking": "https://example.com/bekendmaking",
                     "toelichting": "bla",
-                    "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                    "beschikbaar_rechtsmiddel": LegalProcedureOptions.objection,
                     "url_reactieformulier": "https://example.com/reactieformulier",
                     "datum_begin_inzagetermijn": "2008-09-10",
                     "datum_einde_inzagetermijn": "2010-09-08",
@@ -1253,7 +1253,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
             publicatie=publication,
             url_bekendmaking="https://example.com/bekendmaking",
             toelichting="bla",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
             url_reactieformulier="https://example.com/reactieformulier",
             datum_begin_inzagetermijn=datetime.date(2008, 9, 10),
             datum_einde_inzagetermijn=datetime.date(2010, 9, 8),
@@ -1288,7 +1288,7 @@ class TestInzageProcedureAdminAuditLogging(WebTest):
                 "publicatie": publication.pk,
                 "url_bekendmaking": "https://example.com/bekendmaking",
                 "toelichting": "bla",
-                "beschikbaar_rechtsmiddel": LegalRemedyOptions.objection,
+                "beschikbaar_rechtsmiddel": LegalProcedureOptions.objection,
                 "url_reactieformulier": "https://example.com/reactieformulier",
                 "datum_begin_inzagetermijn": "2008-09-10",
                 "datum_einde_inzagetermijn": "2010-09-08",

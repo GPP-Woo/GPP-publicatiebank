@@ -11,7 +11,7 @@ from maykin_2fa.test import disable_admin_mfa
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.config.models import GlobalConfiguration
 
-from ..constants import LegalRemedyOptions
+from ..constants import LegalProcedureOptions
 from ..models import InzageProcedure
 from .factories import InzageProcedureFactory, PublicationFactory
 
@@ -89,19 +89,19 @@ class InzageProcedureAdminWebTest(WebTest):
     def test_inzage_procedure_admin_list_filter(self):
         inzage_procedure_1 = InzageProcedureFactory.create(
             automatisch_intrekken=False,
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
             datum_begin_inzagetermijn=datetime.date(2026, 9, 13),
             datum_einde_inzagetermijn=datetime.date(2026, 10, 13),
         )
         inzage_procedure_2 = InzageProcedureFactory.create(
             automatisch_intrekken=True,
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
             datum_begin_inzagetermijn=datetime.date(2026, 9, 14),
             datum_einde_inzagetermijn=datetime.date(2026, 10, 14),
         )
         inzage_procedure_3 = InzageProcedureFactory.create(
             automatisch_intrekken=True,
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
             datum_begin_inzagetermijn=datetime.date(2026, 9, 15),
             datum_einde_inzagetermijn=datetime.date(2026, 10, 15),
         )
@@ -154,9 +154,9 @@ class InzageProcedureAdminWebTest(WebTest):
             self.assertContains(search_response, "field-uuid", 1)
             self.assertContains(search_response, str(inzage_procedure_1.uuid), 1)
 
-        with self.subTest("filter on legal remedy"):
+        with self.subTest("filter on legal procedure"):
             search_response = response.click(
-                description=str(LegalRemedyOptions.objection.label), index=0
+                description=str(LegalProcedureOptions.objection.label), index=0
             )
 
             self.assertEqual(search_response.status_code, 200)
@@ -178,7 +178,7 @@ class InzageProcedureAdminWebTest(WebTest):
             form["publicatie"].force_value(publication_1.id)
             form["url_bekendmaking"] = "https://example.com/bekendmaking"
             form["toelichting"] = "bla"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
             form["url_reactieformulier"] = "https://example.com/reactieformulier"
             form["datum_begin_inzagetermijn"] = "2008-09-10"
             form["datum_einde_inzagetermijn"] = "2010-09-8"
@@ -200,7 +200,8 @@ class InzageProcedureAdminWebTest(WebTest):
             )
             self.assertEqual(inzage_procedure.toelichting, "bla")
             self.assertEqual(
-                inzage_procedure.beschikbaar_rechtsmiddel, LegalRemedyOptions.objection
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalProcedureOptions.objection,
             )
             self.assertEqual(
                 inzage_procedure.url_reactieformulier,
@@ -220,7 +221,7 @@ class InzageProcedureAdminWebTest(WebTest):
             form["publicatie"].force_value(publication_2.id)
             form["url_bekendmaking"] = "https://example.com/bekendmaking"
             form["toelichting"] = "bla"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
             form["url_reactieformulier"] = "https://example.com/reactieformulier"
             form["datum_begin_inzagetermijn"] = "10-09-2008"
             form["datum_einde_inzagetermijn"] = "08-09-2010"
@@ -245,7 +246,7 @@ class InzageProcedureAdminWebTest(WebTest):
         form["publicatie"].force_value(publication.id)
         form["url_bekendmaking"] = "https://example.com/bekendmaking"
         form["toelichting"] = "bla"
-        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+        form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.perspective
         form["url_reactieformulier"] = ""
         form["datum_begin_inzagetermijn"] = "2008-09-10"
         form["datum_einde_inzagetermijn"] = "2026-04-27"
@@ -275,7 +276,7 @@ class InzageProcedureAdminWebTest(WebTest):
         form["publicatie"].force_value(publication.id)
         form["url_bekendmaking"] = "https://example.com/bekendmaking"
         form["toelichting"] = "bla"
-        form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+        form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
         form["url_reactieformulier"] = "https://example.com/reactieformulier"
         form["datum_begin_inzagetermijn"] = "2008-09-10"
         form["datum_einde_inzagetermijn"] = "2026-04-27"
@@ -306,7 +307,7 @@ class InzageProcedureAdminWebTest(WebTest):
             form["publicatie"].force_value(publication.id)
             form["url_bekendmaking"] = "https://example.com/bekendmaking"
             form["toelichting"] = "bla"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
             form["url_reactieformulier"] = "https://example.com/reactieformulier"
             form["datum_begin_inzagetermijn"] = "2008-09-10"
             form["datum_einde_inzagetermijn"] = "2008-07-10"
@@ -327,7 +328,7 @@ class InzageProcedureAdminWebTest(WebTest):
             publicatie=publication_1,
             url_bekendmaking="https://example.com/bekendmaking",
             toelichting="bla",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
             url_reactieformulier="https://example.com/reactieformulier",
             datum_begin_inzagetermijn=datetime.date(2008, 9, 10),
             datum_einde_inzagetermijn=datetime.date(2010, 9, 8),
@@ -347,7 +348,7 @@ class InzageProcedureAdminWebTest(WebTest):
             form["publicatie"].force_value(publication_2.id)
             form["url_bekendmaking"] = "https://example.com/bekendmaking/changed/"
             form["toelichting"] = "changed"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.perspective
             form["url_reactieformulier"] = (
                 "https://example.com/reactieformulier/changed/"
             )
@@ -371,7 +372,7 @@ class InzageProcedureAdminWebTest(WebTest):
             self.assertEqual(inzage_procedure.toelichting, "changed")
             self.assertEqual(
                 inzage_procedure.beschikbaar_rechtsmiddel,
-                LegalRemedyOptions.perspective,
+                LegalProcedureOptions.perspective,
             )
             self.assertEqual(
                 inzage_procedure.url_reactieformulier,
@@ -404,7 +405,7 @@ class InzageProcedureAdminWebTest(WebTest):
     def test_inzage_procedure_admin_update_auto_fills_url_reactieformulier_field(self):
         inzage_procedure = InzageProcedureFactory.create(
             url_reactieformulier="https://example.com/bekendmaking/",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
         )
 
         url = reverse(
@@ -422,7 +423,7 @@ class InzageProcedureAdminWebTest(WebTest):
             "doesn't fall back on global settings"
         ):
             form["url_reactieformulier"] = "https://example.com/bekendmaking/changed/"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.perspective
 
             submit_response = form.submit(name="_save")
 
@@ -434,7 +435,7 @@ class InzageProcedureAdminWebTest(WebTest):
             )
             self.assertEqual(
                 inzage_procedure.beschikbaar_rechtsmiddel,
-                LegalRemedyOptions.perspective,
+                LegalProcedureOptions.perspective,
             )
 
         with self.subTest(
@@ -443,7 +444,7 @@ class InzageProcedureAdminWebTest(WebTest):
         ):
             # explicitly state that the url_bekendmaking's field contains data
             form["url_reactieformulier"] = "https://example.com/bekendmaking/changed/"
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.objection
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.objection
 
             submit_response = form.submit(name="_save")
 
@@ -455,7 +456,7 @@ class InzageProcedureAdminWebTest(WebTest):
             )
             self.assertEqual(
                 inzage_procedure.beschikbaar_rechtsmiddel,
-                LegalRemedyOptions.objection,
+                LegalProcedureOptions.objection,
             )
 
         with self.subTest(
@@ -464,7 +465,7 @@ class InzageProcedureAdminWebTest(WebTest):
         ):
             # explicitly state that the url_bekendmaking's field contains data
             form["url_reactieformulier"] = ""
-            form["beschikbaar_rechtsmiddel"] = LegalRemedyOptions.perspective
+            form["beschikbaar_rechtsmiddel"] = LegalProcedureOptions.perspective
 
             submit_response = form.submit(name="_save")
 
@@ -476,7 +477,7 @@ class InzageProcedureAdminWebTest(WebTest):
             )
             self.assertEqual(
                 inzage_procedure.beschikbaar_rechtsmiddel,
-                LegalRemedyOptions.perspective,
+                LegalProcedureOptions.perspective,
             )
 
     def test_inzage_procedure_admin_delete(self):

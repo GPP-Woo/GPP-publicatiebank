@@ -3257,25 +3257,25 @@ components:
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal remedy
+          title: Available legal procedure
           description: |-
-            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
 
             * `zienswijze` - Perspective
             * `bezwaar` - Objection
         urlReactieformulier:
           type: string
           format: uri
-          title: Announcement URL
+          title: Legal notice URL
           description: "The URL to the web form where citizens can submit the legal
-            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
             field and the global config. If you do not want to this field to get populated
             in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Datum begin geldigheid
+          title: Inzagetermijn in effect from
           description: The date when the inspection period starts.
         datumEindeInzagetermijn:
           type: string
@@ -3286,7 +3286,7 @@ components:
             the date back to the first available workday.
         automatischIntrekken:
           type: boolean
-          title: Automatically redact
+          title: Automatically withdraw
           description: When enabled, ensure that the publication gets redacted on
             the configured end date.
       required:
@@ -3317,25 +3317,25 @@ components:
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal remedy
+          title: Available legal procedure
           description: |-
-            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
 
             * `zienswijze` - Perspective
             * `bezwaar` - Objection
         urlReactieformulier:
           type: string
           format: uri
-          title: Announcement URL
+          title: Legal notice URL
           description: "The URL to the web form where citizens can submit the legal
-            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
             field and the global config. If you do not want to this field to get populated
             in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Datum begin geldigheid
+          title: Inzagetermijn in effect from
           description: The date when the inspection period starts.
         datumEindeInzagetermijn:
           type: string
@@ -3346,7 +3346,7 @@ components:
             the date back to the first available workday.
         automatischIntrekken:
           type: boolean
-          title: Automatically redact
+          title: Automatically withdraw
           description: When enabled, ensure that the publication gets redacted on
             the configured end date.
       required:
@@ -3769,25 +3769,25 @@ components:
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal remedy
+          title: Available legal procedure
           description: |-
-            The legal remedy that a citizen can employ to oppose the (predisposed) decision.
+            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
 
             * `zienswijze` - Perspective
             * `bezwaar` - Objection
         urlReactieformulier:
           type: string
           format: uri
-          title: Announcement URL
+          title: Legal notice URL
           description: "The URL to the web form where citizens can submit the legal
-            remedy. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
             field and the global config. If you do not want to this field to get populated
             in this fashion ensure to provide it yourself."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Datum begin geldigheid
+          title: Inzagetermijn in effect from
           description: The date when the inspection period starts.
         datumEindeInzagetermijn:
           type: string
@@ -3798,7 +3798,7 @@ components:
             the date back to the first available workday.
         automatischIntrekken:
           type: boolean
-          title: Automatically redact
+          title: Automatically withdraw
           description: When enabled, ensure that the publication gets redacted on
             the configured end date.
     PatchedOrganisation:

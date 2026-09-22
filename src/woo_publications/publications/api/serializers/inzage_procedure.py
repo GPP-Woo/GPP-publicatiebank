@@ -43,7 +43,7 @@ class InzageProcedureSerializer(serializers.ModelSerializer[InzageProcedure]):
             "url_reactieformulier": {
                 "help_text": _(
                     "The URL to the web form where citizens can submit the "
-                    "legal remedy. \n\n This field gets populated based on the "
+                    "legal procedure. \n\n This field gets populated based on the "
                     "'beschikbaar_rechtsmiddel' field and the global config. "
                     "If you do not want to this field to get populated in "
                     "this fashion ensure to provide it yourself."
