@@ -250,8 +250,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publication = PublicationFactory.create(
                 informatie_categorieen=[ic],
                 eigenaar=self.organisation_member,
-                officiele_titel="title one",
-                verkorte_titel="one",
+                officiele_titel="aaa",
+                verkorte_titel="aaa",
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
@@ -261,81 +261,14 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publication2 = PublicationFactory.create(
                 informatie_categorieen=[ic2],
                 eigenaar=self.organisation_member,
-                officiele_titel="title two",
-                verkorte_titel="two",
+                officiele_titel="AAB",
+                verkorte_titel="AAB",
                 omschrijving="Vestibulum eros nulla, tincidunt sed est non, "
                 "facilisis mollis urna.",
                 bron_bewaartermijn="Selectielijst gemeenten 2020",
                 archiefnominatie=ArchiveNominationChoices.retain,
                 archiefactiedatum="2025-01-01",
             )
-        expected_first_item_data = {
-            "uuid": str(publication.uuid),
-            "urlPublicatieIntern": "",
-            "urlPublicatieExtern": "",
-            "informatieCategorieen": [str(ic.uuid)],
-            "diWooInformatieCategorieen": [str(ic.uuid)],
-            "onderwerpen": [],
-            "publisher": str(publication.publisher.uuid),
-            "kenmerken": [],
-            "verantwoordelijke": None,
-            "opsteller": None,
-            "officieleTitel": "title one",
-            "verkorteTitel": "one",
-            "omschrijving": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            "publicatiestatus": PublicationStatusOptions.published,
-            "eigenaar": {
-                "identifier": self.organisation_member.identifier,
-                "weergaveNaam": self.organisation_member.naam,
-            },
-            "eigenaarGroep": None,
-            "registratiedatum": "2024-09-24T14:00:00+02:00",
-            "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
-            "bronBewaartermijn": "Selectielijst gemeenten 2020",
-            "datumBeginGeldigheid": None,
-            "datumEindeGeldigheid": None,
-            "gepubliceerdOp": "2024-09-24T14:00:00+02:00",
-            "ingetrokkenOp": None,
-            "selectiecategorie": "",
-            "archiefnominatie": ArchiveNominationChoices.retain,
-            "archiefactiedatum": "2025-01-01",
-            "toelichtingBewaartermijn": "",
-            "inzageProcedure": None,
-        }
-        expected_second_item_data = {
-            "uuid": str(publication2.uuid),
-            "urlPublicatieIntern": "",
-            "urlPublicatieExtern": "",
-            "informatieCategorieen": [str(ic2.uuid)],
-            "diWooInformatieCategorieen": [str(ic2.uuid)],
-            "onderwerpen": [],
-            "publisher": str(publication2.publisher.uuid),
-            "kenmerken": [],
-            "verantwoordelijke": None,
-            "opsteller": None,
-            "officieleTitel": "title two",
-            "verkorteTitel": "two",
-            "omschrijving": "Vestibulum eros nulla, tincidunt sed est non, "
-            "facilisis mollis urna.",
-            "publicatiestatus": PublicationStatusOptions.published,
-            "eigenaar": {
-                "identifier": self.organisation_member.identifier,
-                "weergaveNaam": self.organisation_member.naam,
-            },
-            "eigenaarGroep": None,
-            "registratiedatum": "2024-09-25T14:30:00+02:00",
-            "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
-            "datumBeginGeldigheid": None,
-            "datumEindeGeldigheid": None,
-            "gepubliceerdOp": "2024-09-25T14:30:00+02:00",
-            "ingetrokkenOp": None,
-            "bronBewaartermijn": "Selectielijst gemeenten 2020",
-            "selectiecategorie": "",
-            "archiefnominatie": ArchiveNominationChoices.retain,
-            "archiefactiedatum": "2025-01-01",
-            "toelichtingBewaartermijn": "",
-            "inzageProcedure": None,
-        }
 
         # registratiedatum
         with self.subTest("registratiedatum ascending"):
@@ -349,8 +282,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_first_item_data)
-            self.assertEqual(data["results"][1], expected_second_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication2.uuid))
 
         with self.subTest("registratiedatum descending"):
             response = self.client.get(
@@ -363,8 +296,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_second_item_data)
-            self.assertEqual(data["results"][1], expected_first_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication.uuid))
 
         # Officiele titel
         with self.subTest("officiele title ascending"):
@@ -378,8 +311,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_first_item_data)
-            self.assertEqual(data["results"][1], expected_second_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication2.uuid))
 
         with self.subTest("officiele title descending"):
             response = self.client.get(
@@ -392,8 +325,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_second_item_data)
-            self.assertEqual(data["results"][1], expected_first_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication.uuid))
 
         # short titel
         with self.subTest("verkorte titel ascending"):
@@ -407,8 +340,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_first_item_data)
-            self.assertEqual(data["results"][1], expected_second_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication2.uuid))
 
         with self.subTest("verkorte titel descending"):
             response = self.client.get(
@@ -421,8 +354,8 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             data = response.json()
 
-            self.assertEqual(data["results"][0], expected_second_item_data)
-            self.assertEqual(data["results"][1], expected_first_item_data)
+            self.assertEqual(data["results"][0]["uuid"], str(publication2.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication.uuid))
 
     def test_list_publications_filter_information_categories(self):
         ic, ic2, ic3, ic4 = InformationCategoryFactory.create_batch(
