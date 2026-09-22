@@ -28,6 +28,7 @@ from ..validators import (
     SourceDocumentURLValidator,
     validate_duplicated_kenmerken,
 )
+from .owner import EigenaarSerializer
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -97,6 +98,13 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
         slug_field="uuid",
         help_text=_("The unique identifier of the publication."),
     )
+    eigenaar = EigenaarSerializer(
+        source="publicatie.eigenaar",
+        label=_("owner"),
+        help_text=_("The creator of the document, derived from the audit headers."),
+        allow_null=True,
+        read_only=True,
+    )
     kenmerken = DocumentIdentifierSerializer(
         help_text=_("The document identifiers attached to this document."),
         many=True,
@@ -132,6 +140,7 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
             "bestandsformaat",
             "bestandsnaam",
             "bestandsomvang",
+            "eigenaar",
             "registratiedatum",
             "laatst_gewijzigd_datum",
             "upload_voltooid",

@@ -21,6 +21,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from woo_publications.accounts.tests.factories import (
+    OrganisationMemberFactory,
     UserFactory,
 )
 from woo_publications.api.tests.mixins import (
@@ -105,10 +106,24 @@ class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITes
 
 
 class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.organisation_member = OrganisationMemberFactory.create(
+            identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
+            naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+
     def test_list_documents(self):
         organisation = OrganisationFactory.create()
-        publication = PublicationFactory.create(verantwoordelijke=organisation)
-        publication2 = PublicationFactory.create(verantwoordelijke=None)
+        publication = PublicationFactory.create(
+            verantwoordelijke=organisation,
+            eigenaar=self.organisation_member,
+        )
+        publication2 = PublicationFactory.create(
+            verantwoordelijke=None,
+            eigenaar=self.organisation_member,
+        )
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
@@ -156,6 +171,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
+                "eigenaar": {
+                    "identifier": "id",
+                    "weergaveNaam": "username",
+                },
                 "registratiedatum": "2024-09-24T14:00:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-24T14:00:00+02:00",
                 "ontvangstdatum": None,
@@ -182,6 +201,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
+                "eigenaar": {
+                    "identifier": "id",
+                    "weergaveNaam": "username",
+                },
                 "registratiedatum": "2024-09-25T14:30:00+02:00",
                 "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
                 "ontvangstdatum": "2024-09-25T14:30:00+02:00",
@@ -981,7 +1004,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
     def test_detail_document(self):
-        publication = PublicationFactory.create()
+        publication = PublicationFactory.create(eigenaar=self.organisation_member)
         with freeze_time("2024-09-25T12:30:00-00:00"):
             document = DocumentFactory.create(
                 publicatie=publication,
@@ -1015,6 +1038,10 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "bestandsformaat": "unknown",
             "bestandsnaam": "unknown.bin",
             "bestandsomvang": 0,
+            "eigenaar": {
+                "identifier": "id",
+                "weergaveNaam": "username",
+            },
             "registratiedatum": "2024-09-25T14:30:00+02:00",
             "laatstGewijzigdDatum": "2024-09-25T14:30:00+02:00",
             "ontvangstdatum": None,

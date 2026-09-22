@@ -2730,6 +2730,12 @@ components:
           minimum: 0
           format: int64
           description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          readOnly: true
+          nullable: true
+          description: The creator of the document, derived from the audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2754,6 +2760,7 @@ components:
             Documenten-API.
       required:
       - creatiedatum
+      - eigenaar
       - gepubliceerdOp
       - ingetrokkenOp
       - laatstGewijzigdDatum
@@ -2875,6 +2882,12 @@ components:
           minimum: 0
           format: int64
           description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          readOnly: true
+          nullable: true
+          description: The creator of the document, derived from the audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2919,6 +2932,7 @@ components:
       required:
       - bestandsdelen
       - creatiedatum
+      - eigenaar
       - gepubliceerdOp
       - ingetrokkenOp
       - laatstGewijzigdDatum
@@ -3053,6 +3067,12 @@ components:
           type: integer
           readOnly: true
           description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          readOnly: true
+          nullable: true
+          description: The creator of the document, derived from the audit headers.
         registratiedatum:
           type: string
           format: date-time
@@ -3079,6 +3099,7 @@ components:
       - bestandsformaat
       - bestandsnaam
       - bestandsomvang
+      - eigenaar
       - gepubliceerdOp
       - identifier
       - ingetrokkenOp
@@ -3695,6 +3716,12 @@ components:
           type: integer
           readOnly: true
           description: Bestandsgrootte op de harde schijf, in bytes.
+        eigenaar:
+          allOf:
+          - $ref: '#/components/schemas/Eigenaar'
+          readOnly: true
+          nullable: true
+          description: The creator of the document, derived from the audit headers.
         registratiedatum:
           type: string
           format: date-time
