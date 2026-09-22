@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 import structlog
 
 from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
+from woo_publications.logging.admin_tools import AuditLogInlineformset
 from woo_publications.typing import is_authenticated_request
 from woo_publications.utils.date import get_workday
 
@@ -326,3 +327,26 @@ class InzageProcedureAdminForm(forms.ModelForm[InzageProcedure]):
             )
 
         return end_date
+
+
+class InzageProcedureInlineFormset(AuditLogInlineformset):
+    def save_new(self, form, commit=True):
+        inzage_procedure: InzageProcedure = super().save_new(form, commit)
+
+        if not inzage_procedure.url_reactieformulier:
+            inzage_procedure.set_url_reactieformulier(
+                beschikbaar_rechtsmiddel=inzage_procedure.beschikbaar_rechtsmiddel,
+                url_reactieformulier=None,
+            )
+            inzage_procedure.save()
+
+        return inzage_procedure
+
+    def save_existing(self, form, obj: InzageProcedure, commit=True):
+        if not obj.url_reactieformulier:
+            obj.set_url_reactieformulier(
+                beschikbaar_rechtsmiddel=obj.beschikbaar_rechtsmiddel,
+                url_reactieformulier=None,
+            )
+
+        return super().save_new(form, commit)
