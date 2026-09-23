@@ -10,6 +10,8 @@ from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.metadata.tests.factories import InformationCategoryFactory
+from woo_publications.utils.tests.webtest import add_dynamic_field
 
 from ..constants import LegalProcedureOptions
 from ..models import InzageProcedure
@@ -498,4 +500,241 @@ class InzageProcedureAdminWebTest(WebTest):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
             InzageProcedure.objects.filter(uuid=inzage_procedure.uuid).exists()
+        )
+
+    def test_inline_inzage_procedure_create(self):
+        assert InzageProcedure.objects.count() == 0
+
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["inzageprocedure-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
+        add_dynamic_field(
+            form,
+            "inzageprocedure-0-url_bekendmaking",
+            "https://example.com/bekendmaking",
+        )
+        add_dynamic_field(form, "inzageprocedure-0-toelichting", "bla")
+        add_dynamic_field(
+            form,
+            "inzageprocedure-0-beschikbaar_rechtsmiddel",
+            LegalProcedureOptions.objection,
+        )
+        add_dynamic_field(
+            form, "inzageprocedure-0-datum_begin_inzagetermijn", "2008-09-10"
+        )
+        add_dynamic_field(
+            form, "inzageprocedure-0-datum_einde_inzagetermijn", "2026-04-27"
+        )
+        add_dynamic_field(form, "inzageprocedure-0-automatisch_intrekken", "1")
+
+        create_response = form.submit(name="_save")
+
+        self.assertEqual(create_response.status_code, 302)
+
+        inzage_procedure = InzageProcedure.objects.get()
+
+        self.assertEqual(inzage_procedure.publicatie, publication)
+        self.assertEqual(
+            inzage_procedure.url_bekendmaking, "https://example.com/bekendmaking"
+        )
+        self.assertEqual(inzage_procedure.toelichting, "bla")
+        self.assertEqual(
+            inzage_procedure.beschikbaar_rechtsmiddel,
+            LegalProcedureOptions.objection,
+        )
+        self.assertEqual(
+            inzage_procedure.url_reactieformulier, "http://www.example.com/objection"
+        )
+        self.assertEqual(
+            inzage_procedure.datum_begin_inzagetermijn, datetime.date(2008, 9, 10)
+        )
+        self.assertEqual(
+            inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
+        )
+        self.assertEqual(inzage_procedure.automatisch_intrekken, True)
+
+    def test_inline_inzage_procedure_create_provide_url_reactieformulier_manually(self):
+        assert InzageProcedure.objects.count() == 0
+
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["inzageprocedure-TOTAL_FORMS"] = "1"  # we're adding one, dynamically
+        add_dynamic_field(form, "inzageprocedure-0-toelichting", "bla")
+        add_dynamic_field(
+            form,
+            "inzageprocedure-0-beschikbaar_rechtsmiddel",
+            LegalProcedureOptions.objection,
+        )
+        add_dynamic_field(
+            form,
+            "inzageprocedure-0-url_reactieformulier",
+            "https://www.example.com/some/path",
+        )
+        add_dynamic_field(
+            form, "inzageprocedure-0-datum_begin_inzagetermijn", "2008-09-10"
+        )
+        add_dynamic_field(
+            form, "inzageprocedure-0-datum_einde_inzagetermijn", "2026-04-27"
+        )
+
+        create_response = form.submit(name="_save")
+
+        self.assertEqual(create_response.status_code, 302)
+
+        inzage_procedure = InzageProcedure.objects.get()
+
+        self.assertEqual(inzage_procedure.publicatie, publication)
+        self.assertEqual(
+            inzage_procedure.beschikbaar_rechtsmiddel,
+            LegalProcedureOptions.objection,
+        )
+        self.assertEqual(
+            inzage_procedure.url_reactieformulier, "https://www.example.com/some/path"
+        )
+
+    def test_inline_inzage_procedure_update(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        inzage_procedure = InzageProcedureFactory.create(publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+
+        with self.subTest("update entire object"):
+            add_dynamic_field(
+                form,
+                "inzageprocedure-0-url_bekendmaking",
+                "https://example.com/bekendmaking/changed",
+            )
+            add_dynamic_field(form, "inzageprocedure-0-toelichting", "changed")
+            add_dynamic_field(
+                form,
+                "inzageprocedure-0-beschikbaar_rechtsmiddel",
+                LegalProcedureOptions.perspective,
+            )
+            add_dynamic_field(
+                form, "inzageprocedure-0-datum_begin_inzagetermijn", "2008-09-10"
+            )
+            add_dynamic_field(
+                form, "inzageprocedure-0-datum_einde_inzagetermijn", "2026-04-27"
+            )
+            add_dynamic_field(form, "inzageprocedure-0-automatisch_intrekken", "")
+
+            update_response = form.submit(name="_save")
+
+            self.assertEqual(update_response.status_code, 302)
+
+            inzage_procedure.refresh_from_db()
+
+            self.assertEqual(inzage_procedure.publicatie, publication)
+            self.assertEqual(
+                inzage_procedure.url_bekendmaking,
+                "https://example.com/bekendmaking/changed",
+            )
+            self.assertEqual(inzage_procedure.toelichting, "changed")
+            self.assertEqual(
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalProcedureOptions.perspective,
+            )
+            self.assertEqual(
+                inzage_procedure.url_reactieformulier,
+                "http://www.example.com/perspective",
+            )
+            self.assertEqual(
+                inzage_procedure.datum_begin_inzagetermijn, datetime.date(2008, 9, 10)
+            )
+            self.assertEqual(
+                inzage_procedure.datum_einde_inzagetermijn, datetime.date(2026, 4, 28)
+            )
+            self.assertEqual(inzage_procedure.automatisch_intrekken, False)
+
+        with self.subTest("provide url_reactieformulier in update uses said data"):
+            add_dynamic_field(
+                form,
+                "inzageprocedure-0-beschikbaar_rechtsmiddel",
+                LegalProcedureOptions.objection,
+            )
+            add_dynamic_field(
+                form,
+                "inzageprocedure-0-url_reactieformulier",
+                "https://example.com/some/path",
+            )
+
+            update_response = form.submit(name="_save")
+
+            self.assertEqual(update_response.status_code, 302)
+
+            inzage_procedure.refresh_from_db()
+
+            self.assertEqual(inzage_procedure.publicatie, publication)
+            self.assertEqual(
+                inzage_procedure.beschikbaar_rechtsmiddel,
+                LegalProcedureOptions.objection,
+            )
+            self.assertEqual(
+                inzage_procedure.url_reactieformulier,
+                "https://example.com/some/path",
+            )
+
+    def test_inline_inzage_procedure_delete(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic],
+            officiele_titel="title one",
+        )
+        inzage_procedure = InzageProcedureFactory.create(publicatie=publication)
+        reverse_url = reverse(
+            "admin:publications_publication_change",
+            kwargs={"object_id": publication.id},
+        )
+
+        response = self.app.get(reverse_url, user=self.user)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["publication_form"]
+        form["inzageprocedure-0-DELETE"] = True
+
+        delete_response = form.submit(name="_save")
+
+        self.assertEqual(delete_response.status_code, 302)
+
+        self.assertFalse(
+            InzageProcedure.objects.filter(pk=inzage_procedure.id).exists()
         )
