@@ -152,6 +152,7 @@ services:
       - ENVIRONMENT_FOREGROUND_COLOR=white
     volumes: &web_volumes
       - ./docker/fixtures/:/app/fixtures
+      - static:/app/static
       - media:/app/media
       - log:/app/log
     extra_hosts: &web_extra_hosts
@@ -187,6 +188,17 @@ services:
       - redis
       - celery
 
+  nginx:
+    image: nginx
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static:/app/static:ro
+      - media:/app/media:ro
+    ports:
+      - '9000:80'
+    depends_on:
+      - web
+
 volumes:
   db:
   redis-data:
@@ -194,6 +206,7 @@ volumes:
   oz-private-media:
   log:
   media:
+  static:
   es-data:
   gpp-zoeken-media:
   gpp-zoeken-log:
