@@ -59,9 +59,9 @@ from .tasks import (
     description=_("Change %(verbose_name_plural)s owner(s)"), permissions=["change"]
 )
 def change_owner(
-    modeladmin: PublicationAdmin | DocumentAdmin,
+    modeladmin: PublicationAdmin,
     request: HttpRequest,
-    queryset: models.QuerySet[Publication | Document],
+    queryset: models.QuerySet[Publication],
 ):
     assert isinstance(request.user, User)
     model_name = str(model_ngettext(queryset))
@@ -711,12 +711,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             },
         ),
         (
-            _("Actors"),
-            {
-                "fields": ("eigenaar",),
-            },
-        ),
-        (
             _("File"),
             {
                 "fields": (
@@ -762,7 +756,6 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "verkorte_titel",
         "bestandsnaam",
         "publicatie__uuid",
-        "eigenaar__identifier",
     )
     list_filter = (
         "registratiedatum",
@@ -772,19 +765,8 @@ class DocumentAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     inlines = [
         DocumentIdentifierInlineAdmin,
     ]
-    autocomplete_fields = ("eigenaar",)
     date_hierarchy = "registratiedatum"
-    actions = [sync_to_index, remove_from_index, revoke, change_owner]
-
-    def get_changeform_initial_data(self, request: HttpRequest):
-        assert isinstance(request.user, User)
-        initial_data: dict = super().get_changeform_initial_data(request)
-        owner = OrganisationMember.objects.get_and_sync(
-            identifier=str(request.user.pk),
-            naam=request.user.get_full_name() or request.user.username,
-        )
-        initial_data["eigenaar"] = owner
-        return initial_data
+    actions = [sync_to_index, remove_from_index, revoke]
 
     def get_readonly_fields(self, request: HttpRequest, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
