@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from woo_publications.config.models import GlobalConfiguration
 
-from ..constants import LegalRemedyOptions
+from ..constants import LegalProcedureOptions
 from .factories import InzageProcedureFactory, PublicationFactory
 
 
@@ -48,34 +48,34 @@ class TestInzageProcedureModelTestCase(TestCase):
 
         with self.subTest(
             "provide beschikbaar rechtsmiddel with no global config url fields",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
         ):
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
                 url_reactieformulier=None,
             )
             self.assertEqual(inzage_procedure.url_reactieformulier, "")
 
         with self.subTest(
             "provide beschikbaar rechtsmiddel with no global config url fields",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
         ):
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
                 url_reactieformulier=None,
             )
             self.assertEqual(inzage_procedure.url_reactieformulier, "")
 
         with self.subTest(
             "provide beschikbaar rechtsmiddel with global config",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
         ):
             config = GlobalConfiguration.get_solo()
             config.perspective_reaction_form_url = "http://www.example.com/perspective"
             config.save()
 
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
                 url_reactieformulier=None,
             )
             self.assertEqual(
@@ -85,14 +85,14 @@ class TestInzageProcedureModelTestCase(TestCase):
 
         with self.subTest(
             "provide beschikbaar rechtsmiddel with global config",
-            beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+            beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
         ):
             config = GlobalConfiguration.get_solo()
             config.objection_reaction_form_url = "http://www.example.com/objection"
             config.save()
 
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
                 url_reactieformulier=None,
             )
             self.assertEqual(
@@ -107,7 +107,7 @@ class TestInzageProcedureModelTestCase(TestCase):
             config.save()
 
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.perspective,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.perspective,
                 url_reactieformulier="http://www.important.com/",
             )
             self.assertEqual(
@@ -115,7 +115,7 @@ class TestInzageProcedureModelTestCase(TestCase):
             )
 
             inzage_procedure.set_url_reactieformulier(
-                beschikbaar_rechtsmiddel=LegalRemedyOptions.objection,
+                beschikbaar_rechtsmiddel=LegalProcedureOptions.objection,
                 url_reactieformulier="http://www.important.com/",
             )
             self.assertEqual(

@@ -62,7 +62,7 @@ from woo_publications.utils.validators import (
 from .archiving import get_retention_informatie_category
 from .constants import (
     LEGACY_MS_OFFICE_MIMETYPES,
-    LegalRemedyOptions,
+    LegalProcedureOptions,
     PublicationStatusOptions,
 )
 
@@ -1238,30 +1238,30 @@ class InzageProcedure(models.Model):
         help_text=_("The description of the announcement."),
     )
     beschikbaar_rechtsmiddel = models.CharField(
-        _("available legal remedy"),
+        _("available legal procedure"),
         help_text=_(
-            "The legal remedy that a citizen can employ to oppose "
+            "The legal procedure that a citizen can employ to oppose "
             "the (predisposed) decision."
         ),
-        choices=LegalRemedyOptions.choices,
+        choices=LegalProcedureOptions.choices,
         max_length=20,
     )
     url_reactieformulier = models.URLField(
-        _("announcement URL"),
+        _("legal notice URL"),
         help_text=_(
-            "The URL to the web form where citizens can submit the legal remedy. "
-            "This field gets populated based on the 'available legal remedy' field "
+            "The URL to the web form where citizens can submit the legal procedure. "
+            "This field gets populated based on the 'available legal procedure' field "
             "and the global config when left empty."
         ),
         max_length=1000,
         blank=True,
     )
     datum_begin_inzagetermijn = models.DateField(
-        _("in effect from"),
+        _("inzagetermijn in effect from"),
         help_text=_("The date when the inspection period starts."),
     )
     datum_einde_inzagetermijn = models.DateField(
-        _("in effect until"),
+        _("inzagetermijn in effect until"),
         help_text=_(
             "The date when the inspection period comes to an end."
             "If the end date falls on a saturday, sunday or holiday we automatically "
@@ -1269,7 +1269,7 @@ class InzageProcedure(models.Model):
         ),
     )
     automatisch_intrekken = models.BooleanField(
-        _("automatically redact"),
+        _("automatically withdraw"),
         help_text=_(
             "When enabled, ensure that the publication gets "
             "redacted on the configured end date."
@@ -1293,7 +1293,7 @@ class InzageProcedure(models.Model):
     def set_url_reactieformulier(
         self,
         *,
-        beschikbaar_rechtsmiddel: LegalRemedyOptions | None,
+        beschikbaar_rechtsmiddel: LegalProcedureOptions | None,
         url_reactieformulier: str | None,
     ):
         """
@@ -1310,11 +1310,11 @@ class InzageProcedure(models.Model):
         match (url_reactieformulier, beschikbaar_rechtsmiddel):
             case (url, _) if url:
                 self.url_reactieformulier = url
-            case (_, LegalRemedyOptions.objection) if (
+            case (_, LegalProcedureOptions.objection) if (
                 global_config.objection_reaction_form_url
             ):
                 self.url_reactieformulier = global_config.objection_reaction_form_url
-            case (_, LegalRemedyOptions.perspective) if (
+            case (_, LegalProcedureOptions.perspective) if (
                 global_config.perspective_reaction_form_url
             ):
                 self.url_reactieformulier = global_config.perspective_reaction_form_url

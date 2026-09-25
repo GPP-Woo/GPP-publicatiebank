@@ -33,6 +33,7 @@ from .forms import (
     ChangeOwnerGroepForm,
     DocumentAdminForm,
     InzageProcedureAdminForm,
+    InzageProcedureInlineFormset,
     PublicationAdminForm,
 )
 from .models import (
@@ -394,6 +395,24 @@ def revoke(
     )
 
 
+class InzageProcedureInlineAdmin(admin.StackedInline[InzageProcedure, Publication]):
+    formset = InzageProcedureInlineFormset
+    form = InzageProcedureAdminForm
+    model = InzageProcedure
+    fields = (
+        "url_bekendmaking",
+        "toelichting",
+        "beschikbaar_rechtsmiddel",
+        "url_reactieformulier",
+        "datum_begin_inzagetermijn",
+        "datum_einde_inzagetermijn",
+        "automatisch_intrekken",
+        "uuid",
+    )
+    readonly_fields = ("uuid",)
+    max_num = 1
+
+
 class DocumentInlineAdmin(admin.TabularInline[Document, Publication]):
     model = Document
     fk_name = "publicatie"  # necessary for the template override
@@ -548,6 +567,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
     )
     date_hierarchy = "registratiedatum"
     inlines = (
+        InzageProcedureInlineAdmin,
         PublicationIdentifierInlineAdmin,
         DocumentInlineAdmin,
     )
