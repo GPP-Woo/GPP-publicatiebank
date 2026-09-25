@@ -349,4 +349,4 @@ class InzageProcedureInlineFormset(AuditLogInlineformset):
                 url_reactieformulier=None,
             )
 
-        return super().save_new(form, commit)
+        return super().save_existing(form, obj, commit)
