@@ -126,6 +126,7 @@ class Topic(models.Model):
     officiele_titel = models.CharField(
         _("official title"),
         max_length=255,
+        db_collation="nl-NL-x-icu",
     )
     omschrijving = models.TextField(_("description"), blank=True)
     publicatiestatus = models.CharField(
@@ -257,11 +258,13 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     officiele_titel = models.CharField(
         _("official title"),
         max_length=255,
+        db_collation="nl-NL-x-icu",
     )
     verkorte_titel = models.CharField(
         _("short title"),
         max_length=255,
         blank=True,
+        db_collation="nl-NL-x-icu",
     )
     omschrijving = models.TextField(_("description"), blank=True)
     publicatiestatus = FSMField(
