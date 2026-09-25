@@ -368,9 +368,6 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     #
-    # # Filtering
-    "ORDERING_PARAM": "ordering",  # 'ordering',
-    #
     # Versioning
     # NOT to be confused with API_VERSION - it's the major version part.
     "DEFAULT_VERSION": "1",

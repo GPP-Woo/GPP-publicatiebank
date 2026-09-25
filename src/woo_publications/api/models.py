@@ -38,6 +38,7 @@ class Application(models.Model):  # noqa: DJ008
             "credentials."
         ),
         blank=True,
+        db_collation="nl-NL-x-icu",
     )
     email = models.EmailField(
         _("email"),
