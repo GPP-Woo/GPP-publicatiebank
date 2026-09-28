@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ordered_model.models import OrderedModel
 from treebeard.mp_tree import MP_Node
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.config.validators import validate_rsin
 from woo_publications.constants import ArchiveNominationChoices
@@ -107,6 +108,18 @@ class InformationCategory(OrderedModel):
     toelichting_bewaartermijn = models.TextField(
         _("retention policy explanation"),
         blank=True,
+    )
+    iot_url = models.URLField(
+        _("informatieobjecttype URL"),
+        help_text=_("The informatieobjecttype URL from the catalogi API."),
+        editable=False,
+    )
+    iot_uuid = models.UUIDField(
+        _("informatieobjecttype UUID"),
+        help_text=_("The UUID of the API resource recorded in the Catalogi API."),
+        editable=False,
+        null=True,
+        blank=False,
     )
 
     objects = InformationCategoryManager()
