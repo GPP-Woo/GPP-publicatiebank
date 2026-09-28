@@ -38,7 +38,7 @@
     "pk": 3,
     "fields": {
         "api_type": "ztc",
-        "enabled": false
+        "enabled": true
     }
 },
 {
