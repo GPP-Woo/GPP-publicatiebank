@@ -1,10 +1,13 @@
 from contextlib import contextmanager
+from functools import partial
 
 from django.db import transaction
-from django.db.models import Q
+
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from .constants import INFORMATION_CATEGORY_FIXTURE_FIELDS
 from .models import InformationCategory
+from .tasks import index_iot
 
 
 @contextmanager
@@ -21,14 +24,13 @@ def keep_none_retention_policy_field_values():
         if field.name not in ignore_fields
     ]
 
-    # bron_bewaartermijn is a required field which is blank by default
-    # so if it is empty the retention fields hasn't been set yet and can
-    # be ignored.
+    # Since we deleted the catalogi API endpoint from the project
+    # we now track the URL in the database table itself.
+    # because of it we always have keep track of the original data
+    # of specific fields, to ensure we don't delete the lookups.
     information_categories_data = {
         ic.pk: {field: getattr(ic, field) for field in updatable_fields}
-        for ic in InformationCategory.objects.filter(
-            ~Q(bron_bewaartermijn="")
-        ).iterator()
+        for ic in InformationCategory.objects.iterator()
     }
 
     try:
@@ -36,6 +38,7 @@ def keep_none_retention_policy_field_values():
     finally:
         information_categories: list[InformationCategory] = []
 
+        # retain original data
         if information_categories_data:
             for ic in InformationCategory.objects.filter(
                 pk__in=information_categories_data.keys()
@@ -46,4 +49,14 @@ def keep_none_retention_policy_field_values():
 
             InformationCategory.objects.bulk_update(
                 information_categories, updatable_fields
+            )
+
+        # initialize catalogi API information
+        for ic in InformationCategory.objects.filter(iot_url=""):
+            transaction.on_commit(
+                partial(
+                    index_iot.delay,
+                    information_category_id=ic.pk,
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                )
             )
