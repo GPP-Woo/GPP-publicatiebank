@@ -1,5 +1,9 @@
+from functools import partial
+
+from django import forms
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Case, Value, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -10,11 +14,13 @@ from django.utils.translation import gettext_lazy as _
 from ordered_model.admin import OrderedModelAdmin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
 from .models import InformationCategory, Organisation, Theme
+from .tasks import index_iot
 
 
 @admin.register(InformationCategory)
@@ -55,6 +61,15 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                 )
             },
         ),
+        (
+            _("Catalogi API"),
+            {
+                "fields": (
+                    "iot_url",
+                    "iot_uuid",
+                )
+            },
+        ),
     )
     _value_list_readonly_fields = (
         "uuid",
@@ -63,11 +78,15 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
         "naam_meervoud",
         "definitie",
         "oorsprong",
+        "iot_url",
+        "iot_uuid",
     )
     readonly_fields = (
         "uuid",
         "identifier",
         "oorsprong",
+        "iot_url",
+        "iot_uuid",
     )
     search_fields = (
         "identifier",
@@ -80,6 +99,25 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
             return self._value_list_readonly_fields
 
         return super().get_readonly_fields(request, obj)
+
+    @transaction.atomic
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: InformationCategory,
+        form: forms.Form,
+        change: bool,
+    ):
+        super().save_model(request, obj, form, change)
+
+        if not obj.iot_url:
+            transaction.on_commit(
+                partial(
+                    index_iot.delay,
+                    information_category_id=obj.pk,
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                )
+            )
 
     def get_urls(self):
         default_urls = super().get_urls()
