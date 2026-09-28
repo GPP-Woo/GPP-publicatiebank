@@ -189,6 +189,15 @@ class DocumentenClient(NLXClient):
         )
         response.raise_for_status()
 
+    def update_document_iot(
+        self, *, uuid: UUID, document_type_url: str, lock: str
+    ) -> None:
+        response = self.patch(
+            f"enkelvoudiginformatieobjecten/{uuid}",
+            json={"informatieobjecttype": document_type_url, "lock": lock},
+        )
+        response.raise_for_status()
+
     def destroy_document(self, uuid: UUID) -> None:
         try:
             response = self.delete(f"enkelvoudiginformatieobjecten/{uuid}")
