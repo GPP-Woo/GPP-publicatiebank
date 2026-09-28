@@ -1348,7 +1348,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID
+            uuid=cls.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
         )
 
     def setUp(self):
@@ -2043,7 +2043,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID
+            uuid=cls.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
         )
 
     def setUp(self):

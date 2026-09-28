@@ -125,7 +125,7 @@ class TestDocumentApi(VCRMixin, TestCase):
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID
+            uuid=self.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
         )
         publisher = OrganisationFactory.create(is_actief=True, rsin="")
         document: Document = DocumentFactory.create(
@@ -147,7 +147,7 @@ class TestDocumentApi(VCRMixin, TestCase):
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID
+            uuid=self.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
         )
         publisher = OrganisationFactory.create(is_actief=True, rsin="123456782")
         document: Document = DocumentFactory.create(
