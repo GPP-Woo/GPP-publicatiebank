@@ -119,7 +119,7 @@ cryptography==50.0.1
     #   webauthn
 cssselect==1.3.0
     # via pyquery
-django==5.2.13
+django==5.2.18
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -307,7 +307,7 @@ django-upgrade-check==1.1.0
     #   open-api-framework
 django-webtest==1.9.14
     # via -r requirements/test-tools.in
-djangorestframework==3.16.1
+djangorestframework==3.18.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -391,7 +391,7 @@ humanize==4.15.0
     #   flower
 hypothesis==6.168.0
     # via -r requirements/test-tools.in
-idna==3.11
+idna==3.20
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt

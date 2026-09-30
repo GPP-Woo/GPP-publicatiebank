@@ -61,7 +61,7 @@ cryptography==50.0.1
     #   mozilla-django-oidc
     #   pyopenssl
     #   webauthn
-django==5.2.13
+django==5.2.18
     # via
     #   -r requirements/base.in
     #   django-admin-index
@@ -177,7 +177,7 @@ django-upgrade-check==1.1.0
     # via
     #   -r requirements/base.in
     #   open-api-framework
-djangorestframework==3.16.1
+djangorestframework==3.18.1
     # via
     #   djangorestframework-recursive
     #   drf-polymorphic
@@ -211,7 +211,7 @@ glom==25.12.0
     # via mozilla-django-oidc-db
 humanize==4.15.0
     # via flower
-idna==3.11
+idna==3.20
     # via requests
 inflection==0.5.1
     # via drf-spectacular
