@@ -656,4 +656,3 @@ class InzageProcedureAdminWebTest(WebTest):
         self.assertFalse(
             InzageProcedure.objects.filter(pk=inzage_procedure.id).exists()
         )
-
