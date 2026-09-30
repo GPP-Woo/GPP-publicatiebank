@@ -54,7 +54,7 @@ click-repl==0.3.0
     # via celery
 convertdate==2.4.1
     # via workalendar
-cryptography==46.0.7
+cryptography==50.0.1
     # via
     #   django-simple-certmanager
     #   josepy
@@ -243,7 +243,7 @@ orderedmultidict==1.0.2
     # via furl
 packaging==26.0
     # via kombu
-pillow==12.2.0
+pillow==12.3.0
     # via -r requirements/base.in
 polib==1.2.0
     # via django-rosetta
@@ -263,17 +263,17 @@ pydantic==2.12.5
     #   pydantic-settings
 pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.12.0
+pydantic-settings==2.15.0
     # via django-setup-configuration
-pyjwt==2.12.1
+pyjwt==2.15.1
     # via zgw-consumers
 pyluach==2.3.0
     # via workalendar
 pymeeus==0.5.12
     # via convertdate
-pyopenssl==26.0.0
+pyopenssl==26.4.0
     # via webauthn
-pypdf==6.10.2
+pypdf==6.19.0
     # via -r requirements/base.in
 python-dateutil==2.9.0.post0
     # via
@@ -329,23 +329,20 @@ six==1.17.0
     #   furl
     #   orderedmultidict
     #   python-dateutil
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via django
 structlog==25.5.0
     # via
     #   -r requirements/base.in
     #   django-structlog
-tornado==6.5.5
+tornado==6.5.10
     # via flower
 typing-extensions==4.15.0
     # via
     #   django-stubs-ext
     #   mozilla-django-oidc-db
-    #   psycopg
     #   pydantic
     #   pydantic-core
-    #   pyopenssl
-    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
@@ -358,7 +355,7 @@ tzlocal==5.3.1
     # via celery
 uritemplate==4.2.0
     # via drf-spectacular
-urllib3==2.6.3
+urllib3==2.8.0
     # via
     #   elastic-apm
     #   requests

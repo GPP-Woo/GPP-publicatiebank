@@ -108,7 +108,7 @@ convertdate==2.4.1
     #   workalendar
 coverage==7.13.2
     # via -r requirements/test-tools.in
-cryptography==46.0.7
+cryptography==50.0.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -425,6 +425,8 @@ kombu==5.6.2
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
+legacy-cgi==2.6.4
+    # via webob
 lunardate==0.3.0
     # via
     #   -c requirements/base.txt
@@ -473,7 +475,7 @@ packaging==26.0
     #   sphinx
 parametrize==0.1.1
     # via -r requirements/test-tools.in
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -518,7 +520,7 @@ pydantic-core==2.41.5
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   pydantic
-pydantic-settings==2.12.0
+pydantic-settings==2.15.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -527,7 +529,7 @@ pygments==2.20.0
     # via
     #   sphinx
     #   sphinx-tabs
-pyjwt==2.12.1
+pyjwt==2.15.1
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -542,12 +544,12 @@ pymeeus==0.5.12
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   convertdate
-pyopenssl==26.0.0
+pyopenssl==26.4.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   webauthn
-pypdf==6.10.2
+pypdf==6.19.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -661,7 +663,7 @@ snowballstemmer==3.0.1
     # via sphinx
 sortedcontainers==2.4.0
     # via hypothesis
-soupsieve==2.8.3
+soupsieve==2.10
     # via beautifulsoup4
 sphinx==9.1.0
     # via
@@ -687,7 +689,7 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -699,7 +701,7 @@ structlog==25.5.0
     #   django-structlog
 tblib==3.2.2
     # via -r requirements/test-tools.in
-tornado==6.5.5
+tornado==6.5.10
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -712,11 +714,8 @@ typing-extensions==4.15.0
     #   django-stubs-ext
     #   django-test-migrations
     #   mozilla-django-oidc-db
-    #   psycopg
     #   pydantic
     #   pydantic-core
-    #   pyopenssl
-    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
@@ -740,7 +739,7 @@ uritemplate==4.2.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   drf-spectacular
-urllib3==2.6.3
+urllib3==2.8.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
@@ -751,7 +750,7 @@ uwsgi==2.0.31
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
-vcrpy==8.1.1
+vcrpy==8.3.0
     # via -r requirements/test-tools.in
 vine==5.1.0
     # via
@@ -772,7 +771,7 @@ webauthn==2.7.0
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   django-two-factor-auth
-webob==1.8.9
+webob==1.8.11
     # via webtest
 webtest==3.0.7
     # via django-webtest

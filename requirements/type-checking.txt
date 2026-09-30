@@ -121,7 +121,7 @@ coverage==7.13.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-cryptography==46.0.7
+cryptography==50.0.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -470,6 +470,11 @@ kombu==5.6.2
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   celery
+legacy-cgi==2.6.4
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+    #   webob
 lunardate==0.3.0
     # via
     #   -c requirements/ci.txt
@@ -525,7 +530,7 @@ parametrize==0.1.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -570,7 +575,7 @@ pydantic-core==2.41.5
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   pydantic
-pydantic-settings==2.12.0
+pydantic-settings==2.15.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -581,7 +586,7 @@ pygments==2.20.0
     #   -r requirements/ci.txt
     #   sphinx
     #   sphinx-tabs
-pyjwt==2.12.1
+pyjwt==2.15.1
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -596,12 +601,12 @@ pymeeus==0.5.12
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   convertdate
-pyopenssl==26.0.0
+pyopenssl==26.4.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webauthn
-pypdf==6.10.2
+pypdf==6.19.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -731,7 +736,7 @@ sortedcontainers==2.4.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   hypothesis
-soupsieve==2.8.3
+soupsieve==2.10
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -786,7 +791,7 @@ sphinxcontrib-serializinghtml==2.0.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   sphinx
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -801,7 +806,7 @@ tblib==3.2.2
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-tornado==6.5.5
+tornado==6.5.10
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -825,12 +830,9 @@ typing-extensions==4.15.0
     #   django-test-migrations
     #   djangorestframework-stubs
     #   mozilla-django-oidc-db
-    #   psycopg
     #   pydantic
     #   pydantic-core
-    #   pyopenssl
     #   pyright
-    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
@@ -854,7 +856,7 @@ uritemplate==4.2.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   drf-spectacular
-urllib3==2.6.3
+urllib3==2.8.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -866,7 +868,7 @@ uwsgi==2.0.31
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-vcrpy==8.1.1
+vcrpy==8.3.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -892,7 +894,7 @@ webauthn==2.7.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   django-two-factor-auth
-webob==1.8.9
+webob==1.8.11
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
