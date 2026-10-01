@@ -29,7 +29,11 @@ from django.test import TestCase, override_settings
 
 import requests_mock
 from requests import RequestException
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
+from woo_publications.contrib.catalogi_api.client import (
+    get_client as get_catalogi_client,
+)
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
@@ -217,6 +221,59 @@ class DocumentsAPIClientTests(VCRMixin, TestCase):
                 f"enkelvoudiginformatieobjecten/{document.uuid}"
             )
             self.assertEqual(openzaak_response.json()["bronorganisatie"], "112345670")
+
+    def test_update_document_iot(self):
+        document_service = ServiceFactory.build(for_documents_api_docker_compose=True)
+        catalogi_service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+
+        with get_catalogi_client(catalogi_service) as client:
+            catalogi = client.create_catalogi(rsin="731604829")
+            original_iot = client.create_iot(
+                catalogus=catalogi,
+                description="some-data",
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
+            new_iot = client.create_iot(
+                catalogus=catalogi,
+                description="some-other-data",
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
+
+        with get_client(document_service) as client:
+            # create document
+            document = client.create_document(
+                identification=str(
+                    uuid4()
+                ),  # must be unique for the source organisation
+                source_organisation="111222333",
+                document_type_url=original_iot.url,
+                creation_date=date.today(),
+                title="Sample document",
+                filesize=1_000,  # in bytes
+                filename="sample.png",
+            )
+            # ensure that the bronorganisatie has been updated
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.uuid}"
+            )
+            self.assertEqual(
+                openzaak_response.json()["informatieobjecttype"], original_iot.url
+            )
+
+            # update bronorganisatie
+            client.update_document_iot(
+                uuid=document.uuid,
+                document_type_url=new_iot.url,
+                lock=document.lock,
+            )
+
+            # ensure that the bronorganisatie has been updated
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{document.uuid}"
+            )
+            self.assertEqual(
+                openzaak_response.json()["informatieobjecttype"], new_iot.url
+            )
 
     def test_download_document(self):
         service = ServiceFactory.build(for_documents_api_docker_compose=True)

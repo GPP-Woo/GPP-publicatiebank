@@ -1339,12 +1339,18 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         # Set up global configuration
-        cls.service = service = ServiceFactory.create(
+        cls.service = document_service = ServiceFactory.create(
             for_documents_api_docker_compose=True
         )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
         config = GlobalConfiguration.get_solo()
-        config.documents_api_service = service
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = (
+            "http://host.docker.internal:8001/catalogi/api/v1/catalogus/some-catalogus"
+        )
+        config.default_iot_url = "http://host.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/some-iot"
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
@@ -2034,12 +2040,18 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         # Set up global configuration
-        cls.service = service = ServiceFactory.create(
+        cls.service = document_service = ServiceFactory.create(
             for_documents_api_docker_compose=True
         )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
         config = GlobalConfiguration.get_solo()
-        config.documents_api_service = service
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = (
+            "http://host.docker.internal:8001/catalogi/api/v1/catalogus/some-catalogus"
+        )
+        config.default_iot_url = "http://host.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/some-iot"
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
