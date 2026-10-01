@@ -91,7 +91,7 @@ class CatalogiClient(NLXClient):
         try:
             uuid = response_data["url"].rsplit("/", 1)[-1]
             uuid = UUID(uuid)
-        except ValueError as err:  # noqa
+        except ValueError as err:  # pragma: no cover
             raise CatalogiAPIError(
                 message=_(
                     "Malformed uuid retrieved from informatieobjecttypen response."
@@ -125,7 +125,11 @@ class CatalogiClient(NLXClient):
             response = self.delete(f"informatieobjecttypen/{uuid}")
             response.raise_for_status()
         except RequestException as err:
-            if err.response is not None and err.response.status_code == 404:
+            if (
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and status_code == 404:
                 return
 
             sentry_sdk.capture_exception(err)

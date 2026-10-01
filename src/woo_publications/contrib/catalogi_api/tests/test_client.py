@@ -1,4 +1,5 @@
 import re
+from uuid import UUID
 
 from django.test import TestCase
 from django.utils.translation import gettext as _
@@ -11,6 +12,7 @@ from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..client import CatalogiAPIError, get_client
+from ..constants import DEFAULT_CATALOGUS
 
 
 class CatalogiClientTests(VCRMixin, TestCase):
@@ -44,10 +46,9 @@ class CatalogiClientTests(VCRMixin, TestCase):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
         with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="111111110")
             iot = client.create_iot(
-                catalogus=catalogi,
-                description="Some text.",
+                catalogus=DEFAULT_CATALOGUS,
+                description="create iot.",
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
 
@@ -62,27 +63,24 @@ class CatalogiClientTests(VCRMixin, TestCase):
             # ensure that the IOT is published
             self.assertFalse(detail_response.json()["concept"])
 
-    def test_while_encountering_error_during_publishing_delete_iot(self):
+    def test_while_encountering_error_during_publishing_deleted_iot(self):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
-        with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="222222220")
-
-            with requests_mock.Mocker(real_http=True) as m:
-                m.post(
-                    re.compile(
-                        r"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/[^/]+/publish"
-                    ),
-                    status_code=400,
+        with get_client(service) as client, requests_mock.Mocker(real_http=True) as m:
+            m.post(
+                re.compile(
+                    r"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/[^/]+/publish"
+                ),
+                status_code=400,
+            )
+            with self.assertRaisesMessage(
+                CatalogiAPIError, _("IOT object couldn't be published.")
+            ):
+                client.create_iot(
+                    catalogus=DEFAULT_CATALOGUS,
+                    description="encountering error during publishing deleted iot.",
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
                 )
-                with self.assertRaisesMessage(
-                    CatalogiAPIError, _("IOT object couldn't be published.")
-                ):
-                    client.create_iot(
-                        catalogus=catalogi,
-                        description="Some text.",
-                        confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
-                    )
 
         with self.subTest("check no concept IOT's exist"):
             detail_response = client.get(
@@ -95,30 +93,26 @@ class CatalogiClientTests(VCRMixin, TestCase):
     def test_error_during_creating_iot(self):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
-        with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="333333330")
-
-            with (
-                self.assertRaisesMessage(
-                    CatalogiAPIError, _("Something went wrong while creating IOT.")
-                ),
-                self.vcr_raises(RequestException),
-            ):
-                client.create_iot(
-                    catalogus=catalogi,
-                    description="Some text.",
-                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
-                )
+        with (
+            get_client(service) as client,
+            self.assertRaisesMessage(
+                CatalogiAPIError, _("Something went wrong while creating IOT.")
+            ),
+            self.vcr_raises(RequestException),
+        ):
+            client.create_iot(
+                catalogus=DEFAULT_CATALOGUS,
+                description="error during creating iot",
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
 
     def test_destroy_iot(self):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
         with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="444444440")
-
             iot = client.create_iot(
-                catalogus=catalogi,
-                description="Some text.",
+                catalogus=DEFAULT_CATALOGUS,
+                description="destroy iot.",
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
             client.destroy_iot(uuid=iot.uuid)
@@ -132,11 +126,9 @@ class CatalogiClientTests(VCRMixin, TestCase):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
         with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="555555550")
-
             iot = client.create_iot(
-                catalogus=catalogi,
-                description="Some text.",
+                catalogus=DEFAULT_CATALOGUS,
+                description="destroy iot error.",
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
 
@@ -147,3 +139,9 @@ class CatalogiClientTests(VCRMixin, TestCase):
                 self.vcr_raises(RequestException),
             ):
                 client.destroy_iot(uuid=iot.uuid)
+
+    def test_destroy_iot_when_iot_does_not_exist(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+
+        with get_client(service) as client:
+            client.destroy_iot(uuid=UUID("e2016928-ca1b-4b08-911b-a2495b234eb6"))

@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.33.1
+    method: DELETE
+    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/e2016928-ca1b-4b08-911b-a2495b234eb6
+  response:
+    body:
+      string: '{"type":"http://openzaak.docker.internal:8001/ref/fouten/NotFound/","code":"not_found","title":"Niet
+        gevonden.","status":404,"detail":"Niet gevonden.","instance":"urn:uuid:2fa3238a-dc93-40a3-9a4d-a654eeb67068"}'
+    headers:
+      API-version:
+      - 1.3.1
+      Allow:
+      - GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+      Content-Length:
+      - '210'
+      Content-Security-Policy:
+      - 'worker-src ''self'' blob:; default-src ''self''; base-uri ''self''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; style-src
+        ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net;
+        form-action ''self''; object-src ''none''; frame-ancestors ''none''; img-src
+        ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com tile.openstreetmap.org; font-src
+        ''self'' fonts.gstatic.com; frame-src ''self'''
+      Content-Type:
+      - application/json
+      Cross-Origin-Opener-Policy:
+      - same-origin
+      Referrer-Policy:
+      - same-origin
+      Vary:
+      - Accept, origin, Cookie
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 404
+      message: Not Found
+version: 1
