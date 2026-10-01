@@ -30,7 +30,10 @@ from woo_publications.api.tests.mixins import (
     TokenAuthMixin,
 )
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.contrib.documents_api.api import DUMMY_IC_UUID
+from woo_publications.contrib.catalogi_api.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
 from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.logging.constants import Events
@@ -1347,14 +1350,12 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.documents_api_service = document_service
         config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
-        config.catalogus_url = (
-            "http://host.docker.internal:8001/catalogi/api/v1/catalogus/some-catalogus"
-        )
-        config.default_iot_url = "http://host.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/some-iot"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
+            iot_url=DEFAULT_IOT
         )
 
     def setUp(self):
@@ -1498,10 +1499,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
             self.assertEqual(detail.status_code, status.HTTP_200_OK)
             detail_data = detail.json()
-            self.assertEqual(
-                detail_data["informatieobjecttype"],
-                f"http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/{DUMMY_IC_UUID}",
-            )
+            self.assertEqual(detail_data["informatieobjecttype"], DEFAULT_IOT)
 
     @patch("woo_publications.publications.models.Document.register_in_documents_api")
     def test_create_document_with_inline_kenmerken(
@@ -2048,14 +2046,12 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.documents_api_service = document_service
         config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
-        config.catalogus_url = (
-            "http://host.docker.internal:8001/catalogi/api/v1/catalogus/some-catalogus"
-        )
-        config.default_iot_url = "http://host.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/some-iot"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
+            uuid=cls.DOCUMENT_TYPE_UUID, iot_url=DEFAULT_IOT
         )
 
     def setUp(self):

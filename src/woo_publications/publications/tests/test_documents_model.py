@@ -9,6 +9,11 @@ from rest_framework import status
 from zgw_consumers.constants import APITypes
 
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.catalogi_api.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
+from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -16,7 +21,6 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ...contrib.documents_api.client import get_client
 from ..constants import PublicationStatusOptions
 from ..models import Document
 from .factories import DocumentFactory
@@ -24,12 +28,6 @@ from .factories import DocumentFactory
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class TestDocumentApi(VCRMixin, TestCase):
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-    DOCUMENT_TYPE_URL = (
-        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-        + DOCUMENT_TYPE_UUID
-    )
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -42,10 +40,8 @@ class TestDocumentApi(VCRMixin, TestCase):
         config.documents_api_service = document_service
         config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
-        config.catalogus_url = (
-            "http://host.docker.internal:8001/catalogi/api/v1/catalogus/some-catalogus"
-        )
-        config.default_iot_url = "http://host.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/some-iot"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
     def setUp(self):
@@ -130,9 +126,7 @@ class TestDocumentApi(VCRMixin, TestCase):
 
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
-        information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
-        )
+        information_category = InformationCategoryFactory.create(iot_url=DEFAULT_IOT)
         publisher = OrganisationFactory.create(is_actief=True, rsin="")
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[information_category],
@@ -152,9 +146,7 @@ class TestDocumentApi(VCRMixin, TestCase):
 
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
-        information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID, iot_url="https://www.example.com/something"
-        )
+        information_category = InformationCategoryFactory.create(iot_url=DEFAULT_IOT)
         publisher = OrganisationFactory.create(is_actief=True, rsin="123456782")
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[information_category],

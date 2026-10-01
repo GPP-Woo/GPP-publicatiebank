@@ -136,5 +136,40 @@
         "certificate": "",
         "certificate_key": ""
     }
-}
+},
+{
+    "model": "catalogi.catalogus",
+    "pk": 1,
+    "fields": {
+      "naam": "Open Zaak default catalogus",
+      "uuid": "770dcb62-2469-4353-a2a7-e619df7e061f",
+      "domein": "GPP",
+      "rsin": "100000198",
+      "contactpersoon_beheer_naam": "unknown",
+      "contactpersoon_beheer_telefoonnummer": "",
+      "contactpersoon_beheer_emailadres": "",
+      "versie": "",
+      "begindatum_versie": null
+    }
+  },
+  {
+    "model": "catalogi.informatieobjecttype",
+    "pk": 1,
+    "fields": {
+      "datum_begin_geldigheid": "2026-01-01",
+      "datum_einde_geldigheid": null,
+      "concept": false,
+      "uuid": "ed78b0dc-e5d6-4259-9eae-04e02be2167b",
+      "omschrijving": "default IOT",
+      "informatieobjectcategorie": "Overig",
+      "trefwoord": "[]",
+      "vertrouwelijkheidaanduiding": "openbaar",
+      "omschrijving_generiek_informatieobjecttype": "",
+      "omschrijving_generiek_definitie": "",
+      "omschrijving_generiek_herkomst": "",
+      "omschrijving_generiek_hierarchie": "",
+      "omschrijving_generiek_opmerking": "",
+      "catalogus": 1
+    }
+  }
 ]

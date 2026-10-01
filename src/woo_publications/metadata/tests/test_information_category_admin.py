@@ -10,6 +10,7 @@ from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.contrib.catalogi_api.constants import DEFAULT_IOT
 
 from ..constants import InformationCategoryOrigins
 from ..models import CUSTOM_CATEGORY_IDENTIFIER_URL_PREFIX, InformationCategory
@@ -314,16 +315,12 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
         user = UserFactory.create(superuser=True)
         url = reverse("admin:metadata_informationcategory_iotendpoints")
         InformationCategoryFactory.create(
-            naam="unique snowflake", uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a"
+            naam="unique snowflake",
+            uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
+            iot_url=DEFAULT_IOT,
         )
 
         response = self.app.get(url, user=user)
 
         self.assertContains(response, "unique snowflake")
-        self.assertContains(
-            response,
-            (
-                "http://testserver/catalogi/api/v1/informatieobjecttypen/"
-                "7aa923ea-9e72-4523-9ef9-f7e1e74cf53a"
-            ),
-        )
+        self.assertContains(response, DEFAULT_IOT)
