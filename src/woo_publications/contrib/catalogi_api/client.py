@@ -13,7 +13,7 @@ from zgw_consumers.nlx import NLXClient
 
 __all__ = ["CatalogiAPIError", "get_client"]
 
-from woo_publications.contrib.catalogi_api.typing import IOT, IOTBody, IOTResponse
+from .typing import IOT, IOTBody, IOTResponse
 
 
 def get_client(service: Service) -> CatalogiClient:
@@ -25,9 +25,6 @@ class CatalogiAPIError(Exception):
         self.message = message
         self.status_code = status_code
         super().__init__(message)
-
-
-class CatalogiRetryError(Exception): ...
 
 
 class CatalogiClient(NLXClient):

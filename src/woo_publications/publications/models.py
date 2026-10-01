@@ -1035,7 +1035,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
     @property
     def get_iot_url(self) -> str:
         config = GlobalConfiguration.get_solo()
-        if (documenttype_url := config.default_iot_url) is None:
+        if (documenttype_url := config.default_iot_url) == "":
             raise RuntimeError(
                 "No default Information Objecttype url configured yet! "
                 "Set up the global configuration."

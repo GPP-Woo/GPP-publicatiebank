@@ -570,8 +570,18 @@ def update_document_informatieobjecttype(
     with get_documents_client(document.document_service) as client:
         lock = document.lock
         if not lock:
-            # Lock the document to allow updates.
-            lock = client.lock_document(uuid)
+            try:
+                # Lock the document to allow updates.
+                lock = client.lock_document(uuid)
+            except RequestException as err:
+                if (
+                    status_code := getattr(
+                        getattr(err, "response", None), "status_code", None
+                    )
+                ) and 429 <= status_code < 503:
+                    raise self.retry(countdown=30) from err
+
+                raise
             # Save the lock incase something goes wrong during the update
             document.lock = lock
             document.save(update_fields=("lock",))
@@ -583,10 +593,10 @@ def update_document_informatieobjecttype(
             )
         except RequestException as err:
             if (
-                err.response
-                and err.response.status_code
-                and 429 <= err.response.status_code < 503
-            ):
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and 429 <= status_code < 503:
                 raise self.retry(countdown=30) from err
 
             raise

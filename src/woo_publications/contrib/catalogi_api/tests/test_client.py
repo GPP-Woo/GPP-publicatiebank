@@ -74,7 +74,6 @@ class CatalogiClientTests(VCRMixin, TestCase):
                         r"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/[^/]+/publish"
                     ),
                     status_code=400,
-                    # exc=RequestException,
                 )
                 with self.assertRaisesMessage(
                     CatalogiAPIError, _("IOT object couldn't be published.")

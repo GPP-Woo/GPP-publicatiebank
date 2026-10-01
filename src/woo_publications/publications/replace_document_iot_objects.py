@@ -4,7 +4,7 @@ from woo_publications.publications.models import Document
 from .tasks import update_document_informatieobjecttype
 
 
-def change_all_iot():
+def change_document_api_iots():
     config = GlobalConfiguration.get_solo()
     if not config.documents_api_service:
         raise RuntimeError(
