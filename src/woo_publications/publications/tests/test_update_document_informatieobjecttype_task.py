@@ -1,4 +1,3 @@
-import re
 from datetime import date
 from io import BytesIO
 from uuid import uuid4
@@ -14,8 +13,9 @@ from rest_framework import status
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.config.models import GlobalConfiguration
-from woo_publications.contrib.catalogi_api.client import (
-    get_client as get_catalogi_client,
+from woo_publications.contrib.catalogi_api.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
 )
 from woo_publications.contrib.documents_api.client import (
     get_client as get_document_client,
@@ -29,6 +29,8 @@ from .factories import DocumentFactory, PublicationFactory
 
 response_500 = Response()
 response_500.status_code = 500
+
+uuid_pattern = r"[0-9a-fA-F-]{36}"
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
@@ -47,6 +49,8 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         config.documents_api_service = document_service
         config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
     def setUp(self):
@@ -93,21 +97,12 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
             self.assertEqual(openzaak_response.json()["bronorganisatie"], "123456782")
             return openzaak_document
 
-    def setup_catalogi(self, rsin):
-        with get_catalogi_client(self.catalogi_service) as client:
-            catalogus_url = client.create_catalogi(rsin=rsin)
-            default_iot = client.create_iot(
-                catalogus=catalogus_url,
-                description="default catalogus",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.vertrouwelijk,
-            )
-
+    def test_no_documents_api_relation(self):
         config = GlobalConfiguration.get_solo()
-        config.catalogus_url = catalogus_url
-        config.default_iot_url = default_iot.url
+        config.catalogus_url = ""
+        config.default_iot_url = ""
         config.save()
 
-    def test_no_documents_api_relation(self):
         document = DocumentFactory.create(lock="asd9asd9a9sd9asd")
 
         update_document_informatieobjecttype(
@@ -118,7 +113,6 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         self.assertEqual(document.lock, "asd9asd9a9sd9asd")
 
     def test_update_document_informatieobjecttype_happy_flow(self):
-        self.setup_catalogi(rsin="314159265")
         external_document = self.setup_document()
 
         information_category = InformationCategoryFactory.create()
@@ -153,8 +147,44 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
             )
         self.assertEqual(document.lock, "")
 
+    def test_update_document_informatieobjecttype_with_existing_lock(self):
+        external_document = self.setup_document()
+        with get_document_client(self.document_service) as client:
+            lock = client.lock_document(uuid=external_document.uuid)
+
+        information_category = InformationCategoryFactory.create()
+        information_category.create_iot_object(
+            confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
+        )
+        information_category.refresh_from_db()
+
+        publication = PublicationFactory.create(
+            informatie_categorieen=[information_category.pk]
+        )
+        document = DocumentFactory.create(
+            publicatie=publication,
+            document_service=self.document_service,
+            document_uuid=external_document.uuid,
+            lock=lock,
+        )
+
+        update_document_informatieobjecttype(
+            document_id=document.pk, documenttype_url=information_category.iot_url
+        )
+
+        document.refresh_from_db()
+        with get_document_client(self.document_service) as client:
+            openzaak_response = client.get(
+                f"enkelvoudiginformatieobjecten/{external_document.uuid}"
+            )
+            self.assertEqual(openzaak_response.status_code, status.HTTP_200_OK)
+            self.assertEqual(
+                openzaak_response.json()["informatieobjecttype"],
+                information_category.iot_url,
+            )
+        self.assertEqual(document.lock, "")
+
     def test_error_during_locking(self):
-        self.setup_catalogi(rsin="100000010")
         external_document = self.setup_document()
 
         information_category = InformationCategoryFactory.create()
@@ -175,9 +205,7 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
 
         with requests_mock.Mocker(real_http=True) as m:
             m.post(
-                re.compile(
-                    r"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/[^/]+/lock"
-                ),
+                f"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/{external_document.uuid}/lock",
                 exc=RequestException,
             )
             with self.assertRaises(RequestException):
@@ -190,7 +218,6 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         self.assertEqual(document.lock, "")
 
     def test_error_during_locking_with_retry(self):
-        self.setup_catalogi(rsin="100000022")
         external_document = self.setup_document()
 
         information_category = InformationCategoryFactory.create()
@@ -211,9 +238,7 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
 
         with requests_mock.Mocker(real_http=True) as m:
             m.post(
-                re.compile(
-                    r"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/[^/]+/lock"
-                ),
+                f"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/{external_document.uuid}/lock",
                 exc=HTTPError("500 Internal Server Error", response=response_500),
             )
             with self.assertRaises(Retry):
@@ -226,7 +251,6 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         self.assertEqual(document.lock, "")
 
     def test_error_during_update_document_iot(self):
-        self.setup_catalogi(rsin="100000034")
         external_document = self.setup_document()
 
         information_category = InformationCategoryFactory.create()
@@ -246,10 +270,8 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         )
 
         with requests_mock.Mocker(real_http=True) as m:
-            m.post(
-                re.compile(
-                    r"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/[^/]+"
-                ),
+            m.patch(
+                f"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/{external_document.uuid}",
                 exc=RequestException,
             )
             with self.assertRaises(RequestException):
@@ -262,7 +284,6 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         self.assertEqual(document.lock, "")
 
     def test_error_during_update_document_iot_with_retry(self):
-        self.setup_catalogi(rsin="100000046")
         external_document = self.setup_document()
 
         information_category = InformationCategoryFactory.create()
@@ -282,10 +303,8 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
         )
 
         with requests_mock.Mocker(real_http=True) as m:
-            m.post(
-                re.compile(
-                    r"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/[^/]+"
-                ),
+            m.patch(
+                f"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/{external_document.uuid}",
                 exc=HTTPError("500 Internal Server Error", response=response_500),
             )
             with self.assertRaises(Retry):

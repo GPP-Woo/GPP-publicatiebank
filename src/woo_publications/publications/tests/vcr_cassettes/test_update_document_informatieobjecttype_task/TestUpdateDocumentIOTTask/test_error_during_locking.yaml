@@ -1,166 +1,7 @@
 interactions:
 - request:
-    body: '{"domein": "GPP", "rsin": "100000010", "contactpersoonBeheerNaam": "Unknown"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '77'
-      Content-Type:
-      - application/json
-      User-Agent:
-      - python-requests/2.33.1
-    method: POST
-    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen
-  response:
-    body:
-      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14","domein":"GPP","rsin":"100000010","contactpersoonBeheerNaam":"Unknown","contactpersoonBeheerTelefoonnummer":"","contactpersoonBeheerEmailadres":"","zaaktypen":[],"besluittypen":[],"informatieobjecttypen":[],"naam":"","versie":"","begindatumVersie":null}'
-    headers:
-      API-version:
-      - 1.3.1
-      Allow:
-      - GET, POST, HEAD, OPTIONS
-      Content-Length:
-      - '365'
-      Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Location:
-      - http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14
-      Referrer-Policy:
-      - same-origin
-      Vary:
-      - Accept, origin, Cookie
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14",
-      "omschrijving": "default catalogus", "vertrouwelijkheidaanduiding": "vertrouwelijk",
-      "beginGeldigheid": "2024-09-01", "informatieobjectcategorie": "Wet Open Overheid"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '287'
-      Content-Type:
-      - application/json
-      User-Agent:
-      - python-requests/2.33.1
-    method: POST
-    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen
-  response:
-    body:
-      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14","omschrijving":"default
-        catalogus","vertrouwelijkheidaanduiding":"vertrouwelijk","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":true,"besluittypen":[],"informatieobjectcategorie":"Wet
-        Open Overheid","trefwoord":[],"omschrijvingGeneriek":{"informatieobjecttypeOmschrijvingGeneriek":"","definitieInformatieobjecttypeOmschrijvingGeneriek":"","herkomstInformatieobjecttypeOmschrijvingGeneriek":"","hierarchieInformatieobjecttypeOmschrijvingGeneriek":"","opmerkingInformatieobjecttypeOmschrijvingGeneriek":""},"zaaktypen":[],"beginObject":"2024-09-01","eindeObject":null}'
-    headers:
-      API-version:
-      - 1.3.1
-      Allow:
-      - GET, POST, HEAD, OPTIONS
-      Content-Length:
-      - '821'
-      Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Location:
-      - http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc
-      Referrer-Policy:
-      - same-origin
-      Vary:
-      - Accept, origin, Cookie
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14",
-      "omschrijving": "default catalogus", "vertrouwelijkheidaanduiding": "vertrouwelijk",
-      "beginGeldigheid": "2024-09-01", "informatieobjectcategorie": "Wet Open Overheid"}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '287'
-      Content-Type:
-      - application/json
-      User-Agent:
-      - python-requests/2.33.1
-    method: POST
-    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc/publish
-  response:
-    body:
-      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14","omschrijving":"default
-        catalogus","vertrouwelijkheidaanduiding":"vertrouwelijk","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":false,"besluittypen":[],"informatieobjectcategorie":"Wet
-        Open Overheid","trefwoord":[],"omschrijvingGeneriek":{"informatieobjecttypeOmschrijvingGeneriek":"","definitieInformatieobjecttypeOmschrijvingGeneriek":"","herkomstInformatieobjecttypeOmschrijvingGeneriek":"","hierarchieInformatieobjecttypeOmschrijvingGeneriek":"","opmerkingInformatieobjecttypeOmschrijvingGeneriek":""},"zaaktypen":[],"beginObject":"2024-09-01","eindeObject":null}'
-    headers:
-      API-version:
-      - 1.3.1
-      Allow:
-      - POST, OPTIONS
-      Content-Length:
-      - '822'
-      Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
-      Content-Type:
-      - application/json
-      Cross-Origin-Opener-Policy:
-      - same-origin
-      Referrer-Policy:
-      - same-origin
-      Vary:
-      - Accept, origin, Cookie
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"identificatie": "8f35a943-1ce6-436e-8084-a7cb9359905f", "bronorganisatie":
-      "123456782", "informatieobjecttype": "http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc",
+    body: '{"identificatie": "d4d144db-da29-409d-8b1e-5cc8042c5eff", "bronorganisatie":
+      "123456782", "informatieobjecttype": "http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/ed78b0dc-e5d6-4259-9eae-04e02be2167b",
       "creatiedatum": "2026-10-01", "titel": "File part test", "auteur": "WOO registrations",
       "status": "definitief", "formaat": "text/plain", "taal": "dut", "bestandsnaam":
       "data.txt", "inhoud": null, "bestandsomvang": 10, "beschrijving": "", "indicatieGebruiksrecht":
@@ -182,28 +23,28 @@ interactions:
     uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11","identificatie":"8f35a943-1ce6-436e-8084-a7cb9359905f","bronorganisatie":"123456782","creatiedatum":"2026-10-01","titel":"File
-        part test","vertrouwelijkheidaanduiding":"vertrouwelijk","auteur":"WOO registrations","status":"definitief","formaat":"text/plain","taal":"dut","versie":1,"beginRegistratie":"2026-10-01T11:30:31.268098Z","bestandsnaam":"data.txt","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":null,"integriteit":null,"informatieobjecttype":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/766e4aee-cf04-4933-b2f5-ba259b7362c7","volgnummer":1,"omvang":10,"voltooid":false,"lock":"ded5b49221744a39955ba1566838567e"}],"trefwoorden":[],"lock":"ded5b49221744a39955ba1566838567e"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31","identificatie":"d4d144db-da29-409d-8b1e-5cc8042c5eff","bronorganisatie":"123456782","creatiedatum":"2026-10-01","titel":"File
+        part test","vertrouwelijkheidaanduiding":"openbaar","auteur":"WOO registrations","status":"definitief","formaat":"text/plain","taal":"dut","versie":1,"beginRegistratie":"2026-10-01T12:36:48.697401Z","bestandsnaam":"data.txt","inhoud":null,"bestandsomvang":10,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":null,"integriteit":null,"informatieobjecttype":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/ed78b0dc-e5d6-4259-9eae-04e02be2167b","locked":true,"bestandsdelen":[{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/19b04609-6c8b-4eeb-b08d-338d24ff5f98","volgnummer":1,"omvang":10,"voltooid":false,"lock":"453fe6c9a9874419bf46e7c08d7aab46"}],"trefwoorden":[],"lock":"453fe6c9a9874419bf46e7c08d7aab46"}'
     headers:
       API-version:
       - 1.4.2
       Allow:
       - GET, POST, HEAD, OPTIONS
       Content-Length:
-      - '1116'
+      - '1111'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
       Location:
-      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11
+      - http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31
       Referrer-Policy:
       - same-origin
       Vary:
@@ -219,12 +60,12 @@ interactions:
     body: !!python/object/new:_io.BytesIO
       state: !!python/tuple
       - !!binary |
-        LS1kYjQzMGY5ZjUxNDA0YzZjYTY2ZDQ4YjFhMjJjMzQxMg0KQ29udGVudC1EaXNwb3NpdGlvbjog
-        Zm9ybS1kYXRhOyBuYW1lPSJsb2NrIg0KDQpkZWQ1YjQ5MjIxNzQ0YTM5OTU1YmExNTY2ODM4NTY3
-        ZQ0KLS1kYjQzMGY5ZjUxNDA0YzZjYTY2ZDQ4YjFhMjJjMzQxMg0KQ29udGVudC1EaXNwb3NpdGlv
+        LS1hODBiYmU1MzhlZDE0NDEyYTc4NGU4MmYwNTAzYjBjMw0KQ29udGVudC1EaXNwb3NpdGlvbjog
+        Zm9ybS1kYXRhOyBuYW1lPSJsb2NrIg0KDQo0NTNmZTZjOWE5ODc0NDE5YmY0NmU3YzA4ZDdhYWI0
+        Ng0KLS1hODBiYmU1MzhlZDE0NDEyYTc4NGU4MmYwNTAzYjBjMw0KQ29udGVudC1EaXNwb3NpdGlv
         bjogZm9ybS1kYXRhOyBuYW1lPSJpbmhvdWQiOyBmaWxlbmFtZT0icGFydC5iaW4iDQpDb250ZW50
-        LVR5cGU6IGFwcGxpY2F0aW9uL29jdGV0LXN0cmVhbQ0KDQoxMjM0NTY3ODkwDQotLWRiNDMwZjlm
-        NTE0MDRjNmNhNjZkNDhiMWEyMmMzNDEyLS0NCg==
+        LVR5cGU6IGFwcGxpY2F0aW9uL29jdGV0LXN0cmVhbQ0KDQoxMjM0NTY3ODkwDQotLWE4MGJiZTUz
+        OGVkMTQ0MTJhNzg0ZTgyZjA1MDNiMGMzLS0NCg==
       - 0
       - null
     headers:
@@ -237,14 +78,14 @@ interactions:
       Content-Length:
       - '313'
       Content-Type:
-      - multipart/form-data; boundary=db430f9f51404c6ca66d48b1a22c3412
+      - multipart/form-data; boundary=a80bbe538ed14412a784e82f0503b0c3
       User-Agent:
       - python-requests/2.33.1
     method: PUT
-    uri: http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/766e4aee-cf04-4933-b2f5-ba259b7362c7
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/19b04609-6c8b-4eeb-b08d-338d24ff5f98
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/766e4aee-cf04-4933-b2f5-ba259b7362c7","volgnummer":1,"omvang":10,"voltooid":true,"lock":"ded5b49221744a39955ba1566838567e"}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/bestandsdelen/19b04609-6c8b-4eeb-b08d-338d24ff5f98","volgnummer":1,"omvang":10,"voltooid":true,"lock":"453fe6c9a9874419bf46e7c08d7aab46"}'
     headers:
       API-version:
       - 1.4.2
@@ -253,12 +94,12 @@ interactions:
       Content-Length:
       - '200'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
@@ -275,7 +116,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"lock": "ded5b49221744a39955ba1566838567e"}'
+    body: '{"lock": "453fe6c9a9874419bf46e7c08d7aab46"}'
     headers:
       Accept:
       - '*/*'
@@ -290,7 +131,7 @@ interactions:
       User-Agent:
       - python-requests/2.33.1
     method: POST
-    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11/unlock
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31/unlock
   response:
     body:
       string: ''
@@ -302,12 +143,12 @@ interactions:
       Content-Length:
       - '0'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Cross-Origin-Opener-Policy:
       - same-origin
       Referrer-Policy:
@@ -333,31 +174,31 @@ interactions:
       User-Agent:
       - python-requests/2.33.1
     method: GET
-    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11
+    uri: http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11","identificatie":"8f35a943-1ce6-436e-8084-a7cb9359905f","bronorganisatie":"123456782","creatiedatum":"2026-10-01","titel":"File
-        part test","vertrouwelijkheidaanduiding":"vertrouwelijk","auteur":"WOO registrations","status":"definitief","formaat":"text/plain","taal":"dut","versie":1,"beginRegistratie":"2026-10-01T11:30:31.309613Z","bestandsnaam":"data.txt","inhoud":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/793a3af3-3f91-40e4-bcf6-7343351c5c11/download?versie=1","bestandsomvang":10,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":null,"integriteit":null,"informatieobjecttype":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/4b4c288e-51ac-4ca7-898e-35644d9841bc","locked":false,"bestandsdelen":[],"trefwoorden":[],"_expand":{}}'
+      string: '{"url":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31","identificatie":"d4d144db-da29-409d-8b1e-5cc8042c5eff","bronorganisatie":"123456782","creatiedatum":"2026-10-01","titel":"File
+        part test","vertrouwelijkheidaanduiding":"openbaar","auteur":"WOO registrations","status":"definitief","formaat":"text/plain","taal":"dut","versie":1,"beginRegistratie":"2026-10-01T12:36:48.754816Z","bestandsnaam":"data.txt","inhoud":"http://openzaak.docker.internal:8001/documenten/api/v1/enkelvoudiginformatieobjecten/27a4d855-bd45-4c7c-a22b-1e69b5a22d31/download?versie=1","bestandsomvang":10,"link":"","beschrijving":"","ontvangstdatum":null,"verzenddatum":null,"indicatieGebruiksrecht":false,"verschijningsvorm":"","ondertekening":null,"integriteit":null,"informatieobjecttype":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/ed78b0dc-e5d6-4259-9eae-04e02be2167b","locked":false,"bestandsdelen":[],"trefwoorden":[],"_expand":{}}'
     headers:
       API-version:
       - 1.4.2
       Allow:
       - GET, PUT, PATCH, DELETE, HEAD, OPTIONS
       Content-Length:
-      - '1024'
+      - '1019'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
       ETag:
-      - '"5301b0e8db8c00c2a3d4a97ea061667e"'
+      - '"78bb00f8181ede7db00b76dcf262e6bc"'
       Referrer-Policy:
       - same-origin
       Vary:
@@ -370,8 +211,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14",
-      "omschrijving": "many", "vertrouwelijkheidaanduiding": "openbaar", "beginGeldigheid":
+    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/770dcb62-2469-4353-a2a7-e619df7e061f",
+      "omschrijving": "listen", "vertrouwelijkheidaanduiding": "openbaar", "beginGeldigheid":
       "2024-09-01", "informatieobjectcategorie": "Wet Open Overheid"}'
     headers:
       Accept:
@@ -381,7 +222,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '269'
+      - '271'
       Content-Type:
       - application/json
       User-Agent:
@@ -390,7 +231,7 @@ interactions:
     uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/251b5b0d-c14f-4fac-bc76-926070cf4c36","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14","omschrijving":"many","vertrouwelijkheidaanduiding":"openbaar","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":true,"besluittypen":[],"informatieobjectcategorie":"Wet
+      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/3883dfe4-0a2e-4f95-b035-91b3d4b97bb5","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/770dcb62-2469-4353-a2a7-e619df7e061f","omschrijving":"listen","vertrouwelijkheidaanduiding":"openbaar","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":true,"besluittypen":[],"informatieobjectcategorie":"Wet
         Open Overheid","trefwoord":[],"omschrijvingGeneriek":{"informatieobjecttypeOmschrijvingGeneriek":"","definitieInformatieobjecttypeOmschrijvingGeneriek":"","herkomstInformatieobjecttypeOmschrijvingGeneriek":"","hierarchieInformatieobjecttypeOmschrijvingGeneriek":"","opmerkingInformatieobjecttypeOmschrijvingGeneriek":""},"zaaktypen":[],"beginObject":"2024-09-01","eindeObject":null}'
     headers:
       API-version:
@@ -398,20 +239,20 @@ interactions:
       Allow:
       - GET, POST, HEAD, OPTIONS
       Content-Length:
-      - '803'
+      - '805'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
       - same-origin
       Location:
-      - http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/251b5b0d-c14f-4fac-bc76-926070cf4c36
+      - http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/3883dfe4-0a2e-4f95-b035-91b3d4b97bb5
       Referrer-Policy:
       - same-origin
       Vary:
@@ -424,8 +265,8 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14",
-      "omschrijving": "many", "vertrouwelijkheidaanduiding": "openbaar", "beginGeldigheid":
+    body: '{"catalogus": "http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/770dcb62-2469-4353-a2a7-e619df7e061f",
+      "omschrijving": "listen", "vertrouwelijkheidaanduiding": "openbaar", "beginGeldigheid":
       "2024-09-01", "informatieobjectcategorie": "Wet Open Overheid"}'
     headers:
       Accept:
@@ -435,16 +276,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '269'
+      - '271'
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.33.1
     method: POST
-    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/251b5b0d-c14f-4fac-bc76-926070cf4c36/publish
+    uri: http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/3883dfe4-0a2e-4f95-b035-91b3d4b97bb5/publish
   response:
     body:
-      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/251b5b0d-c14f-4fac-bc76-926070cf4c36","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/0a71bd5c-2691-4bf1-9277-9b9ca1ca8f14","omschrijving":"many","vertrouwelijkheidaanduiding":"openbaar","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":false,"besluittypen":[],"informatieobjectcategorie":"Wet
+      string: '{"url":"http://openzaak.docker.internal:8001/catalogi/api/v1/informatieobjecttypen/3883dfe4-0a2e-4f95-b035-91b3d4b97bb5","catalogus":"http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/770dcb62-2469-4353-a2a7-e619df7e061f","omschrijving":"listen","vertrouwelijkheidaanduiding":"openbaar","beginGeldigheid":"2024-09-01","eindeGeldigheid":null,"concept":false,"besluittypen":[],"informatieobjectcategorie":"Wet
         Open Overheid","trefwoord":[],"omschrijvingGeneriek":{"informatieobjecttypeOmschrijvingGeneriek":"","definitieInformatieobjecttypeOmschrijvingGeneriek":"","herkomstInformatieobjecttypeOmschrijvingGeneriek":"","hierarchieInformatieobjecttypeOmschrijvingGeneriek":"","opmerkingInformatieobjecttypeOmschrijvingGeneriek":""},"zaaktypen":[],"beginObject":"2024-09-01","eindeObject":null}'
     headers:
       API-version:
@@ -452,14 +293,14 @@ interactions:
       Allow:
       - POST, OPTIONS
       Content-Length:
-      - '804'
+      - '806'
       Content-Security-Policy:
-      - 'object-src ''none''; font-src ''self'' fonts.gstatic.com; script-src ''self''
-        ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; default-src ''self'';
-        form-action ''self''; frame-src ''self''; img-src ''self'' data: cdn.redoc.ly
-        cdnjs.cloudflare.com tile.openstreetmap.org; style-src ''self'' ''unsafe-inline''
-        fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; base-uri ''self'';
-        worker-src ''self'' blob:; frame-ancestors ''none'''
+      - 'base-uri ''self''; worker-src ''self'' blob:; object-src ''none''; script-src
+        ''self'' ''unsafe-inline'' cdnjs.cloudflare.com cdn.jsdelivr.net; form-action
+        ''self''; style-src ''self'' ''unsafe-inline'' fonts.googleapis.com cdnjs.cloudflare.com
+        cdn.jsdelivr.net; frame-src ''self''; frame-ancestors ''none''; font-src ''self''
+        fonts.gstatic.com; img-src ''self'' data: cdn.redoc.ly cdnjs.cloudflare.com
+        tile.openstreetmap.org; default-src ''self'''
       Content-Type:
       - application/json
       Cross-Origin-Opener-Policy:
