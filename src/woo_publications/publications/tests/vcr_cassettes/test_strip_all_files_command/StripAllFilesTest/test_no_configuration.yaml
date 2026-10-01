@@ -9,14 +9,14 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.5
+      - python-requests/2.33.1
     method: GET
     uri: http://host.docker.internal:8000/api/v2/
   response:
     body:
       string: "{\n    \"openapi\": \"3.0.3\",\n    \"info\": {\n        \"title\":
-        \"WOO Publications\",\n        \"version\": \"2.0.0 (1)\",\n        \"description\":
-        \"\\n## Documentatie\\n\\nDe Woo-Publicatiebank API stelt client-applicaties
+        \"GPP Publications\",\n        \"version\": \"2.1.0 (1)\",\n        \"description\":
+        \"\\n## Documentatie\\n\\nDe GPP-publicatiebank API stelt client-applicaties
         in staat om publicaties van documenten te raadplegen en te beheren in het
         kader van een open overheid. Deze API-documentatie bevat drie logische 'domeinen'.\\n\\n###
         Domeinen\\n\\n**Metadata**\\n\\nPublicaties en hun gerelateerde documenten
@@ -50,20 +50,20 @@ interactions:
         {\n            \"name\": \"EUPL\",\n            \"url\": \"https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md\"\n
         \       }\n    },\n    \"paths\": {\n        \"/api/v2/accounts/organisatie-eenheden\":
         {\n            \"get\": {\n                \"operationId\": \"accountsOrganisatieEenhedenList\",\n
-        \               \"description\": \"Returns a paginated result list of existing
-        organisation units.\",\n                \"summary\": \"All available organisation
-        units.\",\n                \"parameters\": [\n                    {\n                        \"in\":
-        \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
-        {\n                            \"type\": \"string\"\n                        },\n
-        \                       \"description\": \"\\nAny additional information describing
-        the action performed by the user.\\n\",\n                        \"required\":
-        true\n                    },\n                    {\n                        \"in\":
-        \"header\",\n                        \"name\": \"Audit-User-ID\",\n                        \"schema\":
-        {\n                            \"type\": \"string\"\n                        },\n
-        \                       \"description\": \"\\nThe system identifier that uniquely
-        identifies the user performing the action.\\nIdeally, this is obtained from
-        some Identity and Access Management\\ninfrastructure. With OpenID Connect,
-        this would typically be the `sub` claim.\\n\",\n                        \"required\":
+        \               \"description\": \"Geeft een lijst (met paginering) terug
+        van alle bestaande organisatie-eenheden.\",\n                \"summary\":
+        \"Alle beschikbare organisatie-eenheden.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
+        \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
+        \"string\"\n                        },\n                        \"description\":
+        \"\\nAny additional information describing the action performed by the user.\\n\",\n
+        \                       \"required\": true\n                    },\n                    {\n
+        \                       \"in\": \"header\",\n                        \"name\":
+        \"Audit-User-ID\",\n                        \"schema\": {\n                            \"type\":
+        \"string\"\n                        },\n                        \"description\":
+        \"\\nThe system identifier that uniquely identifies the user performing the
+        action.\\nIdeally, this is obtained from some Identity and Access Management\\ninfrastructure.
+        With OpenID Connect, this would typically be the `sub` claim.\\n\",\n                        \"required\":
         true\n                    },\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-User-Representation\",\n
         \                       \"schema\": {\n                            \"type\":
@@ -89,9 +89,9 @@ interactions:
         \                       \"description\": \"\"\n                    }\n                }\n
         \           }\n        },\n        \"/api/v2/accounts/organisatie-eenheden/{identifier}\":
         {\n            \"get\": {\n                \"operationId\": \"accountsOrganisatieEenhedenRetrieve\",\n
-        \               \"description\": \"Retrieve a specific organisation unit.\",\n
-        \               \"summary\": \"Retrieve a specific organisation unit.\",\n
-        \               \"parameters\": [\n                    {\n                        \"in\":
+        \               \"description\": \"Haal een specifieke organisatie-eenheid
+        op.\",\n                \"summary\": \"Haal een specifieke organisatie-eenheid
+        op.\",\n                \"parameters\": [\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
         {\n                            \"type\": \"string\"\n                        },\n
         \                       \"description\": \"\\nAny additional information describing
@@ -122,11 +122,11 @@ interactions:
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            },\n            \"put\":
         {\n                \"operationId\": \"accountsOrganisatieEenhedenUpdate\",\n
-        \               \"description\": \"Update the metadata of a specific organisation
-        unit.\\n\\nThe following properties cannot be modified after initial creation:\\n*
-        `identifier`\",\n                \"summary\": \"Update the metadata of a specific
-        organisation unit.\",\n                \"parameters\": [\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
+        \               \"description\": \"Werk de metadata van een specifieke organisatie-eenheid
+        bij.\\n\\nThe volgende attributen mogen niet aangepast worden na de initi\xEBle
+        creatie:\\n* `identifier`\",\n                \"summary\": \"Werk de metadata
+        van een specifieke organisatie-eenheid bij.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
         \"\\nAny additional information describing the action performed by the user.\\n\",\n
@@ -161,11 +161,11 @@ interactions:
         \                       \"description\": \"\"\n                    }\n                }\n
         \           },\n            \"patch\": {\n                \"operationId\":
         \"accountsOrganisatieEenhedenPartialUpdate\",\n                \"description\":
-        \"Update the metadata of a specific organisation unit partially.\\n\\nThe
-        following properties cannot be modified after initial creation:\\n* `identifier`\",\n
-        \               \"summary\": \"Update the metadata of a specific organisation
-        unit partially.\",\n                \"parameters\": [\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
+        \"Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk bij.\\n\\nThe
+        volgende attributen mogen niet aangepast worden na de initi\xEBle creatie:\\n*
+        `identifier`\",\n                \"summary\": \"Werk de metadata van een specifieke
+        organisatie-eenheid gedeeltelijk bij.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
         \"\\nAny additional information describing the action performed by the user.\\n\",\n
@@ -252,8 +252,12 @@ interactions:
         van de categorie\xEBn. Gebruik komma's om meerdere waarden van elkaar te scheiden.\",\n
         \                       \"explode\": true,\n                        \"style\":
         \"form\"\n                    },\n                    {\n                        \"in\":
-        \"query\",\n                        \"name\": \"laatstGewijzigdDatumTot\",\n
+        \"query\",\n                        \"name\": \"isGereedVoorPublicatie\",\n
         \                       \"schema\": {\n                            \"type\":
+        \"boolean\"\n                        },\n                        \"description\":
+        \"Filter documents that are either fully uploaded or not.\"\n                    },\n
+        \                   {\n                        \"in\": \"query\",\n                        \"name\":
+        \"laatstGewijzigdDatumTot\",\n                        \"schema\": {\n                            \"type\":
         \"string\",\n                            \"format\": \"date-time\"\n                        },\n
         \                       \"description\": \"Filter documenten op laastste wijzigingsdatum
         voor de opgegeven datumtijd.\"\n                    },\n                    {\n
@@ -279,10 +283,9 @@ interactions:
         \"integer\"\n                        }\n                    },\n                    {\n
         \                       \"in\": \"query\",\n                        \"name\":
         \"publicatie\",\n                        \"schema\": {\n                            \"type\":
-        \"integer\"\n                        },\n                        \"description\":
-        \"Filter documenten op basis van de unieke publicatie-identificatie (UUID)
-        waartoe ze horen. **Opmerkingen**: negeer het gedocumenteerde type `integer`,
-        het correcte type is `string` met formaat `uuid`.\"\n                    },\n
+        \"string\",\n                            \"format\": \"uuid\"\n                        },\n
+        \                       \"description\": \"Filter documenten op basis van
+        de unieke publicatie-identificatie (UUID) waartoe ze horen.\"\n                    },\n
         \                   {\n                        \"in\": \"query\",\n                        \"name\":
         \"publicatiestatus\",\n                        \"schema\": {\n                            \"type\":
         \"array\",\n                            \"items\": {\n                                \"type\":
@@ -727,7 +730,7 @@ interactions:
         opgeeft, dan krijg je alle onderwerpen die aan \xE9\xE9n van deze publicaties
         gerelateerd zijn.\\n\\nDe filterwaarden zijn de UUIDs van de publicaties.
         Gebruik komma's om meerdere waarden van elkaar te scheiden.\",\n                        \"explode\":
-        true,\n                        \"style\": \"form\"\n                    },\n
+        false,\n                        \"style\": \"form\"\n                    },\n
         \                   {\n                        \"in\": \"query\",\n                        \"name\":
         \"publicatiestatus\",\n                        \"schema\": {\n                            \"type\":
         \"array\",\n                            \"items\": {\n                                \"type\":
@@ -821,28 +824,32 @@ interactions:
         naam zoeken, en het zoeken is niet hoofdlettergevoelig.\"\n                    },\n
         \                   {\n                        \"in\": \"query\",\n                        \"name\":
         \"oorsprong\",\n                        \"schema\": {\n                            \"type\":
-        \"string\",\n                            \"enum\": [\n                                \"gemeentelijst\",\n
-        \                               \"oorglijst\",\n                                \"solijst\",\n
+        \"string\",\n                            \"enum\": [\n                                \"caribischelijst\",\n
+        \                               \"gemeentelijst\",\n                                \"oorglijst\",\n
+        \                               \"provincielijst\",\n                                \"solijst\",\n
+        \                               \"waterschaplijst\",\n                                \"zbolijst\",\n
         \                               \"zelf_toegevoegd\"\n                            ]\n
         \                       },\n                        \"description\": \"Zoek
         organisaties op basis van de oorsprong van de gegevens.\\n\\n* `gemeentelijst`
         - Register gemeenten compleet\\n* `solijst` - Register samenwerkingsorganisaties
         compleet\\n* `oorglijst` - Register overige overheidsorganisaties compleet\\n*
-        `zelf_toegevoegd` - Zelf-toegevoegd item\"\n                    },\n                    {\n
-        \                       \"name\": \"page\",\n                        \"required\":
+        `caribischelijst` - Register Caribische openbare lichamen compleet\\n* `provincielijst`
+        - Register provincies compleet\\n* `waterschaplijst` - Register waterschappen
+        compleet\\n* `zbolijst` - Register zbo's compleet\\n* `zelf_toegevoegd` -
+        Zelf-toegevoegd item\"\n                    },\n                    {\n                        \"name\":
+        \"page\",\n                        \"required\": false,\n                        \"in\":
+        \"query\",\n                        \"description\": \"A page number within
+        the paginated result set.\",\n                        \"schema\": {\n                            \"type\":
+        \"integer\"\n                        }\n                    },\n                    {\n
+        \                       \"name\": \"pageSize\",\n                        \"required\":
         false,\n                        \"in\": \"query\",\n                        \"description\":
-        \"A page number within the paginated result set.\",\n                        \"schema\":
+        \"Number of results to return per page.\",\n                        \"schema\":
         {\n                            \"type\": \"integer\"\n                        }\n
-        \                   },\n                    {\n                        \"name\":
-        \"pageSize\",\n                        \"required\": false,\n                        \"in\":
-        \"query\",\n                        \"description\": \"Number of results to
-        return per page.\",\n                        \"schema\": {\n                            \"type\":
-        \"integer\"\n                        }\n                    }\n                ],\n
-        \               \"tags\": [\n                    \"Organisaties\"\n                ],\n
-        \               \"security\": [\n                    {\n                        \"tokenAuth\":
-        []\n                    }\n                ],\n                \"responses\":
-        {\n                    \"200\": {\n                        \"content\": {\n
-        \                           \"application/json\": {\n                                \"schema\":
+        \                   }\n                ],\n                \"tags\": [\n                    \"Organisaties\"\n
+        \               ],\n                \"security\": [\n                    {\n
+        \                       \"tokenAuth\": []\n                    }\n                ],\n
+        \               \"responses\": {\n                    \"200\": {\n                        \"content\":
+        {\n                            \"application/json\": {\n                                \"schema\":
         {\n                                    \"$ref\": \"#/components/schemas/PaginatedOrganisationList\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
@@ -985,11 +992,12 @@ interactions:
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
         \       \"/api/v2/publicaties\": {\n            \"get\": {\n                \"operationId\":
-        \"publicatiesList\",\n                \"description\": \"Returns a paginated
-        result list of existing publications.\\n\\n**Note**: when filtering on both
-        `eigenaar` and `eigenaarGroep`, publications matching any kind of owner will
-        be returned. These parameters have OR-behaviour when combined.\",\n                \"summary\":
-        \"Alle beschikbare publicaties.\",\n                \"parameters\": [\n                    {\n
+        \"publicatiesList\",\n                \"description\": \"Geeft een gepagineerde
+        lijst van bestaande publicaties terug.\\n\\n**Opmerking**: wanneer je tegelijk
+        op `eigenaar` en `eigenaarGroep` filtert, dan worden de publicaties waar \xE9\xE9n
+        van beide condities geldt teruggegeven. De parameters hebben OF-gedrag wanneer
+        ze gecombineerd worden.\",\n                \"summary\": \"Alle beschikbare
+        publicaties.\",\n                \"parameters\": [\n                    {\n
         \                       \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
@@ -1042,7 +1050,7 @@ interactions:
         \                   {\n                        \"in\": \"query\",\n                        \"name\":
         \"eigenaarGroep\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
-        \"Filter publications based on the owner group identifier of the object.\"\n
+        \"Filter publicaties op basis van de identificatie van de eigenaar (groep).\"\n
         \                   },\n                    {\n                        \"in\":
         \"query\",\n                        \"name\": \"informatieCategorieen\",\n
         \                       \"schema\": {\n                            \"type\":
@@ -1067,7 +1075,7 @@ interactions:
         opgeeft, dan krijg je alle publicaties die aan \xE9\xE9n van deze onderwerpen
         gerelateerd zijn.\\n\\nDe filterwaarden zijn de UUIDs van de onderwerpen.
         Gebruik komma's om meerdere waarden van elkaar te scheiden.\",\n                        \"explode\":
-        true,\n                        \"style\": \"form\"\n                    },\n
+        false,\n                        \"style\": \"form\"\n                    },\n
         \                   {\n                        \"name\": \"page\",\n                        \"required\":
         false,\n                        \"in\": \"query\",\n                        \"description\":
         \"A page number within the paginated result set.\",\n                        \"schema\":
@@ -1515,10 +1523,10 @@ interactions:
         [\n                            {\n                                \"$ref\":
         \"#/components/schemas/EigenaarGroep\"\n                            }\n                        ],\n
         \                       \"nullable\": true,\n                        \"title\":
-        \"owner (group)\",\n                        \"description\": \"Optional organisation
-        unit that also owns the publication, in addition to the `eigenaar` property.\"\n
-        \                   },\n                    \"publicatiestatus\": {\n                        \"allOf\":
-        [\n                            {\n                                \"$ref\":
+        \"eigenaar (groep)\",\n                        \"description\": \"Niet-verplichte
+        organisatie-eenheid die ook eigenaar is van de publicatie, naast de `eigenaar`
+        (op persoonlijke titel).\"\n                    },\n                    \"publicatiestatus\":
+        {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/PublicatiestatusEnum\"\n                            }\n
         \                       ],\n                        \"default\": \"gepubliceerd\",\n
         \                       \"title\": \"Status\",\n                        \"description\":
@@ -1927,17 +1935,16 @@ interactions:
         \               ]\n            },\n            \"EigenaarGroep\": {\n                \"type\":
         \"object\",\n                \"properties\": {\n                    \"identifier\":
         {\n                        \"type\": \"string\",\n                        \"title\":
-        \"Identificatie\",\n                        \"description\": \"The system
-        identifier that uniquely identifies the organisation unit performing the action.
-        Only letters, numbers, underscores or hyphens are allowed.\",\n                        \"pattern\":
-        \"^[-a-zA-Z0-9_]+$\",\n                        \"maxLength\": 255\n                    },\n
-        \                   \"weergaveNaam\": {\n                        \"type\":
-        \"string\",\n                        \"description\": \"The display name of
-        the organisation unit.\"\n                    }\n                },\n                \"required\":
-        [\n                    \"weergaveNaam\"\n                ]\n            },\n
-        \           \"FilePart\": {\n                \"type\": \"object\",\n                \"properties\":
-        {\n                    \"uuid\": {\n                        \"type\": \"string\",\n
-        \                       \"format\": \"uuid\",\n                        \"readOnly\":
+        \"Identificatie\",\n                        \"description\": \"De (unieke)
+        identificatie waarmee de gebruiker (groep) die de actie uitvoert achterhaald
+        kan worden.\",\n                        \"pattern\": \"^[-a-zA-Z0-9_]+$\",\n
+        \                       \"maxLength\": 255\n                    },\n                    \"weergaveNaam\":
+        {\n                        \"type\": \"string\",\n                        \"description\":
+        \"De weergavenaam van de organisatie-eenheid.\"\n                    }\n                },\n
+        \               \"required\": [\n                    \"weergaveNaam\"\n                ]\n
+        \           },\n            \"FilePart\": {\n                \"type\": \"object\",\n
+        \               \"properties\": {\n                    \"uuid\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uuid\",\n                        \"readOnly\":
         true,\n                        \"description\": \"Het unieke ID van een bestandsdeel
         horend bij een document.\"\n                    },\n                    \"url\":
         {\n                        \"type\": \"string\",\n                        \"format\":
@@ -2017,28 +2024,36 @@ interactions:
         te worden. Als een waardelijst als oorsprong gebruikt wordt, dan kan de organisatie
         niet bewerkt of verwijderd worden.\\n\\n* `gemeentelijst` - Register gemeenten
         compleet\\n* `solijst` - Register samenwerkingsorganisaties compleet\\n* `oorglijst`
-        - Register overige overheidsorganisaties compleet\\n* `zelf_toegevoegd` -
-        Zelf-toegevoegd item\"\n                    },\n                    \"isActief\":
-        {\n                        \"type\": \"boolean\",\n                        \"title\":
-        \"Actief\",\n                        \"description\": \"Geeft de actief-status
-        van de organisatie aan.\"\n                    }\n                },\n                \"required\":
-        [\n                    \"identifier\",\n                    \"oorsprong\",\n
-        \                   \"uuid\"\n                ]\n            },\n            \"OrganisationOorsprongEnum\":
-        {\n                \"enum\": [\n                    \"gemeentelijst\",\n                    \"solijst\",\n
-        \                   \"oorglijst\",\n                    \"zelf_toegevoegd\"\n
+        - Register overige overheidsorganisaties compleet\\n* `caribischelijst` -
+        Register Caribische openbare lichamen compleet\\n* `provincielijst` - Register
+        provincies compleet\\n* `waterschaplijst` - Register waterschappen compleet\\n*
+        `zbolijst` - Register zbo's compleet\\n* `zelf_toegevoegd` - Zelf-toegevoegd
+        item\"\n                    },\n                    \"isActief\": {\n                        \"type\":
+        \"boolean\",\n                        \"title\": \"Actief\",\n                        \"description\":
+        \"Geeft de actief-status van de organisatie aan.\"\n                    }\n
+        \               },\n                \"required\": [\n                    \"identifier\",\n
+        \                   \"oorsprong\",\n                    \"uuid\"\n                ]\n
+        \           },\n            \"OrganisationOorsprongEnum\": {\n                \"enum\":
+        [\n                    \"gemeentelijst\",\n                    \"solijst\",\n
+        \                   \"oorglijst\",\n                    \"caribischelijst\",\n
+        \                   \"provincielijst\",\n                    \"waterschaplijst\",\n
+        \                   \"zbolijst\",\n                    \"zelf_toegevoegd\"\n
         \               ],\n                \"type\": \"string\",\n                \"description\":
         \"* `gemeentelijst` - Register gemeenten compleet\\n* `solijst` - Register
         samenwerkingsorganisaties compleet\\n* `oorglijst` - Register overige overheidsorganisaties
-        compleet\\n* `zelf_toegevoegd` - Zelf-toegevoegd item\"\n            },\n
-        \           \"OrganisationUnit\": {\n                \"type\": \"object\",\n
-        \               \"properties\": {\n                    \"identifier\": {\n
-        \                       \"type\": \"string\",\n                        \"readOnly\":
-        true,\n                        \"title\": \"Identificatie\",\n                        \"description\":
-        \"The system identifier that uniquely identifies the organisation unit performing
-        the action.\",\n                        \"pattern\": \"^[-a-zA-Z0-9_]+$\"\n
+        compleet\\n* `caribischelijst` - Register Caribische openbare lichamen compleet\\n*
+        `provincielijst` - Register provincies compleet\\n* `waterschaplijst` - Register
+        waterschappen compleet\\n* `zbolijst` - Register zbo's compleet\\n* `zelf_toegevoegd`
+        - Zelf-toegevoegd item\"\n            },\n            \"OrganisationUnit\":
+        {\n                \"type\": \"object\",\n                \"properties\":
+        {\n                    \"identifier\": {\n                        \"type\":
+        \"string\",\n                        \"readOnly\": true,\n                        \"title\":
+        \"Identificatie\",\n                        \"description\": \"De (unieke)
+        identificatie waarmee de organisatie-eenheid die de actie uitvoert achterhaald
+        kan worden.\",\n                        \"pattern\": \"^[-a-zA-Z0-9_]+$\"\n
         \                   },\n                    \"naam\": {\n                        \"type\":
-        \"string\",\n                        \"description\": \"The display name of
-        the organisation unit.\",\n                        \"maxLength\": 255\n                    }\n
+        \"string\",\n                        \"description\": \"De weergavenaam van
+        de organisatie-eenheid.\",\n                        \"maxLength\": 255\n                    }\n
         \               },\n                \"required\": [\n                    \"identifier\",\n
         \                   \"naam\"\n                ]\n            },\n            \"PaginatedDocumentList\":
         {\n                \"type\": \"object\",\n                \"required\": [\n
@@ -2244,20 +2259,23 @@ interactions:
         te worden. Als een waardelijst als oorsprong gebruikt wordt, dan kan de organisatie
         niet bewerkt of verwijderd worden.\\n\\n* `gemeentelijst` - Register gemeenten
         compleet\\n* `solijst` - Register samenwerkingsorganisaties compleet\\n* `oorglijst`
-        - Register overige overheidsorganisaties compleet\\n* `zelf_toegevoegd` -
-        Zelf-toegevoegd item\"\n                    },\n                    \"isActief\":
-        {\n                        \"type\": \"boolean\",\n                        \"title\":
-        \"Actief\",\n                        \"description\": \"Geeft de actief-status
-        van de organisatie aan.\"\n                    }\n                }\n            },\n
-        \           \"PatchedOrganisationUnit\": {\n                \"type\": \"object\",\n
-        \               \"properties\": {\n                    \"identifier\": {\n
-        \                       \"type\": \"string\",\n                        \"readOnly\":
-        true,\n                        \"title\": \"Identificatie\",\n                        \"description\":
-        \"The system identifier that uniquely identifies the organisation unit performing
-        the action.\",\n                        \"pattern\": \"^[-a-zA-Z0-9_]+$\"\n
+        - Register overige overheidsorganisaties compleet\\n* `caribischelijst` -
+        Register Caribische openbare lichamen compleet\\n* `provincielijst` - Register
+        provincies compleet\\n* `waterschaplijst` - Register waterschappen compleet\\n*
+        `zbolijst` - Register zbo's compleet\\n* `zelf_toegevoegd` - Zelf-toegevoegd
+        item\"\n                    },\n                    \"isActief\": {\n                        \"type\":
+        \"boolean\",\n                        \"title\": \"Actief\",\n                        \"description\":
+        \"Geeft de actief-status van de organisatie aan.\"\n                    }\n
+        \               }\n            },\n            \"PatchedOrganisationUnit\":
+        {\n                \"type\": \"object\",\n                \"properties\":
+        {\n                    \"identifier\": {\n                        \"type\":
+        \"string\",\n                        \"readOnly\": true,\n                        \"title\":
+        \"Identificatie\",\n                        \"description\": \"De (unieke)
+        identificatie waarmee de organisatie-eenheid die de actie uitvoert achterhaald
+        kan worden.\",\n                        \"pattern\": \"^[-a-zA-Z0-9_]+$\"\n
         \                   },\n                    \"naam\": {\n                        \"type\":
-        \"string\",\n                        \"description\": \"The display name of
-        the organisation unit.\",\n                        \"maxLength\": 255\n                    }\n
+        \"string\",\n                        \"description\": \"De weergavenaam van
+        de organisatie-eenheid.\",\n                        \"maxLength\": 255\n                    }\n
         \               }\n            },\n            \"PatchedPublicationWrite\":
         {\n                \"oneOf\": [\n                    {\n                        \"$ref\":
         \"#/components/schemas/PatchedPublicationWriteConceptPublicationWrite\"\n
@@ -2391,10 +2409,10 @@ interactions:
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/EigenaarGroep\"\n                            }\n                        ],\n
         \                       \"nullable\": true,\n                        \"title\":
-        \"owner (group)\",\n                        \"description\": \"Optional organisation
-        unit that also owns the publication, in addition to the `eigenaar` property.\"\n
-        \                   },\n                    \"publicatiestatus\": {\n                        \"allOf\":
-        [\n                            {\n                                \"$ref\":
+        \"eigenaar (groep)\",\n                        \"description\": \"Niet-verplichte
+        organisatie-eenheid die ook eigenaar is van de publicatie, naast de `eigenaar`
+        (op persoonlijke titel).\"\n                    },\n                    \"publicatiestatus\":
+        {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/PublicatiestatusEnum\"\n                            }\n
         \                       ],\n                        \"default\": \"gepubliceerd\",\n
         \                       \"title\": \"Status\",\n                        \"description\":
@@ -2578,10 +2596,10 @@ interactions:
         [\n                            {\n                                \"$ref\":
         \"#/components/schemas/EigenaarGroep\"\n                            }\n                        ],\n
         \                       \"nullable\": true,\n                        \"title\":
-        \"owner (group)\",\n                        \"description\": \"Optional organisation
-        unit that also owns the publication, in addition to the `eigenaar` property.\"\n
-        \                   },\n                    \"publicatiestatus\": {\n                        \"allOf\":
-        [\n                            {\n                                \"$ref\":
+        \"eigenaar (groep)\",\n                        \"description\": \"Niet-verplichte
+        organisatie-eenheid die ook eigenaar is van de publicatie, naast de `eigenaar`
+        (op persoonlijke titel).\"\n                    },\n                    \"publicatiestatus\":
+        {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/PublicatiestatusEnum\"\n                            }\n
         \                       ],\n                        \"default\": \"gepubliceerd\",\n
         \                       \"title\": \"Status\",\n                        \"description\":
@@ -2738,33 +2756,28 @@ interactions:
     headers:
       Allow:
       - GET, HEAD, OPTIONS
+      Connection:
+      - close
       Content-Disposition:
-      - inline; filename="WOO Publications (1).json"
+      - inline; filename="GPP Publications (1).json"
       Content-Length:
-      - '220602'
+      - '222280'
       Content-Type:
       - application/vnd.oai.openapi+json
       Cross-Origin-Opener-Policy:
       - same-origin
       Date:
-      - Thu, 29 Jan 2026 14:26:37 GMT
+      - Thu, 01 Oct 2026 11:20:51 GMT
       Referrer-Policy:
       - same-origin
       Server:
-      - WSGIServer/0.2 CPython/3.12.7
-      Server-Timing:
-      - TimerPanel_utime;dur=43.14600000000013;desc="User CPU time", TimerPanel_stime;dur=5.131999999999692;desc="System
-        CPU time", TimerPanel_total;dur=48.27799999999982;desc="Total CPU time", TimerPanel_total_time;dur=48.28646098030731;desc="Elapsed
-        time", SQLPanel_sql_time;dur=0;desc="SQL 0 queries", CachePanel_total_time;dur=0;desc="Cache
-        0 Calls"
+      - gunicorn
       Vary:
       - Accept
       X-Content-Type-Options:
       - nosniff
       X-Frame-Options:
       - DENY
-      djdt-store-id:
-      - 49c4054611ec416c9cb51698828f6ba1
     status:
       code: 200
       message: OK
