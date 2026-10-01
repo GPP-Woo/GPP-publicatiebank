@@ -11,6 +11,10 @@ from maykin_2fa.test import disable_admin_mfa
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.contrib.catalogi_api.client import CatalogiAPIError
+from woo_publications.contrib.catalogi_api.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.publications.constants import LegalProcedureOptions
 from woo_publications.publications.tests.factories import InzageProcedureFactory
@@ -155,6 +159,7 @@ class SmokeTests(WebTest):
         global_config = GlobalConfiguration.objects.get()
         self.assertEqual(global_config.catalogus_url, "https://example.com/catalogi")
         mock_index_default_iot_delay.assert_called_once()
+        mock_create_catalogi.assert_called_once()
 
     @patch(
         "woo_publications.contrib.catalogi_api.client.CatalogiClient.create_catalogi",
@@ -185,3 +190,41 @@ class SmokeTests(WebTest):
         self.assertEqual(submit_response.status_code, 302)
         global_config = GlobalConfiguration.objects.get()
         self.assertEqual(global_config.catalogus_url, "")
+
+    @patch(
+        "woo_publications.contrib.catalogi_api.client.CatalogiClient.create_catalogi",
+        return_value="https://example.com/catalogi",
+    )
+    @patch("woo_publications.config.tasks.index_default_iot.delay")
+    def test_saving_model_with_pre_existing_catalogi_fields_does_not_trigger_tasks(
+        self, mock_index_default_iot_delay: MagicMock, mock_create_catalogi: MagicMock
+    ):
+        document_service = ServiceFactory.create(for_documents_api_docker_compose=True)
+        search_service = ServiceFactory.create(for_gpp_search_docker_compose=True)
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
+
+        global_config = GlobalConfiguration.get_solo()
+        global_config.catalogus_url = DEFAULT_CATALOGUS
+        global_config.default_iot_url = DEFAULT_IOT
+        global_config.documents_api_service = document_service
+        global_config.gpp_search_service = search_service
+        global_config.catalogi_api_service = catalogi_service
+        global_config.save()
+
+        url = reverse("admin:config_globalconfiguration_change", args=(1,))
+        response = self.app.get(url, user=self.user)
+
+        form = response.forms["globalconfiguration_form"]
+
+        form["organisation_rsin"] = "000000000"
+        form["perspective_reaction_form_url"] = "http://www.config.net/perspective"
+        form["objection_reaction_form_url"] = "http://www.config.net/objection"
+
+        with self.captureOnCommitCallbacks(execute=True):
+            submit_response = form.submit(name="_save")
+
+        self.assertEqual(submit_response.status_code, 302)
+        global_config = GlobalConfiguration.objects.get()
+        self.assertEqual(global_config.catalogus_url, DEFAULT_CATALOGUS)
+        mock_index_default_iot_delay.assert_not_called()
+        mock_create_catalogi.assert_not_called()
