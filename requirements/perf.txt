@@ -52,6 +52,8 @@ markupsafe==3.0.3
     #   werkzeug
 msgpack==1.2.3
     # via locust
+msgspec==0.22.0
+    # via -r requirements/perf.in
 packaging==26.3
     # via pytest
 pluggy==1.6.0
