@@ -232,6 +232,8 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                     "interdum eleifend eros sed consectetur."
                 ),
                 "order": 0,
+                "iot_url": "",
+                "iot_uuid": None,
             },
             "_cached_object_repr": "new item",
         }
@@ -309,6 +311,8 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                     "bewaartermijn": 10,
                     "toelichting_bewaartermijn": "",
                     "order": 0,
+                    "iot_url": "",
+                    "iot_uuid": None,
                 },
                 "_cached_object_repr": "changed",
             }
@@ -368,6 +372,8 @@ class TestInformatieCategorieenAdminAuditLogging(WebTest):
                 "bewaartermijn": 10,
                 "toelichting_bewaartermijn": "",
                 "order": 0,
+                "iot_url": "",
+                "iot_uuid": None,
             },
             "_cached_object_repr": "naam",
         }

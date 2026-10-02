@@ -21,7 +21,7 @@ class GlobalConfiguration(SingletonModel):
         "zgw_consumers.Service",
         on_delete=models.PROTECT,
         limit_choices_to={"api_type": APITypes.drc},
-        verbose_name=_("Documents API service"),
+        verbose_name=_("documents API service"),
         help_text=_(
             "The service to use for new document uploads - the metadata and binary "
             "content will be sent to this API."
@@ -53,10 +53,32 @@ class GlobalConfiguration(SingletonModel):
         related_name="+",
     )
     document_meta_data_stripping = models.BooleanField(
-        _("Strip document metadata"),
+        _("strip document metadata"),
         help_text=_("Enable the meta data stripping functionality of documents."),
         default=True,
     )
+
+    catalogi_api_service = models.ForeignKey(
+        "zgw_consumers.Service",
+        on_delete=models.PROTECT,
+        limit_choices_to={"api_type": APITypes.ztc},
+        verbose_name=_("catalogi API service"),
+        help_text=_("The service to use for informatieobjecttype objects."),
+        null=True,
+        blank=False,
+        related_name="+",
+    )
+    catalogus_url = models.URLField(
+        verbose_name=_("catalogus url"),
+        help_text=_("The URL to the catalogus object."),
+        editable=False,
+    )
+    default_iot_url = models.URLField(
+        verbose_name=_("default informatieobjecttype url"),
+        help_text=_("The URL to the default informatieobjecttype object."),
+        editable=False,
+    )
+
     gpp_app_publication_url_template = models.URLField(
         _("GPP-app publication URL template"),
         max_length=500,
