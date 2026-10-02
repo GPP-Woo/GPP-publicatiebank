@@ -17,6 +17,10 @@ command -v uv || (echo "uv not found on PATH. Install it https://astral.sh/uv" >
 cwd="${PWD}"
 toplevel=$(git rev-parse --show-toplevel)
 
+{ # shellcheck disable=SC2064
+trap "cd '$(pwd)'" EXIT
+}
+
 cd "${toplevel}"
 
 export UV_CUSTOM_COMPILE_COMMAND="./bin/compile_dependencies.sh"
@@ -46,4 +50,8 @@ uv pip compile \
     "$@" \
     requirements/dev.in
 
-cd "${cwd}"
+# Dependencies for performance_test
+uv pip compile \
+    --output-file requirements/perf.txt \
+    "$@" \
+    requirements/perf.in \

@@ -425,6 +425,8 @@ kombu==5.6.2
     #   -c requirements/base.txt
     #   -r requirements/base.txt
     #   celery
+legacy-cgi==2.6.4
+    # via webob
 lunardate==0.3.0
     # via
     #   -c requirements/base.txt
@@ -712,11 +714,8 @@ typing-extensions==4.15.0
     #   django-stubs-ext
     #   django-test-migrations
     #   mozilla-django-oidc-db
-    #   psycopg
     #   pydantic
     #   pydantic-core
-    #   pyopenssl
-    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2

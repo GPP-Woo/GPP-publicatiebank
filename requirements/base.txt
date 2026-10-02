@@ -341,11 +341,8 @@ typing-extensions==4.15.0
     # via
     #   django-stubs-ext
     #   mozilla-django-oidc-db
-    #   psycopg
     #   pydantic
     #   pydantic-core
-    #   pyopenssl
-    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
