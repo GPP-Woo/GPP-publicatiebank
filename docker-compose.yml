@@ -16,6 +16,14 @@
 # Before deploying to production, please review the environment configuration reference:
 # https://gpp-publicatiebank.readthedocs.io/en/latest/installation/config.html
 
+# Some container runtimes (e.g. containerd with LimitNOFILE=infinity) hand containers an
+# open files limit of ~1 billion. uWSGI sizes per-file-descriptor structures after that
+# limit, making every uwsgi process claim gigabytes of memory - even when idle.
+x-ulimits: &ulimits
+  nofile:
+    soft: 65536
+    hard: 65536
+
 services:
   db:
     image: postgis/postgis:${PG_VERSION:-16-master}
@@ -36,6 +44,7 @@ services:
 
   openzaak-web:
     image: openzaak/open-zaak:${OPENZAAK_VERSION:-latest}
+    ulimits: *ulimits
     environment: &openzaak_web_env
       - DJANGO_SETTINGS_MODULE=openzaak.conf.patched_settings
       - SECRET_KEY=${SECRET_KEY:-django-insecure-^#9nzgn*@-@0szv+$$)6th!i+$$ks^+bt@&ejcgzqt==7af(a(u3}
@@ -56,7 +65,7 @@ services:
       - NOTIFICATIONS_DISABLED=true
       - SENDFILE_BACKEND=django_sendfile.backends.simple
       - JWT_EXPIRY=99999999999  # Roughly 3170 years. This is required for tests with time frozen to work
-      - DOCUMENTEN_UPLOAD_CHUNK_SIZE=100
+      - DOCUMENTEN_UPLOAD_CHUNK_SIZE=${DOCUMENTEN_UPLOAD_CHUNK_SIZE:-100}
       - CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-2}
     volumes: &openzaak_web_volumes
       # mount fixtures dir to automatically populate the DB
@@ -75,6 +84,7 @@ services:
 
   openzaak-celery:
     image: openzaak/open-zaak:${OPENZAAK_VERSION:-1.14.0}
+    ulimits: *ulimits
     environment: *openzaak_web_env
     volumes: *openzaak_web_volumes
     command: /celery_worker.sh
@@ -84,6 +94,7 @@ services:
 
   gpp-zoeken-web:
     image: ghcr.io/gpp-woo/gpp-zoeken:${GPP_ZOEKEN_VERSION:-latest}
+    ulimits: *ulimits
     environment:
       - DJANGO_SETTINGS_MODULE=woo_search.conf.docker
       - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
@@ -129,6 +140,7 @@ services:
       args:
         RELEASE: ${RELEASE:-latest}
     image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    ulimits: *ulimits
     environment: &web_env
       - DJANGO_SETTINGS_MODULE=woo_publications.conf.docker
       - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
@@ -168,6 +180,7 @@ services:
   celery:
     build: *web_build
     image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    ulimits: *ulimits
     environment: *web_env
     command: /celery_worker.sh
     volumes: *web_volumes
@@ -179,6 +192,7 @@ services:
   celery-flower:
     build: *web_build
     image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    ulimits: *ulimits
     environment: *web_env
     command: /celery_flower.sh
     ports:

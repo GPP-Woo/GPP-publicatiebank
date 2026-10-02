@@ -44,4 +44,4 @@ Maykin and ICATT are currently the maintainer of the concept API standard, as we
 
 .. _`Dimpact` : https://www.dimpact.nl/
 .. _`ICATT` : https://www.icatt.nl/
-.. _`Maykin` : https://www.maykinmedia.nl/
+.. _`Maykin` : https://www.maykin.nl/
