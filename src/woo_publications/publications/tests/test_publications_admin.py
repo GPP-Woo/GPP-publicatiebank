@@ -10,6 +10,7 @@ from maykin_2fa.test import disable_admin_mfa
 from woo_publications.accounts.models import OrganisationMember, OrganisationUnit
 from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
+    OrganisationUnitFactory,
     UserFactory,
 )
 from woo_publications.config.models import GlobalConfiguration
@@ -56,6 +57,28 @@ class TestPublicationsAdmin(WebTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "field-uuid", 2)
+
+    def test_show_owner_group(self):
+        short_org = OrganisationUnitFactory.create(
+            identifier="95b8e414-6aa1-4c5e-9ee4-68ab33e189c3", naam="short name"
+        )
+        long_org = OrganisationUnitFactory.create(
+            identifier="8342e0d4-46bc-4b46-89cd-ef309d5269b0",
+            naam="Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch",
+        )
+
+        PublicationFactory.create(eigenaar_groep=short_org)
+        PublicationFactory.create(eigenaar_groep=long_org)
+
+        response = self.app.get(
+            reverse("admin:publications_publication_changelist"),
+            user=self.user,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "field-uuid", 2)
+        self.assertContains(response, "short name - (95b8e414)", 1)
+        self.assertContains(response, "Llanfairpwllgwyngyllgoger... - (8342e0d4)", 1)
 
     def test_admin_shows_link_to_gpp_app(self):
         config = GlobalConfiguration.get_solo()
