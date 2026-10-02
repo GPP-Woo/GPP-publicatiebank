@@ -23,3 +23,4 @@ sure to finish the installation with the necessary :ref:`configuration <configur
    helm
    requirements
    config
+   performance_testing
