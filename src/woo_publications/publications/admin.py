@@ -475,6 +475,7 @@ class PublicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "officiele_titel",
         "verkorte_titel",
         "publicatiestatus",
+        "eigenaar_groep",
         "registratiedatum",
         "archiefnominatie",
         "archiefactiedatum",
