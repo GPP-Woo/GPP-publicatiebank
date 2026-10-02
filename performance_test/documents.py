@@ -23,7 +23,7 @@ import re
 import zipfile
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Literal, assert_never
+from typing import Literal, TypeGuard, assert_never
 
 MiB = 1024 * 1024
 
@@ -41,6 +41,10 @@ FILE_TYPES: Mapping[FileTypeName, FileType] = {
     "zip": FileType("zip", "application/zip"),
     "bin": FileType("bin", "application/octet-stream"),
 }
+
+
+def is_file_type(value: str) -> TypeGuard[FileTypeName]:
+    return value in FILE_TYPES
 
 
 @dataclass(frozen=True)

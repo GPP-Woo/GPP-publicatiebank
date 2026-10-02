@@ -39,13 +39,22 @@ import time
 import uuid
 from argparse import Namespace
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from datetime import date
-from typing import Any, Literal, NamedTuple, TypedDict, overload
+from typing import Literal, NamedTuple, TypedDict, Unpack
 from urllib.parse import urlsplit
 
-from documents import FILE_TYPES, SizeRange, make_document
+import msgspec
+from documents import (
+    FILE_TYPES,
+    FileTypeName,
+    SizeRange,
+    is_file_type,
+    make_document,
+)
 from locust import HttpUser, between, events, task
 from locust.argument_parser import LocustArgumentParser
+from locust.clients import ResponseContextManager
 from locust.env import Environment
 from locust.exception import StopUser
 from requests import Response
@@ -58,29 +67,65 @@ POLL_INTERVAL = 2  # seconds between checks whether an upload is complete
 MAX_GROWTH = 1.1  # largest acceptable stored size / uploaded size
 
 type Method = Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
+type JSON = Mapping[str, JSON] | Sequence[JSON] | str | int | float | bool | None
 
 
-# The parts of the API responses the test relies on.
-class Publication(TypedDict):
+class RequestOptions(TypedDict, total=False):
+    """What the test passes on to ``requests``, besides method, URL and name."""
+
+    json: JSON
+    files: Mapping[str, tuple[str, bytes]]  # field name: (file name, content)
+    headers: Mapping[str, str]
+
+
+# The fields of the API responses the test reads, and no more: msgspec skips undeclared
+# fields. Responses are decoded into these (see ``request_json``), and a response that
+# does not match counts as a failure.
+class Struct(msgspec.Struct, frozen=True, kw_only=True, rename="camel"):
+    pass
+
+
+class Resource(Struct, frozen=True):
     uuid: str
 
 
-class FilePart(TypedDict):
+class Document(Resource, frozen=True):
+    upload_voltooid: bool
+
+
+class StoredDocument(Document, frozen=True):
+    bestandsomvang: int | None = None  # not in the response for every document
+
+
+class FilePart(Struct, frozen=True):
     url: str
     volgnummer: int
     omvang: int
 
 
-class Document(TypedDict):
-    uuid: str
-    uploadVoltooid: bool
-    bestandsomvang: int
-    bestandsdelen: Sequence[FilePart]
+class RegisteredDocument(Resource, frozen=True):
+    """The response to creating a document: only that one has the file parts."""
+
+    bestandsdelen: tuple[FilePart, ...]
 
 
-class Page[T](TypedDict):
+class Page[T](Struct, frozen=True):
+    results: tuple[T, ...]
+
+
+class CountedPage[T](Page[T], frozen=True):
     count: int
-    results: Sequence[T]
+
+
+class Decoders:
+    """One decoder per response type, built once and shared by all users."""
+
+    resource = msgspec.json.Decoder(Resource)
+    registered_document = msgspec.json.Decoder(RegisteredDocument)
+    stored_document = msgspec.json.Decoder(StoredDocument)
+    resources = msgspec.json.Decoder(Page[Resource])
+    counted_resources = msgspec.json.Decoder(CountedPage[Resource])
+    counted_documents = msgspec.json.Decoder(CountedPage[Document])
 
 
 class PendingDocument(NamedTuple):
@@ -159,7 +204,39 @@ def _(parser: LocustArgumentParser, **kwargs: object) -> None:
     )
 
 
-def _user_counts(options: Namespace) -> Mapping[type[PublicatiebankUser], int]:
+@dataclass(frozen=True)
+class Options:
+    """The options added above, typed and validated."""
+
+    token: str
+    readers: int
+    editors: int
+    uploaders: int
+    doc_size: SizeRange
+    docs_per_publication: int
+    file_type: FileTypeName
+    completion_timeout: int
+    keep_data: bool
+
+    @classmethod
+    def read(cls, namespace: Namespace) -> Options:
+        file_type: str = namespace.file_type
+        if not is_file_type(file_type):
+            raise ValueError(f"Unknown file type {file_type!r}")
+        return cls(
+            token=namespace.token,
+            readers=namespace.readers,
+            editors=namespace.editors,
+            uploaders=namespace.uploaders,
+            doc_size=SizeRange.parse(namespace.doc_size_mb),
+            docs_per_publication=namespace.docs_per_publication,
+            file_type=file_type,
+            completion_timeout=namespace.completion_timeout,
+            keep_data=namespace.keep_data,
+        )
+
+
+def _user_counts(options: Options) -> Mapping[type[PublicatiebankUser], int]:
     return {
         Reader: options.readers,
         Editor: options.editors,
@@ -169,21 +246,22 @@ def _user_counts(options: Namespace) -> Mapping[type[PublicatiebankUser], int]:
 
 @events.init.add_listener
 def _(environment: Environment, **kwargs: object) -> None:
-    options = environment.parsed_options
-    if options is None:
+    namespace = environment.parsed_options
+    if namespace is None:
         return
-    SizeRange.parse(options.doc_size_mb)  # fail early on a typo
+    options = Options.read(namespace)  # fail early on a typo
     # without -u/--users, start exactly the requested users of each kind
-    if not options.num_users:
-        options.num_users = sum(_user_counts(options).values())
+    num_users: int | None = namespace.num_users
+    if not num_users:
+        namespace.num_users = sum(_user_counts(options).values())
 
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs: object) -> None:
-    options = environment.parsed_options
-    if options is None:
+    namespace = environment.parsed_options
+    if namespace is None:
         return
-    counts = _user_counts(options)
+    counts = _user_counts(Options.read(namespace))
     for user_class, count in counts.items():
         user_class.fixed_count = count
     total = sum(counts.values())
@@ -199,18 +277,30 @@ def _(environment: Environment, **kwargs: object) -> None:
         )
 
 
+def succeeded(response: Response) -> bool:
+    """Whether the status is 2xx.
+
+    Not ``response.ok``: once a request is marked with ``response.success()``, Locust
+    makes ``ok`` true whatever the status.
+    """
+    return 200 <= response.status_code < 300
+
+
 class PublicatiebankUser(HttpUser):
     abstract = True
 
     def on_start(self) -> None:
         self._information_categories: list[str] = []
         self._created: set[str] = set()  # publications not deleted yet
-        options = self.environment.parsed_options
-        if not options.token:
+        namespace = self.environment.parsed_options
+        if namespace is None:
+            raise StopUser("Only runs from the locust command")
+        self.options = Options.read(namespace)
+        if not self.options.token:
             raise StopUser("No API key: pass --token or set PERF_TOKEN")
         self.client.headers.update(
             {
-                "Authorization": f"Token {options.token}",
+                "Authorization": f"Token {self.options.token}",
                 "Accept": "application/json",
                 # the API requires the audit headers on every request
                 "Audit-User-ID": "prestatietest",
@@ -219,64 +309,105 @@ class PublicatiebankUser(HttpUser):
             }
         )
 
+    def _send(
+        self,
+        method: Method,
+        path: str,
+        name: str | None,
+        **options: Unpack[RequestOptions],
+    ) -> ResponseContextManager:
+        # ``path`` may be an absolute URL returned by the API; only its path is used,
+        # so the request always goes to ``--host`` (the API builds URLs from the Host
+        # header, which may not resolve from where the test runs).
+        parts = urlsplit(path)
+        path = parts.path + (f"?{parts.query}" if parts.query else "")
+        return self.client.request(
+            method,
+            path,
+            name=name or path,
+            catch_response=True,
+            timeout=REQUEST_TIMEOUT,
+            **options,
+        )
+
     def request(
         self,
         method: Method,
         path: str,
         name: str | None = None,
         gone_status: int | None = None,
-        **kwargs: Any,
+        **options: Unpack[RequestOptions],
     ) -> Response:
-        """Do a request, failing it on any non-2xx status.
-
-        ``path`` may be an absolute URL returned by the API; only its path is used, so
-        the request always goes to ``--host`` (the API builds URLs from the Host
-        header, which may not resolve from where the test runs).
+        """Do a request, failing it on any non-2xx status other than ``gone_status``.
 
         A response with ``gone_status`` counts as a success: other users of the test
         delete what they created, possibly right after it showed up in a list. That
-        gives a 404 on the object itself, and a 400 when filtering on it.
+        gives a 404 on the object itself, and a 400 when filtering on it. Check the
+        outcome with ``succeeded``, not ``response.ok``.
         """
-        parts = urlsplit(path)
-        path = parts.path + (f"?{parts.query}" if parts.query else "")
-        kwargs.setdefault("timeout", REQUEST_TIMEOUT)
-        with self.client.request(
-            method, path, name=name or path, catch_response=True, **kwargs
-        ) as response:
+        with self._send(method, path, name, **options) as response:
             if response.status_code == gone_status:
                 response.success()
-            elif not response.ok:
+            elif not succeeded(response):
                 response.failure(f"HTTP {response.status_code}: {response.text[:300]}")
             return response
 
-    def get_json(self, path: str, name: str | None = None, **kwargs: Any) -> Any:
-        """Return the parsed body, or ``None`` on an error status.
+    def request_json[T](
+        self,
+        method: Method,
+        path: str,
+        decoder: msgspec.json.Decoder[T],
+        name: str | None = None,
+        gone_status: int | None = None,
+        **options: Unpack[RequestOptions],
+    ) -> T | None:
+        """Do a request and decode the response body with ``decoder``.
 
-        The JSON is not validated: callers annotate the result with the TypedDict of
-        the response they expect.
+        Returns ``None`` when the request failed, when the object is gone (see
+        ``request``), or when the body does not match the decoder's type, which is
+        reported as a failure.
         """
-        response = self.request("GET", path, name, **kwargs)
-        return response.json() if response.ok else None
+        with self._send(method, path, name, **options) as response:
+            if response.status_code == gone_status:
+                response.success()
+                return None
+            if not succeeded(response):
+                response.failure(f"HTTP {response.status_code}: {response.text[:300]}")
+                return None
+            try:
+                return decoder.decode(response.content)
+            except msgspec.DecodeError as exc:  # invalid JSON, or not the type
+                response.failure(f"Unexpected response body: {exc}")
+                return None
+
+    def get_json[T](
+        self,
+        path: str,
+        decoder: msgspec.json.Decoder[T],
+        name: str | None = None,
+        gone_status: int | None = None,
+        **options: Unpack[RequestOptions],
+    ) -> T | None:
+        return self.request_json("GET", path, decoder, name, gone_status, **options)
 
     def pick_information_category(self) -> str | None:
         if not self._information_categories:
-            data: Page[Publication] | None = self.get_json(
-                f"{API}/informatiecategorieen"
-            )
+            data = self.get_json(f"{API}/informatiecategorieen", Decoders.resources)
             self._information_categories = [
-                item["uuid"] for item in (data["results"] if data else [])
+                item.uuid for item in (data.results if data else ())
             ]
         if not self._information_categories:
             return None
         return random.choice(self._information_categories)
 
-    def create_publication(self) -> Publication | None:
+    def create_publication(self) -> Resource | None:
         category = self.pick_information_category()
         if category is None:
             return None
-        response = self.request(
+        publication = self.request_json(
             "POST",
             f"{API}/publicaties",
+            Decoders.resource,
             json={
                 "officieleTitel": f"Prestatietest {uuid.uuid4()}",
                 "omschrijving": "Aangemaakt door de prestatietest.",
@@ -284,10 +415,8 @@ class PublicatiebankUser(HttpUser):
                 "informatieCategorieen": [category],
             },
         )
-        if not response.ok:
-            return None
-        publication: Publication = response.json()
-        self._created.add(publication["uuid"])
+        if publication is not None:
+            self._created.add(publication.uuid)
         return publication
 
     def on_stop(self) -> None:
@@ -296,19 +425,20 @@ class PublicatiebankUser(HttpUser):
             self.delete_publication(publication_uuid)
 
     def delete_publication(self, publication_uuid: str) -> None:
-        if self.environment.parsed_options.keep_data:
+        if self.options.keep_data:
             return
         self._created.discard(publication_uuid)
         # Deleting a publication leaves its files in the Documents API, deleting the
         # documents first removes those too.
-        documents: Page[Document] | None = self.get_json(
+        documents = self.get_json(
             f"{API}/documenten?publicatie={publication_uuid}",
+            Decoders.resources,
             name=f"{API}/documenten?publicatie=[uuid]",
         )
-        for document in documents["results"] if documents else []:
+        for document in documents.results if documents else ():
             self.request(
                 "DELETE",
-                f"{API}/documenten/{document['uuid']}",
+                f"{API}/documenten/{document.uuid}",
                 name=f"{API}/documenten/[uuid]",
             )
         self.request(
@@ -325,70 +455,66 @@ class Reader(PublicatiebankUser):
         super().on_start()
         self._pages: dict[str, int] = {}
 
-    @overload
-    def get_page(
-        self, resource: Literal["publicaties"]
-    ) -> Page[Publication] | None: ...
-    @overload
-    def get_page(self, resource: Literal["documenten"]) -> Page[Document] | None: ...
-    def get_page(
-        self, resource: Literal["publicaties", "documenten"]
-    ) -> Page[Publication] | Page[Document] | None:
+    def get_page[T](
+        self, resource: str, decoder: msgspec.json.Decoder[CountedPage[T]]
+    ) -> CountedPage[T] | None:
         """Get a random page (of the first five) of a list endpoint."""
         page = random.randint(1, self._pages.get(resource, 1))
-        data: Page[Any] | None = self.get_json(
+        data = self.get_json(
             f"{API}/{resource}?page={page}",
+            decoder,
             name=f"{API}/{resource}?page=[n]",
             gone_status=404,  # the list got shorter
         )
         if data is None:
             self._pages.pop(resource, None)
-        if data and data["results"]:
-            pages = math.ceil(data["count"] / len(data["results"]))
+        if data and data.results:
+            pages = math.ceil(data.count / len(data.results))
             self._pages[resource] = min(5, pages)
         return data
 
     @task(4)
     def browse_publications(self) -> None:
-        page = self.get_page("publicaties")
-        if not page or not page["results"]:
+        page = self.get_page("publicaties", Decoders.counted_resources)
+        if not page or not page.results:
             return
-        publication = random.choice(page["results"])
-        self.get_json(
-            f"{API}/publicaties/{publication['uuid']}",
+        publication = random.choice(page.results)
+        self.request(
+            "GET",
+            f"{API}/publicaties/{publication.uuid}",
             name=f"{API}/publicaties/[uuid]",
             gone_status=404,
         )
-        documents: Page[Document] | None = self.get_json(
-            f"{API}/documenten?publicatie={publication['uuid']}",
+        documents = self.get_json(
+            f"{API}/documenten?publicatie={publication.uuid}",
+            Decoders.resources,
             name=f"{API}/documenten?publicatie=[uuid]",
             gone_status=400,
         )
-        if documents and documents["results"]:
-            document = random.choice(documents["results"])
-            self.get_json(
-                f"{API}/documenten/{document['uuid']}",
+        if documents and documents.results:
+            document = random.choice(documents.results)
+            self.request(
+                "GET",
+                f"{API}/documenten/{document.uuid}",
                 name=f"{API}/documenten/[uuid]",
                 gone_status=404,
             )
 
     @task(2)
     def browse_documents(self) -> None:
-        self.get_page("documenten")
+        self.get_page("documenten", Decoders.counted_resources)
 
     @task(1)
     def download_document(self) -> None:
-        documents = self.get_page("documenten")
+        documents = self.get_page("documenten", Decoders.counted_documents)
         complete = [
-            d
-            for d in (documents["results"] if documents else [])
-            if d["uploadVoltooid"]
+            d for d in (documents.results if documents else ()) if d.upload_voltooid
         ]
         if complete:
             document = random.choice(complete)
             self.request(
                 "GET",
-                f"{API}/documenten/{document['uuid']}/download",
+                f"{API}/documenten/{document.uuid}/download",
                 name=f"{API}/documenten/[uuid]/download",
                 headers={"Accept": "*/*"},
                 gone_status=404,
@@ -399,7 +525,7 @@ class Reader(PublicatiebankUser):
         resource = random.choice(
             ["informatiecategorieen", "themas", "onderwerpen", "organisaties"]
         )
-        self.get_json(f"{API}/{resource}")
+        self.request("GET", f"{API}/{resource}")
 
 
 class Editor(PublicatiebankUser):
@@ -410,20 +536,21 @@ class Editor(PublicatiebankUser):
         publication = self.create_publication()
         if publication is None:
             return
-        path = f"{API}/publicaties/{publication['uuid']}"
+        path = f"{API}/publicaties/{publication.uuid}"
         name = f"{API}/publicaties/[uuid]"
-        self.get_json(path, name=name)
+        self.request("GET", path, name=name)
         self.request(
             "PATCH",
             path,
             name=name,
             json={"omschrijving": "Bijgewerkt door de prestatietest."},
         )
-        self.get_json(
+        self.request(
+            "GET",
             f"{API}/publicaties?search=Prestatietest",
             name=f"{API}/publicaties?search=[term]",
         )
-        self.delete_publication(publication["uuid"])
+        self.delete_publication(publication.uuid)
 
 
 class Uploader(PublicatiebankUser):
@@ -431,31 +558,30 @@ class Uploader(PublicatiebankUser):
 
     @task
     def upload_publication(self) -> None:
-        options = self.environment.parsed_options
         publication = self.create_publication()
         if publication is None:
             return
         try:
             started = [
-                self.upload_document(publication["uuid"])
-                for _ in range(options.docs_per_publication)
+                self.upload_document(publication.uuid)
+                for _ in range(self.options.docs_per_publication)
             ]
             for pending in filter(None, started):
                 self.wait_until_ready(pending)
         finally:
-            self.delete_publication(publication["uuid"])
+            self.delete_publication(publication.uuid)
 
     def upload_document(self, publication_uuid: str) -> PendingDocument | None:
         """Register a document and upload its parts; return what to wait for."""
-        options = self.environment.parsed_options
-        file_type = FILE_TYPES[options.file_type]
-        size = SizeRange.parse(options.doc_size_mb).sample()
-        content = make_document(options.file_type, size)
+        file_type = FILE_TYPES[self.options.file_type]
+        size = self.options.doc_size.sample()
+        content = make_document(self.options.file_type, size)
 
         started = time.monotonic()
-        response = self.request(
+        document = self.request_json(
             "POST",
             f"{API}/documenten",
+            Decoders.registered_document,
             json={
                 "publicatie": publication_uuid,
                 "officieleTitel": "Prestatietest document",
@@ -465,41 +591,40 @@ class Uploader(PublicatiebankUser):
                 "bestandsomvang": size,
             },
         )
-        if not response.ok:
-            self.report_ready(started, size, f"create failed ({response.status_code})")
+        if document is None:
+            self.report_ready(started, size, "create failed")
             return None
-        document: Document = response.json()
 
         offset = 0
-        for part in sorted(document["bestandsdelen"], key=lambda p: p["volgnummer"]):
-            chunk = content[offset : offset + part["omvang"]]
-            offset += part["omvang"]
+        for part in sorted(document.bestandsdelen, key=lambda p: p.volgnummer):
+            chunk = content[offset : offset + part.omvang]
+            offset += part.omvang
             response = self.request(
                 "PUT",
-                part["url"],
+                part.url,
                 name=f"{API}/documenten/[uuid]/bestandsdelen/[uuid]",
                 files={"inhoud": (f"part.{file_type.extension}", chunk)},
             )
-            if not response.ok:
+            if not succeeded(response):
                 self.report_ready(
                     started, size, f"part upload failed ({response.status_code})"
                 )
                 return None
-        return PendingDocument(document["uuid"], started, size)
+        return PendingDocument(document.uuid, started, size)
 
     def wait_until_ready(self, pending: PendingDocument) -> None:
         """Poll until the upload (including metadata stripping) is complete."""
         document_uuid, started, size = pending
-        deadline = started + self.environment.parsed_options.completion_timeout
+        deadline = started + self.options.completion_timeout
         path = f"{API}/documenten/{document_uuid}"
         while True:
-            data: Document | None = self.get_json(
-                path, name=f"{API}/documenten/[uuid] (poll)"
+            data = self.get_json(
+                path, Decoders.stored_document, name=f"{API}/documenten/[uuid] (poll)"
             )
             if data is None:
                 self.report_ready(started, size, "document could not be retrieved")
                 return
-            if data["uploadVoltooid"]:
+            if data.upload_voltooid:
                 break
             if time.monotonic() > deadline:
                 self.report_ready(started, size, "upload did not complete in time")
@@ -513,23 +638,25 @@ class Uploader(PublicatiebankUser):
             name=f"{API}/documenten/[uuid]/download",
             headers={"Accept": "*/*"},
         )
-        if not response.ok:
+        if not succeeded(response):
             self.report_ready(
                 started, size, f"download failed ({response.status_code})"
             )
-        elif data["bestandsomvang"] > size * MAX_GROWTH:
+        elif data.bestandsomvang is None:
+            self.report_ready(started, size, "complete document has no bestandsomvang")
+        elif data.bestandsomvang > size * MAX_GROWTH:
             # stripping metadata may change the size a little, never this much
             self.report_ready(
                 started,
                 size,
-                f"stored file is {data['bestandsomvang'] / size:.1f}x the upload",
+                f"stored file is {data.bestandsomvang / size:.1f}x the upload",
             )
-        elif len(response.content) != data["bestandsomvang"]:
+        elif len(response.content) != data.bestandsomvang:
             self.report_ready(
                 started,
                 size,
                 f"downloaded {len(response.content)} bytes, "
-                f"expected {data['bestandsomvang']}",
+                f"expected {data.bestandsomvang}",
             )
         else:
             self.report_ready(started, size)
