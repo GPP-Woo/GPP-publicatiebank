@@ -84,7 +84,7 @@ todo_include_todos = True
 linkcheck_ignore = [
     r"https?://.*\.example\.com*",
     r"https?://.*\.gemeente\.nl*",
-    r"http://localhost:\d+/",
+    r"http://localhost:\d+",
     r"https://.*sentry.*",
     r"https://www\.miniwebtool\.com/django-secret-key-generator",
     r"https://gemeente\.groningen\.nl/",
