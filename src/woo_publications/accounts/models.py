@@ -150,4 +150,5 @@ class OrganisationUnit(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.naam} - ({self.identifier})"
+        name = f"{self.naam[:25]}..." if len(self.naam) > 25 else self.naam
+        return f"{name} - ({self.identifier[:8]})"
