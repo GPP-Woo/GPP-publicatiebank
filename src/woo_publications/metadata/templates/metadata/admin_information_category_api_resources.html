@@ -44,7 +44,7 @@
                 <tr>
                     <td>{{ category.naam }}</td>
                     <td>
-                        <code>{{ url_prefix }}{% url 'catalogi-informatieobjecttypen-detail' uuid=category.uuid %}</code>
+                        <code>{{ category.iot_url }}</code>
                     </td>
                 </tr>
             {% endfor %}
