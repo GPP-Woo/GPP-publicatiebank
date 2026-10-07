@@ -1,12 +1,16 @@
+from unittest.mock import MagicMock, patch
+
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from django_webtest import WebTest
 from furl import furl
 from maykin_2fa.test import disable_admin_mfa
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.accounts.tests.factories import UserFactory
 from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.contrib.catalogi_api.tests.constants import DEFAULT_IOT
 
 from ..constants import InformationCategoryOrigins
 from ..models import CUSTOM_CATEGORY_IDENTIFIER_URL_PREFIX, InformationCategory
@@ -139,13 +143,15 @@ class TestInformationCategoryAdmin(WebTest):
         self.assertIn("bewaartermijn", form.fields)
         self.assertIn("toelichting_bewaartermijn", form.fields)
 
+    @patch("woo_publications.metadata.tasks.index_iot.delay")
     def test_information_category_admin_can_update_item_with_oorsprong_zelf_toegevoegd(
-        self,
+        self, mock_index_iot_delay: MagicMock
     ):
         information_category = InformationCategoryFactory.create(
             identifier="https://www.example.com/waardenlijsten/2",
             naam="second item",
             oorsprong=InformationCategoryOrigins.custom_entry,
+            iot_url="https://www.example.com",
         )
         url = reverse(
             "admin:metadata_informationcategory_change",
@@ -168,7 +174,8 @@ class TestInformationCategoryAdmin(WebTest):
         form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
         form["bewaartermijn"] = 10
 
-        response = form.submit(name="_save")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit(name="_save")
 
         self.assertEqual(response.status_code, 302)
         information_category.refresh_from_db()
@@ -183,8 +190,12 @@ class TestInformationCategoryAdmin(WebTest):
             information_category.archiefnominatie, ArchiveNominationChoices.retain
         )
         self.assertEqual(information_category.bewaartermijn, 10)
+        mock_index_iot_delay.assert_not_called()
 
-    def test_information_category_admin_create_item(self):
+    @patch("woo_publications.metadata.tasks.index_iot.delay")
+    def test_information_category_admin_create_item(
+        self, mock_index_iot_delay: MagicMock
+    ):
         response = self.app.get(
             reverse("admin:metadata_informationcategory_add"), user=self.user
         )
@@ -215,7 +226,8 @@ class TestInformationCategoryAdmin(WebTest):
             form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
             form["bewaartermijn"] = 10
 
-            form.submit(name="_save")
+            with self.captureOnCommitCallbacks(execute=True):
+                form.submit(name="_save")
 
             added_item = InformationCategory.objects.order_by("-pk").first()
             assert added_item is not None
@@ -238,6 +250,10 @@ class TestInformationCategoryAdmin(WebTest):
                 added_item.archiefnominatie, ArchiveNominationChoices.retain
             )
             self.assertEqual(added_item.bewaartermijn, 10)
+            mock_index_iot_delay.assert_called_once_with(
+                information_category_id=added_item.pk,
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
 
     def test_information_category_admin_delete_item(self):
         information_category = InformationCategoryFactory.create(
@@ -299,16 +315,12 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
         user = UserFactory.create(superuser=True)
         url = reverse("admin:metadata_informationcategory_iotendpoints")
         InformationCategoryFactory.create(
-            naam="unique snowflake", uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a"
+            naam="unique snowflake",
+            uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
+            iot_url=DEFAULT_IOT,
         )
 
         response = self.app.get(url, user=user)
 
         self.assertContains(response, "unique snowflake")
-        self.assertContains(
-            response,
-            (
-                "http://testserver/catalogi/api/v1/informatieobjecttypen/"
-                "7aa923ea-9e72-4523-9ef9-f7e1e74cf53a"
-            ),
-        )
+        self.assertContains(response, DEFAULT_IOT)
