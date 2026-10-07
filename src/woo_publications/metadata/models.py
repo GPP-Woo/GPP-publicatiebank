@@ -108,6 +108,18 @@ class InformationCategory(OrderedModel):
         _("retention policy explanation"),
         blank=True,
     )
+    iot_url = models.URLField(
+        _("informatieobjecttype URL"),
+        help_text=_("The informatieobjecttype URL from the catalogi API."),
+        editable=False,
+    )
+    iot_uuid = models.UUIDField(
+        _("informatieobjecttype UUID"),
+        help_text=_("The UUID of the API resource recorded in the Catalogi API."),
+        editable=False,
+        null=True,
+        blank=False,
+    )
 
     objects = InformationCategoryManager()
 
