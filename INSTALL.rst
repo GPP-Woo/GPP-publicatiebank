@@ -104,6 +104,13 @@ have Redis (the message broker) running. Start the workers with:
 
 Check that script for available environment variables to modify the behaviour.
 
+Periodic tasks (such as automatically revoking publications after their inspection
+period ends) are scheduled by Celery beat. Start it with:
+
+.. code-block:: bash
+
+    ./bin/celery_beat.sh
+
 
 .. _install_etc_hosts:
 

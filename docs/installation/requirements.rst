@@ -50,6 +50,27 @@ Known applications/products providing a Documents API
 
 .. tip:: If you're a vendor, please create a PR to add your product to this list.
 
+Processes
+---------
+
+The container image provides scripts to start each process that makes up a complete
+GPP-publicatiebank deployment. All of them use the same image and environment
+variables.
+
+* ``/start.sh`` - the web application (admin and API).
+* ``/celery_worker.sh`` - the background task workers, e.g. for synchronising with
+  GPP-zoeken and stripping document metadata. You can run as many replicas as needed.
+* ``/celery_beat.sh`` - the scheduler for periodic tasks, such as automatically
+  revoking publications when their inspection period ("inzagetermijn") has ended.
+
+.. warning:: Run **exactly one** Celery beat process. Without it, periodic tasks are
+   never scheduled and silently don't run. With more than one, every periodic task
+   is scheduled multiple times.
+
+Celery beat keeps its schedule state in ``/app/celerybeat``. This location does not
+require persistent storage, but if beat is restarted around the time a task is due,
+that run may be skipped until the next scheduled moment.
+
 Reverse proxy
 -------------
 

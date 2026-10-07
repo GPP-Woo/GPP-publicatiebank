@@ -176,6 +176,15 @@ services:
       - db
       - redis
 
+  celery-beat:
+    build: *web_build
+    image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
+    environment: *web_env
+    command: /celery_beat.sh
+    depends_on:
+      - db
+      - redis
+
   celery-flower:
     build: *web_build
     image: ghcr.io/gpp-woo/gpp-publicatiebank:${RELEASE:-latest}
