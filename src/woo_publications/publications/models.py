@@ -1032,6 +1032,28 @@ class Document(ConcurrentTransitionMixin, models.Model):
             "api:document-download", kwargs={"uuid": str(self.uuid)}, request=request
         )
 
+    @property
+    def get_iot_url(self) -> str:
+        config = GlobalConfiguration.get_solo()
+        if (documenttype_url := config.default_iot_url) == "":
+            raise RuntimeError(
+                "No default Information Objecttype url configured yet! "
+                "Set up the global configuration."
+            )
+
+        # Resolve the 'informatieobjecttype' for the Documents API to use.
+        # XXX: if there are multiple, which to pick?
+        if information_category := self.publicatie.informatie_categorieen.first():
+            # check if the information category has an IOT url configured
+            # if not make it known how to fix this issue.
+            if (documenttype_url := information_category.iot_url) == "":
+                raise RuntimeError(
+                    "The Catalogi API isn't configured fully yet, we are missing "
+                    "some if not all of the Catalogi API global configuration URLS."
+                )
+
+        return documenttype_url
+
     @transaction.atomic()
     def register_in_documents_api(
         self,
@@ -1042,31 +1064,12 @@ class Document(ConcurrentTransitionMixin, models.Model):
 
         As a side-effect, this populates ``self.zgw_document``.
         """
-
-        from woo_publications.contrib.documents_api.api import DUMMY_IC_UUID
-
         # Look up which service to use to register the document
         config = GlobalConfiguration.get_solo()
         if (service := config.documents_api_service) is None:
             raise RuntimeError(
                 "No documents API configured yet! Set up the global configuration."
             )
-
-        # Resolve the 'informatieobjecttype' for the Documents API to use.
-        # XXX: if there are multiple, which to pick?
-        information_category = self.publicatie.informatie_categorieen.first()
-        if not information_category:
-            # Now that IC's can be empty because of concept publications.
-            # Assign the hardcoded dummy information category for the generation
-            # of the document_type_url.
-            information_category = InformationCategory(uuid=DUMMY_IC_UUID)
-
-        assert isinstance(information_category, InformationCategory)
-        iot_path = reverse(
-            "catalogi-informatieobjecttypen-detail",
-            kwargs={"uuid": information_category.uuid},
-        )
-        documenttype_url = build_absolute_uri(iot_path)
 
         rsin = config.organisation_rsin
         if (publisher := self.publicatie.publisher) and publisher.rsin:
@@ -1077,7 +1080,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 # woo_document.identifier will have duplicates
                 identification=str(self.uuid),
                 source_organisation=rsin,
-                document_type_url=documenttype_url,
+                document_type_url=self.get_iot_url,
                 creation_date=self.creatiedatum,
                 title=self.officiele_titel[:200],
                 filesize=self.bestandsomvang,

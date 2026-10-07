@@ -557,6 +557,59 @@ def update_document_rsin(*, document_id: int, rsin: str):
             document.save(update_fields=("lock",))
 
 
+@app.task(bind=True, max_retries=5)
+def update_document_informatieobjecttype(
+    self, *, document_id: int, documenttype_url: str
+):
+    document = Document.objects.get(pk=document_id)
+    uuid = document.document_uuid
+
+    if not uuid or not document.document_service:
+        return
+
+    with get_documents_client(document.document_service) as client:
+        # If the document is already locked try again later.
+        if document.lock:
+            raise self.retry(countdown=60 * 5)
+
+        try:
+            # Lock the document to allow updates.
+            lock = client.lock_document(uuid)
+        except RequestException as err:
+            if (
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and 429 <= status_code < 503:
+                raise self.retry(countdown=30) from err
+
+            raise
+
+        # Save the lock incase something goes wrong during the update
+        document.lock = lock
+        document.save(update_fields=("lock",))
+
+        try:
+            # Perform IOT update
+            client.update_document_iot(
+                uuid=uuid, document_type_url=documenttype_url, lock=lock
+            )
+        except RequestException as err:
+            if (
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and 429 <= status_code < 503:
+                raise self.retry(countdown=30) from err
+
+            raise
+        finally:
+            # Unlock the document again
+            client.unlock_document(uuid=uuid, lock=lock)
+            document.lock = ""
+            document.save(update_fields=("lock",))
+
+
 @app.task
 def revoke_inzage_procedure_publications():
     publications = Publication.objects.filter(
