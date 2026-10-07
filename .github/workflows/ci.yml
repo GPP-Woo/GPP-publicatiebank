@@ -92,10 +92,20 @@ jobs:
           setup-node: 'no'
           apt-packages: 'gettext postgresql-client graphviz'
 
-      - name: Build and test docs
+      - name: Build docs
         run: |
           export OPENSSL_CONF=$(pwd)/openssl.conf
           make SPHINXOPTS="-W" html
+        working-directory: docs
+        env:
+          FORCE_COLOR: "1"
+
+      - name: Check external links
+        # Soft-fail PRs to prevent third-party flakiness from blocking code review.
+        # Main, stable, and tag builds remain strict.
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+        run: |
+          export OPENSSL_CONF=$(pwd)/openssl.conf
           make linkcheck
         working-directory: docs
         env:
