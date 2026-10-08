@@ -3,7 +3,6 @@
 
 # Helpers
 bump-my-version
-gitpython
 
 # Debug tooling
 django-debug-toolbar

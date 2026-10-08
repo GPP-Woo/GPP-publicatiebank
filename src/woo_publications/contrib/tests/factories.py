@@ -4,6 +4,8 @@ from zgw_consumers.test.factories import ServiceFactory as _ServiceFactory
 
 
 class ServiceFactory(_ServiceFactory):
+    secret = "insecure-default-service-secret-0123456789"
+
     class Params:  # pyright: ignore
         # See ``docker/open-zaak/README.md`` for the test credentials and available
         # data.

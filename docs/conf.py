@@ -81,6 +81,12 @@ html_css_files = [
 
 todo_include_todos = True
 
+# Treat linkcheck timeouts as broken links so linkcheck_retries can retry them.
+# By default, Sphinx's retry loop ignores TIMEOUT statuses; reporting them as
+# broken ensures transient network blips don't fail CI.
+linkcheck_report_timeouts_as_broken = True
+linkcheck_retries = 3
+
 linkcheck_ignore = [
     r"https?://.*\.example\.com*",
     r"https?://.*\.gemeente\.nl*",
