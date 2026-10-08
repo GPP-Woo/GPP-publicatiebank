@@ -201,6 +201,8 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         self.assertIsNone(reader.metadata)
         self.assertIsNone(reader.xmp_metadata)
+        # check if the stripped file shrunk in size
+        self.assertLess(len(document_content), file_size)
 
     @parametrize("file_type", ["odt", "ods", "odp", "odg"])
     def test_strip_open_documents_of_metadata(self, file_type):
