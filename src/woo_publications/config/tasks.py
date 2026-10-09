@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.db.models import CharField, OuterRef, Subquery
 
+import sentry_sdk
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.celery import app
@@ -24,6 +25,7 @@ def sync_information_categories_and_documents_with_catalog_api(
     to overwrite the IOT's from the documents in the Document API.
     """
     config = GlobalConfiguration.get_solo()
+    retry = False
 
     if not config.documents_api_service:
         raise RuntimeError(
@@ -53,9 +55,10 @@ def sync_information_categories_and_documents_with_catalog_api(
             # with the Category API, this will ensure that the task will be retried,
             # since the IOT url won't match the user defined Category API root.
             if err.status_code and 429 <= err.status_code < 503:
+                retry = True
                 continue
 
-            raise
+            sentry_sdk.capture_exception(err)
 
     # When all the urls are in sync we can update the IOT's of the documents
     # in the Documents API
@@ -65,7 +68,8 @@ def sync_information_categories_and_documents_with_catalog_api(
         change_document_api_iots()
         return
 
-    raise self.retry(countdown=30)
+    if retry:
+        raise self.retry(countdown=30)
 
 
 @app.task()

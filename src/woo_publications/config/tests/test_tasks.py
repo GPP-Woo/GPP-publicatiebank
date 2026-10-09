@@ -257,13 +257,16 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         mock_change_document_api_iots: MagicMock,
         mock_create_iot: MagicMock,
     ):
-        InformationCategoryFactory.create(iot_url="", iot_uuid=None)
+        ic = InformationCategoryFactory.create(iot_url="", iot_uuid=None)
 
         with self.assertRaises(Retry):
             sync_information_categories_and_documents_with_catalog_api(
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
             )
 
+        ic.refresh_from_db()
+        self.assertEqual(ic.iot_url, "")
+        self.assertIsNone(ic.iot_uuid)
         mock_change_document_api_iots.assert_called_once()
 
     @patch("woo_publications.config.tasks.change_document_api_iots")
@@ -276,14 +279,13 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         mock_change_document_api_iots: MagicMock,
         mock_create_iot: MagicMock,
     ):
-        InformationCategoryFactory.create(iot_url="", iot_uuid=None)
+        ic = InformationCategoryFactory.create(iot_url="", iot_uuid=None)
 
-        with self.assertRaisesMessage(
-            CatalogiAPIError,
-            "some message",
-        ):
-            sync_information_categories_and_documents_with_catalog_api(
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
-            )
+        sync_information_categories_and_documents_with_catalog_api(
+            confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
+        )
 
+        ic.refresh_from_db()
+        self.assertEqual(ic.iot_url, "")
+        self.assertIsNone(ic.iot_uuid)
         mock_change_document_api_iots.assert_called_once()
