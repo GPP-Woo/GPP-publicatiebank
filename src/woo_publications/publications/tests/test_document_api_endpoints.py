@@ -1333,11 +1333,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
     """
 
     # this UUID is in the fixture
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-    DOCUMENT_TYPE_URL = (
-        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-        + DOCUMENT_TYPE_UUID
-    )
+    DOCUMENT_TYPE_UUID = "ed78b0dc-e5d6-4259-9eae-04e02be2167b"
 
     @classmethod
     def setUpTestData(cls):
@@ -1827,7 +1823,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 # must be unique for the source organisation
                 identification=str(uuid4()),
                 source_organisation="123456782",
-                document_type_url=self.DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="File part test",
                 filesize=10,  # in bytes
@@ -1901,7 +1897,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 # must be unique for the source organisation
                 identification=str(uuid4()),
                 source_organisation="123456782",
-                document_type_url=self.DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="Dummy",
                 filesize=0,  # in bytes
@@ -2030,11 +2026,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
     """
 
     # this UUID is in the fixture
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-    DOCUMENT_TYPE_URL = (
-        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-        + DOCUMENT_TYPE_UUID
-    )
+    DOCUMENT_TYPE_UUID = "ed78b0dc-e5d6-4259-9eae-04e02be2167b"
 
     @classmethod
     def setUpTestData(cls):
@@ -2097,7 +2089,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
                     uuid4()
                 ),  # must be unique for the source organisation
                 source_organisation="123456782",
-                document_type_url=self.DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="File part test",
                 filesize=METADATA_PDF_SIZE,  # in bytes
@@ -2191,7 +2183,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
+    DOCUMENT_TYPE_UUID = "ed78b0dc-e5d6-4259-9eae-04e02be2167b"
 
     @classmethod
     def setUpTestData(cls):
@@ -2307,10 +2299,6 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
         self, mock_remove_document_from_index: MagicMock
     ):
         uploaded_file = File(BytesIO(b"1234567890"))
-        DOCUMENT_TYPE_URL = (
-            "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-            "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"  # this UUID is in the fixture
-        )
 
         with get_client(self.service) as client:
             openzaak_document = client.create_document(
@@ -2318,7 +2306,7 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
                     uuid4()
                 ),  # must be unique for the source organisation
                 source_organisation="123456782",
-                document_type_url=DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="File part test",
                 filesize=10,  # in bytes
