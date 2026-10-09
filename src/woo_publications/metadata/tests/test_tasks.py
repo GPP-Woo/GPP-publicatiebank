@@ -48,6 +48,21 @@ class IndexIOTTest(TestCase):
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
 
+    def test_no_global_config_catalogus_url_set(self):
+        global_config = GlobalConfiguration.objects.get()
+        global_config.catalogus_url = ""
+        global_config.save()
+        information_category = InformationCategory.objects.create()
+
+        with self.assertRaisesMessage(
+            RuntimeError,
+            "No catalogi API configured yet! Set up the global configuration.",
+        ):
+            index_iot(
+                information_category_id=information_category.pk,
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
+
     @patch(
         "woo_publications.contrib.catalogi_api.client.CatalogiClient.create_iot",
         return_value=IOT(

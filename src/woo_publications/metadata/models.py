@@ -147,7 +147,7 @@ class InformationCategory(OrderedModel):
 
         config = GlobalConfiguration.get_solo()
 
-        if (service := config.catalogi_api_service) is None:
+        if (service := config.catalogi_api_service) is None or not config.catalogus_url:
             raise RuntimeError(
                 "No catalogi API configured yet! Set up the global configuration."
             )
