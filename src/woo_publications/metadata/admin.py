@@ -1,7 +1,7 @@
 from functools import partial
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Case, Value, When
@@ -16,6 +16,7 @@ from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
+from woo_publications.config.tasks import change_document_api_iots
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
@@ -150,12 +151,28 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                 default=Value(10),
             )
         ).order_by("origin_order", "order")
+
+        all_ics_synced = not InformationCategory.objects.filter(iot_url="").exists()
+
+        if request.method == "POST" and all_ics_synced:
+            messages.add_message(
+                request,
+                messages.INFO,
+                _(
+                    "The Information Object Types of the documents in the Document "
+                    "API will now be replaced by the Information Object Types defined "
+                    "in the Information Categories."
+                ),
+            )
+            change_document_api_iots.delay()
+
         context = {
             **self.admin_site.each_context(request),
             "title": _("Information object type API resource URLs"),
             "has_add_permission": self.has_add_permission(request),
             "opts": self.model._meta,
             "information_categories": qs,
+            "synced": all_ics_synced,
             "cl": {"opts": self.model._meta},
             "url_prefix": request.build_absolute_uri("/")[
                 :-1

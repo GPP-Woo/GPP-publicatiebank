@@ -11,6 +11,23 @@
 
 {% block search %}{% endblock %}
 
+{% block object-tools %}
+    <ul class="object-tools">
+      {% block object-tools-items %}
+        {% change_list_object_tools %}
+      {% endblock %}
+
+      {% if synced %}
+          <li>
+            <form id="sync_documents_api_form" method="post">
+              {% csrf_token %}
+              <input type="submit" class="default" value="{% trans 'Sync Document API' %}">
+            </form>
+          </li>
+      {% endif %}
+    </ul>
+{% endblock %}
+
 {% block result_list %}
 <div class="results">
     <table id="result_list">

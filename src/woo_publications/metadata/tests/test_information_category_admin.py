@@ -354,3 +354,76 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
 
         self.assertContains(response, "unique snowflake")
         self.assertContains(response, DEFAULT_IOT)
+        self.assertContains(response, "Sync Document API")
+
+    def test_ics_not_filled_out(self):
+        user = UserFactory.create(superuser=True)
+        url = reverse("admin:metadata_informationcategory_iotendpoints")
+        InformationCategoryFactory.create(
+            naam="unique snowflake",
+            uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
+        )
+
+        response = self.app.get(url, user=user)
+
+        self.assertNotContains(response, "Sync Document API")
+
+    @patch("woo_publications.config.tasks.change_document_api_iots.delay")
+    def test_schedule_task(self, mock_change_document_api_iots_delay: MagicMock):
+        user = UserFactory.create(superuser=True)
+        url = reverse("admin:metadata_informationcategory_iotendpoints")
+        InformationCategoryFactory.create(
+            naam="unique snowflake",
+            uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("6217db83-c1f2-450a-a580-53fed72bd979"),
+        )
+
+        response = self.app.get(url, user=user)
+
+        form = response.forms["sync_documents_api_form"]
+        response = form.submit()
+
+        self.assertContains(
+            response,
+            _(
+                "The Information Object Types of the documents in the Document "
+                "API will now be replaced by the Information Object Types defined "
+                "in the Information Categories."
+            ),
+        )
+        mock_change_document_api_iots_delay.assert_called_once()
+
+    @patch("woo_publications.config.tasks.change_document_api_iots.delay")
+    def test_ics_not_filled_out_denies_task(
+        self, mock_change_document_api_iots_delay: MagicMock
+    ):
+        user = UserFactory.create(superuser=True)
+        url = reverse("admin:metadata_informationcategory_iotendpoints")
+        InformationCategoryFactory.create(
+            naam="unique snowflake",
+            uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("6217db83-c1f2-450a-a580-53fed72bd979"),
+        )
+
+        response = self.app.get(url, user=user)
+
+        # ic gets added in between opening page and clicking button
+        InformationCategoryFactory.create(
+            naam="broken snowflake",
+            uuid="6f8a196c-5a10-4811-b987-2c43ecceedfe",
+        )
+
+        form = response.forms["sync_documents_api_form"]
+        form.submit()
+
+        self.assertNotContains(
+            response,
+            _(
+                "The Information Object Types of the documents in the Document "
+                "API will now be replaced by the Information Object Types defined "
+                "in the Information Categories."
+            ),
+        )
+        mock_change_document_api_iots_delay.assert_not_called()
