@@ -1,30 +1,30 @@
 interactions:
 - request:
-    body: '{"uuid": "7c081df9-c0a0-42c2-ba1f-4662c2f35581", "publicatie": "008f3b81-ec3f-4c5c-8b05-4c6ea29e104e",
-      "publisher": {"uuid": "a43acdc5-351a-4340-be53-7d4963cdbf74", "naam": "some"},
-      "identifier": "", "officieleTitel": "contain", "verkorteTitel": "", "omschrijving":
-      "", "creatiedatum": "2025-01-27", "registratiedatum": "2025-02-12T15:16:07.945513+00:00",
-      "laatstGewijzigdDatum": "2025-02-12T15:16:07.945521+00:00"}'
+    body: '{"uuid": "2b23cc04-1292-4316-a230-ab3354f3234c", "publicatie": "e5161f2e-54dc-4ae3-941f-38ff102639ae",
+      "publisher": {"uuid": "88023ff7-734e-41e2-b6fe-856e43d36681", "naam": "business"},
+      "onderwerpen": [], "informatieCategorieen": [], "identifiers": [], "officieleTitel":
+      "dog", "verkorteTitel": "", "omschrijving": "", "creatiedatum": "2026-09-12",
+      "registratiedatum": "2026-10-09T17:49:10.595968+00:00", "laatstGewijzigdDatum":
+      "2026-10-09T17:49:10.596401+00:00", "gepubliceerdOp": "2026-10-09T17:49:10.595968+00:00",
+      "fileSize": 0, "downloadUrl": ""}'
     headers:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      - gzip, deflate, br
       Connection:
       - keep-alive
       Content-Length:
-      - '415'
+      - '552'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.34.2
     method: POST
     uri: http://localhost:8002/api/v1/documenten
   response:
     body:
-      string: '{"taskId":"b00a611e-f868-4c9e-abbd-9c8706909ec3"}'
+      string: '{"taskId":"4317ea07-1c59-457d-82ad-ef1e18c91d51"}'
     headers:
       Allow:
       - POST, OPTIONS

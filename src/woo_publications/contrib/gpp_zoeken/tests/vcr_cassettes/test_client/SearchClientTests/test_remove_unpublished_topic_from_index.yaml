@@ -5,20 +5,18 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      - gzip, deflate, br
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.34.2
     method: DELETE
     uri: http://localhost:8002/api/v1/onderwerpen/632d1653-023b-4ada-9eb0-6d1c6f279274
   response:
     body:
-      string: '{"taskId":"a0839ef0-416c-467d-82fb-e25eaba9c652"}'
+      string: '{"taskId":"1aa132a3-070a-4cb3-a71b-119db13eaf88"}'
     headers:
       Allow:
       - DELETE, OPTIONS
@@ -43,20 +41,18 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      - gzip, deflate, br
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.34.2
     method: DELETE
     uri: http://localhost:8002/api/v1/onderwerpen/632d1653-023b-4ada-9eb0-6d1c6f279274
   response:
     body:
-      string: '{"taskId":"81731304-1a98-4044-a52f-59097f7598d4"}'
+      string: '{"taskId":"a3ca3455-eb55-46e1-818c-5bfda3eab9e2"}'
     headers:
       Allow:
       - DELETE, OPTIONS
