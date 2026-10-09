@@ -72,12 +72,12 @@ def _change(a: float | None, b: float | None) -> str:
     return f"{(b - a) / a:+.0%}"
 
 
-COLUMNS: Sequence[Column] = (
+COLUMNS: Sequence[Column] = [
     Column("req/s", "Requests/s", ".2f", relative_change=False),
     Column("fail", _failure_ratio, ".1%", relative_change=False),
     Column("p50 ms", "50%", ".0f", relative_change=True),
     Column("p95 ms", "95%", ".0f", relative_change=True),
-)
+]
 
 
 def compare(a: Stats, b: Stats, label_a: str, label_b: str) -> list[list[str]]:

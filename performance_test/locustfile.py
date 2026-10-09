@@ -106,11 +106,11 @@ class FilePart(Struct, frozen=True):
 class RegisteredDocument(Resource, frozen=True):
     """The response to creating a document: only that one has the file parts."""
 
-    bestandsdelen: tuple[FilePart, ...]
+    bestandsdelen: list[FilePart]
 
 
 class Page[T](Struct, frozen=True):
-    results: tuple[T, ...]
+    results: list[T]
 
 
 class CountedPage[T](Page[T], frozen=True):
@@ -394,7 +394,7 @@ class PublicatiebankUser(HttpUser):
         if not self._information_categories:
             data = self.get_json(f"{API}/informatiecategorieen", Decoders.resources)
             self._information_categories = [
-                item.uuid for item in (data.results if data else ())
+                item.uuid for item in (data.results if data else [])
             ]
         if not self._information_categories:
             return None
@@ -508,7 +508,7 @@ class Reader(PublicatiebankUser):
     def download_document(self) -> None:
         documents = self.get_page("documenten", Decoders.counted_documents)
         complete = [
-            d for d in (documents.results if documents else ()) if d.upload_voltooid
+            d for d in (documents.results if documents else []) if d.upload_voltooid
         ]
         if complete:
             document = random.choice(complete)
