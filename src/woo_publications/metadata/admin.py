@@ -1,5 +1,9 @@
-from django.contrib import admin
+from functools import partial
+
+from django import forms
+from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Case, Value, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -10,11 +14,14 @@ from django.utils.translation import gettext_lazy as _
 from ordered_model.admin import OrderedModelAdmin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
+from woo_publications.config.tasks import change_document_api_iots
 from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
 from .models import InformationCategory, Organisation, Theme
+from .tasks import index_iot
 
 
 @admin.register(InformationCategory)
@@ -55,6 +62,15 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                 )
             },
         ),
+        (
+            _("Catalogi API"),
+            {
+                "fields": (
+                    "iot_url",
+                    "iot_uuid",
+                )
+            },
+        ),
     )
     _value_list_readonly_fields = (
         "uuid",
@@ -63,6 +79,8 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
         "naam_meervoud",
         "definitie",
         "oorsprong",
+        "iot_url",
+        "iot_uuid",
     )
     readonly_fields = (
         "uuid",
@@ -80,6 +98,25 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
             return self._value_list_readonly_fields
 
         return super().get_readonly_fields(request, obj)
+
+    @transaction.atomic
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: InformationCategory,
+        form: forms.Form,
+        change: bool,
+    ):
+        super().save_model(request, obj, form, change)
+
+        if not obj.iot_url:
+            transaction.on_commit(
+                partial(
+                    index_iot.delay,
+                    information_category_id=obj.pk,
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                )
+            )
 
     def get_urls(self):
         default_urls = super().get_urls()
@@ -114,12 +151,28 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                 default=Value(10),
             )
         ).order_by("origin_order", "order")
+
+        all_ics_synced = not InformationCategory.objects.filter(iot_url="").exists()
+
+        if request.method == "POST" and all_ics_synced:
+            messages.add_message(
+                request,
+                messages.INFO,
+                _(
+                    "The Information Object Types of the documents in the Document "
+                    "API will now be replaced by the Information Object Types defined "
+                    "in the Information Categories."
+                ),
+            )
+            change_document_api_iots.delay()
+
         context = {
             **self.admin_site.each_context(request),
             "title": _("Information object type API resource URLs"),
             "has_add_permission": self.has_add_permission(request),
             "opts": self.model._meta,
             "information_categories": qs,
+            "synced": all_ics_synced,
             "cl": {"opts": self.model._meta},
             "url_prefix": request.build_absolute_uri("/")[
                 :-1

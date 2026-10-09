@@ -2292,33 +2292,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Theme'
           description: ''
-  /catalogi/api/v1/informatieobjecttypen/{uuid}:
-    get:
-      operationId: catalogiApiV1InformatieobjecttypenRetrieve
-      description: |-
-        Expose an information category as a Catalogi API `informatieobjecttype`.
-
-        **NOTE**: this API endpoint is internal and used in the integration with the
-        Documenten API. Publication components are not expected to interact with it.
-      summary: Haal een documenttype op
-      parameters:
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Catalogi API
-      security:
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogiAPIDocumentType'
-          description: ''
 components:
   schemas:
     AanleveringBestandEnum:
@@ -2348,74 +2321,6 @@ components:
     BlankEnum:
       enum:
       - ''
-    CatalogiAPIDocumentType:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-          readOnly: true
-        catalogus:
-          type: string
-          format: uri
-          description: URL-referentie naar de CATALOGUS waartoe dit INFORMATIEOBJECTTYPE
-            behoort.
-        beginGeldigheid:
-          type: string
-          format: date
-          description: De datum waarop het is ontstaan.
-        informatieobjectcategorie:
-          type: string
-          description: Typering van de aard van informatieobjecten van dit INFORMATIEOBJECTTYPE.
-          maxLength: 80
-        omschrijving:
-          type: string
-          description: Omschrijving van de aard van informatieobjecten van dit INFORMATIEOBJECTTYPE.
-          maxLength: 80
-        vertrouwelijkheidaanduiding:
-          allOf:
-          - $ref: '#/components/schemas/VertrouwelijkheidaanduidingEnum'
-          description: |-
-            Aanduiding van de mate waarin informatieobjecten van dit INFORMATIEOBJECTTYPE voor de openbaarheid bestemd zijn.
-
-            * `openbaar` - Openbaar
-            * `beperkt_openbaar` - Beperkt openbaar
-            * `intern` - Intern
-            * `zaakvertrouwelijk` - Zaakvertrouwelijk
-            * `vertrouwelijk` - Vertrouwelijk
-            * `confidentieel` - Confidentieel
-            * `geheim` - Geheim
-            * `zeer_geheim` - Zeer geheim
-        concept:
-          type: boolean
-          readOnly: true
-          description: Geeft aan of het object een concept betreft. Concepten zijn
-            niet-definitieve versies en zouden niet gebruikt moeten worden buiten
-            deze API.
-        besluittypen:
-          type: array
-          items:
-            type: string
-            format: uri
-          readOnly: true
-          description: URL-referenties naar de BESLUITTYPEN
-        zaaktypen:
-          type: array
-          items:
-            type: string
-            format: uri
-          readOnly: true
-          description: URL-referenties naar de ZAAKTYPEN
-      required:
-      - beginGeldigheid
-      - besluittypen
-      - catalogus
-      - concept
-      - informatieobjectcategorie
-      - omschrijving
-      - url
-      - vertrouwelijkheidaanduiding
-      - zaaktypen
     ConceptPublicationWrite:
       type: object
       description: |-
@@ -4521,26 +4426,6 @@ components:
       - publicaties
       - registratiedatum
       - uuid
-    VertrouwelijkheidaanduidingEnum:
-      enum:
-      - openbaar
-      - beperkt_openbaar
-      - intern
-      - zaakvertrouwelijk
-      - vertrouwelijk
-      - confidentieel
-      - geheim
-      - zeer_geheim
-      type: string
-      description: |-
-        * `openbaar` - Openbaar
-        * `beperkt_openbaar` - Beperkt openbaar
-        * `intern` - Intern
-        * `zaakvertrouwelijk` - Zaakvertrouwelijk
-        * `vertrouwelijk` - Vertrouwelijk
-        * `confidentieel` - Confidentieel
-        * `geheim` - Geheim
-        * `zeer_geheim` - Zeer geheim
   securitySchemes:
     tokenAuth:
       type: apiKey

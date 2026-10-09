@@ -1,15 +1,20 @@
 from functools import partial
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db import transaction
 from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 
 from solo.admin import SingletonModelAdmin
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
+from woo_publications.contrib.catalogi_api.client import CatalogiAPIError, get_client
+from woo_publications.metadata.models import InformationCategory
 from woo_publications.publications.models import InzageProcedure
 
 from .models import GlobalConfiguration
+from .tasks import sync_information_categories_and_documents_with_catalog_api
 
 
 @admin.register(GlobalConfiguration)
@@ -46,6 +51,86 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
 
         InzageProcedure.objects.bulk_update(objects, fields=["url_reactieformulier"])
 
+    @staticmethod
+    @transaction.atomic()
+    def _create_global_catalogi_api_objects(request: HttpRequest) -> None:
+        config = GlobalConfiguration.objects.select_for_update().get(
+            pk=GlobalConfiguration.singleton_instance_id
+        )
+        service = config.catalogi_api_service
+
+        if service.connection_check != 200:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                _(
+                    "The Catalogi API service is not available. "
+                    "Because of this the Catalogi and default Informationobjecttypes "
+                    "couldn't be created. Check if you configured the Service "
+                    "correctly and make sure that it is running correctly."
+                ),
+            )
+            return
+
+        with get_client(service) as client:
+            if (catalogi := config.catalogus_url) == "":
+                try:
+                    catalogi = config.catalogus_url = client.create_catalogi(
+                        rsin=config.organisation_rsin
+                    )
+                except CatalogiAPIError:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        _("Something went wrong while trying to create the Catalogi."),
+                    )
+                    return
+
+            try:
+                iot = client.create_iot(
+                    description=(
+                        "informatieobjecttypen of publications with no information "
+                        "category objects."
+                    ),
+                    catalogus=catalogi,
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.vertrouwelijk,
+                )
+                config.default_iot_url = iot.url
+            except CatalogiAPIError:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    _(
+                        "Something went wrong while trying to create the default "
+                        "Informationobjecttypes."
+                    ),
+                )
+                config.save(update_fields=("catalogus_url",))
+                return
+
+        messages.add_message(
+            request,
+            messages.INFO,
+            _(
+                "Catalogi API has been set up successfully. The Information Categories "
+                "and Documents will now be processed in the background."
+            ),
+        )
+
+        def sync_models_with_catalogi_api():
+            InformationCategory.objects.update(iot_url="", iot_uuid=None)
+            sync_information_categories_and_documents_with_catalog_api.delay(
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
+            )
+
+        transaction.on_commit(partial(sync_models_with_catalogi_api))
+        config.save(
+            update_fields=(
+                "catalogus_url",
+                "default_iot_url",
+            )
+        )
+
     def save_model(
         self,
         request: HttpRequest,
@@ -61,5 +146,13 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
             and not form.initial["objection_reaction_form_url"]
         ):
             transaction.on_commit(partial(self._back_fill_url_reactieformulier))
+
+        if (
+            not form.cleaned_data["catalogus_url"]
+            or not form.cleaned_data["default_iot_url"]
+        ):
+            transaction.on_commit(
+                partial(self._create_global_catalogi_api_objects, request=request)
+            )
 
         super().save_model(request, obj, form, change)

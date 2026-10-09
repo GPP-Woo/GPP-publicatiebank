@@ -9,6 +9,11 @@ from rest_framework import status
 from zgw_consumers.constants import APITypes
 
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.catalogi_api.tests.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
+from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import (
     InformationCategoryFactory,
@@ -16,30 +21,27 @@ from woo_publications.metadata.tests.factories import (
 )
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ...contrib.documents_api.client import get_client
 from ..constants import PublicationStatusOptions
 from ..models import Document
-from .factories import DocumentFactory
+from .factories import DocumentFactory, PublicationFactory
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class TestDocumentApi(VCRMixin, TestCase):
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-    DOCUMENT_TYPE_URL = (
-        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-        + DOCUMENT_TYPE_UUID
-    )
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         # Set up global configuration
-        cls.service = service = ServiceFactory.create(
+        cls.service = document_service = ServiceFactory.create(
             for_documents_api_docker_compose=True
         )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
         config = GlobalConfiguration.get_solo()
-        config.documents_api_service = service
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
     def setUp(self):
@@ -125,7 +127,8 @@ class TestDocumentApi(VCRMixin, TestCase):
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("21ea3334-a931-4f9b-8acd-7f85c95417a6"),
         )
         publisher = OrganisationFactory.create(is_actief=True, rsin="")
         document: Document = DocumentFactory.create(
@@ -147,7 +150,8 @@ class TestDocumentApi(VCRMixin, TestCase):
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
         information_category = InformationCategoryFactory.create(
-            uuid=self.DOCUMENT_TYPE_UUID
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("2a8936aa-56da-4ad0-a954-b777cdce29cf"),
         )
         publisher = OrganisationFactory.create(is_actief=True, rsin="123456782")
         document: Document = DocumentFactory.create(
@@ -165,3 +169,71 @@ class TestDocumentApi(VCRMixin, TestCase):
             self.assertEqual(detail.status_code, status.HTTP_200_OK)
             detail_data = detail.json()
             self.assertEqual(detail_data["bronorganisatie"], "123456782")
+
+
+class TestGetIOTUrl(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
+
+        GlobalConfiguration.objects.update_or_create(
+            pk=GlobalConfiguration.singleton_instance_id,
+            defaults={
+                "catalogi_api_service": catalogi_service,
+                "catalogus_url": DEFAULT_IOT,
+                "default_iot_url": DEFAULT_IOT,
+            },
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(GlobalConfiguration.clear_cache)
+
+    def test_default_iot_url_not_configured(self):
+        config = GlobalConfiguration.get_solo()
+        config.default_iot_url = ""
+        config.save()
+
+        document = DocumentFactory.create()
+
+        with self.assertRaisesMessage(
+            RuntimeError,
+            "No default Information Objecttype url configured yet! "
+            "Set up the global configuration.",
+        ):
+            document.get_iot_url  # noqa: B018
+
+    def test_documents_attached_information_category_has_no_iot_url(self):
+        ic = InformationCategoryFactory.create()
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic.pk],
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+
+        with self.assertRaisesMessage(
+            RuntimeError,
+            "The Catalogi API isn't configured fully yet, we are missing some if not "
+            "all of the Catalogi API global configuration URLS.",
+        ):
+            document.get_iot_url  # noqa: B018
+
+    def test_happy_flow(self):
+        ic = InformationCategoryFactory.create(
+            iot_url=DEFAULT_IOT, iot_uuid="d1ef0ea4-a335-452f-93cc-6a0dbcb740b5"
+        )
+        publication = PublicationFactory.create(
+            informatie_categorieen=[ic.pk],
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+        document = DocumentFactory.create(
+            publicatie=publication,
+            publicatiestatus=PublicationStatusOptions.concept,
+        )
+
+        self.assertEqual(document.get_iot_url, DEFAULT_IOT)

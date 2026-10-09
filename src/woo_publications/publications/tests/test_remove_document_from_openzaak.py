@@ -21,8 +21,6 @@ from woo_publications.utils.tests.vcr import VCRMixin
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class TestRemoveDocumentFromOpenZaakTask(VCRMixin, TestCase):
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

@@ -14,7 +14,7 @@ from requests import RequestException
 from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import User
-from woo_publications.celery import app
+from woo_publications.celery import app, sentry_exponential_backoff
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.documents_api.client import (
     DocumentsAPIError,
@@ -549,6 +549,67 @@ def update_document_rsin(*, document_id: int, rsin: str):
                 uuid=uuid, source_organisation=rsin, lock=lock
             )
         except RequestException:
+            raise
+        finally:
+            # Unlock the document again
+            client.unlock_document(uuid=uuid, lock=lock)
+            document.lock = ""
+            document.save(update_fields=("lock",))
+
+
+@app.task(bind=True, max_retries=5)
+def update_document_informatieobjecttype(
+    self, *, document_id: int, documenttype_url: str
+):
+    document = Document.objects.get(pk=document_id)
+    uuid = document.document_uuid
+
+    if not uuid or not document.document_service:
+        return
+
+    with get_documents_client(document.document_service) as client:
+        # If the document is already locked try again later.
+        if document.lock:
+            raise self.retry(
+                countdown=sentry_exponential_backoff(
+                    base=60, retries=self.request.retries
+                )
+            )
+
+        try:
+            # Lock the document to allow updates.
+            lock = client.lock_document(uuid)
+        except RequestException as err:
+            if (
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and 429 <= status_code < 503:
+                raise self.retry(
+                    countdown=sentry_exponential_backoff(retries=self.request.retries)
+                ) from err
+
+            raise
+
+        # Save the lock incase something goes wrong during the update
+        document.lock = lock
+        document.save(update_fields=("lock",))
+
+        try:
+            # Perform IOT update
+            client.update_document_iot(
+                uuid=uuid, document_type_url=documenttype_url, lock=lock
+            )
+        except RequestException as err:
+            if (
+                status_code := getattr(
+                    getattr(err, "response", None), "status_code", None
+                )
+            ) and 429 <= status_code < 503:
+                raise self.retry(
+                    countdown=sentry_exponential_backoff(retries=self.request.retries)
+                ) from err
+
             raise
         finally:
             # Unlock the document again

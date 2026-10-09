@@ -1,28 +1,26 @@
 interactions:
 - request:
-    body: '{"uuid": "cc60b5d3-4377-461b-ab80-af252ef5a774", "officieleTitel": "partner",
-      "omschrijving": "", "registratiedatum": "2025-04-18T09:14:32.458184+00:00",
-      "laatstGewijzigdDatum": "2025-04-18T09:14:32.458194+00:00"}'
+    body: '{"uuid": "dbf9709a-87dd-49a4-afc7-5618a662f2da", "officieleTitel": "from",
+      "omschrijving": "", "registratiedatum": "2026-10-09T17:49:10.709407+00:00",
+      "laatstGewijzigdDatum": "2026-10-09T17:49:10.709416+00:00"}'
     headers:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      - gzip, deflate, br
       Connection:
       - keep-alive
       Content-Length:
-      - '213'
+      - '210'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.34.2
     method: POST
     uri: http://localhost:8002/api/v1/onderwerpen
   response:
     body:
-      string: '{"taskId":"4a931628-ac93-4e0b-b898-810c2d536cc4"}'
+      string: '{"taskId":"50e64f9a-a486-4e73-aa5e-ab5bc6940e3a"}'
     headers:
       Allow:
       - POST, OPTIONS

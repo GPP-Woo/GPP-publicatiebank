@@ -1,12 +1,16 @@
 import base64
 from datetime import date
 from io import BytesIO
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from django.core.files import File
 from django.test import TestCase
 
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.catalogi_api.tests.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
 from woo_publications.contrib.documents_api.client import DocumentenClient, get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.tests.factories import (
@@ -16,13 +20,6 @@ from woo_publications.utils.tests.vcr import VCRMixin
 
 from ..tasks import process_source_document
 from .factories import DocumentFactory
-
-# this UUID is in the fixture
-DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-DOCUMENT_TYPE_URL = (
-    "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-    + DOCUMENT_TYPE_UUID
-)
 
 
 def _create_initial_document(
@@ -37,7 +34,7 @@ def _create_initial_document(
         # must be unique for the source organisation
         identification=str(uuid4()),
         source_organisation="123456782",
-        document_type_url=DOCUMENT_TYPE_URL,
+        document_type_url=DEFAULT_IOT,
         creation_date=creation_date,
         title="File part test",
         filesize=len(content),  # in bytes
@@ -61,16 +58,20 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
         super().setUpTestData()
 
         # Set up global configuration
-        cls.service = service = ServiceFactory.create(
+        cls.service = document_service = ServiceFactory.create(
             for_documents_api_docker_compose=True
         )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
         config = GlobalConfiguration.get_solo()
-        config.documents_api_service = service
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=DOCUMENT_TYPE_UUID
+            iot_url=DEFAULT_IOT, iot_uuid=UUID("14abec3f-dd4e-4297-9882-10f95b208f9a")
         )
 
     def setUp(self):

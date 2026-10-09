@@ -5,20 +5,18 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token insecure-RySD8u5xkb9PH6AJtaZV4Y
+      - gzip, deflate, br
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       User-Agent:
-      - python-requests/2.32.3
+      - python-requests/2.34.2
     method: DELETE
     uri: http://localhost:8002/api/v1/onderwerpen/de7c7543-e2fb-43e8-953a-9e1c9a4150e4
   response:
     body:
-      string: '{"taskId":"c0d463f9-2c3d-4525-b3a9-e7d6ae7562d5"}'
+      string: '{"taskId":"04a3957a-275e-4240-b2d9-e4f1c3407fb2"}'
     headers:
       Allow:
       - DELETE, OPTIONS

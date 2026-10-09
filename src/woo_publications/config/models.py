@@ -21,7 +21,7 @@ class GlobalConfiguration(SingletonModel):
         "zgw_consumers.Service",
         on_delete=models.PROTECT,
         limit_choices_to={"api_type": APITypes.drc},
-        verbose_name=_("Documents API service"),
+        verbose_name=_("documents API service"),
         help_text=_(
             "The service to use for new document uploads - the metadata and binary "
             "content will be sent to this API."
@@ -53,10 +53,45 @@ class GlobalConfiguration(SingletonModel):
         related_name="+",
     )
     document_meta_data_stripping = models.BooleanField(
-        _("Strip document metadata"),
+        _("strip document metadata"),
         help_text=_("Enable the meta data stripping functionality of documents."),
         default=True,
     )
+
+    catalogi_api_service = models.ForeignKey(
+        "zgw_consumers.Service",
+        on_delete=models.PROTECT,
+        limit_choices_to={"api_type": APITypes.ztc},
+        verbose_name=_("catalogi API service"),
+        help_text=_("The service to use for informatieobjecttype objects."),
+        null=True,
+        blank=False,
+        related_name="+",
+    )
+    catalogus_url = models.URLField(
+        verbose_name=_("catalogus url"),
+        help_text=_(
+            "The URL to the catalogus object. This field will be automatically "
+            "generated if no data is provided, this means to generate it again when "
+            "switching services you have to empty the field yourself. Disclaimer: "
+            "A catalogus should be unique (per service) based on the RSIN, if you "
+            "switch back and forth between services our application won't be able to "
+            "generate the catalogus url. If you want to switch back you should provide "
+            "the url manually."
+        ),
+        blank=True,
+    )
+    default_iot_url = models.URLField(
+        verbose_name=_("default informatieobjecttype url"),
+        help_text=_(
+            "The URL to the default informatieobjecttype object. "
+            "This field will be automatically generated if no data is provided, "
+            "this means to generate it again when switching services you have to "
+            "empty the field yourself."
+        ),
+        blank=True,
+    )
+
     gpp_app_publication_url_template = models.URLField(
         _("GPP-app publication URL template"),
         max_length=500,
@@ -91,6 +126,16 @@ class GlobalConfiguration(SingletonModel):
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         verbose_name = _("global configuration")
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(catalogus_url__gt="") | models.Q(default_iot_url=""),
+                name="catalogi_api_reference",
+                violation_error_message=_(
+                    "The default IOT URL field cannot be set if the Catalogi URL "
+                    "field is empty."
+                ),
+            )
+        ]
 
     def __str__(self) -> str:
         return force_str(self._meta.verbose_name)

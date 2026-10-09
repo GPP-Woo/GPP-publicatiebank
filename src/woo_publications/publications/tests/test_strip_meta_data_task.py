@@ -16,11 +16,15 @@ from pypdf import PdfReader
 from rest_framework import status
 
 from woo_publications.config.models import GlobalConfiguration
+from woo_publications.contrib.catalogi_api.tests.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
+from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
+from woo_publications.metadata.tests.factories import InformationCategoryFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
-from ...contrib.documents_api.client import get_client
-from ...metadata.tests.factories import InformationCategoryFactory
 from ..constants import PublicationStatusOptions
 from ..file_processing import (
     MIN_MS_OFFICE_DOCUMENT_CORE_META,
@@ -37,29 +41,26 @@ METADATA_PDF = (
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class StripMetaDataTaskTestCase(VCRMixin, TestCase):
-    # this UUID is in the fixture
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-    DOCUMENT_TYPE_URL = (
-        "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-        + DOCUMENT_TYPE_UUID
-    )
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         # Set up global configuration
-        cls.service = service = ServiceFactory.create(
+        cls.service = document_service = ServiceFactory.create(
             for_documents_api_docker_compose=True
         )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
         config = GlobalConfiguration.get_solo()
-        config.documents_api_service = service
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
         config.organisation_rsin = "123456782"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
         # create Information Category to ensure the document_type_url
         # matches DOCUMENT_TYPE_URL
         InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID,
+            iot_url=DEFAULT_IOT, iot_uuid=UUID("64d4ab9c-8b11-4582-b4c7-f9f693c3eabe")
         )
 
     def setUp(self):
@@ -81,7 +82,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
                     uuid4()
                 ),  # must be unique for the source organisation
                 source_organisation="123456782",
-                document_type_url=self.DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="strip metadata test",
                 filesize=size,  # in bytes

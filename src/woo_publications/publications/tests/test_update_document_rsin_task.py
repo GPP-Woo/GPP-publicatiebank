@@ -14,14 +14,13 @@ from woo_publications.contrib.documents_api.client import get_client
 from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.utils.tests.vcr import VCRMixin
 
+from ...contrib.catalogi_api.tests.constants import DEFAULT_CATALOGUS, DEFAULT_IOT
 from ..tasks import update_document_rsin
 from .factories import DocumentFactory
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class TestUpdateDocumentRsinTask(VCRMixin, TestCase):
-    DOCUMENT_TYPE_UUID = "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -32,6 +31,8 @@ class TestUpdateDocumentRsinTask(VCRMixin, TestCase):
         config = GlobalConfiguration.get_solo()
         config.documents_api_service = service
         config.organisation_rsin = "000000000"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
         config.save()
 
     def setUp(self):
@@ -40,10 +41,6 @@ class TestUpdateDocumentRsinTask(VCRMixin, TestCase):
 
     def setup_document(self):
         uploaded_file = File(BytesIO(b"1234567890"))
-        DOCUMENT_TYPE_URL = (
-            "http://host.docker.internal:8000/catalogi/api/v1/informatieobjecttypen/"
-            "9aeb7501-3f77-4f36-8c8f-d21f47c2d6e8"  # this UUID is in the fixture
-        )
 
         with get_client(self.service) as client:
             openzaak_document = client.create_document(
@@ -51,7 +48,7 @@ class TestUpdateDocumentRsinTask(VCRMixin, TestCase):
                     uuid4()
                 ),  # must be unique for the source organisation
                 source_organisation="123456782",
-                document_type_url=DOCUMENT_TYPE_URL,
+                document_type_url=DEFAULT_IOT,
                 creation_date=date.today(),
                 title="File part test",
                 filesize=10,  # in bytes

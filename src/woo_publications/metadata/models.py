@@ -6,9 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 from ordered_model.models import OrderedModel
 from treebeard.mp_tree import MP_Node
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
+from woo_publications.config.models import GlobalConfiguration
 from woo_publications.config.validators import validate_rsin
 from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.contrib.catalogi_api.client import get_client
+from woo_publications.contrib.catalogi_api.typing import IOT
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
 from .managers import InformationCategoryManager, OrganisationManager, ThemeManager
@@ -108,18 +112,68 @@ class InformationCategory(OrderedModel):
         _("retention policy explanation"),
         blank=True,
     )
+    iot_url = models.URLField(
+        _("informatieobjecttype URL"),
+        help_text=_("The informatieobjecttype URL from the catalogi API."),
+        blank=True,
+    )
+    iot_uuid = models.UUIDField(
+        _("informatieobjecttype UUID"),
+        help_text=_("The UUID of the API resource recorded in the Catalogi API."),
+        null=True,
+        blank=True,
+    )
 
     objects = InformationCategoryManager()
 
     class Meta(OrderedModel.Meta):
         verbose_name = _("information category")
         verbose_name_plural = _("information categories")
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(iot_url="", iot_uuid__isnull=True)
+                    | models.Q(iot_url__gt="", iot_uuid__isnull=False)
+                ),
+                name="iot_reference",
+                violation_error_message=_(
+                    "You must specify both the IOT URL and IOT UUID to identify a "
+                    "Information Object Type.",
+                ),
+            )
+        ]
 
     def __str__(self):
         return self.naam
 
     def natural_key(self):
         return (self.identifier,)
+
+    def create_iot_object(
+        self, confidentiality_indication: VertrouwelijkheidsAanduidingen
+    ):
+        """
+        Create the IOT objects in the Catalogi API
+        and set the values on the Model instance.
+        """
+
+        config = GlobalConfiguration.get_solo()
+
+        if (service := config.catalogi_api_service) is None or not config.catalogus_url:
+            raise RuntimeError(
+                "No catalogi API configured yet! Set up the global configuration."
+            )
+
+        with get_client(service) as client:
+            iot: IOT = client.create_iot(
+                catalogus=config.catalogus_url,
+                description=self.naam,
+                confidentiality_indication=confidentiality_indication,
+            )
+
+        self.iot_uuid = iot.uuid
+        self.iot_url = iot.url
+        self.save()
 
 
 class Theme(MP_Node):
