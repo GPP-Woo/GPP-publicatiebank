@@ -85,7 +85,7 @@ class CatalogiClient(NLXClient):
 
         body: IOTBody = {
             "catalogus": catalogus,
-            "omschrijving": description,
+            "omschrijving": description[:80],
             # hardcoded dummy data
             "vertrouwelijkheidaanduiding": confidentiality_indication,
             "beginGeldigheid": "2024-09-01",
@@ -137,7 +137,7 @@ class CatalogiClient(NLXClient):
                 "informatieobjecttypen",
                 params={
                     "catalogus": catalogus,
-                    "omschrijving": description,
+                    "omschrijving": description[:80],
                     "status": "definitief",
                 },
             )
