@@ -28,7 +28,7 @@ You need the following libraries and/or programs:
 .. _Virtualenv: https://virtualenv.pypa.io/en/stable/
 .. _Pip: https://packaging.python.org/en/latest/tutorials/installing-packages/#ensure-pip-is-up-to-date
 .. _PostgreSQL: https://www.postgresql.org
-.. _Node.js: http://nodejs.org/
+.. _Node.js: https://nodejs.org/
 .. _npm: https://www.npmjs.com/
 
 
