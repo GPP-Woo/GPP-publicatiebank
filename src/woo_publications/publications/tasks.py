@@ -14,7 +14,7 @@ from requests import RequestException
 from zgw_consumers.models import Service
 
 from woo_publications.accounts.models import User
-from woo_publications.celery import app
+from woo_publications.celery import app, sentry_exponential_backoff
 from woo_publications.config.models import GlobalConfiguration
 from woo_publications.contrib.documents_api.client import (
     DocumentsAPIError,
@@ -570,7 +570,11 @@ def update_document_informatieobjecttype(
     with get_documents_client(document.document_service) as client:
         # If the document is already locked try again later.
         if document.lock:
-            raise self.retry(countdown=60 * 5)
+            raise self.retry(
+                countdown=sentry_exponential_backoff(
+                    base=60, retries=self.request.retries
+                )
+            )
 
         try:
             # Lock the document to allow updates.
@@ -581,7 +585,9 @@ def update_document_informatieobjecttype(
                     getattr(err, "response", None), "status_code", None
                 )
             ) and 429 <= status_code < 503:
-                raise self.retry(countdown=30) from err
+                raise self.retry(
+                    countdown=sentry_exponential_backoff(retries=self.request.retries)
+                ) from err
 
             raise
 
@@ -600,7 +606,9 @@ def update_document_informatieobjecttype(
                     getattr(err, "response", None), "status_code", None
                 )
             ) and 429 <= status_code < 503:
-                raise self.retry(countdown=30) from err
+                raise self.retry(
+                    countdown=sentry_exponential_backoff(retries=self.request.retries)
+                ) from err
 
             raise
         finally:

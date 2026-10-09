@@ -1,6 +1,6 @@
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
-from woo_publications.celery import app
+from woo_publications.celery import app, sentry_exponential_backoff
 from woo_publications.contrib.catalogi_api.client import CatalogiAPIError
 from woo_publications.metadata.models import InformationCategory
 
@@ -20,6 +20,8 @@ def index_iot(
         information_category.create_iot_object(confidentiality_indication)
     except CatalogiAPIError as err:
         if err.status_code and 429 <= err.status_code < 503:
-            raise self.retry(countdown=30) from err
+            raise self.retry(
+                countdown=sentry_exponential_backoff(retries=self.request.retries)
+            ) from err
 
         raise

@@ -5,7 +5,7 @@ from django.db.models import CharField, OuterRef, Subquery
 import sentry_sdk
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
-from woo_publications.celery import app
+from woo_publications.celery import app, sentry_exponential_backoff
 from woo_publications.contrib.catalogi_api.client import CatalogiAPIError
 from woo_publications.metadata.models import InformationCategory
 from woo_publications.publications.models import Document
@@ -69,7 +69,9 @@ def sync_information_categories_and_documents_with_catalog_api(
         return
 
     if retry:
-        raise self.retry(countdown=30)
+        raise self.retry(
+            countdown=sentry_exponential_backoff(retries=self.request.retries)
+        )
 
 
 @app.task()

@@ -1,6 +1,6 @@
 import datetime
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, tag
 
 from dateutil import easter
 from hypothesis import example, given
@@ -31,6 +31,7 @@ class GetWorkdaySimpleTestCase(SimpleTestCase):
 
         self.assertEqual(get_workday(kingsday), tuesday)
 
+    @tag("hypothesis")
     @given(
         dates(
             min_value=datetime.date(2026, 1, 1), max_value=datetime.date(2119, 12, 31)

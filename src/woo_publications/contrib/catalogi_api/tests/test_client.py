@@ -15,6 +15,8 @@ from woo_publications.utils.tests.vcr import VCRMixin
 from ..client import CatalogiAPIError, get_client
 from .constants import DEFAULT_CATALOGUS
 
+openbaar = VertrouwelijkheidsAanduidingen.openbaar
+
 
 class CatalogiClientTests(VCRMixin, TestCase):
     def test_create_catalogi(self):
@@ -52,7 +54,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
                     json={
                         "catalogus": DEFAULT_CATALOGUS,
                         "omschrijving": "SOME-RANDOM-DESCRIPTION-OF-A-CONCEPT-IOT",
-                        "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                        "vertrouwelijkheidaanduiding": openbaar,
                         "beginGeldigheid": "2024-09-01",
                         "informatieobjectcategorie": "Wet Open Overheid",
                     },
@@ -71,7 +73,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
                     json={
                         "catalogus": DEFAULT_CATALOGUS,
                         "omschrijving": "SOME-RANDOM-DESCRIPTION-OF-A-PUBLISHED-IOT",
-                        "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                        "vertrouwelijkheidaanduiding": openbaar,
                         "beginGeldigheid": "2024-09-01",
                         "informatieobjectcategorie": "Wet Open Overheid",
                     },
@@ -111,7 +113,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
             iot = client.create_iot(
                 catalogus=DEFAULT_CATALOGUS,
                 description="create iot.",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                confidentiality_indication=openbaar,
             )
 
         self.assertGreater(len(str(iot.uuid)), 0)
@@ -134,7 +136,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
                 json={
                     "catalogus": DEFAULT_CATALOGUS,
                     "omschrijving": "LETS-RETRIEVE-AN-EXISTING-IOT",
-                    "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                    "vertrouwelijkheidaanduiding": openbaar,
                     "beginGeldigheid": "2024-09-01",
                     "informatieobjectcategorie": "Wet Open Overheid",
                 },
@@ -148,7 +150,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
             iot = client.create_iot(
                 catalogus=DEFAULT_CATALOGUS,
                 description="LETS-RETRIEVE-AN-EXISTING-IOT",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                confidentiality_indication=openbaar,
             )
             self.assertEqual(iot.url, iot_url)
 
@@ -168,7 +170,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
                 client.create_iot(
                     catalogus=DEFAULT_CATALOGUS,
                     description="encountering error during publishing deleted iot.",
-                    confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                    confidentiality_indication=openbaar,
                 )
 
         with self.subTest("check no concept IOT's exist"):
@@ -200,7 +202,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
             client.create_iot(
                 catalogus=DEFAULT_CATALOGUS,
                 description="error during creating iot",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                confidentiality_indication=openbaar,
             )
 
     def test_destroy_iot(self):
@@ -210,7 +212,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
             iot = client.create_iot(
                 catalogus=DEFAULT_CATALOGUS,
                 description="destroy iot.",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                confidentiality_indication=openbaar,
             )
             client.destroy_iot(uuid=iot.uuid)
 
@@ -226,7 +228,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
             iot = client.create_iot(
                 catalogus=DEFAULT_CATALOGUS,
                 description="destroy iot error.",
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                confidentiality_indication=openbaar,
             )
 
             with (

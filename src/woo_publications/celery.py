@@ -19,6 +19,15 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 
+def sentry_exponential_backoff(
+    *,
+    base: int = 30,
+    cap: int = 600,
+    retries: int = 1,
+) -> int:
+    return min(cap, base * 2**retries)
+
+
 @setup_logging.connect
 def receiver_setup_logging(
     loglevel, logfile, format, colorize, **kwargs
