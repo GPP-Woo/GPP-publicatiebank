@@ -38,6 +38,18 @@ the environment you test.
 
 * Everything is created as a **concept** publication with a title starting with
   ``Prestatietest``. Concept publications are never published or sent to GPP-zoeken.
+* With ``--publish`` the publications and their documents are published instead, so
+  GPP-zoeken indexes them and they are publicly findable while the test runs. At the
+  end of each iteration they are revoked, which removes them from the search index,
+  but they are not deleted: deleting through the API would leave them in the search
+  index. Every revoked publication is written to ``--revoked-file``, one JSON object
+  per line with the UUIDs of the publication and its documents, for example::
+
+      {"publicatie":"3eaaaab8-...","documenten":["6721c114-..."]}
+
+  Delete them once the celery workers have finished the queued work, or in the admin,
+  where deleting also removes them from the search index. Until then, their files stay
+  in the Documents API.
 * Every uploader and editor deletes what it created, including the files in the
   Documents API, also when the run ends halfway. Only when the load test itself is
   killed (for example by pressing Ctrl+C twice) can some publications remain. You can
@@ -46,9 +58,11 @@ the environment you test.
   to recognise in the audit logs.
 
 Uploads go through the complete processing pipeline: the Documents API stores the file
-parts, and a celery worker removes the metadata from PDF and ZIP files. The test is
-therefore as heavy on the Documents API (for example Open Zaak) and the celery workers
-as it is on the publicatiebank itself.
+parts, and a celery worker removes the metadata from PDF and ZIP files. With
+``--publish``, a celery worker then also sends each document to GPP-zoeken, which
+downloads it from the publicatiebank to index it. The test is therefore as heavy on the
+Documents API (for example Open Zaak), GPP-zoeken and the celery workers as it is on the
+publicatiebank itself.
 
 Requirements
 ------------
@@ -153,15 +167,30 @@ the API key.
     * - ``--completion-timeout``
       - ``PERF_COMPLETION_TIMEOUT``
       - Seconds an upload may take to complete before it counts as failed (default 600).
+    * - ``--publish``
+      - ``PERF_PUBLISH``
+      - Publish the publications, so their documents are also indexed by GPP-zoeken.
+        Needs an active organisation (**Metadata** > **Organisaties**) to use as
+        publisher.
+    * - ``--revoked-file``
+      - ``PERF_REVOKED_FILE``
+      - With ``--publish``: the file the revoked publications are appended to
+        (default ``revoked.jsonl``). It must be writable, so in a container, point it
+        to a mounted directory.
     * - ``--keep-data``
       - ``PERF_KEEP_DATA``
-      - Do not delete the created publications and documents.
+      - Do not delete the created publications and documents (with ``--publish``: do
+        not revoke them either).
     * - ``--run-time``
       - ``LOCUST_RUN_TIME``
       - Duration, e.g. ``10m``.
     * - ``--csv``, ``--html``
       -
       - Save the results.
+
+When the run time is over, users finish what they are doing, including cleaning up,
+for at most ``--stop-timeout`` seconds. Unless you set it, that is the
+``--completion-timeout``.
 
 Run ``locust -f performance_test/locustfile.py --help`` for all of Locust's own options.
 

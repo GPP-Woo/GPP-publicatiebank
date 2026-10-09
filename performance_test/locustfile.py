@@ -27,7 +27,9 @@ Usage (see the documentation for more)::
 
 Everything a run creates is a *concept* publication with "Prestatietest" in the
 title, so it is never published, and it is removed at the end of each iteration
-unless ``--keep-data`` is given.
+unless ``--keep-data`` is given. With ``--publish`` the publications are published, so
+their documents are also indexed by GPP-zoeken; they are revoked instead of deleted, and
+listed in ``--revoked-file`` for deletion later.
 """
 
 from __future__ import annotations
@@ -41,7 +43,7 @@ from argparse import Namespace
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
-from typing import Literal, NamedTuple, TypedDict, Unpack
+from typing import IO, ClassVar, Literal, NamedTuple, TypedDict, Unpack
 from urllib.parse import urlsplit
 
 import msgspec
@@ -128,6 +130,13 @@ class Decoders:
     counted_documents = msgspec.json.Decoder(CountedPage[Document])
 
 
+class RevokedPublication(msgspec.Struct, frozen=True):
+    """A line of ``--revoked-file``."""
+
+    publicatie: str
+    documenten: list[str]
+
+
 class PendingDocument(NamedTuple):
     """A document whose parts are uploaded, waiting to be completely processed."""
 
@@ -197,10 +206,25 @@ def _(parser: LocustArgumentParser, **kwargs: object) -> None:
         help="Seconds to wait for an upload to complete (default 600).",
     )
     parser.add_argument(
+        "--publish",
+        action="store_true",
+        env_var="PERF_PUBLISH",
+        help="Publish the publications, so their documents are also indexed by "
+        "GPP-zoeken. Needs an active organisation as publisher.",
+    )
+    parser.add_argument(
+        "--revoked-file",
+        env_var="PERF_REVOKED_FILE",
+        default="revoked.jsonl",
+        help="With --publish: the file to which the revoked publications and their "
+        "documents are appended, one JSON object per line (default revoked.jsonl).",
+    )
+    parser.add_argument(
         "--keep-data",
         action="store_true",
         env_var="PERF_KEEP_DATA",
-        help="Do not delete the publications and documents the test created.",
+        help="Do not delete (or with --publish: revoke) the publications and "
+        "documents the test created.",
     )
 
 
@@ -216,6 +240,8 @@ class Options:
     docs_per_publication: int
     file_type: FileTypeName
     completion_timeout: int
+    publish: bool
+    revoked_file: str
     keep_data: bool
 
     @classmethod
@@ -232,6 +258,8 @@ class Options:
             docs_per_publication=namespace.docs_per_publication,
             file_type=file_type,
             completion_timeout=namespace.completion_timeout,
+            publish=namespace.publish,
+            revoked_file=namespace.revoked_file,
             keep_data=namespace.keep_data,
         )
 
@@ -250,10 +278,18 @@ def _(environment: Environment, **kwargs: object) -> None:
     if namespace is None:
         return
     options = Options.read(namespace)  # fail early on a typo
+    if options.publish and not options.keep_data:
+        # Unbuffered and appending: every line is a single write, so lines of several
+        # processes (--processes) do not interleave.
+        PublicatiebankUser.revoked_file = open(options.revoked_file, "ab", buffering=0)  # noqa: SIM115
     # without -u/--users, start exactly the requested users of each kind
     num_users: int | None = namespace.num_users
     if not num_users:
         namespace.num_users = sum(_user_counts(options).values())
+    # Without a stop timeout, users are killed when the run ends, and with --processes
+    # their worker exits before on_stop has cleaned up. Let them finish the iteration.
+    if not environment.stop_timeout:
+        environment.stop_timeout = options.completion_timeout
 
 
 @events.test_start.add_listener
@@ -288,10 +324,12 @@ def succeeded(response: Response) -> bool:
 
 class PublicatiebankUser(HttpUser):
     abstract = True
+    revoked_file: ClassVar[IO[bytes] | None] = None  # opened in the init hook
 
     def on_start(self) -> None:
         self._information_categories: list[str] = []
-        self._created: set[str] = set()  # publications not deleted yet
+        self._created: set[str] = set()  # publications not cleaned up yet
+        self._publisher: str | None = None
         namespace = self.environment.parsed_options
         if namespace is None:
             raise StopUser("Only runs from the locust command")
@@ -308,6 +346,15 @@ class PublicatiebankUser(HttpUser):
                 "Audit-Remarks": "Performance test (performance_test/locustfile.py)",
             }
         )
+        if self.options.publish:
+            # the list only contains active organisations, which can publish
+            organisations = self.get_json(f"{API}/organisaties", Decoders.resources)
+            if not organisations or not organisations.results:
+                raise StopUser(
+                    "--publish needs an active organisation as publisher, "
+                    "activate one in the admin"
+                )
+            self._publisher = organisations.results[0].uuid
 
     def _send(
         self,
@@ -411,7 +458,10 @@ class PublicatiebankUser(HttpUser):
             json={
                 "officieleTitel": f"Prestatietest {uuid.uuid4()}",
                 "omschrijving": "Aangemaakt door de prestatietest.",
-                "publicatiestatus": "concept",
+                "publicatiestatus": "gepubliceerd"
+                if self.options.publish
+                else "concept",
+                "publisher": self._publisher,
                 "informatieCategorieen": [category],
             },
         )
@@ -422,23 +472,48 @@ class PublicatiebankUser(HttpUser):
     def on_stop(self) -> None:
         # The run can end in the middle of an iteration, clean up what is left.
         for publication_uuid in list(self._created):
-            self.delete_publication(publication_uuid)
+            self.clean_up_publication(publication_uuid)
 
-    def delete_publication(self, publication_uuid: str) -> None:
+    def clean_up_publication(self, publication_uuid: str) -> None:
         if self.options.keep_data:
             return
         self._created.discard(publication_uuid)
-        # Deleting a publication leaves its files in the Documents API, deleting the
-        # documents first removes those too.
         documents = self.get_json(
             f"{API}/documenten?publicatie={publication_uuid}",
             Decoders.resources,
             name=f"{API}/documenten?publicatie=[uuid]",
         )
-        for document in documents.results if documents else ():
+        document_uuids = [d.uuid for d in (documents.results if documents else [])]
+        if self.options.publish:
+            self.revoke_publication(publication_uuid, document_uuids)
+        else:
+            self.delete_publication(publication_uuid, document_uuids)
+
+    def revoke_publication(
+        self, publication_uuid: str, document_uuids: Sequence[str]
+    ) -> None:
+        # Deleting through the API would leave a published publication and its
+        # documents in the search index; revoking removes them from there (in celery,
+        # which needs them to still exist).
+        response = self.request(
+            "PATCH",
+            f"{API}/publicaties/{publication_uuid}",
+            name=f"{API}/publicaties/[uuid]",
+            json={"publicatiestatus": "ingetrokken"},
+        )
+        if succeeded(response) and self.revoked_file is not None:
+            line = RevokedPublication(publication_uuid, list(document_uuids))
+            self.revoked_file.write(msgspec.json.encode(line) + b"\n")
+
+    def delete_publication(
+        self, publication_uuid: str, document_uuids: Sequence[str]
+    ) -> None:
+        # Deleting a publication leaves its files in the Documents API, deleting the
+        # documents first removes those too.
+        for document_uuid in document_uuids:
             self.request(
                 "DELETE",
-                f"{API}/documenten/{document.uuid}",
+                f"{API}/documenten/{document_uuid}",
                 name=f"{API}/documenten/[uuid]",
             )
         self.request(
@@ -550,7 +625,7 @@ class Editor(PublicatiebankUser):
             f"{API}/publicaties?search=Prestatietest",
             name=f"{API}/publicaties?search=[term]",
         )
-        self.delete_publication(publication.uuid)
+        self.clean_up_publication(publication.uuid)
 
 
 class Uploader(PublicatiebankUser):
@@ -569,7 +644,7 @@ class Uploader(PublicatiebankUser):
             for pending in filter(None, started):
                 self.wait_until_ready(pending)
         finally:
-            self.delete_publication(publication.uuid)
+            self.clean_up_publication(publication.uuid)
 
     def upload_document(self, publication_uuid: str) -> PendingDocument | None:
         """Register a document and upload its parts; return what to wait for."""
