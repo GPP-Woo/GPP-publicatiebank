@@ -13,6 +13,9 @@ def index_iot(
     confidentiality_indication: VertrouwelijkheidsAanduidingen,
 ):
     information_category = InformationCategory.objects.get(pk=information_category_id)
+    if information_category.iot_uuid and information_category.iot_url:
+        return
+
     try:
         information_category.create_iot_object(confidentiality_indication)
     except CatalogiAPIError as err:

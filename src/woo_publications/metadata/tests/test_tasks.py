@@ -133,3 +133,22 @@ class IndexIOTTest(TestCase):
                 information_category_id=information_category.pk,
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
+
+    @patch(
+        "woo_publications.contrib.catalogi_api.client.CatalogiClient.create_iot",
+        return_value=IOT(uuid=uuid.uuid4(), url="https://example.com/iot/new"),
+    )
+    def test_index_iot_is_idempotent(self, mock_create_iot: MagicMock):
+        existing_iot_uuid = uuid.uuid4()
+        information_category = InformationCategory.objects.create(
+            iot_url="https://example.com/iot/existing", iot_uuid=existing_iot_uuid
+        )
+        index_iot(
+            information_category_id=information_category.pk,
+            confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+        )
+        mock_create_iot.assert_not_called()
+        information_category.refresh_from_db()
+        self.assertEqual(
+            information_category.iot_url, "https://example.com/iot/existing"
+        )

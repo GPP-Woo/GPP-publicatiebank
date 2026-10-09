@@ -10,6 +10,7 @@ from solo.admin import SingletonModelAdmin
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 
 from woo_publications.contrib.catalogi_api.client import CatalogiAPIError, get_client
+from woo_publications.metadata.models import InformationCategory
 from woo_publications.publications.models import InzageProcedure
 
 from .models import GlobalConfiguration
@@ -115,12 +116,14 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
                 "and Documents will now be processed in the background."
             ),
         )
-        transaction.on_commit(
-            partial(
-                sync_information_categories_and_documents_with_catalog_api.delay,
-                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+
+        def sync_models_with_catalogi_api():
+            InformationCategory.objects.update(iot_url="", iot_uuid=None)
+            sync_information_categories_and_documents_with_catalog_api.delay(
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
             )
-        )
+
+        transaction.on_commit(partial(sync_models_with_catalogi_api))
         config.save(
             update_fields=(
                 "catalogus_url",
@@ -144,7 +147,10 @@ class GlobalConfigurationAdmin(SingletonModelAdmin):
         ):
             transaction.on_commit(partial(self._back_fill_url_reactieformulier))
 
-        if not obj.catalogus_url or not obj.default_iot_url:
+        if (
+            not form.cleaned_data["catalogus_url"]
+            or not form.cleaned_data["default_iot_url"]
+        ):
             transaction.on_commit(
                 partial(self._create_global_catalogi_api_objects, request=request)
             )

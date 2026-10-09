@@ -1,4 +1,5 @@
 import re
+from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 from django.test import TestCase
@@ -20,7 +21,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
         with get_client(service) as client:
-            catalogi = client.create_catalogi(rsin="000000000")
+            catalogi = client.create_catalogi(rsin="571586685")
 
         self.assertIsInstance(catalogi, str)
 
@@ -172,13 +173,21 @@ class CatalogiClientTests(VCRMixin, TestCase):
 
         with self.subTest("check no concept IOT's exist"):
             detail_response = client.get(
-                "informatieobjecttypen", params={"status": "concept"}
+                "informatieobjecttypen",
+                params={
+                    "status": "concept",
+                    "omschrijving": "encountering error during publishing deleted iot.",
+                },
             )
 
             self.assertEqual(detail_response.status_code, 200)
             self.assertEqual(detail_response.json()["count"], 0)
 
-    def test_error_during_creating_iot(self):
+    @patch(
+        "woo_publications.contrib.catalogi_api.client.CatalogiClient.get_iot_by_description",
+        return_value=None,
+    )
+    def test_error_during_creating_iot(self, mock_get_iot_by_description: MagicMock):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
         with (

@@ -30,8 +30,6 @@ from .factories import DocumentFactory, PublicationFactory
 response_500 = Response()
 response_500.status_code = 500
 
-uuid_pattern = r"[0-9a-fA-F-]{36}"
-
 
 @override_settings(ALLOWED_HOSTS=["testserver", "host.docker.internal"])
 class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
@@ -115,7 +113,9 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
     def test_update_document_informatieobjecttype_happy_flow(self):
         external_document = self.setup_document()
 
-        information_category = InformationCategoryFactory.create()
+        information_category = InformationCategoryFactory.create(
+            naam="TestUpdateDocumentIOTTask.test_update_document_informatieobjecttype_happy_flow"
+        )
         information_category.create_iot_object(
             confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
         )
@@ -166,7 +166,9 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
     def test_error_during_locking(self):
         external_document = self.setup_document()
 
-        information_category = InformationCategoryFactory.create()
+        information_category = InformationCategoryFactory.create(
+            naam="TestUpdateDocumentIOTTask.test_error_during_locking"
+        )
         information_category.create_iot_object(
             confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
         )
@@ -199,7 +201,9 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
     def test_error_during_locking_with_retry(self):
         external_document = self.setup_document()
 
-        information_category = InformationCategoryFactory.create()
+        information_category = InformationCategoryFactory.create(
+            naam="TestUpdateDocumentIOTTask.test_error_during_locking_with_retry"
+        )
         information_category.create_iot_object(
             confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
         )
@@ -232,7 +236,9 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
     def test_error_during_update_document_iot(self):
         external_document = self.setup_document()
 
-        information_category = InformationCategoryFactory.create()
+        information_category = InformationCategoryFactory.create(
+            naam="TestUpdateDocumentIOTTask.test_error_during_update_document_iot"
+        )
         information_category.create_iot_object(
             confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
         )
@@ -265,7 +271,9 @@ class TestUpdateDocumentIOTTask(VCRMixin, TestCase):
     def test_error_during_update_document_iot_with_retry(self):
         external_document = self.setup_document()
 
-        information_category = InformationCategoryFactory.create()
+        information_category = InformationCategoryFactory.create(
+            naam="TestUpdateDocumentIOTTask.test_error_during_update_document_iot_with_retry"
+        )
         information_category.create_iot_object(
             confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
         )

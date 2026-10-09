@@ -216,9 +216,10 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         mock_change_document_api_iots: MagicMock,
     ):
         will_be_updated = InformationCategoryFactory.create(
-            iot_url="https://example.com/information_category"
+            iot_url="",
+            iot_uuid=None,
+            naam="TestSyncInformationCategoriesAndDocumentsWithCatalogApi.test_happy_flow",
         )
-        will_be_updated_uuid = will_be_updated.iot_uuid
 
         will_remain = InformationCategoryFactory.create(
             iot_url=f"{self.catalogi_service.api_root}{uuid.uuid4()}"
@@ -233,11 +234,9 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         will_be_updated.refresh_from_db()
         will_remain.refresh_from_db()
 
-        # Since the url didn't have the same root it now has changed.
-        self.assertNotEqual(
-            will_be_updated.iot_url, "https://example.com/information_category"
-        )
-        self.assertNotEqual(will_be_updated.iot_uuid, will_be_updated_uuid)
+        # Since the url and uuid was empty we updated it
+        self.assertNotEqual(will_be_updated.iot_url, "")
+        self.assertNotEqual(will_be_updated.iot_uuid, None)
         # Since the url had the same root, it didn't change.
         self.assertEqual(will_remain.iot_url, will_remain_iot_url)
         self.assertEqual(will_remain.iot_uuid, will_remain_iot_uuid)
@@ -258,9 +257,7 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         mock_change_document_api_iots: MagicMock,
         mock_create_iot: MagicMock,
     ):
-        InformationCategoryFactory.create(
-            iot_url="https://example.com/information_category"
-        )
+        InformationCategoryFactory.create(iot_url="", iot_uuid=None)
 
         with self.assertRaises(Retry):
             sync_information_categories_and_documents_with_catalog_api(
@@ -279,9 +276,7 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         mock_change_document_api_iots: MagicMock,
         mock_create_iot: MagicMock,
     ):
-        InformationCategoryFactory.create(
-            iot_url="https://example.com/information_category"
-        )
+        InformationCategoryFactory.create(iot_url="", iot_uuid=None)
 
         with self.assertRaisesMessage(
             CatalogiAPIError,
