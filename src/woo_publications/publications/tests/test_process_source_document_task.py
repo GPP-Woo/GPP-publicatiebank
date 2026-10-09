@@ -1,7 +1,7 @@
 import base64
 from datetime import date
 from io import BytesIO
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from django.core.files import File
 from django.test import TestCase
@@ -71,7 +71,7 @@ class ProcessSourceDocumentTaskTests(VCRMixin, TestCase):
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            iot_url=DEFAULT_IOT
+            iot_url=DEFAULT_IOT, iot_uuid=UUID("14abec3f-dd4e-4297-9882-10f95b208f9a")
         )
 
     def setUp(self):

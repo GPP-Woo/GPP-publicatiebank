@@ -115,14 +115,13 @@ class InformationCategory(OrderedModel):
     iot_url = models.URLField(
         _("informatieobjecttype URL"),
         help_text=_("The informatieobjecttype URL from the catalogi API."),
-        editable=False,
+        blank=True,
     )
     iot_uuid = models.UUIDField(
         _("informatieobjecttype UUID"),
         help_text=_("The UUID of the API resource recorded in the Catalogi API."),
-        editable=False,
         null=True,
-        blank=False,
+        blank=True,
     )
 
     objects = InformationCategoryManager()
@@ -130,6 +129,19 @@ class InformationCategory(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name = _("information category")
         verbose_name_plural = _("information categories")
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(iot_url="", iot_uuid__isnull=True)
+                    | models.Q(iot_url__gt="", iot_uuid__isnull=False)
+                ),
+                name="iot_reference",
+                violation_error_message=_(
+                    "You must specify both the IOT URL and IOT UUID to identify a "
+                    "Information Object Type.",
+                ),
+            )
+        ]
 
     def __str__(self):
         return self.naam

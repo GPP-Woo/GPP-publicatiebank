@@ -126,7 +126,10 @@ class TestDocumentApi(VCRMixin, TestCase):
 
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_global_config(self, mock_index_document: MagicMock):
-        information_category = InformationCategoryFactory.create(iot_url=DEFAULT_IOT)
+        information_category = InformationCategoryFactory.create(
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("21ea3334-a931-4f9b-8acd-7f85c95417a6"),
+        )
         publisher = OrganisationFactory.create(is_actief=True, rsin="")
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[information_category],
@@ -146,7 +149,10 @@ class TestDocumentApi(VCRMixin, TestCase):
 
     @patch("woo_publications.publications.tasks.index_document.delay")
     def test_given_rsin_from_publisher(self, mock_index_document: MagicMock):
-        information_category = InformationCategoryFactory.create(iot_url=DEFAULT_IOT)
+        information_category = InformationCategoryFactory.create(
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("2a8936aa-56da-4ad0-a954-b777cdce29cf"),
+        )
         publisher = OrganisationFactory.create(is_actief=True, rsin="123456782")
         document: Document = DocumentFactory.create(
             publicatie__informatie_categorieen=[information_category],
@@ -219,7 +225,7 @@ class TestGetIOTUrl(TestCase):
 
     def test_happy_flow(self):
         ic = InformationCategoryFactory.create(
-            iot_url=DEFAULT_IOT,
+            iot_url=DEFAULT_IOT, iot_uuid="d1ef0ea4-a335-452f-93cc-6a0dbcb740b5"
         )
         publication = PublicationFactory.create(
             informatie_categorieen=[ic.pk],

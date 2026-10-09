@@ -59,7 +59,9 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         # create Information Category to ensure the document_type_url
         # matches DOCUMENT_TYPE_URL
-        InformationCategoryFactory.create(iot_url=DEFAULT_IOT)
+        InformationCategoryFactory.create(
+            iot_url=DEFAULT_IOT, iot_uuid=UUID("64d4ab9c-8b11-4582-b4c7-f9f693c3eabe")
+        )
 
     def setUp(self):
         super().setUp()

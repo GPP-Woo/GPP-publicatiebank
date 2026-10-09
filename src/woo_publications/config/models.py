@@ -131,8 +131,8 @@ class GlobalConfiguration(SingletonModel):
                 check=models.Q(catalogus_url__gt="") | models.Q(default_iot_url=""),
                 name="catalogi_api_reference",
                 violation_error_message=_(
-                    "The default IOT URL field cannot be empty if the Catalogi URL "
-                    "field is set."
+                    "The default IOT URL field cannot be set if the Catalogi URL "
+                    "field is empty."
                 ),
             )
         ]

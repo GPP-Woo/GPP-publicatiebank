@@ -1,4 +1,5 @@
 import io
+import uuid
 from collections.abc import Iterator
 from datetime import date
 from io import BytesIO
@@ -1355,7 +1356,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            iot_url=DEFAULT_IOT
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("14b8f769-8449-4466-9867-a6ec35bb0095"),
         )
 
     def setUp(self):
@@ -2051,7 +2053,9 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         config.save()
 
         cls.information_category = InformationCategoryFactory.create(
-            uuid=cls.DOCUMENT_TYPE_UUID, iot_url=DEFAULT_IOT
+            uuid=cls.DOCUMENT_TYPE_UUID,
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("4220d404-caed-4769-9e46-f4ef469a8744"),
         )
 
     def setUp(self):

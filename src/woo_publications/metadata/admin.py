@@ -85,8 +85,6 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
         "uuid",
         "identifier",
         "oorsprong",
-        "iot_url",
-        "iot_uuid",
     )
     search_fields = (
         "identifier",

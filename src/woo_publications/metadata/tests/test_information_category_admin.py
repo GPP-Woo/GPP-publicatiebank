@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
@@ -152,6 +153,7 @@ class TestInformationCategoryAdmin(WebTest):
             naam="second item",
             oorsprong=InformationCategoryOrigins.custom_entry,
             iot_url="https://www.example.com",
+            iot_uuid=uuid.UUID("f3dc7ce4-25a5-4473-9206-1a15dd807e34"),
         )
         url = reverse(
             "admin:metadata_informationcategory_change",
@@ -255,6 +257,33 @@ class TestInformationCategoryAdmin(WebTest):
                 confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
             )
 
+        with self.subTest("IOT field not filled out properly"):
+            form["naam"] = "new item"
+            form["naam_meervoud"] = "new items"
+            form["definitie"] = (
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris risus "
+                "nibh, iaculis eu cursus sit amet, accumsan ac urna. Mauris interdum "
+                "eleifend eros sed consectetur."
+            )
+            form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+            form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+            form["bewaartermijn"] = 10
+            form["iot_url"] = ""
+            form["iot_uuid"] = uuid.uuid4().__str__()
+
+            with self.captureOnCommitCallbacks(execute=True):
+                response = form.submit(name="_save")
+
+            self.assertEqual(response.status_code, 200)
+            self.assertFormError(
+                response.context["adminform"],
+                None,
+                _(
+                    "You must specify both the IOT URL and IOT UUID to identify a "
+                    "Information Object Type."
+                ),
+            )
+
     def test_information_category_admin_delete_item(self):
         information_category = InformationCategoryFactory.create(
             identifier="https://www.example.com/waardenlijsten/2",
@@ -318,6 +347,7 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
             naam="unique snowflake",
             uuid="7aa923ea-9e72-4523-9ef9-f7e1e74cf53a",
             iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("6217db83-c1f2-450a-a580-53fed72bd979"),
         )
 
         response = self.app.get(url, user=user)

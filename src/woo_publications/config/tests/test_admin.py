@@ -307,8 +307,8 @@ class GlobalConfigCatalogiTestCase(VCRMixin, TestCase):
             response.context["adminform"],
             None,
             _(
-                "The default IOT URL field cannot be empty if the Catalogi URL "
-                "field is set."
+                "The default IOT URL field cannot be set if the Catalogi URL "
+                "field is empty."
             ),
         )
 

@@ -92,7 +92,8 @@ class TestChangeDocumentAPIIOTSTask(TestCase):
         self, mock_update_document_informatieobjecttype_delay: MagicMock
     ):
         informatie_category = InformationCategoryFactory.create(
-            iot_url="https://example.com/information_category"
+            iot_url="https://example.com/information_category",
+            iot_uuid=uuid.UUID("5f0b6c13-50b0-49cc-83a3-ddc7cb898ea3"),
         )
         publication = PublicationFactory.create(
             informatie_categorieen=[informatie_category.pk],
@@ -222,7 +223,8 @@ class TestSyncInformationCategoriesAndDocumentsWithCatalogApi(VCRMixin, TestCase
         )
 
         will_remain = InformationCategoryFactory.create(
-            iot_url=f"{self.catalogi_service.api_root}{uuid.uuid4()}"
+            iot_url=f"{self.catalogi_service.api_root}{uuid.uuid4()}",
+            iot_uuid=uuid.UUID("b890e626-ed12-4d65-9ae5-88cc53b580dd"),
         )
         will_remain_iot_uuid = will_remain.iot_uuid
         will_remain_iot_url = will_remain.iot_url
