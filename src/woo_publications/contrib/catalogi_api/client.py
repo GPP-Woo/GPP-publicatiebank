@@ -13,7 +13,7 @@ from zgw_consumers.nlx import NLXClient
 
 __all__ = ["CatalogiAPIError", "get_client"]
 
-from .typing import IOT, IOTBody, IOTResponse
+from .typing import IOT, IOTBody, IOTListResponse, IOTResponse
 
 
 def get_client(service: Service) -> CatalogiClient:
@@ -25,6 +25,19 @@ class CatalogiAPIError(Exception):
         self.message = message
         self.status_code = status_code
         super().__init__(message)
+
+
+# TODO: fix this ugly way to scrape out the UUID
+#  requires change in OpenZaak to add the UUID to the response
+def iot_uuid(url: str) -> UUID:
+    try:
+        uuid = url.rsplit("/", 1)[-1]
+        return UUID(uuid)
+    except ValueError as err:  # pragma: no cover
+        raise CatalogiAPIError(
+            message=_("Malformed uuid retrieved from informatieobjecttypen response."),
+            status_code=None,
+        ) from err
 
 
 class CatalogiClient(NLXClient):
@@ -64,6 +77,12 @@ class CatalogiClient(NLXClient):
         description: str,
         confidentiality_indication: VertrouwelijkheidsAanduidingen,
     ) -> IOT:
+        if iot := self.get_iot_by_description(
+            catalogus=catalogus,
+            description=description,
+        ):
+            return iot
+
         body: IOTBody = {
             "catalogus": catalogus,
             "omschrijving": description,
@@ -86,20 +105,7 @@ class CatalogiClient(NLXClient):
 
         response_data: IOTResponse = response.json()
 
-        # TODO: fix this ugly way to scrape out the UUID
-        #  requires change in OpenZaak to add the UUID to the response
-        try:
-            uuid = response_data["url"].rsplit("/", 1)[-1]
-            uuid = UUID(uuid)
-        except ValueError as err:  # pragma: no cover
-            raise CatalogiAPIError(
-                message=_(
-                    "Malformed uuid retrieved from informatieobjecttypen response."
-                ),
-                status_code=getattr(
-                    getattr(err, "response", None), "status_code", None
-                ),
-            ) from err
+        uuid = iot_uuid(response_data["url"])
 
         iot = IOT(
             uuid=uuid,
@@ -119,6 +125,45 @@ class CatalogiClient(NLXClient):
             ) from err
 
         return iot
+
+    def get_iot_by_description(
+        self,
+        *,
+        catalogus: str,
+        description: str,
+    ) -> IOT | None:
+        try:
+            response = self.get(
+                "informatieobjecttypen",
+                params={
+                    "catalogus": catalogus,
+                    "omschrijving": description,
+                    "status": "definitief",
+                },
+            )
+            response.raise_for_status()
+        except RequestException as err:
+            raise CatalogiAPIError(
+                message=_("Something went wrong while trying to retrieving IOT."),
+                status_code=getattr(
+                    getattr(err, "response", None), "status_code", None
+                ),
+            ) from err
+
+        data: IOTListResponse = response.json()
+
+        if data["count"] == 0:
+            return
+
+        # for now let's assume that the first match is correct
+        # this system will not create IOT's with different start/end
+        # dates.
+        result: IOTResponse = data["results"][0]
+
+        return IOT(
+            uuid=iot_uuid(result["url"]),
+            url=result["url"],
+        )
 
     def destroy_iot(self, *, uuid: UUID):
         try:

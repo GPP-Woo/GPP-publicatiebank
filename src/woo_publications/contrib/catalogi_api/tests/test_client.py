@@ -42,6 +42,67 @@ class CatalogiClientTests(VCRMixin, TestCase):
         ):
             client.create_catalogi(rsin="123456782")
 
+    def test_get_iot_by_description(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+        with get_client(service) as client:
+            with self.subTest("concept"):
+                response = client.post(
+                    "informatieobjecttypen",
+                    json={
+                        "catalogus": DEFAULT_CATALOGUS,
+                        "omschrijving": "SOME-RANDOM-DESCRIPTION-OF-A-CONCEPT-IOT",
+                        "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                        "beginGeldigheid": "2024-09-01",
+                        "informatieobjectcategorie": "Wet Open Overheid",
+                    },
+                )
+                assert response.status_code == 201
+
+                iot = client.get_iot_by_description(
+                    catalogus=DEFAULT_CATALOGUS,
+                    description="SOME-RANDOM-DESCRIPTION-OF-A-CONCEPT-IOT",
+                )
+                self.assertIsNone(iot)
+
+            with self.subTest("published"):
+                response = client.post(
+                    "informatieobjecttypen",
+                    json={
+                        "catalogus": DEFAULT_CATALOGUS,
+                        "omschrijving": "SOME-RANDOM-DESCRIPTION-OF-A-PUBLISHED-IOT",
+                        "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                        "beginGeldigheid": "2024-09-01",
+                        "informatieobjectcategorie": "Wet Open Overheid",
+                    },
+                )
+                assert response.status_code == 201
+                iot_url = response.json()["url"]
+
+                response = client.post(iot_url + "/publish")
+                assert response.status_code == 200
+
+                iot = client.get_iot_by_description(
+                    catalogus=DEFAULT_CATALOGUS,
+                    description="SOME-RANDOM-DESCRIPTION-OF-A-PUBLISHED-IOT",
+                )
+                assert iot
+                self.assertEqual(iot.url, iot_url)
+
+    def test_get_iot_by_description_error(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+        with (
+            get_client(service) as client,
+            self.assertRaisesMessage(
+                CatalogiAPIError,
+                _("Something went wrong while trying to retrieving IOT."),
+            ),
+            self.vcr_raises(RequestException),
+        ):
+            client.get_iot_by_description(
+                catalogus=DEFAULT_CATALOGUS,
+                description="oops-all-errors",
+            )
+
     def test_create_iot(self):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
 
@@ -62,6 +123,33 @@ class CatalogiClientTests(VCRMixin, TestCase):
             self.assertEqual(detail_response.status_code, 200)
             # ensure that the IOT is published
             self.assertFalse(detail_response.json()["concept"])
+
+    def test_create_iot_returns_existing_iot(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+
+        with get_client(service) as client:
+            response = client.post(
+                "informatieobjecttypen",
+                json={
+                    "catalogus": DEFAULT_CATALOGUS,
+                    "omschrijving": "LETS-RETRIEVE-AN-EXISTING-IOT",
+                    "vertrouwelijkheidaanduiding": VertrouwelijkheidsAanduidingen.openbaar,
+                    "beginGeldigheid": "2024-09-01",
+                    "informatieobjectcategorie": "Wet Open Overheid",
+                },
+            )
+            assert response.status_code == 201
+            iot_url = response.json()["url"]
+
+            response = client.post(iot_url + "/publish")
+            assert response.status_code == 200
+
+            iot = client.create_iot(
+                catalogus=DEFAULT_CATALOGUS,
+                description="LETS-RETRIEVE-AN-EXISTING-IOT",
+                confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+            )
+            self.assertEqual(iot.url, iot_url)
 
     def test_while_encountering_error_during_publishing_deleted_iot(self):
         service = ServiceFactory.build(for_catalogi_api_docker_compose=True)

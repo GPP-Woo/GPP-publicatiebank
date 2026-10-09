@@ -27,3 +27,10 @@ class IOTResponse(IOTBody):
     zaaktypen: list[str]
     beginObject: Annotated[str, "ISO-8601 date"]
     eindeObject: Annotated[str, "ISO-8601 date"]
+
+
+class IOTListResponse(TypedDict):
+    count: int
+    next: str | None
+    previous: str | None
+    results: list[IOTResponse]
