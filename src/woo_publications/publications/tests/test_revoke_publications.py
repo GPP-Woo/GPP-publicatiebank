@@ -141,7 +141,12 @@ class TestRevokePublications(TestCase):
         # check that the logging gets created, and that it only gets done for the
         # 'should_revoke' object
         self.assertEqual(TimelineLogProxy.objects.count(), 2)
-        timeline_object_1, timeline_object_2 = TimelineLogProxy.objects.order_by("pk")
+        # the task doesn't process the publications in a defined order, so look up
+        # the log entries per publication
+        timeline_object_1 = TimelineLogProxy.objects.get(object_id=should_revoke.pk)
+        timeline_object_2 = TimelineLogProxy.objects.get(
+            object_id=should_have_already_been_revoked.pk
+        )
 
         expected_data = {
             "event": Events.update,
