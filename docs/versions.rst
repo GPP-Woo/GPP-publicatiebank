@@ -27,6 +27,7 @@ The backend contains the storage and exposes the API.
    =============== ===========
    Backend version API version
    =============== ===========
+   3.0.0-rc.0      3.0.0
    2.1.0           2.1.0
    2.0.0           2.0.0
    1.2.0           1.1.0
@@ -101,6 +102,23 @@ uploads mechanism.
 .. note:: Version 1.1 - 1.3 mostly work, though you may see failures attempting to
    update the ``bronorganisatie`` if the ``publisher`` of a publication changes. This
    field was immutable before version 1.4.0 of the API specification.
+
+Catalogi API
+************
+
+The Catalogi API from the
+`ZGW API's standard <https://vng-realisatie.github.io/gemma-zaken/>`_ is used to manage
+the informatieobjecttypen of the documents. Since version 3.0.0 it is required, and it
+must be provided by the same Open Zaak instance as the Documenten API.
+
+.. table:: Catalogi API version support
+   :widths: auto
+
+   ==============  ==========================
+   Catalogi API    Status
+   ==============  ==========================
+   1.3             Tested in CI (recorded against Catalogi API 1.3.1)
+   ==============  ==========================
 
 GPP-zoeken
 **********

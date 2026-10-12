@@ -383,7 +383,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-API_VERSION = "2.1.0"
+API_VERSION = "3.0.0"
 
 EXCLUDED_API_PATH_PREFIXES = ("/api/v1",)
 assert isinstance(EXCLUDED_API_PATH_PREFIXES, str | tuple), (
