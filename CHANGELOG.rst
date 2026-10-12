@@ -2,6 +2,133 @@
 Release notes
 =============
 
+3.0.0-rc.0 (2026-10-12)
+=======================
+
+GPP-publicatiebank 3.0.0-rc.0 is a feature release that improves the reliability of
+document uploads and adds inspection procedures ("inzageprocedures") to publications.
+
+Upgrade procedure
+-----------------
+
+⚠️ We bumped the major version because of breaking changes in the API and because
+upgrading requires manual actions. Read the breaking changes below before upgrading.
+GPP-app is not affected by the API changes; other API clients should check their use of
+``Document.eigenaar``.
+
+* **Configure a Catalogi API directly after upgrading.** The informatieobjecttypen are
+  no longer served by GPP-publicatiebank itself, but are managed in the Catalogi API of
+  the Open Zaak instance that also provides the Documenten API. Until this is
+  configured, new documents cannot be registered in the Documenten API, and existing
+  documents there refer to informatieobjecttypen that no longer exist.
+
+    1. In the admin, add a service of type Catalogi API (ZTC) for that Open Zaak
+       instance.
+    2. Open the global configuration. Make sure the organisation RSIN is set, select
+       the new service as Catalogi API service and fill in the default reaction form
+       URLs (see below). Leave the catalogus URL and default informatieobjecttype URL
+       empty and save.
+    3. GPP-publicatiebank creates a catalogus and a default informatieobjecttype in the
+       Catalogi API. In the background, it then creates an informatieobjecttype for every
+       information category and updates the informatieobjecttype of every existing
+       document in the Documenten API. A Celery worker must be running for this.
+    4. Check the information categories in the admin. If the synchronisation was
+       interrupted, use the "Sync Document API" button to try again.
+
+* **Run exactly one Celery beat process** (``/celery_beat.sh``). It schedules the
+  periodic task that revokes publications when their inspection period has ended.
+  Without it, the task silently doesn't run. See the installation documentation.
+
+* The global configuration now requires the default reaction form URLs for
+  "zienswijze" and "bezwaar". The first time you save them, existing inspection
+  procedures without a reaction form URL are filled in.
+
+* The database migrations change existing data:
+
+    * Publications whose ``datum_einde_geldigheid`` is before their
+      ``datum_begin_geldigheid`` get their ``datum_einde_geldigheid`` cleared.
+    * The owner (``eigenaar``) is removed from documents. Documents now always have the
+      owner of their publication; document owners that differed from the owner of the
+      publication are not kept.
+
+Breaking changes
+----------------
+
+* [:issue:`457`] ``Document.eigenaar`` is now read-only and always equals the owner of
+  the publication. Values sent on create or update are ignored.
+* [:issue:`457`] Removed the ``eigenaar`` filter from the documents list endpoint.
+  Unknown query parameters are ignored, so clients that still use this filter receive
+  unfiltered results.
+* [:issue:`491`] Removed the built-in Catalogi API endpoint
+  ``/catalogi/api/v1/informatieobjecttypen/{uuid}``. A Catalogi API (Open Zaak, the same
+  instance as the Documenten API) is now required.
+* [:issue:`458`] The API now rejects publications whose ``datumEindeGeldigheid`` is
+  before their ``datumBeginGeldigheid``. This is also enforced by a database constraint.
+* The API specification version is now 3.0.0. The endpoints remain available under the
+  ``/api/v2`` URL prefix.
+
+Features
+--------
+
+* You can now register an inspection procedure ("inzageprocedure") on a publication.
+
+    - [:issue:`458`] Record the announcement URL, explanation, available legal remedy
+      ("zienswijze" or "bezwaar"), reaction form URL and inspection period. Available
+      in the admin (inline on the publication) and through the new
+      ``/api/v2/inzageprocedure`` endpoint.
+    - [:issue:`458`] The end of the inspection period is automatically moved to the
+      next working day, taking Dutch public holidays into account.
+    - [:issue:`458`] End dates can no longer be before start dates, for both inspection
+      procedures and publications.
+    - [:issue:`485`] Publications in the API include their inspection procedure
+      (read-only).
+    - [:issue:`459`] You can configure default reaction form URLs for "zienswijze" and
+      "bezwaar" in the global configuration. When an inspection procedure has no
+      reaction form URL, the default for its legal remedy is used.
+    - [:issue:`460`] Publications can be revoked automatically when their inspection
+      period ends ("automatisch intrekken"). A periodic task checks this daily.
+
+* [:issue:`491`] Information categories now have a real informatieobjecttype in the
+  Catalogi API. It is created automatically when an information category is created,
+  and can be corrected manually in the admin.
+* [:issue:`462`] You can now switch off the metadata stripping of documents in the
+  global configuration. It remains switched on by default.
+* [:issue:`456`] The publication list in the admin now shows the owner group.
+
+Bugfixes
+--------
+
+* [:issue:`491`] Fixed document uploads failing under concurrent load. Open Zaak
+  validated the informatieobjecttype by calling back into GPP-publicatiebank, while the
+  web workers of GPP-publicatiebank were all waiting for Open Zaak. The uploads only
+  failed after Open Zaak's 30 second timeout.
+* [:issue:`451`] Fixed uploads of large documents failing because uploading a file part
+  and unlocking the document used the generic 10 second service timeout. These calls
+  now use ``DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT`` (default: 300 seconds). A higher
+  timeout configured on the Documenten API service takes precedence.
+* [:issue:`453`] Fixed Celery workers accumulating memory until they are killed. Pool
+  child processes are now replaced after 50 tasks by default. Override this with
+  ``CELERY_WORKER_MAX_TASKS_PER_CHILD``, and optionally set
+  ``CELERY_WORKER_MAX_MEMORY_PER_CHILD`` (in KiB) as an additional limit.
+* [:issue:`449`] Fixed uwsgi settings in the container start script that could not be
+  overridden. You can now set ``UWSGI_PROCESSES``, ``UWSGI_THREADS``,
+  ``UWSGI_HTTP_TIMEOUT``, ``UWSGI_HARAKIRI``, ``UWSGI_POST_BUFFERING`` and
+  ``UWSGI_BUFFER_SIZE`` through the environment.
+* [:issue:`457`] Fixed changes to the owner of a publication not being applied to its
+  documents.
+* [:issue:`461`] Alphabetical ordering in the API is now case-insensitive.
+
+Project maintenance
+-------------------
+
+* [:issue:`466`] Added a performance test tool (Locust) with documentation.
+* [:issue:`466`] Fixed the memory usage of the docker compose setup by limiting the
+  number of open files.
+* [:issue:`491`] Background tasks are retried with exponential backoff.
+* Documented that a Celery beat process must be running.
+* Upgraded dependencies to their latest (security) releases and dropped ``gitpython``.
+* Stopped third-party link timeouts from failing the documentation CI.
+
 2.1.0 (2026-04-22)
 ==================
 
