@@ -8,7 +8,6 @@ factory-boy<3.3.3  # type annotations break stuff
 freezegun
 hypothesis
 parametrize
-pypdf
 pyquery
 tblib
 vcrpy

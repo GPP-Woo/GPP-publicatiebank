@@ -10,9 +10,9 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 import magic
+import pikepdf
 from lxml import html
 from parametrize import parametrize
-from pypdf import PdfReader
 from rest_framework import status
 
 from woo_publications.config.models import GlobalConfiguration
@@ -145,25 +145,32 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
     def test_strip_pdf_of_metadata(self):
         with METADATA_PDF.open("rb") as pdf_file:
-            reader = PdfReader(pdf_file)
-            meta = reader.metadata
-            assert meta
-            self.assertEqual(
-                meta,
-                {
-                    "/Author": "Dean Martin",
-                    "/Creator": "pypdf",
-                    "/Title": "That's Amore",
-                    "/Subject": "Pizza Pie",
-                    "/Keywords": "Moray Eel",
-                },
-            )
+            with pikepdf.open(pdf_file) as pdf:
+                info = dict(pdf.docinfo)
+                assert info
 
-            xmp_metadata = reader.xmp_metadata
-            assert xmp_metadata
-            self.assertEqual(xmp_metadata.dc_creator, ["Dean Martin"])
-            self.assertEqual(xmp_metadata.pdf_keywords, "Moray Eel")
-            self.assertEqual(xmp_metadata.pdf_producer, "pypdf")
+                self.assertEqual(
+                    info,
+                    {
+                        "/Author": "Dean Martin",
+                        "/Creator": "pypdf",
+                        "/Title": "That's Amore",
+                        "/Subject": "Pizza Pie",
+                        "/Keywords": "Moray Eel",
+                    },
+                )
+
+                with pdf.open_metadata() as meta:
+                    self.assertEqual(
+                        meta["{http://purl.org/dc/elements/1.1/}creator"],
+                        ["Dean Martin"],
+                    )
+                    self.assertEqual(
+                        meta["{http://ns.adobe.com/pdf/1.3/}Keywords"], "Moray Eel"
+                    )
+                    self.assertEqual(
+                        meta["{http://ns.adobe.com/pdf/1.3/}Producer"], "pypdf"
+                    )
 
             file_size = Path(pdf_file.name).stat().st_size
 
@@ -197,10 +204,12 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             )
             document_content = documents_api_document.content
 
-        reader = PdfReader(io.BytesIO(document_content))
+        with pikepdf.open(io.BytesIO(document_content)) as pdf:
+            self.assertEqual(pdf.docinfo, {})
 
-        self.assertIsNone(reader.metadata)
-        self.assertIsNone(reader.xmp_metadata)
+            with pdf.open_metadata() as meta:
+                self.assertEqual([key for key in meta.keys()], [])
+
         # check if the stripped file shrunk in size
         self.assertLess(len(document_content), file_size)
 
