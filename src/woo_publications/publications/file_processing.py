@@ -120,7 +120,7 @@ def strip_pdf(file: IO[bytes]) -> None:
 
         try:
             with pikepdf.open(file.name) as pdf:
-                del pdf.docinfo
+                del pdf.docinfo  # pyright: ignore[reportAttributeAccessIssue]
 
                 if "/Metadata" in pdf.Root:
                     del pdf.Root["/Metadata"]
