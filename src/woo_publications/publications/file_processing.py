@@ -9,10 +9,10 @@ from django.conf import settings
 from django.db import transaction
 from django.urls import reverse
 
+import pikepdf
 import structlog
 from celery import chain
 from lxml import html
-from pypdf import PdfWriter
 
 from woo_publications.config.models import GlobalConfiguration
 
@@ -113,13 +113,33 @@ def strip_all_files(base_url: str) -> int:
 
 
 def strip_pdf(file: IO[bytes]) -> None:
-    writer = PdfWriter(file, strict=False, full=False)
+    file.flush()
 
-    # strip meta data fields
-    writer.metadata = None
-    writer.xmp_metadata = None
+    with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
+        stripped_file_name = temp.name
 
-    writer.write(file)
+        try:
+            with pikepdf.open(file.name) as pdf:
+                del pdf.docinfo
+
+                if "/Metadata" in pdf.Root:
+                    del pdf.Root["/Metadata"]
+
+                pdf.save(temp.name)
+
+        except Exception as err:
+            os.remove(stripped_file_name)
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata of the "
+                "PDF file."
+            ) from err
+
+    # overwrite the source file in-place with the processed file
+    try:
+        with open(stripped_file_name, "rb") as stripped_file:
+            _sync_files(stripped_file, file)
+    finally:
+        os.remove(stripped_file_name)
 
 
 def strip_open_document(file: IO[bytes]) -> None:
