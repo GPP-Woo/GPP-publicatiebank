@@ -470,11 +470,6 @@ kombu==5.6.2
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   celery
-legacy-cgi==2.6.4
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
-    #   webob
 lunardate==0.3.0
     # via
     #   -c requirements/ci.txt
@@ -484,6 +479,7 @@ lxml==6.1.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   pikepdf
     #   pyquery
 markupsafe==3.0.3
     # via
@@ -525,8 +521,13 @@ packaging==26.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   kombu
+    #   pikepdf
     #   sphinx
 parametrize==0.1.1
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
+pikepdf==10.17.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
@@ -534,6 +535,7 @@ pillow==12.3.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+    #   pikepdf
 polib==1.2.0
     # via
     #   -c requirements/ci.txt
@@ -606,10 +608,6 @@ pyopenssl==26.4.0
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
     #   webauthn
-pypdf==6.19.0
-    # via
-    #   -c requirements/ci.txt
-    #   -r requirements/ci.txt
 pyquery==2.0.1
     # via
     #   -c requirements/ci.txt
@@ -830,9 +828,12 @@ typing-extensions==4.15.0
     #   django-test-migrations
     #   djangorestframework-stubs
     #   mozilla-django-oidc-db
+    #   psycopg
     #   pydantic
     #   pydantic-core
+    #   pyopenssl
     #   pyright
+    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
