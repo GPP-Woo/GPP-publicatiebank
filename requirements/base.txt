@@ -326,6 +326,8 @@ rpds-py==0.30.0
     #   referencing
 ruamel-yaml==0.19.1
     # via django-setup-configuration
+santanico==0.1.2
+    # via -r requirements/base.in
 semantic-version==2.10.0
     # via django-upgrade-check
 sentry-sdk==2.51.0

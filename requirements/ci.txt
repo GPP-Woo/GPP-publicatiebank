@@ -643,6 +643,10 @@ ruamel-yaml==0.19.1
     #   django-setup-configuration
 ruff==0.14.14
     # via -r requirements/test-tools.in
+santanico==0.1.2
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.txt
 semantic-version==2.10.0
     # via
     #   -c requirements/base.txt

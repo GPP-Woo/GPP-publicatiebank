@@ -707,6 +707,10 @@ ruff==0.14.14
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
+santanico==0.1.2
+    # via
+    #   -c requirements/ci.txt
+    #   -r requirements/ci.txt
 semantic-version==2.10.0
     # via
     #   -c requirements/ci.txt
