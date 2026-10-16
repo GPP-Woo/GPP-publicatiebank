@@ -6,6 +6,8 @@ from django.conf import settings
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 
+from parametrize import parametrize
+
 from ..file_processing import (
     MetaDataStripError,
     strip_html,
@@ -16,6 +18,13 @@ from ..file_processing import (
 
 METADATA_PDF = (
     Path(settings.DJANGO_PROJECT_DIR) / "publications" / "tests" / "files" / "amore.pdf"
+)
+NO_METADATA_PDF = (
+    Path(settings.DJANGO_PROJECT_DIR)
+    / "publications"
+    / "tests"
+    / "files"
+    / "no_meta_data.pdf"
 )
 
 
@@ -72,8 +81,15 @@ class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
 
 
 class StripPDFTests(SimpleTestCase):
-    def test_strip_pdf_does_not_duplicate_objects(self):
-        original = METADATA_PDF.read_bytes()
+    @parametrize(
+        "pdf_path",
+        [
+            METADATA_PDF,
+            NO_METADATA_PDF,
+        ],
+    )
+    def test_strip_pdf_does_not_duplicate_objects(self, pdf_path):
+        original = pdf_path.read_bytes()
 
         with tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file:
             temp_file.write(original)
