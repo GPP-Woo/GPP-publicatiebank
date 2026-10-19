@@ -1,6 +1,7 @@
-import os
 import tempfile
+from io import BytesIO
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.test import SimpleTestCase
@@ -14,6 +15,7 @@ from ..file_processing import (
     strip_ms_office_document,
     strip_open_document,
     strip_pdf,
+    strip_rtf_file,
 )
 
 METADATA_PDF = (
@@ -28,41 +30,84 @@ NO_METADATA_PDF = (
 )
 
 
-class StripMetaDataFunctionsRemoveTempFileOnErrorTests(SimpleTestCase):
+class StripMetaDataFunctionsErrorTests(SimpleTestCase):
     def test_open_document_strip_error(self):
-        with tempfile.NamedTemporaryFile(suffix="txt") as temp_file:
-            temp_file.write(b"hello world.")
+        temp_file: BytesIO
+        new_file: BytesIO
 
-            before_tmp_dir_state = os.listdir(tempfile.gettempdir())
+        with (
+            tempfile.NamedTemporaryFile(suffix=".txt") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
+        ):
+            temp_file.write(b"hello world.")
 
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata "
                 "of the open document file",
             ):
-                strip_open_document(temp_file)
-
-            self.assertEqual(before_tmp_dir_state, os.listdir(tempfile.gettempdir()))
+                strip_open_document(temp_file, new_file)
 
     def test_ms_document_strip_error(self):
-        with tempfile.NamedTemporaryFile(suffix="txt") as temp_file:
-            temp_file.write(b"hello world.")
+        temp_file: BytesIO
+        new_file: BytesIO
 
-            before_tmp_dir_state = os.listdir(tempfile.gettempdir())
+        with (
+            tempfile.NamedTemporaryFile(suffix=".txt") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
+        ):
+            temp_file.write(b"hello world.")
 
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata "
                 "of the MS document file",
             ):
-                strip_ms_office_document(temp_file)
+                strip_ms_office_document(temp_file, new_file)
 
-            self.assertEqual(before_tmp_dir_state, os.listdir(tempfile.gettempdir()))
+    @patch(
+        "woo_publications.publications.file_processing.RtfStreamFilter.process_chunk",
+        side_effect=OSError(),
+    )
+    def test_rtf_document_strip_error(self, mock_process_chunk: MagicMock):
+        temp_file: BytesIO
+        new_file: BytesIO
+
+        with (
+            tempfile.NamedTemporaryFile(suffix=".rtf") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
+        ):
+            temp_file.write(b"hello world.")
+
+            with self.assertRaisesMessage(
+                MetaDataStripError,
+                "Something went wrong while stripping the metadata of the RTF file",
+            ):
+                strip_rtf_file(temp_file, new_file)
+
+    def test_pdf_document_error(self):
+        temp_file: BytesIO
+        new_file: BytesIO
+
+        with (
+            tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
+        ):
+            temp_file.write(b"hello world.")
+
+            with self.assertRaisesMessage(
+                MetaDataStripError,
+                "Something went wrong while stripping the metadata of the PDF file.",
+            ):
+                strip_pdf(temp_file, new_file)
 
 
 @override_settings(STRIP_METADATA_HTML_MAX_FILE_SIZE=1)
 class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
     def test_strip_html_data(self):
+        temp_file: BytesIO
+        new_file: BytesIO
+
         html_path = (
             Path(settings.DJANGO_PROJECT_DIR)
             / "publications"
@@ -72,12 +117,13 @@ class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
         )
 
         with (
-            html_path.open("rb") as html_file,
+            html_path.open("rb") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
             self.assertRaisesMessage(
                 MetaDataStripError, "The file is to large for us to process."
             ),
         ):
-            strip_html(html_file)
+            strip_html(temp_file, new_file)
 
 
 class StripPDFTests(SimpleTestCase):
@@ -89,27 +135,19 @@ class StripPDFTests(SimpleTestCase):
         ],
     )
     def test_strip_pdf_does_not_duplicate_objects(self, pdf_path):
+        temp_file: BytesIO
+        new_file: BytesIO
+
         original = pdf_path.read_bytes()
 
-        with tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file,
+            tempfile.NamedTemporaryFile() as new_file,
+        ):
             temp_file.write(original)
-            strip_pdf(temp_file)
-            temp_file.seek(0)
-            stripped = temp_file.read()
+            strip_pdf(temp_file, new_file)
+            new_file.seek(0)
+            stripped = new_file.read()
 
         self.assertLessEqual(stripped.count(b" 0 obj"), original.count(b" 0 obj"))
         self.assertLessEqual(len(stripped), len(original))
-
-    def test_pdf_document_error(self):
-        with tempfile.NamedTemporaryFile(suffix="txt") as temp_file:
-            temp_file.write(b"hello world.")
-
-            before_tmp_dir_state = os.listdir(tempfile.gettempdir())
-
-            with self.assertRaisesMessage(
-                MetaDataStripError,
-                "Something went wrong while stripping the metadata of the PDF file.",
-            ):
-                strip_pdf(temp_file)
-
-            self.assertEqual(before_tmp_dir_state, os.listdir(tempfile.gettempdir()))
