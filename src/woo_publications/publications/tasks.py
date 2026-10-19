@@ -39,6 +39,7 @@ from .file_processing import (
     strip_ms_office_document,
     strip_open_document,
     strip_pdf,
+    strip_rtf_file,
     strip_zip_file,
 )
 from .models import Document, Publication, Topic
@@ -67,6 +68,8 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
     :param document_id: The internal Document model reference.
     :param base_url: The base URL of the Documents API.
     """
+    destination_file: BytesIO
+    source_file: BytesIO
 
     document = Document.objects.get(pk=document_id)
 
@@ -81,41 +84,49 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
     # - create temporary named file to create a pdf which we can strip
     with (
         get_documents_client(document.document_service) as client,
-        NamedTemporaryFile() as temp_file,
+        NamedTemporaryFile() as destination_file,
     ):
         source_document = client.retrieve_document(uuid=document.document_uuid)
-        upstream_response, streaming_content = client.download_document(
-            uuid=document.document_uuid
-        )
 
-        upstream_response.raise_for_status()
+        with NamedTemporaryFile() as source_file:
+            upstream_response, streaming_content = client.download_document(
+                uuid=document.document_uuid
+            )
 
-        for chunk in streaming_content:
-            assert isinstance(chunk, bytes)
-            temp_file.write(chunk)
+            upstream_response.raise_for_status()
 
-        # strip the metadata of the file
-        match document.get_strippable_file_type():
-            case StrippableFileTypes.pdf:
-                strip_pdf(temp_file)
-            case StrippableFileTypes.open_document:
-                strip_open_document(temp_file)
-            case StrippableFileTypes.ms_office_file:
-                strip_ms_office_document(temp_file)
-            case StrippableFileTypes.zip:
-                strip_zip_file(temp_file)
-            case StrippableFileTypes.html:
-                strip_html(temp_file)
-            case _:  # pragma: no cover
-                pass
+            for chunk in streaming_content:
+                assert isinstance(chunk, bytes)
+                source_file.write(chunk)
+
+            # strip the metadata of the file
+            match type_ := document.get_strippable_file_type():
+                case StrippableFileTypes.pdf:
+                    strip_pdf(src=source_file, dst=destination_file)
+                case StrippableFileTypes.open_document:
+                    strip_open_document(src=source_file, dst=destination_file)
+                case StrippableFileTypes.ms_office_file:
+                    strip_ms_office_document(src=source_file, dst=destination_file)
+                case StrippableFileTypes.zip:
+                    strip_zip_file(src=source_file, dst=destination_file)
+                case StrippableFileTypes.html:
+                    strip_html(src=source_file, dst=destination_file)
+                case StrippableFileTypes.rtf:
+                    strip_rtf_file(src=source_file, dst=destination_file)
+                case StrippableFileTypes.not_strippable:  # pragma: no cover
+                    assert False, "unreachable"
+                case _:  # pragma: no cover
+                    assert_never(type_)
+
+        destination_file.flush()
 
         # delete document in documents api
         client.destroy_document(uuid=document.document_uuid)
 
         # change document name to original name
-        temp_file.name = source_document.file_name
+        destination_file.name = source_document.file_name
 
-        document.bestandsomvang = temp_file.tell()
+        document.bestandsomvang = destination_file.tell()
         document.metadata_gestript_op = timezone.now()
         # save data
         document.save(update_fields=("bestandsomvang", "metadata_gestript_op"))
@@ -132,12 +143,12 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
         file_parts = document.zgw_document.file_parts
         file_parts = sorted(file_parts, key=lambda x: x.order)
 
-        temp_file.seek(0)
+        destination_file.seek(0)
 
         # upload file parts
         for part in file_parts:
             # TODO: optimize to avoid loading large parts into memory
-            file_part = File(BytesIO(temp_file.read(part.size)))
+            file_part = File(BytesIO(destination_file.read(part.size)))
             # when the upload is complete the upload_complete flag will be set to True
             document.upload_part_data(uuid=part.uuid, file=file_part)
 

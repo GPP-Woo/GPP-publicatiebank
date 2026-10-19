@@ -851,7 +851,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
     def __str__(self):
         return self.officiele_titel
 
-    def get_strippable_file_type(self) -> StrippableFileTypes | None:
+    def get_strippable_file_type(self) -> StrippableFileTypes:
         extension = Path(self.bestandsnaam).suffix.lower()
 
         # first, check the guessed mime type
@@ -866,6 +866,8 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.zip
             case "text/html":
                 return StrippableFileTypes.html
+            case "application/rtf":
+                return StrippableFileTypes.rtf
             case str(mimetype) if mimetype.startswith(OPEN_DOCUMENT_MIMETYPE_PREFIX):
                 return StrippableFileTypes.open_document
             case str(mimetype) if mimetype.startswith(
@@ -886,12 +888,14 @@ class Document(ConcurrentTransitionMixin, models.Model):
                 return StrippableFileTypes.zip
             case ".html" | ".htm":
                 return StrippableFileTypes.html
+            case ".rtf":
+                return StrippableFileTypes.rtf
             case str() if extension in get_open_document_extensions():
                 return StrippableFileTypes.open_document
             case str() if extension in get_ms_office_document_extensions():
                 return StrippableFileTypes.ms_office_file
 
-        return None
+        return StrippableFileTypes.not_strippable
 
     @property
     def has_to_strip_metadata(self) -> bool:
@@ -901,6 +905,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
             config.document_meta_data_stripping
             and not self.metadata_gestript_op
             and self.get_strippable_file_type()
+            is not StrippableFileTypes.not_strippable
         ):
             return True
 
