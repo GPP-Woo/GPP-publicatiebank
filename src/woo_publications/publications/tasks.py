@@ -68,8 +68,6 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
     :param document_id: The internal Document model reference.
     :param base_url: The base URL of the Documents API.
     """
-    destination_file: BytesIO
-    source_file: BytesIO
 
     document = Document.objects.get(pk=document_id)
 
@@ -114,7 +112,7 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
                 case StrippableFileTypes.rtf:
                     strip_rtf_file(src=source_file, dst=destination_file)
                 case StrippableFileTypes.not_strippable:  # pragma: no cover
-                    assert False, "unreachable"
+                    raise AssertionError("unreachable")
                 case _:  # pragma: no cover
                     assert_never(type_)
 

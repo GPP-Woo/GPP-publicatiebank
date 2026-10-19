@@ -2,6 +2,7 @@ import os
 import shutil
 import zipfile
 from io import BytesIO
+from typing import IO, cast
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -100,7 +101,10 @@ def strip_all_files(base_url: str) -> int:
     return counter
 
 
-def strip_pdf(src: BytesIO, dst: BytesIO) -> None:
+def strip_pdf(src: IO[bytes], dst: IO[bytes]) -> None:
+    src = cast(BytesIO, src)
+    dst = cast(BytesIO, dst)
+
     try:
         with pikepdf.open(src) as pdf:
             if "/Info" in pdf.trailer:
@@ -117,7 +121,7 @@ def strip_pdf(src: BytesIO, dst: BytesIO) -> None:
         ) from err
 
 
-def strip_open_document(src: BytesIO, dst: BytesIO) -> None:
+def strip_open_document(src: IO[bytes], dst: IO[bytes]) -> None:
     try:
         with (
             zipfile.ZipFile(src) as zin,
@@ -137,7 +141,7 @@ def strip_open_document(src: BytesIO, dst: BytesIO) -> None:
         ) from err
 
 
-def strip_ms_office_document(src: BytesIO, dst: BytesIO) -> None:
+def strip_ms_office_document(src: IO[bytes], dst: IO[bytes]) -> None:
     try:
         with (
             zipfile.ZipFile(src) as zin,
@@ -159,7 +163,7 @@ def strip_ms_office_document(src: BytesIO, dst: BytesIO) -> None:
         ) from err
 
 
-def strip_zip_file(src: BytesIO, dst: BytesIO) -> None:
+def strip_zip_file(src: IO[bytes], dst: IO[bytes]) -> None:
     try:
         with (
             zipfile.ZipFile(src) as zin,
@@ -177,7 +181,7 @@ def strip_zip_file(src: BytesIO, dst: BytesIO) -> None:
         ) from err
 
 
-def strip_html(src: BytesIO, dst: BytesIO) -> None:
+def strip_html(src: IO[bytes], dst: IO[bytes]) -> None:
     if os.path.getsize(src.name) > settings.STRIP_METADATA_HTML_MAX_FILE_SIZE:
         raise MetaDataStripError(message="The file is to large for us to process.")
 
@@ -198,7 +202,7 @@ def strip_html(src: BytesIO, dst: BytesIO) -> None:
     dst.flush()
 
 
-def strip_rtf_file(src: BytesIO, dst: BytesIO) -> None:
+def strip_rtf_file(src: IO[bytes], dst: IO[bytes]) -> None:
     src.seek(0)
 
     filter_ = RtfStreamFilter()

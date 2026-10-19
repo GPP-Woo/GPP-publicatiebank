@@ -1,6 +1,5 @@
-import tempfile
-from io import BytesIO
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -32,12 +31,9 @@ NO_METADATA_PDF = (
 
 class StripMetaDataFunctionsErrorTests(SimpleTestCase):
     def test_open_document_strip_error(self):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         with (
-            tempfile.NamedTemporaryFile(suffix=".txt") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile(suffix=".txt") as temp_file,
+            NamedTemporaryFile() as new_file,
         ):
             temp_file.write(b"hello world.")
 
@@ -49,12 +45,9 @@ class StripMetaDataFunctionsErrorTests(SimpleTestCase):
                 strip_open_document(temp_file, new_file)
 
     def test_ms_document_strip_error(self):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         with (
-            tempfile.NamedTemporaryFile(suffix=".txt") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile(suffix=".txt") as temp_file,
+            NamedTemporaryFile() as new_file,
         ):
             temp_file.write(b"hello world.")
 
@@ -70,12 +63,9 @@ class StripMetaDataFunctionsErrorTests(SimpleTestCase):
         side_effect=OSError(),
     )
     def test_rtf_document_strip_error(self, mock_process_chunk: MagicMock):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         with (
-            tempfile.NamedTemporaryFile(suffix=".rtf") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile(suffix=".rtf") as temp_file,
+            NamedTemporaryFile() as new_file,
         ):
             temp_file.write(b"hello world.")
 
@@ -86,12 +76,9 @@ class StripMetaDataFunctionsErrorTests(SimpleTestCase):
                 strip_rtf_file(temp_file, new_file)
 
     def test_pdf_document_error(self):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         with (
-            tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile(suffix=".pdf") as temp_file,
+            NamedTemporaryFile() as new_file,
         ):
             temp_file.write(b"hello world.")
 
@@ -105,9 +92,6 @@ class StripMetaDataFunctionsErrorTests(SimpleTestCase):
 @override_settings(STRIP_METADATA_HTML_MAX_FILE_SIZE=1)
 class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
     def test_strip_html_data(self):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         html_path = (
             Path(settings.DJANGO_PROJECT_DIR)
             / "publications"
@@ -118,7 +102,7 @@ class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
 
         with (
             html_path.open("rb") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile() as new_file,
             self.assertRaisesMessage(
                 MetaDataStripError, "The file is to large for us to process."
             ),
@@ -135,14 +119,11 @@ class StripPDFTests(SimpleTestCase):
         ],
     )
     def test_strip_pdf_does_not_duplicate_objects(self, pdf_path):
-        temp_file: BytesIO
-        new_file: BytesIO
-
         original = pdf_path.read_bytes()
 
         with (
-            tempfile.NamedTemporaryFile(suffix=".pdf") as temp_file,
-            tempfile.NamedTemporaryFile() as new_file,
+            NamedTemporaryFile(suffix=".pdf") as temp_file,
+            NamedTemporaryFile() as new_file,
         ):
             temp_file.write(original)
             strip_pdf(temp_file, new_file)
