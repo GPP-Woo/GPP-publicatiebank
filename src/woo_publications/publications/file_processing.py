@@ -13,6 +13,7 @@ import pikepdf
 import structlog
 from celery import chain
 from lxml import html
+from santanico import RtfStreamFilter
 
 from woo_publications.config.models import GlobalConfiguration
 
@@ -47,6 +48,8 @@ MIN_MS_OFFICE_DOCUMENT_CUSTOM_META = b"""
 
 assert not MIN_MS_OFFICE_DOCUMENT_CORE_META.startswith(b"\n")
 assert not MIN_MS_OFFICE_DOCUMENT_CUSTOM_META.startswith(b"\n")
+
+DEFAULT_CHUNK_SIZE = 1024 * 1024
 
 
 class MetaDataStripError(Exception):
@@ -238,3 +241,17 @@ def strip_html(file: IO[bytes]) -> None:
     assert isinstance(stripped_data, bytes)
     file.write(stripped_data)
     file.flush()
+
+
+def strip_rtf_file(src: BytesIO, dst: BytesIO) -> None:
+    src.seek(0)
+
+    filter_ = RtfStreamFilter()
+
+    try:
+        while chunk := src.read(DEFAULT_CHUNK_SIZE):
+            dst.write(filter_.process_chunk(chunk))
+    except Exception as err:
+        raise MetaDataStripError(
+            message="Something went wrong while stripping the metadata of the RTF file"
+        ) from err
