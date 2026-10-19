@@ -117,7 +117,7 @@ def strip_pdf(src: IO[bytes], dst: IO[bytes]) -> None:
 
     except Exception as err:
         raise MetaDataStripError(
-            message="Something went wrong while stripping the metadata of the PDF file."
+            message="Something went wrong while stripping the metadata of the PDF file"
         ) from err
 
 

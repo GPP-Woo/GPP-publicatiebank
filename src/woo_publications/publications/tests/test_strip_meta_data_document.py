@@ -15,6 +15,7 @@ from ..file_processing import (
     strip_open_document,
     strip_pdf,
     strip_rtf_file,
+    strip_zip_file,
 )
 
 METADATA_PDF = (
@@ -84,9 +85,22 @@ class StripMetaDataFunctionsErrorTests(SimpleTestCase):
 
             with self.assertRaisesMessage(
                 MetaDataStripError,
-                "Something went wrong while stripping the metadata of the PDF file.",
+                "Something went wrong while stripping the metadata of the PDF file",
             ):
                 strip_pdf(temp_file, new_file)
+
+    def test_zip_document_error(self):
+        with (
+            NamedTemporaryFile(suffix=".text") as temp_file,
+            NamedTemporaryFile() as new_file,
+        ):
+            temp_file.write(b"hello world.")
+
+            with self.assertRaisesMessage(
+                MetaDataStripError,
+                "Something went wrong while stripping the metadata of the ZIP file",
+            ):
+                strip_zip_file(temp_file, new_file)
 
 
 @override_settings(STRIP_METADATA_HTML_MAX_FILE_SIZE=1)
