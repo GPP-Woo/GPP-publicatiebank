@@ -254,7 +254,7 @@ Op dit scherm zijn de volgende acties mogelijk:
 * Rechtsboven zit een knop **inzage procedure toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
 * Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiemaans**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere inzage procedures**. Op dit moment worden de actie **Geselecteerde inzage procedures verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *inzage procedure*-registraties aan te vinken.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere inzage procedures**. Op dit moment wordt de actie **Geselecteerde inzage procedures verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *inzage procedure*-registraties aan te vinken.
 * Onder de (bulk-)actie staat de lijst met *inzage procedure*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op automatisch intrekken, inzagetermijn start datum en inzagetermijn stop datum**.
 * Bij een *inzage procedure*-registratie kan op de `publicatie` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.

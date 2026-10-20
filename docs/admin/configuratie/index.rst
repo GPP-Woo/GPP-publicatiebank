@@ -81,7 +81,7 @@ worden weergegeven.
   Deze instelling is noodzakelijk voor de verbinding met de achterliggende Catalogi
   API. Die gebruikt wordt om documenten in de Documenten API te verzien van een Informatie Object typen (IOT).
 
-  Wanneer dit veld ingevuld wordt (terwijl de `Catalogus URL` en/of de `Default Informatieobjecttype URL` leeg is) vullen wij onder water
+  Wanneer dit veld ingevuld wordt (terwijl de `Catalogus URL` en/of de `Default Informatieobjecttype URL` leeg zijn) vullen wij onder water
   de `Catalogus URL` en de `Default Informatieobjecttype URL` in. Als deze velden successful aangemaakt en ingevuld wordt, gaan we verder door om
   de :ref:`informatiecategorie <admin_metadata_index_information_categories>` te voorzien van `Informatie Object Typen` vanuit de catalogi API, en
   zorgen we er voor dat alle Documenten in de `Documenten API` worden overschreven met de nieuwe `Informatie Object Typen` waardes.
