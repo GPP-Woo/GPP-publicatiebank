@@ -241,6 +241,8 @@ Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het sch
 
 * Een lijst met publicaties die aan dit onderwerp zijn gekoppeld.
 
+.. _admin_publicaties_index_inzage_procedure:
+
 Inzage Procedure
 ----------------
 
