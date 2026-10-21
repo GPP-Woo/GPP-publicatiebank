@@ -32,75 +32,50 @@ NO_METADATA_PDF = (
 
 class StripMetaDataFunctionsErrorTests(SimpleTestCase):
     def test_open_document_strip_error(self):
-        with (
-            NamedTemporaryFile(suffix=".txt") as temp_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            temp_file.write(b"hello world.")
-
+        with NamedTemporaryFile() as new_file:
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata "
                 "of the open document file",
             ):
-                strip_open_document(temp_file, new_file)
+                strip_open_document([b"hello world."], new_file)
 
     def test_ms_document_strip_error(self):
-        with (
-            NamedTemporaryFile(suffix=".txt") as temp_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            temp_file.write(b"hello world.")
-
+        with NamedTemporaryFile() as new_file:
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata "
                 "of the MS document file",
             ):
-                strip_ms_office_document(temp_file, new_file)
+                strip_ms_office_document([b"hello world."], new_file)
 
     @patch(
         "woo_publications.publications.file_processing.RtfStreamFilter.process_chunk",
         side_effect=OSError(),
     )
     def test_rtf_document_strip_error(self, mock_process_chunk: MagicMock):
-        with (
-            NamedTemporaryFile(suffix=".rtf") as temp_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            temp_file.write(b"hello world.")
-
+        with NamedTemporaryFile() as new_file:
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata of the RTF file",
             ):
-                strip_rtf_file(temp_file, new_file)
+                strip_rtf_file([b"hello world."], new_file)
 
     def test_pdf_document_error(self):
-        with (
-            NamedTemporaryFile(suffix=".pdf") as temp_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            temp_file.write(b"hello world.")
-
+        with NamedTemporaryFile() as new_file:
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata of the PDF file",
             ):
-                strip_pdf(temp_file, new_file)
+                strip_pdf([b"hello world."], new_file)
 
     def test_zip_document_error(self):
-        with (
-            NamedTemporaryFile(suffix=".text") as temp_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            temp_file.write(b"hello world.")
-
+        with NamedTemporaryFile() as new_file:
             with self.assertRaisesMessage(
                 MetaDataStripError,
                 "Something went wrong while stripping the metadata of the ZIP file",
             ):
-                strip_zip_file(temp_file, new_file)
+                strip_zip_file([b"hello world."], new_file)
 
 
 @override_settings(STRIP_METADATA_HTML_MAX_FILE_SIZE=1)
@@ -115,13 +90,12 @@ class StripMetaDataFileSizeTooLargeTests(SimpleTestCase):
         )
 
         with (
-            html_path.open("rb") as temp_file,
             NamedTemporaryFile() as new_file,
             self.assertRaisesMessage(
                 MetaDataStripError, "The file is to large for us to process."
             ),
         ):
-            strip_html(temp_file, new_file)
+            strip_html([html_path.open("rb").read()], new_file)
 
 
 class StripPDFTests(SimpleTestCase):
@@ -135,11 +109,8 @@ class StripPDFTests(SimpleTestCase):
     def test_strip_pdf_does_not_duplicate_objects(self, pdf_path):
         original = pdf_path.read_bytes()
 
-        with (
-            pdf_path.open("rb") as in_file,
-            NamedTemporaryFile() as new_file,
-        ):
-            strip_pdf(in_file, new_file)
+        with NamedTemporaryFile() as new_file:
+            strip_pdf([original], new_file)
             new_file.seek(0)
             stripped = new_file.read()
 

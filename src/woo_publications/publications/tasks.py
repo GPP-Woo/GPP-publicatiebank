@@ -86,37 +86,30 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
     ):
         source_document = client.retrieve_document(uuid=document.document_uuid)
 
-        with NamedTemporaryFile() as source_file:
-            upstream_response, streaming_content = client.download_document(
-                uuid=document.document_uuid
-            )
+        upstream_response, streaming_content = client.download_document(
+            uuid=document.document_uuid
+        )
 
-            upstream_response.raise_for_status()
+        upstream_response.raise_for_status()
 
-            for chunk in streaming_content:
-                assert isinstance(chunk, bytes)
-                source_file.write(chunk)
-
-            source_file.seek(0)
-
-            # strip the metadata of the file
-            match type_ := document.get_strippable_file_type():
-                case StrippableFileTypes.pdf:
-                    strip_pdf(src=source_file, dst=destination_file)
-                case StrippableFileTypes.open_document:
-                    strip_open_document(src=source_file, dst=destination_file)
-                case StrippableFileTypes.ms_office_file:
-                    strip_ms_office_document(src=source_file, dst=destination_file)
-                case StrippableFileTypes.zip:
-                    strip_zip_file(src=source_file, dst=destination_file)
-                case StrippableFileTypes.html:
-                    strip_html(src=source_file, dst=destination_file)
-                case StrippableFileTypes.rtf:
-                    strip_rtf_file(src=source_file, dst=destination_file)
-                case StrippableFileTypes.not_strippable:  # pragma: no cover
-                    raise AssertionError("unreachable")
-                case _:  # pragma: no cover
-                    assert_never(type_)
+        # strip the metadata of the file
+        match type_ := document.get_strippable_file_type():
+            case StrippableFileTypes.pdf:
+                strip_pdf(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.open_document:
+                strip_open_document(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.ms_office_file:
+                strip_ms_office_document(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.zip:
+                strip_zip_file(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.html:
+                strip_html(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.rtf:
+                strip_rtf_file(chunks=streaming_content, dst=destination_file)
+            case StrippableFileTypes.not_strippable:  # pragma: no cover
+                raise AssertionError("unreachable")
+            case _:  # pragma: no cover
+                assert_never(type_)
 
         destination_file.flush()
 
