@@ -160,7 +160,11 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
                     },
                 )
 
-                with pdf.open_metadata() as meta:
+                with pdf.open_metadata(
+                    set_pikepdf_as_editor=False,
+                    update_docinfo=False,
+                    strict=True,
+                ) as meta:
                     self.assertEqual(
                         meta["{http://purl.org/dc/elements/1.1/}creator"],
                         ["Dean Martin"],

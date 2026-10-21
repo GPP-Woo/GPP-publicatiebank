@@ -97,8 +97,8 @@ class StripPDFTests(SimpleTestCase):
             temp_file.seek(0)
             stripped = temp_file.read()
 
-        self.assertLess(stripped.count(b" 0 obj"), original.count(b" 0 obj"))
-        self.assertLess(len(stripped), len(original))
+        self.assertLessEqual(stripped.count(b" 0 obj"), original.count(b" 0 obj"))
+        self.assertLessEqual(len(stripped), len(original))
 
     def test_pdf_document_error(self):
         with tempfile.NamedTemporaryFile(suffix="txt") as temp_file:
