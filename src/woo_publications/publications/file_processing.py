@@ -1,7 +1,9 @@
 import os
 import shutil
 import zipfile
-from tempfile import NamedTemporaryFile
+from collections.abc import Generator, Iterable
+from contextlib import contextmanager
+from tempfile import SpooledTemporaryFile
 from typing import IO
 from urllib.parse import urljoin
 
@@ -9,10 +11,11 @@ from django.conf import settings
 from django.db import transaction
 from django.urls import reverse
 
+import pikepdf
 import structlog
 from celery import chain
 from lxml import html
-from pypdf import PdfWriter
+from santanico import RtfStreamFilter
 
 from woo_publications.config.models import GlobalConfiguration
 
@@ -48,25 +51,13 @@ MIN_MS_OFFICE_DOCUMENT_CUSTOM_META = b"""
 assert not MIN_MS_OFFICE_DOCUMENT_CORE_META.startswith(b"\n")
 assert not MIN_MS_OFFICE_DOCUMENT_CUSTOM_META.startswith(b"\n")
 
+DEFAULT_CHUNK_SIZE = 1024 * 1024
+
 
 class MetaDataStripError(Exception):
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
-
-
-def _sync_files(src: IO[bytes], dst: IO[bytes]) -> None:
-    # ensure writer is done
-    src.flush()
-    os.fsync(src.fileno())
-
-    src.seek(0)
-    dst.seek(0)
-    dst.truncate(0)
-
-    shutil.copyfileobj(src, dst)
-    dst.flush()
-    os.fsync(dst.fileno())
 
 
 def strip_all_files(base_url: str) -> int:
@@ -112,59 +103,66 @@ def strip_all_files(base_url: str) -> int:
     return counter
 
 
-def strip_pdf(file: IO[bytes]) -> None:
-    writer = PdfWriter(file, strict=False, full=False)
+@contextmanager
+def spooled(chunks: Iterable[bytes]) -> Generator[IO[bytes]]:
+    with SpooledTemporaryFile(max_size=DEFAULT_CHUNK_SIZE * 8) as f:
+        for chunk in chunks:
+            f.write(chunk)
+        f.seek(0)
+        yield f
 
-    # strip meta data fields
-    writer.metadata = None
-    writer.xmp_metadata = None
 
-    writer.write(file)
+def strip_pdf(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    with spooled(chunks) as src:
+        try:
+            with pikepdf.open(src) as pdf:  # pyright:ignore[reportArgumentType]
+                if "/Info" in pdf.trailer:
+                    del pdf.trailer["/Info"]
+
+                if "/Metadata" in pdf.Root:
+                    del pdf.Root["/Metadata"]
+
+                pdf.save(dst)  # pyright:ignore[reportArgumentType]
+
+        except Exception as err:
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata of the PDF "
+                "file"
+            ) from err
 
 
-def strip_open_document(file: IO[bytes]) -> None:
-    file.flush()
-
-    with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
-        stripped_file_name = temp.name
-
+def strip_open_document(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    with spooled(chunks) as src:
         try:
             with (
-                zipfile.ZipFile(file.name) as zin,
-                zipfile.ZipFile(temp, "w") as zout,
+                zipfile.ZipFile(src) as zin,
+                zipfile.ZipFile(dst, "w") as zout,
             ):
                 for info in zin.infolist():
                     if info.filename == "meta.xml":
                         zout.writestr(info, MIN_OPEN_DOCUMENT_META)
                     else:
-                        with zin.open(info) as src, zout.open(info, "w") as dst:
-                            shutil.copyfileobj(src, dst, 1024 * 1024)
+                        with (
+                            zin.open(info) as member_in,
+                            zout.open(info, "w") as member_out,
+                        ):
+                            shutil.copyfileobj(
+                                member_in, member_out, DEFAULT_CHUNK_SIZE
+                            )
 
         except Exception as err:
-            os.remove(stripped_file_name)
             raise MetaDataStripError(
                 message="Something went wrong while stripping the metadata "
                 "of the open document file"
             ) from err
 
-    # overwrite the source file in-place with the processed file
-    try:
-        with open(stripped_file_name, "rb") as stripped_file:
-            _sync_files(stripped_file, file)
-    finally:
-        os.remove(stripped_file_name)
 
-
-def strip_ms_office_document(file: IO[bytes]) -> None:
-    file.flush()
-
-    with NamedTemporaryFile(dir=os.path.dirname(file.name), delete=False) as temp:
-        stripped_file_name = temp.name
-
+def strip_ms_office_document(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    with spooled(chunks) as src:
         try:
             with (
-                zipfile.ZipFile(file.name) as zin,
-                zipfile.ZipFile(temp, "w") as zout,
+                zipfile.ZipFile(src) as zin,
+                zipfile.ZipFile(dst, "w") as zout,
             ):
                 for info in zin.infolist():
                     if info.filename == "docProps/core.xml":
@@ -172,48 +170,78 @@ def strip_ms_office_document(file: IO[bytes]) -> None:
                     elif info.filename == "docProps/custom.xml":
                         zout.writestr(info, MIN_MS_OFFICE_DOCUMENT_CUSTOM_META)
                     else:
-                        with zin.open(info) as src, zout.open(info, "w") as dst:
-                            shutil.copyfileobj(src, dst, 1024 * 1024)
+                        with (
+                            zin.open(info) as member_in,
+                            zout.open(info, "w") as member_out,
+                        ):
+                            shutil.copyfileobj(
+                                member_in, member_out, DEFAULT_CHUNK_SIZE
+                            )
 
         except Exception as err:
-            os.remove(stripped_file_name)
             raise MetaDataStripError(
                 message="Something went wrong while stripping the metadata "
                 "of the MS document file"
             ) from err
 
-    # overwrite the source file in-place with the processed file
+
+def strip_zip_file(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    with spooled(chunks) as src:
+        try:
+            with (
+                zipfile.ZipFile(src) as zin,
+                zipfile.ZipFile(dst, "w") as zout,
+            ):
+                for info in zin.infolist():
+                    with (
+                        zin.open(info) as member_in,
+                        zout.open(info, "w") as member_out,
+                    ):
+                        shutil.copyfileobj(member_in, member_out, DEFAULT_CHUNK_SIZE)
+
+        except Exception as err:
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata of the "
+                "ZIP file"
+            ) from err
+
+
+def strip_html(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    with spooled(chunks) as src:
+        src.seek(0, os.SEEK_END)
+        size = src.tell()
+        if size > settings.STRIP_METADATA_HTML_MAX_FILE_SIZE:
+            raise MetaDataStripError(message="The file is too large for us to process.")
+        src.seek(0)
+
+        try:
+            tree = html.fromstring(src.read())
+
+            for meta in tree.xpath("//meta"):
+                if meta.get("charset"):
+                    continue
+
+                meta.getparent().remove(meta)
+
+            stripped_data = html.tostring(tree, pretty_print=True, method="html")
+            del tree
+
+            assert isinstance(stripped_data, bytes)
+            dst.write(stripped_data)
+        except Exception as err:
+            raise MetaDataStripError(
+                message="Something went wrong while stripping the metadata of the "
+                "HTML file"
+            ) from err
+
+
+def strip_rtf_file(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
+    filter_ = RtfStreamFilter()
+
     try:
-        with open(stripped_file_name, "rb") as stripped_file:
-            _sync_files(stripped_file, file)
-    finally:
-        os.remove(stripped_file_name)
-
-
-def strip_zip_file(file: IO[bytes]) -> None:
-    import zipfile
-
-    with zipfile.ZipFile(file, mode="a") as zip_file:
-        zip_file.comment = b""
-
-
-def strip_html(file: IO[bytes]) -> None:
-    if os.path.getsize(file.name) > settings.STRIP_METADATA_HTML_MAX_FILE_SIZE:
-        raise MetaDataStripError(message="The file is to large for us to process.")
-
-    file.seek(0)
-    tree = html.fromstring(file.read())
-
-    for meta in tree.xpath("//meta"):
-        if meta.get("charset"):
-            continue
-
-        meta.getparent().remove(meta)
-
-    stripped_data = html.tostring(tree, pretty_print=True, method="html")
-    del tree
-
-    file.seek(0)
-    assert isinstance(stripped_data, bytes)
-    file.write(stripped_data)
-    file.flush()
+        for chunk in chunks:
+            dst.write(filter_.process_chunk(chunk))
+    except Exception as err:
+        raise MetaDataStripError(
+            message="Something went wrong while stripping the metadata of the RTF file"
+        ) from err
