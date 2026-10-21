@@ -10,9 +10,9 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 import magic
+import pikepdf
 from lxml import html
 from parametrize import parametrize
-from pypdf import PdfReader
 from rest_framework import status
 
 from woo_publications.config.models import GlobalConfiguration
@@ -145,25 +145,36 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
     def test_strip_pdf_of_metadata(self):
         with METADATA_PDF.open("rb") as pdf_file:
-            reader = PdfReader(pdf_file)
-            meta = reader.metadata
-            assert meta
-            self.assertEqual(
-                meta,
-                {
-                    "/Author": "Dean Martin",
-                    "/Creator": "pypdf",
-                    "/Title": "That's Amore",
-                    "/Subject": "Pizza Pie",
-                    "/Keywords": "Moray Eel",
-                },
-            )
+            with pikepdf.open(pdf_file) as pdf:
+                info = dict(pdf.docinfo)
+                assert info
 
-            xmp_metadata = reader.xmp_metadata
-            assert xmp_metadata
-            self.assertEqual(xmp_metadata.dc_creator, ["Dean Martin"])
-            self.assertEqual(xmp_metadata.pdf_keywords, "Moray Eel")
-            self.assertEqual(xmp_metadata.pdf_producer, "pypdf")
+                self.assertEqual(
+                    info,
+                    {
+                        "/Author": "Dean Martin",
+                        "/Creator": "pypdf",
+                        "/Title": "That's Amore",
+                        "/Subject": "Pizza Pie",
+                        "/Keywords": "Moray Eel",
+                    },
+                )
+
+                with pdf.open_metadata(
+                    set_pikepdf_as_editor=False,
+                    update_docinfo=False,
+                    strict=True,
+                ) as meta:
+                    self.assertEqual(
+                        meta["{http://purl.org/dc/elements/1.1/}creator"],
+                        ["Dean Martin"],
+                    )
+                    self.assertEqual(
+                        meta["{http://ns.adobe.com/pdf/1.3/}Keywords"], "Moray Eel"
+                    )
+                    self.assertEqual(
+                        meta["{http://ns.adobe.com/pdf/1.3/}Producer"], "pypdf"
+                    )
 
             file_size = Path(pdf_file.name).stat().st_size
 
@@ -175,7 +186,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
 
         document = DocumentFactory.create(
             publicatiestatus=PublicationStatusOptions.published,
-            bestandsnaam=pdf_file.name,
+            bestandsnaam="example.pdf",
             bestandsomvang=file_size,
             bestandsformaat="application/pdf",
             document_service=self.service,
@@ -197,10 +208,18 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             )
             document_content = documents_api_document.content
 
-        reader = PdfReader(io.BytesIO(document_content))
+        with pikepdf.open(io.BytesIO(document_content)) as pdf:
+            self.assertEqual(pdf.docinfo, {})
 
-        self.assertIsNone(reader.metadata)
-        self.assertIsNone(reader.xmp_metadata)
+            with pdf.open_metadata(
+                set_pikepdf_as_editor=False,
+                update_docinfo=False,
+                strict=True,
+            ) as meta:
+                self.assertEqual([key for key in meta.keys()], [])
+
+        # check if the stripped file shrunk in size
+        self.assertLess(len(document_content), file_size)
 
     @parametrize("file_type", ["odt", "ods", "odp", "odg"])
     def test_strip_open_documents_of_metadata(self, file_type):
@@ -448,3 +467,54 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
         document.refresh_from_db()
         self.assertEqual(document.metadata_gestript_op, None)
         self.assertFalse(document.upload_complete)
+
+    def test_strip_rtf_file_of_metadata(self):
+        rtf_path = (
+            Path(settings.DJANGO_PROJECT_DIR)
+            / "publications"
+            / "tests"
+            / "files"
+            / "example.rtf"
+        )
+
+        file_size = rtf_path.stat().st_size
+
+        with open(rtf_path) as file:
+            data = file.read()
+            self.assertIn("\\author Some One", data)
+            self.assertIn("\\subject rtf example file", data)
+            self.assertIn("\\keywords rtf, metadata, stripping", data)
+            self.assertIn("\\creatim\\yr2026\\mo01\\dy01\\hr00\\min00", data)
+            self.assertIn("\\comment used for testing purposes", data)
+
+        with open(rtf_path, "rb") as file:
+            document_reference = self._create_document_in_documents_api(
+                file=file, name="example.rtf", size=file_size
+            )
+
+            document = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                bestandsnaam="example.rtf",
+                bestandsomvang=file_size,
+                document_service=self.service,
+                document_uuid=document_reference,
+            )
+
+        strip_metadata(
+            document_id=document.pk,
+            base_url="http://host.docker.internal:8000",
+        )
+
+        document.refresh_from_db()
+        self.assertIsNotNone(document.metadata_gestript_op)
+
+        with get_client(self.service) as client:
+            documents_api_document = client.get(
+                f"enkelvoudiginformatieobjecten/{document.document_uuid}/download"
+            )
+            document_content = documents_api_document.content.decode("cp1252")
+
+        # previous metadata no longer present
+        expected = "{\\rtf1\\ansi\\deff0\n\n\\pard\nFoo and maybe some bar.\n\\par\n}\n"
+
+        self.assertEqual(document_content, expected)
