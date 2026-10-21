@@ -190,7 +190,8 @@ def strip_zip_file(chunks: Iterable[bytes], dst: IO[bytes]) -> None:
 
         except Exception as err:
             raise MetaDataStripError(
-                message="Something went wrong while stripping the metadata of the ZIP file"
+                message="Something went wrong while stripping the metadata of the "
+                "ZIP file"
             ) from err
 
 
