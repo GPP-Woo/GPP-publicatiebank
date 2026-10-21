@@ -226,7 +226,9 @@ kombu==5.6.2
 lunardate==0.3.0
     # via workalendar
 lxml==6.1.0
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   pikepdf
 maykin-2fa==2.0.1
     # via
     #   maykin-common
@@ -242,9 +244,15 @@ open-api-framework==0.13.4
 orderedmultidict==1.0.2
     # via furl
 packaging==26.0
-    # via kombu
-pillow==12.3.0
+    # via
+    #   kombu
+    #   pikepdf
+pikepdf==10.17.0
     # via -r requirements/base.in
+pillow==12.3.0
+    # via
+    #   -r requirements/base.in
+    #   pikepdf
 polib==1.2.0
     # via django-rosetta
 prometheus-client==0.24.1
@@ -273,8 +281,6 @@ pymeeus==0.5.12
     # via convertdate
 pyopenssl==26.4.0
     # via webauthn
-pypdf==6.19.0
-    # via -r requirements/base.in
 python-dateutil==2.9.0.post0
     # via
     #   celery
@@ -320,6 +326,8 @@ rpds-py==0.30.0
     #   referencing
 ruamel-yaml==0.19.1
     # via django-setup-configuration
+santanico==0.1.2
+    # via -r requirements/base.in
 semantic-version==2.10.0
     # via django-upgrade-check
 sentry-sdk==2.51.0
@@ -341,8 +349,11 @@ typing-extensions==4.15.0
     # via
     #   django-stubs-ext
     #   mozilla-django-oidc-db
+    #   psycopg
     #   pydantic
     #   pydantic-core
+    #   pyopenssl
+    #   referencing
     #   typing-inspection
     #   zgw-consumers
 typing-inspection==0.4.2
