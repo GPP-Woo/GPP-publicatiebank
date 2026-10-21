@@ -165,6 +165,21 @@ class CatalogiClient(NLXClient):
             url=result["url"],
         )
 
+    def update_iot_description(self, *, uuid: UUID, description: str):
+        try:
+            response = self.patch(
+                f"informatieobjecttypen/{uuid}",
+                json={"omschrijving": description[:80]},
+            )
+            response.raise_for_status()
+        except RequestException as err:
+            raise CatalogiAPIError(
+                message=_("Something went wrong while trying to update IOT."),
+                status_code=getattr(
+                    getattr(err, "response", None), "status_code", None
+                ),
+            ) from err
+
     def destroy_iot(self, *, uuid: UUID):
         try:
             response = self.delete(f"informatieobjecttypen/{uuid}")
