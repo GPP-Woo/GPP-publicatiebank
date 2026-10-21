@@ -97,6 +97,8 @@ def strip_metadata(*, document_id: int, base_url: str) -> None:
                 assert isinstance(chunk, bytes)
                 source_file.write(chunk)
 
+            source_file.seek(0)
+
             # strip the metadata of the file
             match type_ := document.get_strippable_file_type():
                 case StrippableFileTypes.pdf:

@@ -510,7 +510,7 @@ class StripMetaDataTaskTestCase(VCRMixin, TestCase):
             )
             document_content = documents_api_document.content.decode("cp1252")
 
-        # previous metadata no longer presence
+        # previous metadata no longer present
         expected = "{\\rtf1\\ansi\\deff0\n\n\\pard\nFoo and maybe some bar.\n\\par\n}\n"
 
         self.assertEqual(document_content, expected)

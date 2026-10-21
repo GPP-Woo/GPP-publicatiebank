@@ -136,11 +136,10 @@ class StripPDFTests(SimpleTestCase):
         original = pdf_path.read_bytes()
 
         with (
-            NamedTemporaryFile(suffix=".pdf") as temp_file,
+            pdf_path.open("rb") as in_file,
             NamedTemporaryFile() as new_file,
         ):
-            temp_file.write(original)
-            strip_pdf(temp_file, new_file)
+            strip_pdf(in_file, new_file)
             new_file.seek(0)
             stripped = new_file.read()
 

@@ -1,8 +1,7 @@
 import os
 import shutil
 import zipfile
-from io import BytesIO
-from typing import IO, cast
+from typing import IO
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -102,18 +101,15 @@ def strip_all_files(base_url: str) -> int:
 
 
 def strip_pdf(src: IO[bytes], dst: IO[bytes]) -> None:
-    src = cast(BytesIO, src)
-    dst = cast(BytesIO, dst)
-
     try:
-        with pikepdf.open(src) as pdf:
+        with pikepdf.open(src) as pdf:  # pyright:ignore[reportArgumentType]
             if "/Info" in pdf.trailer:
                 del pdf.trailer["/Info"]
 
             if "/Metadata" in pdf.Root:
                 del pdf.Root["/Metadata"]
 
-            pdf.save(dst)
+            pdf.save(dst)  # pyright:ignore[reportArgumentType]
 
     except Exception as err:
         raise MetaDataStripError(
@@ -185,7 +181,6 @@ def strip_html(src: IO[bytes], dst: IO[bytes]) -> None:
     if os.path.getsize(src.name) > settings.STRIP_METADATA_HTML_MAX_FILE_SIZE:
         raise MetaDataStripError(message="The file is to large for us to process.")
 
-    src.seek(0)
     tree = html.fromstring(src.read())
 
     for meta in tree.xpath("//meta"):
@@ -199,7 +194,6 @@ def strip_html(src: IO[bytes], dst: IO[bytes]) -> None:
 
     assert isinstance(stripped_data, bytes)
     dst.write(stripped_data)
-    dst.flush()
 
 
 def strip_rtf_file(src: IO[bytes], dst: IO[bytes]) -> None:
