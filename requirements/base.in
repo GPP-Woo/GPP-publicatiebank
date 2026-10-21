@@ -4,8 +4,9 @@ flower
 furl
 lxml
 Pillow
-pypdf
+pikepdf
 python-magic
+santanico
 structlog
 workalendar
 
