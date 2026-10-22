@@ -1,11 +1,22 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 from solo.models import SingletonModel
+from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 from zgw_consumers.constants import APITypes
 
+from woo_publications.contrib.catalogi_api.client import CatalogiAPIError, get_client
+
 from .validators import validate_rsin
+
+
+class CatalogiSetupError(Exception):
+    """
+    The Catalogi API objects could not be set up.
+
+    The message is meant to be shown to the user.
+    """
 
 
 class GlobalConfiguration(SingletonModel):
@@ -139,3 +150,83 @@ class GlobalConfiguration(SingletonModel):
 
     def __str__(self) -> str:
         return force_str(self._meta.verbose_name)
+
+    @classmethod
+    def setup_catalogi_api(cls) -> None:
+        """
+        Create the catalogus and default IOT in the configured Catalogi API.
+
+        Once committed, the Information Categories are reset and the
+        Information Categories and Documents are synced with the Catalogi API in the
+        background. A catalogus created before a failure is kept.
+
+        :raises CatalogiSetupError: when (part of) the setup failed.
+        """
+        with transaction.atomic():
+            config = cls.objects.select_for_update().get(pk=cls.singleton_instance_id)
+            try:
+                config._create_catalogi_api_objects()
+            except CatalogiSetupError as err:
+                error = err
+            else:
+                error = None
+                transaction.on_commit(_sync_models_with_catalogi_api)
+            config.save(update_fields=("catalogus_url", "default_iot_url"))
+
+        if error is not None:
+            raise error
+
+    def _create_catalogi_api_objects(self) -> None:
+        service = self.catalogi_api_service
+
+        if service is None or service.connection_check != 200:
+            raise CatalogiSetupError(
+                _(
+                    "The Catalogi API service is not available. "
+                    "Because of this the Catalogi and default Informationobjecttypes "
+                    "couldn't be created. Check if you configured the Service "
+                    "correctly and make sure that it is running correctly."
+                )
+            )
+
+        with get_client(service) as client:
+            if not self.catalogus_url:
+                try:
+                    self.catalogus_url = client.create_catalogi(
+                        rsin=self.organisation_rsin
+                    )
+                except CatalogiAPIError as err:
+                    raise CatalogiSetupError(
+                        _("Something went wrong while trying to create the Catalogi.")
+                    ) from err
+
+            try:
+                iot = client.create_iot(
+                    description=(
+                        "informatieobjecttypen of publications with no information "
+                        "category objects."
+                    ),
+                    catalogus=self.catalogus_url,
+                    confidentiality_indication=VertrouwelijkheidsAanduidingen.vertrouwelijk,
+                )
+            except CatalogiAPIError as err:
+                raise CatalogiSetupError(
+                    _(
+                        "Something went wrong while trying to create the default "
+                        "Informationobjecttypes."
+                    )
+                ) from err
+
+        self.default_iot_url = iot.url
+
+
+def _sync_models_with_catalogi_api() -> None:
+    # avoid circular imports, both modules depend on this one
+    from woo_publications.metadata.models import InformationCategory
+
+    from .tasks import sync_information_categories_and_documents_with_catalog_api
+
+    InformationCategory.objects.update(iot_url="", iot_uuid=None)
+    sync_information_categories_and_documents_with_catalog_api.delay(
+        confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar
+    )

@@ -380,6 +380,10 @@ class GlobalConfigCatalogiTestCase(VCRMixin, TestCase):
                 "Informationobjecttypes."
             ),
         )
+        # the catalogus that was created is kept
+        global_config = GlobalConfiguration.get_solo()
+        self.assertNotEqual(global_config.catalogus_url, "")
+        self.assertEqual(global_config.default_iot_url, "")
 
     @requests_mock.Mocker()
     def test_catalogi_service_not_configured_properly(self, m: requests_mock.Mocker):
