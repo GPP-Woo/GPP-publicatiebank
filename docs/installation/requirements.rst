@@ -50,6 +50,38 @@ Known applications/products providing a Documents API
 
 .. tip:: If you're a vendor, please create a PR to add your product to this list.
 
+Catalogi API
+------------
+
+The Woo Publications component manages the document types ("informatieobjecttypen") of
+the :ref:`information categories <admin_metadata_index_information_categories>` in a
+`Catalogi API <https://vng-realisatie.github.io/gemma-zaken/standaard/catalogi/>`_. It
+must be the Catalogi API that the Documents API uses to validate document types; with
+Open Zaak, that is the Catalogi API of the same Open Zaak instance.
+
+What you'll need
+~~~~~~~~~~~~~~~~
+
+* Configure the :ref:`Catalogi API service <configuration_services_catalogi_api>`.
+
+Configuration for the Authorisations API
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Permission scopes**
+
+* ``catalogi.lezen``
+* ``catalogi.schrijven``
+
+Woo Publications creates a catalogus, a default informatieobjecttype for documents of
+publications without an information category, and an informatieobjecttype for every
+information category.
+
+When you grant the Documents API permissions per document type, include the default
+informatieobjecttype. Its URL is shown in the global configuration
+(``Default informatieobjecttype url``) and it has the confidentiality level
+``vertrouwelijk``, so the maximum confidentiality level must be at least
+``vertrouwelijk``.
+
 Processes
 ---------
 

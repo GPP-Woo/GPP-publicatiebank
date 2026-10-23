@@ -69,43 +69,60 @@ worden weergegeven.
 
   Deze instelling is noodzakelijk voor de verbinding met het GPP-zoeken-component (of passend alternatief).
 
-* ``Strip documenten metadata``. Vlag die aangeeft of de documenten ge stripped moet worden van hun metadata, hier mee kan je er voor zorgen dat burgers niet kunnen achterhalen wie het document gemaakt heeft.
+* ``Metadata van documenten verwijderen``. Een vinkje dat aangeeft of de metadata (zoals
+  de auteur) uit geüploade documenten verwijderd wordt. Zo is uit een gepubliceerd
+  document niet af te leiden wie het gemaakt of bewerkt heeft. Deze instelling staat
+  standaard aan.
 
-* ``Catalogi API service``. Een keuzemenu om de relevante
+* ``Catalogi API-service``. Een keuzemenu om de relevante
   :ref:`service <admin_configuratie_index_services>` met verbindingsparameters te
   selecteren. Mits je de nodige rechten hebt kan je hier ook:
 
   - klikken op het potloodicoon om de service aan te passen
   - klikken op het plusicoon om een nieuwe service toe te voegen
 
-  Deze instelling is noodzakelijk voor de verbinding met de achterliggende Catalogi
-  API. Die gebruikt wordt om documenten in de Documenten API te verzien van een Informatie Object typen (IOT).
+  Deze instelling is noodzakelijk voor de verbinding met de achterliggende Catalogi API
+  (bijvoorbeeld die van Open Zaak). Daarin worden de informatieobjecttypen beheerd die
+  de Documenten API voor elk document vereist. De applicatie van de
+  GPP-publicatiebank heeft daar de scopes ``catalogi.lezen`` en ``catalogi.schrijven``
+  nodig.
 
-  Wanneer dit veld ingevuld wordt (terwijl de `Catalogus URL` en/of de `Default Informatieobjecttype URL` leeg zijn) vullen wij onder water
-  de `Catalogus URL` en de `Default Informatieobjecttype URL` in. Als deze velden successful aangemaakt en ingevuld wordt, gaan we verder door om
-  de :ref:`informatiecategorie <admin_metadata_index_information_categories>` te voorzien van `Informatie Object Typen` vanuit de catalogi API, en
-  zorgen we er voor dat alle Documenten in de `Documenten API` worden overschreven met de nieuwe `Informatie Object Typen` waardes.
+  Als bij het opslaan de ``Catalogus-URL`` of de ``Standaard-informatieobjecttype-URL``
+  leeg is, maakt de GPP-publicatiebank de catalogus en/of het
+  standaard-informatieobjecttype aan in de Catalogi API. Daarna krijgt op de
+  achtergrond elke :ref:`informatiecategorie <admin_metadata_index_information_categories>`
+  een eigen informatieobjecttype en wordt het informatieobjecttype van alle bestaande
+  documenten in de Documenten API daarop aangepast.
 
-* ``Catalogus URL``. Het URL van het Catalogus object van de geconfigureerde `Catalogus API service`.
+* ``Catalogus-URL``. De URL van de catalogus in de Catalogi API. Laat je dit veld leeg,
+  dan wordt de catalogus bij het opslaan automatisch aangemaakt.
 
-  Dit veld wordt automatisch ingevuld wanneer de `Catalogi API service` geconfigureerd wordt (als dit veld leeg is of gemaakt wordt), als de `Catalogi`
-  al eerder op deze methode is aangemaakt in de geconfigureerde `Catalogi API` dan zou u het manueel moeten invullen.
+  Een Catalogi API staat maar één catalogus per RSIN toe. Bestaat er al een catalogus
+  voor het RSIN van de organisatie, bijvoorbeeld omdat je terugwisselt naar een eerder
+  gebruikte service, dan moet je de URL van die catalogus zelf invullen.
 
-* ``Standaard Informatieobjecttypen URL``. Het URL van de `Informatie Object Typen` die gebruikt moet worden als een :ref:`publicatie <admin_publicaties_index_publicaties>`
-  nog niet voorziet van een :ref:`informatiecategorie <admin_metadata_index_information_categories>`. De `Informatie Object Typen` zijn namelijk verplicht in de Documenten API
-  voor de `Enkelvoudig Informatie Objecten` objecten die wij gebruiken om `Documenten` te bewaren.
+* ``Standaard-informatieobjecttype-URL``. De URL van het informatieobjecttype voor
+  documenten van een :ref:`publicatie <admin_publicaties_index_publicaties>` zonder
+  :ref:`informatiecategorie <admin_metadata_index_information_categories>`.
 
-  Dit veld wordt automatisch ingevuld wanneer de `Catalogi API service` geconfigureerd wordt (als dit veld leeg is of gemaakt wordt), als de `Catalogi`
-  al eerder op deze methode is aangemaakt in de geconfigureerde `Catalogi API` dan zou u het manueel moeten invullen.
+  Laat dit veld leeg, ook als je zelf een ``Catalogus-URL`` invult: bij het opslaan
+  wordt het standaard-informatieobjecttype in de catalogus opgezocht, of aangemaakt als
+  het nog niet bestaat. Als beide velden ingevuld zijn, worden de informatiecategorieën
+  en documenten niet gesynchroniseerd.
 
 * ``GPP-app publicatie-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in de GPP-app (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieIntern``).
 
 * ``GPP-burgerportaal publication-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
 
-* ``Zienswijze reactie form URL``. Dit is de standaard URL voor het `reactieformulier` binnen de :ref:`inzage procedure <admin_publicaties_index_inzage_procedure>` wanneer `Beschikbaar rechtsmiddel` de waarde `zienswijze` heeft.
+* ``Reactieformulier-URL zienswijze``. De standaard-URL van het reactieformulier van een
+  :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
+  ``Beschikbaar rechtsmiddel`` "zienswijze". Deze wordt gebruikt als bij de
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
 
-* ``Bezwaar reactie form URL``. Dit is de standaard URL voor het `reactieformulier` binnen de :ref:`inzage procedure <admin_publicaties_index_inzage_procedure>` wanneer `Beschikbaar rechtsmiddel` de waarde `bezwaar` heeft.
-
+* ``Reactieformulier-URL bezwaar``. De standaard-URL van het reactieformulier van een
+  :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
+  ``Beschikbaar rechtsmiddel`` "bezwaar". Deze wordt gebruikt als bij de
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
 
 .. _admin_configuratie_index_applicatiegroepen:
 

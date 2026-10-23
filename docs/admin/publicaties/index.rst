@@ -5,10 +5,10 @@ Publicaties
 
 Onder het menu-item "Publicaties" en op het dashboard onder het kopje "Publicaties" wordt toegang geboden tot het beheer van:
 
-* :ref:`admin_publicaties_index_inzage_procedure`
 * :ref:`admin_publicaties_index_documenten`
 * :ref:`admin_publicaties_index_publicaties`
 * :ref:`admin_publicaties_index_onderwerpen`
+* :ref:`admin_publicaties_index_inzage_procedure`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -243,46 +243,56 @@ Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het sch
 
 .. _admin_publicaties_index_inzage_procedure:
 
-Inzage Procedure
+Inzageprocedures
 ----------------
 
-Een *inzage procedure* bestaat uit een aantal gegevens en omvat altijd een :ref:`admin_publicaties_index_publicaties` (zie hierboven).
+Een *inzageprocedure* legt vast hoe en wanneer burgers kunnen reageren op het
+(voorgenomen) besluit van een :ref:`publicatie <admin_publicaties_index_publicaties>`
+(zie hierboven). Een publicatie heeft hooguit één inzageprocedure. Deze kan ook direct
+op het scherm van de publicatie ingevuld worden.
 
-In het beheerscherm van de *inzage procedure* wordt een lijst getoond van alle *inzage procedure*-registraties die zijn opgeslagen in de publicatiebank.
-Op dit scherm zijn de volgende acties mogelijk:
+In het beheerscherm van de *inzageprocedures* wordt een lijst getoond van alle
+*inzageprocedure*-registraties die zijn opgeslagen in de publicatiebank. Op dit scherm
+zijn de volgende acties mogelijk:
 
-* Rechtsboven zit een knop **inzage procedure toevoegen** waarmee een registratie toegevoegd kan worden.
+* Rechtsboven zit een knop **Inzageprocedure toevoegen** waarmee een registratie toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
-* Direct onder de zoekbalk zit de mogelijkheid om de lijst te **filteren op een specifieke registratiemaans**.
-* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere inzage procedures**. Op dit moment wordt de actie **Geselecteerde inzage procedures verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *inzage procedure*-registraties aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *inzage procedure*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
-* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op automatisch intrekken, inzagetermijn start datum en inzagetermijn stop datum**.
-* Bij een *inzage procedure*-registratie kan op de `publicatie` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
-* Bij een *inzage procedure*-registratie kan op **Toon logs** (rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere inzageprocedures**. Op dit moment wordt de actie **Geselecteerde inzageprocedures verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *inzageprocedure*-registraties aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *inzageprocedure*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op automatisch intrekken, beschikbaar rechtsmiddel, datum begin inzagetermijn en datum einde inzagetermijn**.
+* Bij een *inzageprocedure*-registratie kan op de `publicatie` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
+* Bij een *inzageprocedure*-registratie kan op **Toon logs** (rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
 
-Wanneer bij een *inzage procedure*-registratie op  de `publicatie` wordt geklikt, wordt een scherm geopend met de *inzage procedure*-details.
+Wanneer bij een *inzageprocedure*-registratie op de `publicatie` wordt geklikt, wordt een scherm geopend met de *inzageprocedure*-details.
 Hierop zien we:
 
 * **Alle metadatavelden**. Deze lichten we hieronder toe.
-* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *inzage procedure*-registratie.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *inzageprocedure*-registratie.
 * Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de Admin-interface zijn uitgevoerd op de registratie.
 * Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
 * Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
 
-Op een *inzage procedure*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
+Op een *inzageprocedure*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
 
 **Beschrijving**
 
-* ``Publicatie``. de *inzage procedure* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*
-* ``Bekendmakings URL``. De online locatie waar de bekendmaking gepubliceerd is.
-* ``Toelichting``. De beschrijving van de bekendmaking.
-* ``Beschikbaar rechtsmiddel``. Het rechtsmiddel dat de burger in kan zetten om zich te verzetten tegen het (voorgenomen) besluit.
-* ``URL reactiefomulier``. De URL naar het webformulier waar het rechtsmiddel ingediend kan worden. Als deze leeg gelaten wordt dan wordt de
-  geconfigureerde waarden uit de Globale settings gebruikt op basis van het ingevulde *beschikbaar rechtsmiddel*.
+* ``Publicatie``. De :ref:`publicatie <admin_publicaties_index_publicaties>` waar de
+  *inzageprocedure* bij hoort.
+* ``Bekendmakings-URL``. De online locatie waar de bekendmaking gepubliceerd is,
+  bijvoorbeeld op officielebekendmakingen.nl.
+* ``Omschrijving``. De toelichting bij de bekendmaking.
+* ``Beschikbaar rechtsmiddel``. Het rechtsmiddel ("zienswijze" of "bezwaar") waarmee
+  burgers op het (voorgenomen) besluit kunnen reageren.
+* ``Reactieformulier-URL``. De URL van het webformulier waarmee het rechtsmiddel
+  ingediend kan worden. Laat je dit veld leeg, dan wordt bij het opslaan de
+  standaard-URL voor het gekozen rechtsmiddel uit de
+  :ref:`algemene instellingen <admin_configuratie_index_alg_inst>` ingevuld.
 * ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
 
 **Handelingen**
 
-* ``Begindatum inzagetermijn``. De datum waarop de inzage-procedure start.
-* ``Einddatum inzagetermijn``. De datum waarop de inzage-procedure eindigt. Als deze datum op een feest of weekend dag valt wordt de eerst volgende werkdag gebruikt.
-* ``Automatisch intrekken``. Een flag waarmee aangegeven kan worden of de publicatie ingetrokken moet worden als de eind inzagetermijn datum verstreken is.
+* ``Datum begin inzagetermijn``. De datum waarop de inzagetermijn begint.
+* ``Datum einde inzagetermijn``. De datum waarop de inzagetermijn eindigt. Valt deze
+  datum in een weekend of op een feestdag, dan wordt de eerstvolgende werkdag gebruikt.
+* ``Automatisch intrekken``. Een vinkje dat aangeeft of de publicatie automatisch
+  ingetrokken moet worden wanneer de inzagetermijn verstreken is.

@@ -67,6 +67,59 @@ Configuration in the registration component
 
 8. Save the changes.
 
+.. _configuration_services_catalogi_api:
+
+Catalogi API configuration
+--------------------------
+
+GPP-Publicatiebank depends on the
+`Catalogi API <https://vng-realisatie.github.io/gemma-zaken/standaard/catalogi/>`_ to
+manage the document types of the documents.
+
+What you'll need
+~~~~~~~~~~~~~~~~
+
+* The API root URL, e.g. ``https://api.example.com/catalogi/api/v1/``. With Open Zaak,
+  this is the Catalogi API of the instance that provides the Documents API.
+* API credentials: a client ID and secret. With Open Zaak, these can be the same
+  credentials as for the Documents API.
+
+Configuration in the registration component
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Navigate to the **Admin** environment.
+2. In the menu, navigate to **Configuration** > **Services**.
+3. Click the **Add service** button in the top right of the screen.
+4. Fill out the form fields:
+
+    - ``Label``: a label so you can recognize the service in a choice list, e.g. "Catalogi API".
+    - ``Type``: select "ZTC (Zaaktypen)"
+    - ``API root URL``: enter the obtained base URL of the API, e.g.
+      ``https://api.example.com/catalogi/api/v1/`` from the examples in the previous
+      section.
+    - ``Client ID`` and ``Secret``: enter the credentials obtained from the requirements
+      in the previous section.
+    - ``Authorization type``: select "ZGW client_id + secret"
+
+5. Save the changes.
+6. Now, we must instruct the application to use this service. Navigate to
+   **Configuration** > **General configuration**.
+7. Fill out the form fields:
+
+    - ``Catalogi API service``: select the service that you created in step 4.
+    - Leave ``Catalogus url`` and ``Default informatieobjecttype url`` empty, unless a
+      catalogus for the RSIN of the organisation already exists in the Catalogi API. In
+      that case, enter the URL of that catalogus, but still leave
+      ``Default informatieobjecttype url`` empty.
+
+8. Save the changes. The catalogus and default informatieobjecttype are created, and in
+   the background every information category gets its own informatieobjecttype and the
+   existing documents are updated. A Celery worker must be running for this.
+
+With Open Zaak, the command ``python src/manage.py setup_catalogi_api`` performs these
+steps for you. It creates the service from the Documents API service, using the same
+credentials, and runs the same setup.
+
 GPP-Zoeken configuration
 ------------------------
 

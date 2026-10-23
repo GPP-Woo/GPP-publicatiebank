@@ -2,6 +2,62 @@
 Release notes
 =============
 
+Unreleased
+==========
+
+Upgrade procedure
+-----------------
+
+These points complement the "Configure a Catalogi API" step of the 3.0.0-rc.0 upgrade
+procedure below.
+
+* **Until the Catalogi API is configured, document uploads fail.** Direct uploads fail
+  with an HTTP 500 error, uploads from a URL fail in the background task. Uploads for
+  publications with an information category keep failing until the background
+  synchronisation has created the informatieobjecttype of that category. Configure the
+  Catalogi API right after deploying, or during a maintenance window.
+
+* **Prepare Open Zaak** before or right after deploying:
+
+    * The Catalogi API (ZTC) component must be enabled.
+    * Give the application of GPP-publicatiebank the scopes ``catalogi.lezen`` and
+      ``catalogi.schrijven``.
+    * The informatieobjecttypen get new URLs in the catalogus of Open Zaak. Documents
+      API authorisations that refer to the old
+      ``.../catalogi/api/v1/informatieobjecttypen/...`` URLs of GPP-publicatiebank no
+      longer apply. Once the Catalogi API is configured, authorise the new
+      informatieobjecttypen. They are listed on the "View API resource URLs" page of the
+      information categories. Also authorise the default informatieobjecttype from the
+      global configuration, which has the confidentiality level ``vertrouwelijk``, so the
+      maximum confidentiality level must be at least ``vertrouwelijk``. Applications
+      with "heeft alle autorisaties" don't need this.
+
+* [:issue:`526`] Instead of steps 1 and 2, you can run
+  ``python src/manage.py setup_catalogi_api``. It creates the Catalogi API service from
+  the Documents API service, with the same credentials, and runs the same setup as
+  saving the global configuration. This only works with Open Zaak, and the organisation
+  RSIN must be set.
+
+* Afterwards, the ZTC service in Open Zaak that pointed to GPP-publicatiebank (see
+  :issue:`394`) is no longer used and can be removed.
+
+Features
+--------
+
+* [:issue:`526`] Added the ``setup_catalogi_api`` management command to set up the
+  Catalogi API for an existing installation.
+* [:issue:`501`] The inspection procedure list in the admin now links to the audit logs.
+
+Documentation
+-------------
+
+* [:issue:`501`] Documented the Catalogi API: the required permissions, the service
+  configuration and the global configuration fields.
+* [:issue:`501`] Documented the inspection procedures and the new global configuration
+  fields in the admin documentation.
+* Fixed the commands to load the information categories and organisations in the
+  installation instructions.
+
 3.0.0-rc.0 (2026-10-12)
 =======================
 
