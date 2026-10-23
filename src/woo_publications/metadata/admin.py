@@ -21,7 +21,7 @@ from woo_publications.logging.service import AdminAuditLogMixin, get_logs_link
 
 from .constants import InformationCategoryOrigins, OrganisationOrigins
 from .models import InformationCategory, Organisation, Theme
-from .tasks import index_iot
+from .tasks import index_iot, update_iot_description
 
 
 @admin.register(InformationCategory)
@@ -115,6 +115,15 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
                     index_iot.delay,
                     information_category_id=obj.pk,
                     confidentiality_indication=VertrouwelijkheidsAanduidingen.openbaar,
+                )
+            )
+            return
+
+        if change and "naam" in form.changed_data:
+            transaction.on_commit(
+                partial(
+                    update_iot_description.delay,
+                    information_category_id=obj.pk,
                 )
             )
 

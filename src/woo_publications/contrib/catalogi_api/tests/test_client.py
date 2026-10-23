@@ -244,3 +244,45 @@ class CatalogiClientTests(VCRMixin, TestCase):
 
         with get_client(service) as client:
             client.destroy_iot(uuid=UUID("e2016928-ca1b-4b08-911b-a2495b234eb6"))
+
+    def test_update_iot_description(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+
+        with get_client(service) as client:
+            iot = client.create_iot(
+                catalogus=DEFAULT_CATALOGUS,
+                description="soon to be updated.",
+                confidentiality_indication=openbaar,
+            )
+            client.update_iot_description(
+                uuid=iot.uuid, description="new description information."
+            )
+
+        with self.subTest("check no concept IOT's exist"):
+            detail_response = client.get(iot.url)
+
+            self.assertEqual(detail_response.status_code, 200)
+            self.assertEqual(
+                detail_response.json()["omschrijving"], "new description information."
+            )
+
+    def test_update_iot_description_error(self):
+        service = ServiceFactory.build(for_catalogi_api_docker_compose=True)
+
+        with get_client(service) as client:
+            iot = client.create_iot(
+                catalogus=DEFAULT_CATALOGUS,
+                description="soon to be updated.",
+                confidentiality_indication=openbaar,
+            )
+
+            with (
+                self.assertRaisesMessage(
+                    CatalogiAPIError,
+                    _("Something went wrong while trying to update IOT."),
+                ),
+                self.vcr_raises(RequestException),
+            ):
+                client.update_iot_description(
+                    uuid=iot.uuid, description="new description information."
+                )

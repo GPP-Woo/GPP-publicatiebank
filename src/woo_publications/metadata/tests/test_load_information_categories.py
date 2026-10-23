@@ -145,6 +145,38 @@ class LoadInformationCategoriesCommandTests(TestCase):
             )
             self.assertEqual(obj.iot_url, "https://www.example.com/")
 
+    @patch("woo_publications.metadata.tasks.update_iot_description.delay")
+    def test_load_updated_update_name_updates_iot(
+        self, mock_update_iot_description_delay: MagicMock
+    ):
+        assert not InformationCategory.objects.exists()
+
+        existing_ic = InformationCategoryFactory.create(
+            uuid="be4e21c2-0be5-4616-945e-1f101b0c0e6d",
+            identifier="https://identifier.overheid.nl/tooi/def/thes/kern/c_139c6280",
+            naam="this part will be altered",
+            naam_meervoud="wetten en algemeen verbindende voorschriften",
+            definitie="wetten en andere algemeen verbindende voorschriften",
+            oorsprong="waardelijst",
+            iot_uuid="9eb09d4c-f0b3-4d57-81cd-78f8e1922168",
+            iot_url="https://www.example.com/catalogi/api/v1/informatiecategorie/9eb09d4c-f0b3-4d57-81cd-78f8e1922168",
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            call_command(
+                "load_information_categories",
+                information_categories_fixture,
+                stdout=StringIO(),
+            )
+
+        existing_ic.refresh_from_db()
+
+        self.assertEqual(InformationCategory.objects.count(), 10)
+        # check that if iot fields are set that the task won't get called
+        mock_update_iot_description_delay.assert_called_once_with(
+            information_category_id=existing_ic.pk
+        )
+
     def test_wrong_variable(self):
         with self.assertRaisesMessage(
             CommandError, "No fixture named 'not a file' found."
