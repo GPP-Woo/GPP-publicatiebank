@@ -119,7 +119,7 @@ class InformationCategoryAdmin(AdminAuditLogMixin, OrderedModelAdmin):
             )
             return
 
-        if form.cleaned_data["iot_url"] and "naam" in form.changed_data:
+        if change and "naam" in form.changed_data:
             transaction.on_commit(
                 partial(
                     update_iot_description.delay,

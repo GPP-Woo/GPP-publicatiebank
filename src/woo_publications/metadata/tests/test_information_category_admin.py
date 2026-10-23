@@ -240,6 +240,42 @@ class TestInformationCategoryAdmin(WebTest):
 
     @patch("woo_publications.metadata.tasks.index_iot.delay")
     @patch("woo_publications.metadata.tasks.update_iot_description.delay")
+    def test_information_category_admin_update_value_list_item_with_iot_connection(
+        self,
+        mock_update_iot_description_delay: MagicMock,
+        mock_index_iot_delay: MagicMock,
+    ):
+        information_category = InformationCategoryFactory.create(
+            identifier="https://www.example.com/waardenlijsten/1",
+            naam="first item",
+            oorsprong=InformationCategoryOrigins.value_list,
+            iot_url="https://www.example.com",
+            iot_uuid=uuid.UUID("f3dc7ce4-25a5-4473-9206-1a15dd807e34"),
+        )
+        url = reverse(
+            "admin:metadata_informationcategory_change",
+            kwargs={"object_id": information_category.id},
+        )
+
+        response = self.app.get(url, user=self.user)
+        self.assertEqual(response.status_code, 200)
+
+        form = response.forms["informationcategory_form"]
+        form["bron_bewaartermijn"] = "Selectielijst gemeenten 2020"
+        form["archiefnominatie"].select(text=ArchiveNominationChoices.retain.label)
+        form["bewaartermijn"] = 10
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = form.submit(name="_save")
+
+        self.assertEqual(response.status_code, 302)
+        information_category.refresh_from_db()
+        self.assertEqual(information_category.bewaartermijn, 10)
+        mock_index_iot_delay.assert_not_called()
+        mock_update_iot_description_delay.assert_not_called()
+
+    @patch("woo_publications.metadata.tasks.index_iot.delay")
+    @patch("woo_publications.metadata.tasks.update_iot_description.delay")
     def test_information_category_admin_create_item(
         self,
         mock_update_iot_description_delay: MagicMock,
