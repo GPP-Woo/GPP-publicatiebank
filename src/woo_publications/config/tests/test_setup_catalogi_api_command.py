@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import CommandError, call_command
 from django.test import TestCase
+from django.utils.translation import gettext as _
 
 from zgw_consumers.api_models.constants import VertrouwelijkheidsAanduidingen
 from zgw_consumers.constants import APITypes
@@ -166,8 +167,10 @@ class SetupCatalogiAPICommandTests(VCRMixin, TestCase):
 
         with self.assertRaisesMessage(
             CommandError,
-            "Something went wrong while trying to create the default "
-            "Informationobjecttypes.",
+            _(
+                "Something went wrong while trying to create the default "
+                "Informationobjecttypes."
+            ),
         ):
             self._call_command()
 

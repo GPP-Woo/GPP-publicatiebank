@@ -438,7 +438,7 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
 
         self.assertContains(response, "unique snowflake")
         self.assertContains(response, DEFAULT_IOT)
-        self.assertContains(response, "Sync Document API")
+        self.assertContains(response, _("Sync Document API"))
 
     def test_ics_not_filled_out(self):
         user = UserFactory.create(superuser=True)
@@ -450,7 +450,7 @@ class InformationCategoryAPIResourceListAdminTests(WebTest):
 
         response = self.app.get(url, user=user)
 
-        self.assertNotContains(response, "Sync Document API")
+        self.assertNotContains(response, _("Sync Document API"))
 
     @patch("woo_publications.config.tasks.change_document_api_iots.delay")
     def test_schedule_task(self, mock_change_document_api_iots_delay: MagicMock):

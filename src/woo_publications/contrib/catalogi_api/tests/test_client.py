@@ -39,7 +39,7 @@ class CatalogiClientTests(VCRMixin, TestCase):
         with (
             get_client(service) as client,
             self.assertRaisesMessage(
-                CatalogiAPIError, "Catalogus couldn't be created."
+                CatalogiAPIError, _("Catalogus couldn't be created.")
             ),
             self.vcr_raises(RequestException),
         ):
