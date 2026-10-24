@@ -8,6 +8,7 @@ Onder het menu-item "Publicaties" en op het dashboard onder het kopje "Publicati
 * :ref:`admin_publicaties_index_documenten`
 * :ref:`admin_publicaties_index_publicaties`
 * :ref:`admin_publicaties_index_onderwerpen`
+* :ref:`admin_publicaties_index_inzage_procedure`
 
 Door hierop te klikken wordt het desbetreffende beheerscherm geopend.
 
@@ -239,3 +240,59 @@ Op een *onderwerp*-registratie zijn de volgende metadata beschikbaar. Op het sch
 **Publicaties**
 
 * Een lijst met publicaties die aan dit onderwerp zijn gekoppeld.
+
+.. _admin_publicaties_index_inzage_procedure:
+
+Inzageprocedures
+----------------
+
+Een *inzageprocedure* legt vast hoe en wanneer burgers kunnen reageren op het
+(voorgenomen) besluit van een :ref:`publicatie <admin_publicaties_index_publicaties>`
+(zie hierboven). Een publicatie heeft hooguit één inzageprocedure. Deze kan ook direct
+op het scherm van de publicatie ingevuld worden.
+
+In het beheerscherm van de *inzageprocedures* wordt een lijst getoond van alle
+*inzageprocedure*-registraties die zijn opgeslagen in de publicatiebank. Op dit scherm
+zijn de volgende acties mogelijk:
+
+* Rechtsboven zit een knop **Inzageprocedure toevoegen** waarmee een registratie toegevoegd kan worden.
+* Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht kan worden.
+* Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere inzageprocedures**. Op dit moment wordt de actie **Geselecteerde inzageprocedures verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *inzageprocedure*-registraties aan te vinken.
+* Onder de (bulk-)actie staat de lijst met *inzageprocedure*-registraties. Door op de kolomtitels te klikken kan de lijst **alfabetisch of chronologisch geordend** worden.
+* Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op automatisch intrekken, beschikbaar rechtsmiddel, datum begin inzagetermijn en datum einde inzagetermijn**.
+* Bij een *inzageprocedure*-registratie kan op de `publicatie` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
+* Bij een *inzageprocedure*-registratie kan op **Toon logs** (rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
+
+Wanneer bij een *inzageprocedure*-registratie op de `publicatie` wordt geklikt, wordt een scherm geopend met de *inzageprocedure*-details.
+Hierop zien we:
+
+* **Alle metadatavelden**. Deze lichten we hieronder toe.
+* Rechtsboven een knop **Toon logs**. Deze toont de volledige :ref:`audit trail<admin_logging_index>` van de *inzageprocedure*-registratie.
+* Rechtsboven een knop **Geschiedenis**. Deze toont de beheer-handelingen die vanuit de Admin-interface zijn uitgevoerd op de registratie.
+* Linksonder de mogelijkheid om **wijzigingen op te slaan**. Er kan voor gekozen worden om na het opslaan direct een nieuwe registratie aan te maken of om direct de huidige registratie nogmaals te wijzigen.
+* Rechtsonder de mogelijkheid om de registratie te **verwijderen**.
+
+Op een *inzageprocedure*-registratie zijn de volgende metadata beschikbaar. Op het scherm worden verplichte velden **dikgedrukt** weergegeven.
+
+**Beschrijving**
+
+* ``Publicatie``. De :ref:`publicatie <admin_publicaties_index_publicaties>` waar de
+  *inzageprocedure* bij hoort.
+* ``Bekendmakings-URL``. De online locatie waar de bekendmaking gepubliceerd is,
+  bijvoorbeeld op officielebekendmakingen.nl.
+* ``Omschrijving``. De toelichting bij de bekendmaking.
+* ``Beschikbaar rechtsmiddel``. Het rechtsmiddel ("zienswijze" of "bezwaar") waarmee
+  burgers op het (voorgenomen) besluit kunnen reageren.
+* ``Reactieformulier-URL``. De URL van het webformulier waarmee het rechtsmiddel
+  ingediend kan worden. Laat je dit veld leeg, dan wordt bij het opslaan de
+  standaard-URL voor het gekozen rechtsmiddel uit de
+  :ref:`algemene instellingen <admin_configuratie_index_alg_inst>` ingevuld.
+* ``UUID``. Een niet-wijzigbaar, automatisch toegekend identificatiekenmerk.
+
+**Handelingen**
+
+* ``Datum begin inzagetermijn``. De datum waarop de inzagetermijn begint.
+* ``Datum einde inzagetermijn``. De datum waarop de inzagetermijn eindigt. Valt deze
+  datum in een weekend of op een feestdag, dan wordt de eerstvolgende werkdag gebruikt.
+* ``Automatisch intrekken``. Een vinkje dat aangeeft of de publicatie automatisch
+  ingetrokken moet worden wanneer de inzagetermijn verstreken is.

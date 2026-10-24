@@ -69,9 +69,60 @@ worden weergegeven.
 
   Deze instelling is noodzakelijk voor de verbinding met het GPP-zoeken-component (of passend alternatief).
 
+* ``Metadata van documenten verwijderen``. Een vinkje dat aangeeft of de metadata (zoals
+  de auteur) uit geüploade documenten verwijderd wordt. Zo is uit een gepubliceerd
+  document niet af te leiden wie het gemaakt of bewerkt heeft. Deze instelling staat
+  standaard aan.
+
+* ``Catalogi API-service``. Een keuzemenu om de relevante
+  :ref:`service <admin_configuratie_index_services>` met verbindingsparameters te
+  selecteren. Mits je de nodige rechten hebt kan je hier ook:
+
+  - klikken op het potloodicoon om de service aan te passen
+  - klikken op het plusicoon om een nieuwe service toe te voegen
+
+  Deze instelling is noodzakelijk voor de verbinding met de achterliggende Catalogi API
+  (bijvoorbeeld die van Open Zaak). Daarin worden de informatieobjecttypen beheerd die
+  de Documenten API voor elk document vereist. De applicatie van de
+  GPP-publicatiebank heeft daar de scopes ``catalogi.lezen`` en ``catalogi.schrijven``
+  nodig.
+
+  Als bij het opslaan de ``Catalogus-URL`` of de ``Standaard-informatieobjecttype-URL``
+  leeg is, maakt de GPP-publicatiebank de catalogus en/of het
+  standaard-informatieobjecttype aan in de Catalogi API. Daarna krijgt op de
+  achtergrond elke :ref:`informatiecategorie <admin_metadata_index_information_categories>`
+  een eigen informatieobjecttype en wordt het informatieobjecttype van alle bestaande
+  documenten in de Documenten API daarop aangepast.
+
+* ``Catalogus-URL``. De URL van de catalogus in de Catalogi API. Laat je dit veld leeg,
+  dan wordt de catalogus bij het opslaan automatisch aangemaakt.
+
+  Een Catalogi API staat maar één catalogus per RSIN toe. Bestaat er al een catalogus
+  voor het RSIN van de organisatie, bijvoorbeeld omdat je terugwisselt naar een eerder
+  gebruikte service, dan moet je de URL van die catalogus zelf invullen.
+
+* ``Standaard-informatieobjecttype-URL``. De URL van het informatieobjecttype voor
+  documenten van een :ref:`publicatie <admin_publicaties_index_publicaties>` zonder
+  :ref:`informatiecategorie <admin_metadata_index_information_categories>`.
+
+  Laat dit veld leeg, ook als je zelf een ``Catalogus-URL`` invult: bij het opslaan
+  wordt het standaard-informatieobjecttype in de catalogus opgezocht, of aangemaakt als
+  het nog niet bestaat. Als beide velden ingevuld zijn, worden de informatiecategorieën
+  en documenten niet gesynchroniseerd.
+
 * ``GPP-app publicatie-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in de GPP-app (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieIntern``).
 
 * ``GPP-burgerportaal publication-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
+
+* ``Reactieformulier-URL zienswijze``. De standaard-URL van het reactieformulier van een
+  :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
+  ``Beschikbaar rechtsmiddel`` "zienswijze". Deze wordt gebruikt als bij de
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
+
+* ``Reactieformulier-URL bezwaar``. De standaard-URL van het reactieformulier van een
+  :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
+  ``Beschikbaar rechtsmiddel`` "bezwaar". Deze wordt gebruikt als bij de
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
 
 .. _admin_configuratie_index_applicatiegroepen:
 

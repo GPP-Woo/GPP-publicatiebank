@@ -347,7 +347,8 @@ paths:
         name: isGereedVoorPublicatie
         schema:
           type: boolean
-        description: Filter documents that are either fully uploaded or not.
+        description: Filter documenten op basis van of ze volledig geüpload zijn of
+          niet.
       - in: query
         name: laatstGewijzigdDatumTot
         schema:
@@ -973,8 +974,9 @@ paths:
   /api/v2/inzageprocedure:
     get:
       operationId: inzageprocedureList
-      description: Returns a paginated result list of existing access procedures.
-      summary: All available access procedures.
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        inzageprocedures.
+      summary: Alle beschikbare inzageprocedures.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1019,8 +1021,8 @@ paths:
         schema:
           type: string
           format: uuid
-        description: Search the access procedure based on the unique identifier (UUID)
-          that represents a publication.
+        description: Filter inzageprocedures op basis van de unieke publicatie-identificatie
+          (UUID) waartoe ze horen.
       tags:
       - Inzage Procedure
       security:
@@ -1034,8 +1036,8 @@ paths:
           description: ''
     post:
       operationId: inzageprocedureCreate
-      description: Create an access procedure.
-      summary: Create an access procedure.
+      description: Maak een inzageprocedure aan.
+      summary: Maak een inzageprocedure aan.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1083,8 +1085,8 @@ paths:
   /api/v2/inzageprocedure/{uuid}:
     get:
       operationId: inzageprocedureRetrieve
-      description: Retrieve an specific access procedure.
-      summary: Retrieve an specific access procedure.
+      description: Haal een specifieke inzageprocedure op.
+      summary: Haal een specifieke inzageprocedure op.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1131,8 +1133,8 @@ paths:
           description: ''
     put:
       operationId: inzageprocedureUpdate
-      description: Update an access procedure entirely.
-      summary: Update an access procedure entirely.
+      description: Werk een inzageprocedure (in zijn geheel) bij.
+      summary: Werk een inzageprocedure (in zijn geheel) bij.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1185,8 +1187,8 @@ paths:
           description: ''
     patch:
       operationId: inzageprocedurePartialUpdate
-      description: Update an access procedure partially.
-      summary: Update an access procedure partially.
+      description: Werk een inzageprocedure (gedeeltelijk) bij.
+      summary: Werk een inzageprocedure (gedeeltelijk) bij.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -1238,8 +1240,8 @@ paths:
           description: ''
     delete:
       operationId: inzageprocedureDestroy
-      description: Destroy an access procedure.
-      summary: Destroy an access procedure.
+      description: Verwijder een inzageprocedure.
+      summary: Verwijder een inzageprocedure.
       parameters:
       - in: header
         name: Audit-Remarks
@@ -2316,8 +2318,8 @@ components:
       - bezwaar
       type: string
       description: |-
-        * `zienswijze` - Perspective
-        * `bezwaar` - Objection
+        * `zienswijze` - Zienswijze
+        * `bezwaar` - Bezwaar
     BlankEnum:
       enum:
       - ''
@@ -2525,7 +2527,8 @@ components:
           - $ref: '#/components/schemas/NestedInzageProcedure'
           readOnly: true
           nullable: true
-          description: The inzage procedure attached to this publication.
+          title: inzageprocedure
+          description: De inzageprocedure horend bij deze publicatie.
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp
@@ -2640,7 +2643,7 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           readOnly: true
           nullable: true
-          description: The creator of the document, derived from the audit headers.
+          description: De aanmaker van het document, afgeleid uit de audit-headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2792,7 +2795,7 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           readOnly: true
           nullable: true
-          description: The creator of the document, derived from the audit headers.
+          description: De aanmaker van het document, afgeleid uit de audit-headers.
         registratiedatum:
           type: string
           format: date-time
@@ -2977,7 +2980,7 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           readOnly: true
           nullable: true
-          description: The creator of the document, derived from the audit headers.
+          description: De aanmaker van het document, afgeleid uit de audit-headers.
         registratiedatum:
           type: string
           format: date-time
@@ -3151,49 +3154,46 @@ components:
         urlBekendmaking:
           type: string
           format: uri
-          title: Announcement URL
-          description: The online location where the announcement is published, for
-            example on 'officielebekendmakingen.nl'.
+          title: Bekendmakings-URL
+          description: De online locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld
+            op 'officielebekendmakingen.nl'.
           maxLength: 1000
         toelichting:
           type: string
           title: Omschrijving
-          description: The description of the announcement.
+          description: De toelichting bij de bekendmaking.
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal procedure
           description: |-
-            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
+            Het rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.
 
-            * `zienswijze` - Perspective
-            * `bezwaar` - Objection
+            * `zienswijze` - Zienswijze
+            * `bezwaar` - Bezwaar
         urlReactieformulier:
           type: string
           format: uri
-          title: Legal notice URL
-          description: "The URL to the web form where citizens can submit the legal
-            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
-            field and the global config. If you do not want to this field to get populated
-            in this fashion ensure to provide it yourself."
+          title: Reactieformulier-URL
+          description: "De URL naar het webformulier waarmee burgers het rechtsmiddel
+            kunnen indienen. \n\n Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel'
+            en de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+            wordt, geef het dan zelf op."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Inzagetermijn in effect from
-          description: The date when the inspection period starts.
+          description: De datum waarop de inzagetermijn begint.
         datumEindeInzagetermijn:
           type: string
           format: date
           title: Datum einde geldigheid
-          description: The date when the inspection period comes to an end.If the
-            end date falls on a saturday, sunday or holiday we automatically push
-            the date back to the first available workday.
+          description: De datum waarop de inzagetermijn eindigt. Als de einddatum
+            op een zaterdag, zondag of feestdag valt, wordt deze automatisch verschoven
+            naar de eerstvolgende werkdag.
         automatischIntrekken:
           type: boolean
-          title: Automatically withdraw
-          description: When enabled, ensure that the publication gets redacted on
-            the configured end date.
+          description: Indien aangevinkt, wordt de publicatie op de ingestelde einddatum
+            automatisch ingetrokken.
       required:
       - beschikbaarRechtsmiddel
       - datumBeginInzagetermijn
@@ -3211,49 +3211,46 @@ components:
         urlBekendmaking:
           type: string
           format: uri
-          title: Announcement URL
-          description: The online location where the announcement is published, for
-            example on 'officielebekendmakingen.nl'.
+          title: Bekendmakings-URL
+          description: De online locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld
+            op 'officielebekendmakingen.nl'.
           maxLength: 1000
         toelichting:
           type: string
           title: Omschrijving
-          description: The description of the announcement.
+          description: De toelichting bij de bekendmaking.
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal procedure
           description: |-
-            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
+            Het rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.
 
-            * `zienswijze` - Perspective
-            * `bezwaar` - Objection
+            * `zienswijze` - Zienswijze
+            * `bezwaar` - Bezwaar
         urlReactieformulier:
           type: string
           format: uri
-          title: Legal notice URL
-          description: "The URL to the web form where citizens can submit the legal
-            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
-            field and the global config. If you do not want to this field to get populated
-            in this fashion ensure to provide it yourself."
+          title: Reactieformulier-URL
+          description: "De URL naar het webformulier waarmee burgers het rechtsmiddel
+            kunnen indienen. \n\n Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel'
+            en de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+            wordt, geef het dan zelf op."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Inzagetermijn in effect from
-          description: The date when the inspection period starts.
+          description: De datum waarop de inzagetermijn begint.
         datumEindeInzagetermijn:
           type: string
           format: date
           title: Datum einde geldigheid
-          description: The date when the inspection period comes to an end.If the
-            end date falls on a saturday, sunday or holiday we automatically push
-            the date back to the first available workday.
+          description: De datum waarop de inzagetermijn eindigt. Als de einddatum
+            op een zaterdag, zondag of feestdag valt, wordt deze automatisch verschoven
+            naar de eerstvolgende werkdag.
         automatischIntrekken:
           type: boolean
-          title: Automatically withdraw
-          description: When enabled, ensure that the publication gets redacted on
-            the configured end date.
+          description: Indien aangevinkt, wordt de publicatie op de ingestelde einddatum
+            automatisch ingetrokken.
       required:
       - beschikbaarRechtsmiddel
       - datumBeginInzagetermijn
@@ -3626,7 +3623,7 @@ components:
           - $ref: '#/components/schemas/Eigenaar'
           readOnly: true
           nullable: true
-          description: The creator of the document, derived from the audit headers.
+          description: De aanmaker van het document, afgeleid uit de audit-headers.
         registratiedatum:
           type: string
           format: date-time
@@ -3663,49 +3660,46 @@ components:
         urlBekendmaking:
           type: string
           format: uri
-          title: Announcement URL
-          description: The online location where the announcement is published, for
-            example on 'officielebekendmakingen.nl'.
+          title: Bekendmakings-URL
+          description: De online locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld
+            op 'officielebekendmakingen.nl'.
           maxLength: 1000
         toelichting:
           type: string
           title: Omschrijving
-          description: The description of the announcement.
+          description: De toelichting bij de bekendmaking.
         beschikbaarRechtsmiddel:
           allOf:
           - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
-          title: Available legal procedure
           description: |-
-            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
+            Het rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.
 
-            * `zienswijze` - Perspective
-            * `bezwaar` - Objection
+            * `zienswijze` - Zienswijze
+            * `bezwaar` - Bezwaar
         urlReactieformulier:
           type: string
           format: uri
-          title: Legal notice URL
-          description: "The URL to the web form where citizens can submit the legal
-            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
-            field and the global config. If you do not want to this field to get populated
-            in this fashion ensure to provide it yourself."
+          title: Reactieformulier-URL
+          description: "De URL naar het webformulier waarmee burgers het rechtsmiddel
+            kunnen indienen. \n\n Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel'
+            en de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+            wordt, geef het dan zelf op."
           maxLength: 1000
         datumBeginInzagetermijn:
           type: string
           format: date
-          title: Inzagetermijn in effect from
-          description: The date when the inspection period starts.
+          description: De datum waarop de inzagetermijn begint.
         datumEindeInzagetermijn:
           type: string
           format: date
           title: Datum einde geldigheid
-          description: The date when the inspection period comes to an end.If the
-            end date falls on a saturday, sunday or holiday we automatically push
-            the date back to the first available workday.
+          description: De datum waarop de inzagetermijn eindigt. Als de einddatum
+            op een zaterdag, zondag of feestdag valt, wordt deze automatisch verschoven
+            naar de eerstvolgende werkdag.
         automatischIntrekken:
           type: boolean
-          title: Automatically withdraw
-          description: When enabled, ensure that the publication gets redacted on
-            the configured end date.
+          description: Indien aangevinkt, wordt de publicatie op de ingestelde einddatum
+            automatisch ingetrokken.
     PatchedOrganisation:
       type: object
       properties:
@@ -4042,7 +4036,8 @@ components:
           - $ref: '#/components/schemas/NestedInzageProcedure'
           readOnly: true
           nullable: true
-          description: The inzage procedure attached to this publication.
+          title: inzageprocedure
+          description: De inzageprocedure horend bij deze publicatie.
       required:
       - archiefactiedatum
       - archiefnominatie
@@ -4322,7 +4317,8 @@ components:
           - $ref: '#/components/schemas/NestedInzageProcedure'
           readOnly: true
           nullable: true
-          description: The inzage procedure attached to this publication.
+          title: inzageprocedure
+          description: De inzageprocedure horend bij deze publicatie.
       required:
       - diWooInformatieCategorieen
       - gepubliceerdOp

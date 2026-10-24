@@ -1069,6 +1069,7 @@ class InzageProcedureAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         "datum_einde_inzagetermijn",
         "automatisch_intrekken",
         "uuid",
+        "show_actions",
     )
     readonly_fields = ("uuid",)
     search_fields = (
@@ -1098,3 +1099,14 @@ class InzageProcedureAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             )
 
         super().save_model(request, obj, form, change)
+
+    @admin.display(description=_("actions"))
+    def show_actions(self, obj: InzageProcedure) -> str:
+        actions = [
+            get_logs_link(obj),
+        ]
+        return format_html_join(
+            " | ",
+            '<a href="{}">{}</a>',
+            actions,
+        )
