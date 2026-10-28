@@ -177,7 +177,7 @@ django-upgrade-check==1.1.0
     # via
     #   -r requirements/base.in
     #   open-api-framework
-djangorestframework==3.18.1
+djangorestframework==3.18.3
     # via
     #   djangorestframework-recursive
     #   drf-polymorphic
