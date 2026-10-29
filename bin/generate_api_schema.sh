@@ -4,19 +4,39 @@
 #
 # Run this script from the root of the repository:
 #
-#   ./bin/generate_api_schema.sh [outfile]
+#   ./bin/generate_api_schema.sh [application] [outfile]
 #
-# 'outfile' defaults to `src/openapi.yml`
+# 'outfile' defaults to `src/woo_publications/api/[application]_api/openapi.yml`
 #
-# For multiple-major version support, take a look at the objects-api and tweak
-# accordingly.
-#
-set -eu -o pipefail
+set -e -o pipefail
 
-OUTFILE=${1:-src/woo_publications/api/openapi.yaml}
+if [[ -z "$VIRTUAL_ENV" ]] && [[ ! -v GITHUB_ACTIONS ]]; then
+    echo "You need to activate your virtual env before running this script"
+    exit 1
+fi
 
-src/manage.py spectacular \
+if [ "$1" = "" ]; then
+    echo "You need to pass the API name in the first argument"
+    exit 1
+fi
+
+case "$1" in
+    application|researcher)
+        ;;
+    *)
+        echo "The valid first argument options are 'application' and 'researcher'."
+        exit 1
+esac
+
+export SCHEMA_PATH=src/woo_publications/api/$1_api
+
+OUTPUT_FILE=$2
+
+echo "Generating OAS schema for $1..."
+src/manage.py spectacular_for_api \
+    --file ${OUTPUT_FILE:-$SCHEMA_PATH/openapi.yaml} \
+    --lang="nl-nl" \
     --validate \
-    --fail-on-warn \
-    --lang=nl \
-    --file "$OUTFILE"
+    --component $1_api
+
+echo "Done."
