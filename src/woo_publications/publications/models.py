@@ -177,6 +177,18 @@ class Topic(models.Model):
                 )
             )
 
+    @property
+    def get_published_publication_uuids(
+        self,
+    ) -> models.QuerySet[Publication, UUID]:
+        return (
+            self.publication_set.filter(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+            .only("uuid")
+            .values_list("uuid", flat=True)
+        )
+
 
 class Publication(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django

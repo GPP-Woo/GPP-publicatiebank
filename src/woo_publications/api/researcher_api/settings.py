@@ -6,5 +6,13 @@ custom_settings = {
     "TITLE": "GPP Publications - Researcher API",
     "DESCRIPTION": _("TODO"),
     "VERSION": settings.RESEARCHER_API_VERSION,
-    "TAGS": [],
+    # TODO: remove this in favor for automated tag detection #478
+    "TAGS": [
+        {"name": "Documenten"},
+        {"name": "Informatiecategorieën"},
+        {"name": "Onderwerpen"},
+        {"name": "Organisaties"},
+        {"name": "Publicaties"},
+        {"name": "Themas"},
+    ],
 }

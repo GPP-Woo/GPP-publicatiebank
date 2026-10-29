@@ -4,6 +4,17 @@ from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
 from rest_framework import routers
 
+from woo_publications.metadata.api.viewsets.researcher import (
+    InformationCategoryViewSet,
+    OrganisationViewSet,
+    ThemeViewSet,
+)
+from woo_publications.publications.api.viewsets.researcher import (
+    DocumentViewSet,
+    PublicationViewSet,
+    TopicViewSet,
+)
+
 from .settings import custom_settings
 
 app_name = "researcher"
@@ -11,6 +22,12 @@ app_name = "researcher"
 router = routers.DefaultRouter(trailing_slash=False, use_regex_path=False)
 router.include_format_suffixes = False
 
+router.register("documenten", DocumentViewSet)
+router.register("informatiecategorieen", InformationCategoryViewSet)
+router.register("organisaties", OrganisationViewSet)
+router.register("publicaties", PublicationViewSet)
+router.register("themas", ThemeViewSet)
+router.register("onderwerpen", TopicViewSet)
 
 urlpatterns = [
     path(

@@ -27,3 +27,22 @@ class TopicSerializer(serializers.ModelSerializer[Topic]):
             "registratiedatum",
             "laatst_gewijzigd_datum",
         )
+
+
+class TopicResearcherSerializer(TopicSerializer):
+    publicaties = serializers.ListField(
+        child=serializers.UUIDField(),
+        source="get_published_publication_uuids",
+        help_text=_("The publication attached to this topic."),
+        read_only=True,
+    )
+
+    class Meta(TopicSerializer.Meta):
+        fields = (
+            "uuid",
+            "officiele_titel",
+            "omschrijving",
+            "afbeelding",
+            "publicaties",
+            "laatst_gewijzigd_datum",
+        )
