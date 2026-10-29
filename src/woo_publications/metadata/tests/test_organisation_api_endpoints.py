@@ -24,9 +24,9 @@ class ThemeAPIAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:organisation-list")
+        list_endpoint = reverse("standard:organisation-list")
         detail_endpoint = reverse(
-            "api:organisation-detail", kwargs={"uuid": str(uuid4())}
+            "standard:organisation-detail", kwargs={"uuid": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -51,9 +51,9 @@ class ThemeAPIAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
 
     def test_api_key_result_in_401_with_wrong_credentials(self):
         organisation = OrganisationFactory.create()
-        list_url = reverse("api:organisation-list")
+        list_url = reverse("standard:organisation-list")
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
 
@@ -98,7 +98,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
         }
 
         response = self.client.get(
-            reverse("api:organisation-list"), headers=AUDIT_HEADERS
+            reverse("standard:organisation-list"), headers=AUDIT_HEADERS
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -123,7 +123,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.municipality_list,
         )
 
-        list_url = reverse("api:organisation-list")
+        list_url = reverse("standard:organisation-list")
 
         with self.subTest("default filter on active true"):
             response = self.client.get(list_url, headers=AUDIT_HEADERS)
@@ -192,7 +192,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.municipality_list,
         )
 
-        list_url = reverse("api:organisation-list")
+        list_url = reverse("standard:organisation-list")
 
         with self.subTest("test_with_exact_match"):
             response = self.client.get(
@@ -231,7 +231,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.municipality_list,
         )
 
-        list_url = reverse("api:organisation-list")
+        list_url = reverse("standard:organisation-list")
 
         with self.subTest("test_with_exact_match"):
             response = self.client.get(
@@ -282,7 +282,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             is_actief=True,
             oorsprong=OrganisationOrigins.municipality_list,
         )
-        list_url = reverse("api:organisation-list")
+        list_url = reverse("standard:organisation-list")
 
         with self.subTest("test_with_exact_match"):
             response = self.client.get(
@@ -310,7 +310,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.custom_entry,
         )
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
 
@@ -330,7 +330,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
         self.assertEqual(data, expected_data)
 
     def test_create_organisation(self):
-        url = reverse("api:organisation-list")
+        url = reverse("standard:organisation-list")
         data = {
             "naam": "object one",
             "isActief": True,
@@ -360,7 +360,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.custom_entry,
         )
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
         data = {
@@ -392,7 +392,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.municipality_list,
         )
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
 
@@ -441,7 +441,7 @@ class OrganisationApiTests(TokenAuthMixin, APITestCase):
             oorsprong=OrganisationOrigins.custom_entry,
         )
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
 

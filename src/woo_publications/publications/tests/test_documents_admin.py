@@ -342,7 +342,7 @@ class TestDocumentAdmin(WebTest):
         added_item = Document.objects.order_by("-pk").first()
         assert added_item is not None
         download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(added_item.uuid)}
+            "standard:document-download", kwargs={"uuid": str(added_item.uuid)}
         )
         mock_index_document_delay.assert_called_once_with(
             document_id=added_item.pk,
@@ -411,7 +411,7 @@ class TestDocumentAdmin(WebTest):
             kwargs={"object_id": document.id},
         )
         download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(document.uuid)}
         )
 
         response = self.app.get(reverse_url, user=self.user)
@@ -605,7 +605,7 @@ class TestDocumentAdmin(WebTest):
             user=self.user,
         )
         download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(published_doc.uuid)}
+            "standard:document-download", kwargs={"uuid": str(published_doc.uuid)}
         )
         form = changelist.forms["changelist-form"]
 

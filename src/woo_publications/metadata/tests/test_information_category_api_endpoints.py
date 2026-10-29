@@ -24,9 +24,9 @@ class InformationCategoryAPIAuthorizationAndPermissionTests(
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:informationcategory-list")
+        list_endpoint = reverse("standard:informationcategory-list")
         detail_endpoint = reverse(
-            "api:informationcategory-detail", kwargs={"uuid": str(uuid.uuid4())}
+            "standard:informationcategory-detail", kwargs={"uuid": str(uuid.uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -41,9 +41,9 @@ class InformationCategoryAPIAuthorizationAndPermissionTests(
 
     def test_api_key_result_in_401_with_wrong_credentials(self):
         information_category = InformationCategoryFactory.create()
-        list_url = reverse("api:informationcategory-list")
+        list_url = reverse("standard:informationcategory-list")
         detail_url = reverse(
-            "api:informationcategory-detail",
+            "standard:informationcategory-detail",
             kwargs={"uuid": str(information_category.uuid)},
         )
 
@@ -71,7 +71,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             oorsprong=InformationCategoryOrigins.custom_entry,
         )
 
-        list_url = reverse("api:informationcategory-list")
+        list_url = reverse("standard:informationcategory-list")
 
         response = self.client.get(list_url, headers=AUDIT_HEADERS)
 
@@ -123,7 +123,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             oorsprong=InformationCategoryOrigins.custom_entry,
         )
 
-        list_url = reverse("api:informationcategory-list")
+        list_url = reverse("standard:informationcategory-list")
 
         expected_first_item_data = {
             "uuid": str(information_category.uuid),
@@ -177,7 +177,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             oorsprong=InformationCategoryOrigins.custom_entry,
         )
 
-        list_url = reverse("api:informationcategory-list")
+        list_url = reverse("standard:informationcategory-list")
 
         expected_item_one_data = {
             "uuid": str(information_category.uuid),
@@ -241,7 +241,7 @@ class InformationCategoryTests(TokenAuthMixin, APITestCase):
             oorsprong=InformationCategoryOrigins.value_list,
         )
         detail_url = reverse(
-            "api:informationcategory-detail",
+            "standard:informationcategory-detail",
             kwargs={"uuid": str(information_category.uuid)},
         )
 

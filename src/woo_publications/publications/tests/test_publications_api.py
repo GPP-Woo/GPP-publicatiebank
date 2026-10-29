@@ -55,9 +55,9 @@ class PublicationApiAuthorizationAndPermissionTests(
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:publication-list")
+        list_endpoint = reverse("standard:publication-list")
         detail_endpoint = reverse(
-            "api:publication-detail", kwargs={"uuid": str(uuid4())}
+            "standard:publication-detail", kwargs={"uuid": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -87,9 +87,9 @@ class PublicationApiAuthorizationAndPermissionTests(
 
     def test_api_key_result_in_401_with_wrong_credentials(self):
         publication = PublicationFactory.create()
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -159,7 +159,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
         response = self.client.get(
-            reverse("api:publication-list"), headers=AUDIT_HEADERS
+            reverse("standard:publication-list"), headers=AUDIT_HEADERS
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -273,7 +273,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # registratiedatum
         with self.subTest("registratiedatum ascending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "registratiedatum"},
                 headers=AUDIT_HEADERS,
             )
@@ -287,7 +287,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("registratiedatum descending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "-registratiedatum"},
                 headers=AUDIT_HEADERS,
             )
@@ -302,7 +302,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # Officiele titel
         with self.subTest("officiele title ascending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "officiele_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -316,7 +316,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("officiele title descending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "-officiele_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -331,7 +331,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # short titel
         with self.subTest("verkorte titel ascending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "verkorte_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -345,7 +345,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("verkorte titel descending"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"sorteer": "-verkorte_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -376,7 +376,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             informatie_categorieen=[self.inspannings_verplichting]
         )
 
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
 
         with self.subTest("filter on a single information category"):
             response = self.client.get(
@@ -447,7 +447,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         publication2 = PublicationFactory.create(onderwerpen=[topic2])
         publication3 = PublicationFactory.create(onderwerpen=[topic3, topic4])
 
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
 
         with self.subTest("filter on a single topic"):
             response = self.client.get(
@@ -509,7 +509,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("gte specific tests"):
             with self.subTest("filter on gte date is exact match"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"registratiedatumVanaf": "2024-09-26T12:00:00-00:00"},
                     headers=AUDIT_HEADERS,
                 )
@@ -523,7 +523,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             with self.subTest("filter on gte date is greater then publication"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"registratiedatumVanaf": "2024-09-26T00:00:00-00:00"},
                     headers=AUDIT_HEADERS,
                 )
@@ -538,7 +538,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("lt specific tests"):
             with self.subTest("filter on lt date is lesser then publication"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"registratiedatumTot": "2024-09-25T00:00:00-00:00"},
                     headers=AUDIT_HEADERS,
                 )
@@ -553,7 +553,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("lte specific tests"):
             with self.subTest("filter on lt date is exact match"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"registratiedatumTotEnMet": "2024-09-24T12:00:00-00:00"},
                     headers=AUDIT_HEADERS,
                 )
@@ -569,7 +569,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter on lte date is exact match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"registratiedatumTotEnMet": "2024-09-25T12:00:00-00:00"},
                 headers=AUDIT_HEADERS,
             )
@@ -586,7 +586,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "filter both lt and gte to find publication between two dates"
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {
                     "registratiedatumVanaf": "2024-09-25T00:00:00-00:00",
                     "registratiedatumTot": "2024-09-26T00:00:00-00:00",
@@ -605,7 +605,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "filter both lte and gte to find publication between two dates"
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {
                     "registratiedatumVanaf": "2024-09-25T12:00:00-00:00",
                     "registratiedatumTotEnMet": "2024-09-25T12:00:00-00:00",
@@ -637,7 +637,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("gte specific tests"):
             with self.subTest("filter on gte date is exact match"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"archiefactiedatumVanaf": "2024-09-27"},
                     headers=AUDIT_HEADERS,
                 )
@@ -651,7 +651,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
             with self.subTest("filter on gte date is greater then publication"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"archiefactiedatumVanaf": "2024-09-26"},
                     headers=AUDIT_HEADERS,
                 )
@@ -666,7 +666,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("lt specific tests"):
             with self.subTest("filter on lt date is lesser then publication"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"archiefactiedatumTot": "2024-09-24"},
                     headers=AUDIT_HEADERS,
                 )
@@ -681,7 +681,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with self.subTest("lte specific tests"):
             with self.subTest("filter on lt date is exact match"):
                 response = self.client.get(
-                    reverse("api:publication-list"),
+                    reverse("standard:publication-list"),
                     {"archiefactiedatumTotEnMet": "2024-09-23"},
                     headers=AUDIT_HEADERS,
                 )
@@ -697,7 +697,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter on lte date is exact match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"archiefactiedatumTotEnMet": "2024-09-25"},
                 headers=AUDIT_HEADERS,
             )
@@ -714,7 +714,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "filter both lt and gte to find publication between two dates"
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {
                     "archiefactiedatumVanaf": "2024-09-24",
                     "archiefactiedatumTot": "2024-09-26",
@@ -734,7 +734,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             "publication 'between' two dates"
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {
                     "archiefactiedatumVanaf": "2024-09-25",
                     "archiefactiedatumTotEnMet": "2024-09-25",
@@ -766,7 +766,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("officele titel exacte match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"search": "Een prachtige titel met een heleboel woorden."},
                 headers=AUDIT_HEADERS,
             )
@@ -780,7 +780,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("verkorte titel exacte match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"search": "waarom is deze titel anders."},
                 headers=AUDIT_HEADERS,
             )
@@ -794,7 +794,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("officele titel partial match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"search": "prachtige titel met"},
                 headers=AUDIT_HEADERS,
             )
@@ -808,7 +808,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("verkorte titel partial match"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"search": "deze titel anders"},
                 headers=AUDIT_HEADERS,
             )
@@ -822,7 +822,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("partial match both objects different fields"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"search": "titel."},
                 headers=AUDIT_HEADERS,
             )
@@ -849,7 +849,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
 
         response = self.client.get(
-            reverse("api:publication-list"),
+            reverse("standard:publication-list"),
             {"archiefnominatie": ArchiveNominationChoices.retain},
             headers=AUDIT_HEADERS,
         )
@@ -962,7 +962,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             freeze_time("2024-10-01T00:00:00-00:00"),
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaar": "123"},
                 headers=AUDIT_HEADERS,
             )
@@ -976,7 +976,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter with none existing eigenaar"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaar": "39834594397543"},
                 headers=AUDIT_HEADERS,
             )
@@ -990,7 +990,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             freeze_time("2024-10-01T00:00:00-00:00"),
         ):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaar": ""},
                 headers=AUDIT_HEADERS,
             )
@@ -1016,7 +1016,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter with existing owner group"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaarGroep": "456"},
                 headers=AUDIT_HEADERS,
             )
@@ -1032,7 +1032,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter with non-existent owner group"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaarGroep": "999"},
                 headers=AUDIT_HEADERS,
             )
@@ -1045,7 +1045,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("filter with non input"):
             response = self.client.get(
-                reverse("api:publication-list"),
+                reverse("standard:publication-list"),
                 {"eigenaarGroep": ""},
                 headers=AUDIT_HEADERS,
             )
@@ -1069,7 +1069,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
 
         response = self.client.get(
-            reverse("api:publication-list"),
+            reverse("standard:publication-list"),
             {"eigenaarGroep": "456", "eigenaar": "123"},
             headers=AUDIT_HEADERS,
         )
@@ -1088,7 +1088,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.concept
         )
         revoked = PublicationFactory.create(revoked=True)
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
 
         with self.subTest("filter on published publications"):
             response = self.client.get(
@@ -1161,7 +1161,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         PublicationIdentifierFactory(
             publicatie=publication_1, kenmerk="kenmerk-1", bron="bron-1"
         )
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
 
         with self.subTest("filter on none existing kenmerk"):
             response = self.client.get(
@@ -1234,7 +1234,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             automatisch_intrekken=False,
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1301,7 +1301,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("detail endpoint"):
             endpoint = reverse(
-                "api:publication-detail", kwargs={"uuid": publication.uuid}
+                "standard:publication-detail", kwargs={"uuid": publication.uuid}
             )
 
             response = self.client.get(endpoint, headers=AUDIT_HEADERS)
@@ -1312,7 +1312,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
         with self.subTest("list endpoint"):
-            endpoint = reverse("api:publication-list")
+            endpoint = reverse("standard:publication-list")
 
             response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -1335,7 +1335,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("detail endpoint"):
             endpoint = reverse(
-                "api:publication-detail", kwargs={"uuid": publication.uuid}
+                "standard:publication-detail", kwargs={"uuid": publication.uuid}
             )
 
             response = self.client.get(endpoint, headers=AUDIT_HEADERS)
@@ -1346,7 +1346,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
         with self.subTest("list endpoint"):
-            endpoint = reverse("api:publication-list")
+            endpoint = reverse("standard:publication-list")
 
             response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -1371,7 +1371,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 informatie_categorieen=[custom_ic, custom_ic2]
             )
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
 
@@ -1388,7 +1388,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 informatie_categorieen=[value_list_ic, value_list_ic2]
             )
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
 
@@ -1413,7 +1413,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 ]
             )
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
 
@@ -1439,7 +1439,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             3, is_actief=True
         )
         deactivated_organisation = OrganisationFactory.create(is_actief=False)
-        url = reverse("api:publication-list")
+        url = reverse("standard:publication-list")
 
         with self.subTest("no information categories results in error"):
             data = {
@@ -1688,7 +1688,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
 
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1807,7 +1807,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1857,7 +1857,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publisher=organisation,
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1900,7 +1900,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             archiefactiedatum="2034-09-24",
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1971,7 +1971,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             datum_einde_geldigheid=datetime.date(2025, 6, 19),
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -1993,7 +1993,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publicatie=publication, kenmerk="kenmerk 1", bron="bron 1"
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2078,7 +2078,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
         with self.subTest("validate duplicated items given"):
             url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
             data = {
@@ -2098,7 +2098,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("other publication is allowed to have same item"):
             url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication2.uuid)},
             )
             data = {
@@ -2120,7 +2120,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
 
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2189,7 +2189,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             informatie_categorieen=[ic], eigenaar_groep=None
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
         assert not OrganisationUnit.objects.exists()
@@ -2272,7 +2272,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             assert not OrganisationUnit.objects.filter(
                 identifier="from-create"
             ).exists()
-            url = reverse("api:publication-list")
+            url = reverse("standard:publication-list")
             data = {
                 "publicatiestatus": PublicationStatusOptions.concept,
                 "officieleTitel": "title one",
@@ -2299,7 +2299,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         )
         detail_url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2314,7 +2314,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
     ):
         information_category = InformationCategoryFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
-        list_url = reverse("api:publication-list")
+        list_url = reverse("standard:publication-list")
         body = {
             "informatieCategorieen": [str(information_category.uuid)],
             "publisher": str(organisation.uuid),
@@ -2351,7 +2351,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                     informatie_categorieen=[information_category],
                 )
                 endpoint = reverse(
-                    "api:publication-detail",
+                    "standard:publication-detail",
                     kwargs={"uuid": str(publication.uuid)},
                 )
                 body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
@@ -2377,7 +2377,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
         document_1, document_2 = DocumentFactory.create_batch(2, publicatie=publication)
         endpoint = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2463,7 +2463,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("update concept with new publisher rsin"):
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(concept.uuid)},
             )
 
@@ -2480,7 +2480,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("update published with global config rsin"):
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(published.uuid)},
             )
 
@@ -2519,7 +2519,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("update concept with new publisher rsin"):
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(concept.uuid)},
             )
 
@@ -2534,7 +2534,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("update published with global config rsin"):
             detail_url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(published.uuid)},
             )
 
@@ -2562,7 +2562,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("eigenaarGroep in list response"):
             list_response = self.client.get(
-                reverse("api:publication-list"), headers=AUDIT_HEADERS
+                reverse("standard:publication-list"), headers=AUDIT_HEADERS
             )
 
             self.assertEqual(list_response.status_code, status.HTTP_200_OK)
@@ -2577,7 +2577,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("eigenaarGroep in detail response"):
             detail_response = self.client.get(
-                reverse("api:publication-detail", kwargs={"uuid": publication.uuid}),
+                reverse("standard:publication-detail", kwargs={"uuid": publication.uuid}),
                 headers=AUDIT_HEADERS,
             )
 
@@ -2594,7 +2594,7 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
 class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
     def test_create_concept_with_only_officiele_titel(self):
-        url = reverse("api:publication-list")
+        url = reverse("standard:publication-list")
         data = {
             "publicatiestatus": PublicationStatusOptions.concept,
             "officieleTitel": "title one",
@@ -2610,7 +2610,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.concept,
         )
         url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
         data = {
@@ -2623,7 +2623,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_publication_fields_empty(self):
-        url = reverse("api:publication-list")
+        url = reverse("standard:publication-list")
         with self.subTest("create concept publication doesn't raise errors"):
             data = {
                 # required:
@@ -2737,7 +2737,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 eigenaar=organisation_member,
             )
             url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
 
@@ -2781,7 +2781,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
                 eigenaar=organisation_member,
             )
             url = reverse(
-                "api:publication-detail",
+                "standard:publication-detail",
                 kwargs={"uuid": str(publication.uuid)},
             )
 
@@ -2819,7 +2819,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             )
 
     def test_create_publication_status_concept(self):
-        url = reverse("api:publication-list")
+        url = reverse("standard:publication-list")
 
         data = {
             "publicatiestatus": PublicationStatusOptions.concept,
@@ -2833,7 +2833,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
         )
 
     def test_create_publication_status_publish(self):
-        url = reverse("api:publication-list")
+        url = reverse("standard:publication-list")
 
         data = {
             "publicatiestatus": PublicationStatusOptions.published,
@@ -2857,7 +2857,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.concept,
         )
         url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2882,7 +2882,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.concept,
         )
         url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -2910,7 +2910,7 @@ class PublicationApiRequiredFieldsTestCase(TokenAuthMixin, APITestCase):
             publicatiestatus=PublicationStatusOptions.published,
         )
         url = reverse(
-            "api:publication-detail",
+            "standard:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 

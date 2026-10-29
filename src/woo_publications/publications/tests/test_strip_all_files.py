@@ -92,10 +92,10 @@ class StripAllFilesTestCase(TestCase):
             any_order=True,
         )
         complete_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(upload_complete.uuid)}
+            "standard:document-download", kwargs={"uuid": str(upload_complete.uuid)}
         )
         incomplete_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(upload_incomplete.uuid)}
+            "standard:document-download", kwargs={"uuid": str(upload_incomplete.uuid)}
         )
 
         mock_index_document.assert_has_calls(

@@ -31,9 +31,9 @@ class InzageProcedureApiAuthorizationAndPermissionTests(
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:inzageprocedure-list")
+        list_endpoint = reverse("standard:inzageprocedure-list")
         detail_endpoint = reverse(
-            "api:inzageprocedure-detail", kwargs={"uuid": str(uuid4())}
+            "standard:inzageprocedure-detail", kwargs={"uuid": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -63,9 +63,9 @@ class InzageProcedureApiAuthorizationAndPermissionTests(
 
     def test_api_key_result_in_301_with_wrong_credentials(self):
         inzage_procedure = InzageProcedureFactory.create()
-        list_url = reverse("api:inzageprocedure-list")
+        list_url = reverse("standard:inzageprocedure-list")
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -115,7 +115,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         )
 
         response = self.client.get(
-            reverse("api:inzageprocedure-list"), headers=AUDIT_HEADERS
+            reverse("standard:inzageprocedure-list"), headers=AUDIT_HEADERS
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -174,7 +174,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         )
 
         response = self.client.get(
-            reverse("api:inzageprocedure-list"),
+            reverse("standard:inzageprocedure-list"),
             {"publicatie": str(publication_2.uuid)},
             headers=AUDIT_HEADERS,
         )
@@ -209,7 +209,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
         )
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -236,7 +236,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         assert InzageProcedure.objects.count() == 0
 
         publication = PublicationFactory.create()
-        url = reverse("api:inzageprocedure-list")
+        url = reverse("standard:inzageprocedure-list")
         body = {
             "publicatie": str(publication.uuid),
             "urlBekendmaking": "https://www.example.com/bekendmaking",
@@ -274,7 +274,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         assert InzageProcedure.objects.count() == 0
 
         publication = PublicationFactory.create()
-        url = reverse("api:inzageprocedure-list")
+        url = reverse("standard:inzageprocedure-list")
         body = {
             "publicatie": str(publication.uuid),
             "urlBekendmaking": "https://www.example.com/bekendmaking",
@@ -298,7 +298,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
         assert InzageProcedure.objects.count() == 0
 
         publication = PublicationFactory.create()
-        url = reverse("api:inzageprocedure-list")
+        url = reverse("standard:inzageprocedure-list")
         body = {
             "publicatie": str(publication.uuid),
             "urlBekendmaking": "https://www.example.com/bekendmaking",
@@ -317,7 +317,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
 
     def test_create_inzage_procedure_auto_fills_url_reactieformulier_field(self):
         publication = PublicationFactory.create()
-        url = reverse("api:inzageprocedure-list")
+        url = reverse("standard:inzageprocedure-list")
         body = {
             "publicatie": str(publication.uuid),
             "urlBekendmaking": "https://www.example.com/bekendmaking",
@@ -351,7 +351,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             automatisch_intrekken=False,
         )
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
         body = {
@@ -384,7 +384,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             automatisch_intrekken=False,
         )
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -422,7 +422,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
             automatisch_intrekken=False,
         )
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -443,7 +443,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
 
         inzage_procedure = InzageProcedureFactory.create()
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -462,7 +462,7 @@ class InzageProcedureApiTests(TokenAuthMixin, APITestCase):
     def test_destroy_inzage_procedure(self):
         inzage_procedure = InzageProcedureFactory.create()
         detail_url = reverse(
-            "api:inzageprocedure-detail",
+            "standard:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
