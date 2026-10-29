@@ -31,7 +31,9 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
         list_endpoint = reverse("standard:topic-list")
-        detail_endpoint = reverse("standard:topic-detail", kwargs={"uuid": str(uuid4())})
+        detail_endpoint = reverse(
+            "standard:topic-detail", kwargs={"uuid": str(uuid4())}
+        )
 
         with self.subTest(action="list"):
             response = self.client.get(list_endpoint, headers={})
@@ -78,7 +80,9 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         publication = PublicationFactory.create(onderwerpen=[topic])
         publication2 = PublicationFactory.create(onderwerpen=[topic2])
 
-        response = self.client.get(reverse("standard:topic-list"), headers=AUDIT_HEADERS)
+        response = self.client.get(
+            reverse("standard:topic-list"), headers=AUDIT_HEADERS
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()

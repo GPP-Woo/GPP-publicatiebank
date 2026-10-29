@@ -2577,7 +2577,9 @@ class PublicationApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("eigenaarGroep in detail response"):
             detail_response = self.client.get(
-                reverse("standard:publication-detail", kwargs={"uuid": publication.uuid}),
+                reverse(
+                    "standard:publication-detail", kwargs={"uuid": publication.uuid}
+                ),
                 headers=AUDIT_HEADERS,
             )
 

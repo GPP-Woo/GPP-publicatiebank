@@ -299,7 +299,9 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             publicatie=publication,
             publicatiestatus=PublicationStatusOptions.concept,
         )
-        endpoint = reverse("standard:publication-detail", kwargs={"uuid": publication.uuid})
+        endpoint = reverse(
+            "standard:publication-detail", kwargs={"uuid": publication.uuid}
+        )
 
         with (
             self.captureOnCommitCallbacks(execute=True),
@@ -353,7 +355,9 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 publicatie=publication,
                 publicatiestatus=PublicationStatusOptions.revoked,
             )
-        endpoint = reverse("standard:publication-detail", kwargs={"uuid": publication.uuid})
+        endpoint = reverse(
+            "standard:publication-detail", kwargs={"uuid": publication.uuid}
+        )
 
         with (
             self.captureOnCommitCallbacks(execute=True),
@@ -636,7 +640,9 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             document_subtest_kwargs = {
                 "publication_status": document.publicatie.publicatiestatus
             }
-            endpoint = reverse("standard:document-detail", kwargs={"uuid": document.uuid})
+            endpoint = reverse(
+                "standard:document-detail", kwargs={"uuid": document.uuid}
+            )
 
             with self.subTest("concept (blocked)", **document_subtest_kwargs):
                 response = self.client.patch(

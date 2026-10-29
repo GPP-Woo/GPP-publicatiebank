@@ -1046,7 +1046,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Creates the absolute document URI for the document-download endpoint.
         """
         return reverse(
-            "standard:document-download", kwargs={"uuid": str(self.uuid)}, request=request
+            "standard:document-download",
+            kwargs={"uuid": str(self.uuid)},
+            request=request,
         )
 
     @property
