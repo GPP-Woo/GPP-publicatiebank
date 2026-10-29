@@ -4,15 +4,18 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, viewsets
 
-from woo_publications.logging.service import (
+from woo_publications.logging.api_tools import (
     AuditTrailCreateMixin,
     AuditTrailRetrieveMixin,
     AuditTrailUpdateMixin,
 )
 
-from ..models import InformationCategory, Organisation, Theme
-from .filters import InformationCategoryFilterSet, OrganisationFilterSet
-from .serializers import (
+from ...models import InformationCategory, Organisation, Theme
+from ..filters import (
+    InformationCategoryFilterSet,
+    OrganisationFilterSet,
+)
+from ..serializers import (
     InformationCategorySerializer,
     OrganisationSerializer,
     ThemeSerializer,

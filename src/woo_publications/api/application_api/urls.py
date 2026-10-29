@@ -8,12 +8,12 @@ from drf_spectacular.views import (
 from rest_framework import routers
 
 from woo_publications.accounts.api.viewsets import OrganisationUnitViewSet
-from woo_publications.metadata.api.viewsets import (
+from woo_publications.metadata.api.viewsets.application import (
     InformationCategoryViewSet,
     OrganisationViewSet,
     ThemeViewSet,
 )
-from woo_publications.publications.api.viewsets import (
+from woo_publications.publications.api.viewsets.application import (
     DocumentViewSet,
     InzageProcedureViewSet,
     PublicationViewSet,
