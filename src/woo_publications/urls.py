@@ -8,6 +8,8 @@ from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 
+from maykin_common.api_reference.views import ComponentIndexView
+
 handler500 = "maykin_common.views.server_error"
 admin.site.enable_nav_sidebar = False
 admin.site.site_header = _("GPP publications")
@@ -32,6 +34,22 @@ urlpatterns = [
     path("api/", include("woo_publications.api.urls")),
     path("researcher/api/", include("woo_publications.api.researcher_api.urls")),
     path("standard/api/", include("woo_publications.api.application_api.urls")),
+    path(
+        "standard/",
+        ComponentIndexView.as_view(
+            template_name="api_index.html",
+            component="standard",
+        ),
+        name="index-application",
+    ),
+    path(
+        "researcher/",
+        ComponentIndexView.as_view(
+            template_name="api_index.html",
+            component="researcher",
+        ),
+        name="index-researcher",
+    ),
     # Simply show the index template.
     path("", TemplateView.as_view(template_name="index.html"), name="root"),
     path("auth/oidc/", include("mozilla_django_oidc.urls")),

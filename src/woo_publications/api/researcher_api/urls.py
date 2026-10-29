@@ -32,7 +32,7 @@ urlpatterns = [
                 path(
                     "docs/",
                     SpectacularRedocView.as_view(
-                        url_name="researcher:schema-yaml-researcher"
+                        url_name="researcher:schema-json-researcher"
                     ),
                     name="schema-redoc-researcher",
                 ),
