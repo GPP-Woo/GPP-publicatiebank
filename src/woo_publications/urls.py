@@ -28,7 +28,10 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
+    # TODO remove in future release
     path("api/", include("woo_publications.api.urls")),
+    path("researcher/api/", include("woo_publications.api.researcher_api.urls")),
+    path("standard/api/", include("woo_publications.api.application_api.urls")),
     # Simply show the index template.
     path("", TemplateView.as_view(template_name="index.html"), name="root"),
     path("auth/oidc/", include("mozilla_django_oidc.urls")),

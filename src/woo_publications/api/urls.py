@@ -1,7 +1,6 @@
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
 from rest_framework import routers
 
 from woo_publications.accounts.api.viewsets import OrganisationUnitViewSet
@@ -32,25 +31,15 @@ router.register("themas", ThemeViewSet)
 router.register("onderwerpen", TopicViewSet)
 
 urlpatterns = [
-    path("docs/", RedirectView.as_view(pattern_name="api:api-docs")),
+    path("docs/", RedirectView.as_view(pattern_name="standard:schema-redoc-standard")),
     path(
-        "v2/",
-        include(
-            [
-                path(
-                    "",
-                    SpectacularJSONAPIView.as_view(schema=None),
-                    name="api-schema-json",
-                ),
-                path(
-                    "docs/",
-                    SpectacularRedocView.as_view(url_name="api:api-schema-json"),
-                    name="api-docs",
-                ),
-            ]
-        ),
+        "v2/docs/",
+        RedirectView.as_view(pattern_name="standard:schema-redoc-standard"),
     ),
-    # TODO remove in future release
-    path("v1/", include(router.urls)),
+    path(
+        "v3/docs/",
+        RedirectView.as_view(pattern_name="standard:schema-redoc-standard"),
+    ),
     path("v2/", include(router.urls)),
+    path("v3/", include(router.urls)),
 ]

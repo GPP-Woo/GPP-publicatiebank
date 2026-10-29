@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  title: GPP Publications - Researcher API
+  version: 1.0.0
+  description: TODO
+  contact:
+    url: https://github.com/GPP-Woo/GPP-publicatiebank
+    email: support@maykinmedia.nl
+  license:
+    name: EUPL
+    url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
+paths: {}
+components: {}
+externalDocs:
+  description: Functional and technical documentation
+  url: https://gpp-publicatiebank.readthedocs.io/
