@@ -6,13 +6,13 @@ from rest_framework.test import APITestCase, URLPatternsTestCase
 from woo_publications.metadata.models import Organisation
 from woo_publications.metadata.tests.factories import OrganisationFactory
 
-from ..pagination import DynamicPageSizePagination
+from ..pagination import CursorPagination, DynamicPageSizePagination
 
 EXPECTED_PAGE_SIZE = 10
 EXPECTED_MAX_PAGE_SIZE = 100
 
 
-class TestDynamicPageSizePaginationSerializer(serializers.ModelSerializer):
+class TestPaginationSerializer(serializers.ModelSerializer):
     class Meta:  # pyright: ignore
         model = Organisation
         fields = ("uuid",)
@@ -20,8 +20,21 @@ class TestDynamicPageSizePaginationSerializer(serializers.ModelSerializer):
 
 class TestDynamicPageSizePaginationViewSet(generics.ListAPIView):
     queryset = Organisation.objects.all().order_by("pk")
-    serializer_class = TestDynamicPageSizePaginationSerializer
+    serializer_class = TestPaginationSerializer
     pagination_class = DynamicPageSizePagination
+    authentication_classes = ()
+    permission_classes = ()
+
+    """
+    A simple ViewSet for listing or retrieving users.
+    """
+
+
+class TestCurserPaginationViewSet(generics.ListAPIView):
+    queryset = Organisation.objects.all().order_by("pk")
+    serializer_class = TestPaginationSerializer
+    pagination_class = CursorPagination
+    pagination_ordering = "-pk"
     authentication_classes = ()
     permission_classes = ()
 
@@ -111,3 +124,37 @@ class DynamicPageSizePaginationTest(URLPatternsTestCase, APITestCase):
 
         self.assertEqual(data["count"], over_max_size)
         self.assertEqual(len(data["results"]), EXPECTED_MAX_PAGE_SIZE)
+
+
+class CurserPaginationTest(URLPatternsTestCase, APITestCase):
+    urlpatterns = [
+        path("pagination", TestCurserPaginationViewSet.as_view()),
+    ]
+
+    def test_get_default_pagination(self):
+        OrganisationFactory.create_batch(10)
+        response = self.client.get("/pagination")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+
+        self.assertEqual(len(data["results"]), 10)
+        self.assertIsNone(data["next"])
+        self.assertIsNone(data["previous"])
+
+    def test_with_next_and_previous(self):
+        OrganisationFactory.create_batch(250)
+        response = self.client.get("/pagination")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(response.json()["next"])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+
+        self.assertEqual(len(data["results"]), 100)
+        self.assertIsNotNone(data["next"])
+        self.assertIsNotNone(data["previous"])

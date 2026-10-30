@@ -126,6 +126,47 @@ class PublicationApiTestCase(APITestCase):
         }
         self.assertEqual(response.json()["results"], [expected_data])
 
+    def test_list_publication_filters(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+        with freeze_time("2024-09-25T12:00:00-00:00"):
+            publication2 = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+        with freeze_time("2024-09-26T12:00:00-00:00"):
+            publication3 = PublicationFactory.create(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+
+        with self.subTest("filter on gte date is exact match"):
+            response = self.client.get(
+                reverse("researcher:publication-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 1)
+            self.assertEqual(data["results"][0]["uuid"], str(publication3.uuid))
+
+        with self.subTest("filter on gte date is before latest change"):
+            response = self.client.get(
+                reverse("researcher:publication-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 2)
+            self.assertEqual(data["results"][0]["uuid"], str(publication3.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(publication2.uuid))
+
     def test_detail_publications(self):
         ic = InformationCategoryFactory.create(naam="Mind Control")
         topic = TopicFactory.create(officiele_titel="Kraken")
@@ -292,6 +333,50 @@ class DocumentApiTestCase(APITestCase):
         }
         self.assertEqual(response.json()["results"], [expected_data])
 
+    def test_list_docuemnt_filters(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                upload_complete=True,
+            )
+        with freeze_time("2024-09-25T12:00:00-00:00"):
+            document2 = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                upload_complete=True,
+            )
+        with freeze_time("2024-09-26T12:00:00-00:00"):
+            document3 = DocumentFactory.create(
+                publicatiestatus=PublicationStatusOptions.published,
+                upload_complete=True,
+            )
+
+        with self.subTest("filter on gte date is exact match"):
+            response = self.client.get(
+                reverse("researcher:document-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 1)
+            self.assertEqual(data["results"][0]["uuid"], str(document3.uuid))
+
+        with self.subTest("filter on gte date is before latest change"):
+            response = self.client.get(
+                reverse("researcher:document-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 2)
+            self.assertEqual(data["results"][0]["uuid"], str(document3.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(document2.uuid))
+
     def test_detail_documents(self):
         organisation = OrganisationFactory.create()
         publication_concept = PublicationFactory.create(
@@ -421,6 +506,45 @@ class TopicApiTestCase(APITestCase):
             "laatstGewijzigdDatum": "2024-09-25T14:00:00+02:00",
         }
         self.assertEqual(response.json()["results"], [expected_data])
+
+    def test_list_topic_filters(self):
+        with freeze_time("2024-09-24T12:00:00-00:00"):
+            TopicFactory.create(publicatiestatus=PublicationStatusOptions.published)
+        with freeze_time("2024-09-25T12:00:00-00:00"):
+            topic2 = TopicFactory.create(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+        with freeze_time("2024-09-26T12:00:00-00:00"):
+            topic3 = TopicFactory.create(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+
+        with self.subTest("filter on gte date is exact match"):
+            response = self.client.get(
+                reverse("researcher:topic-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 1)
+            self.assertEqual(data["results"][0]["uuid"], str(topic3.uuid))
+
+        with self.subTest("filter on gte date is before latest change"):
+            response = self.client.get(
+                reverse("researcher:topic-list"),
+                {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            data = response.json()
+
+            self.assertEqual(len(data["results"]), 2)
+            self.assertEqual(data["results"][0]["uuid"], str(topic3.uuid))
+            self.assertEqual(data["results"][1]["uuid"], str(topic2.uuid))
 
     def test_detail_topics(self):
         with freeze_time("2024-09-25T12:00:00-00:00"):
