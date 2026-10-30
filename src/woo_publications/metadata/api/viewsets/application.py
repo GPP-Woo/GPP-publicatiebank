@@ -4,15 +4,19 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, viewsets
 
-from woo_publications.logging.service import (
+from woo_publications.api.pagination import DynamicPageSizePagination
+from woo_publications.logging.api_tools import (
     AuditTrailCreateMixin,
     AuditTrailRetrieveMixin,
     AuditTrailUpdateMixin,
 )
 
-from ..models import InformationCategory, Organisation, Theme
-from .filters import InformationCategoryFilterSet, OrganisationFilterSet
-from .serializers import (
+from ...models import InformationCategory, Organisation, Theme
+from ..filters import (
+    InformationCategoryFilterSet,
+    OrganisationFilterSet,
+)
+from ..serializers import (
     InformationCategorySerializer,
     OrganisationSerializer,
     ThemeSerializer,
@@ -38,6 +42,7 @@ class InformationCategoryViewSet(
     queryset = InformationCategory.objects.all()
     serializer_class = InformationCategorySerializer
     filterset_class = InformationCategoryFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -81,6 +86,7 @@ class OrganisationViewSet(
     queryset = Organisation.objects.order_by("pk")
     serializer_class = OrganisationSerializer
     filterset_class = OrganisationFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -108,6 +114,7 @@ class OrganisationViewSet(
 class ThemeViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Theme.objects.all().order_by("path")
     serializer_class = ThemeSerializer
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 

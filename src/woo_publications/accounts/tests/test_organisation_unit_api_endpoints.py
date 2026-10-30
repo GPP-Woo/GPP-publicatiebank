@@ -25,9 +25,9 @@ class OrganisationUnitApiAuthorizationAndPermissionTests(
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:organisationunit-list")
+        list_endpoint = reverse("standard:organisationunit-list")
         detail_endpoint = reverse(
-            "api:organisationunit-detail", kwargs={"identifier": str(uuid4())}
+            "standard:organisationunit-detail", kwargs={"identifier": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -57,10 +57,10 @@ class OrganisationUnitApiAuthorizationAndPermissionTests(
 
     def test_api_key_result_in_301_with_wrong_credentials(self):
         org_unit = OrganisationUnitFactory.create()
-        list_url = reverse("api:organisationunit-list")
+        list_url = reverse("standard:organisationunit-list")
 
         detail_url = reverse(
-            "api:organisationunit-detail",
+            "standard:organisationunit-detail",
             kwargs={"identifier": str(org_unit.identifier)},
         )
 
@@ -74,7 +74,7 @@ class OrganisationUnitApiAuthorizationAndPermissionTests(
 class OrganisationUnitApiReadTests(TokenAuthMixin, APITestCase):
     def test_list_returns_paginated_response_with_existing_organisation_units(self):
         OrganisationUnitFactory.create_batch(5)
-        endpoint = reverse("api:organisationunit-list")
+        endpoint = reverse("standard:organisationunit-list")
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -88,7 +88,7 @@ class OrganisationUnitApiReadTests(TokenAuthMixin, APITestCase):
             naam="VTH", identifier="org-unit-42"
         )
         endpoint = reverse(
-            "api:organisationunit-detail",
+            "standard:organisationunit-detail",
             kwargs={"identifier": organisation_unit.identifier},
         )
 
@@ -109,7 +109,7 @@ class OrganisationUnitApiWriteTests(TokenAuthMixin, APITestCase):
         """
         Assert that creation of organisation units is prohibited.
         """
-        endpoint = reverse("api:organisationunit-list")
+        endpoint = reverse("standard:organisationunit-list")
 
         response = self.client.post(endpoint, headers=AUDIT_HEADERS)
 
@@ -126,7 +126,7 @@ class OrganisationUnitApiWriteTests(TokenAuthMixin, APITestCase):
         )
         original_uuid = organisation_unit.identifier
         endpoint = reverse(
-            "api:organisationunit-detail",
+            "standard:organisationunit-detail",
             kwargs={"identifier": organisation_unit.identifier},
         )
         body = {

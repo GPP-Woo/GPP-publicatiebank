@@ -18,7 +18,7 @@ class InformationCategoryLoggingTests(TokenAuthMixin, APITestCase):
     def test_retrieve_logging(self):
         information_category = InformationCategoryFactory.create()
         detail_url = reverse(
-            "api:informationcategory-detail",
+            "standard:informationcategory-detail",
             kwargs={"uuid": str(information_category.uuid)},
         )
 
@@ -35,7 +35,7 @@ class OrganisationLoggingTests(TokenAuthMixin, APITestCase):
     def test_retrieve_logging(self):
         organisation = OrganisationFactory.create()
         detail_url = reverse(
-            "api:organisation-detail",
+            "standard:organisation-detail",
             kwargs={"uuid": str(organisation.uuid)},
         )
 
@@ -52,7 +52,7 @@ class ThemeLoggingTests(TokenAuthMixin, APITestCase):
     def test_retrieve_logging(self):
         theme = ThemeFactory.create()
         detail_url = reverse(
-            "api:theme-detail",
+            "standard:theme-detail",
             kwargs={"uuid": str(theme.uuid)},
         )
 

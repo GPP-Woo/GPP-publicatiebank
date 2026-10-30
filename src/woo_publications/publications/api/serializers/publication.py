@@ -215,10 +215,12 @@ class PublicationSerializer(serializers.ModelSerializer[Publication]):
     def get_fields(self):
         fields = super().get_fields()
 
-        assert fields["publicatiestatus"].help_text
-        fsm_field = Publication._meta.get_field("publicatiestatus")
-        assert isinstance(fsm_field, FSMField)
-        fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
+        if publicatiestatus := fields.get("publicatiestatus"):
+            assert publicatiestatus.help_text
+            fsm_field = Publication._meta.get_field("publicatiestatus")
+            assert isinstance(fsm_field, FSMField)
+            publicatiestatus.help_text += _get_fsm_help_text(fsm_field)
+
         return fields
 
     def validate_kenmerken(self, value: Sequence[Kenmerk]) -> Sequence[Kenmerk]:
@@ -562,3 +564,27 @@ class PublicationWriteSerializer(
         publication.save()
 
         return publication
+
+
+class PublicationResearcherSerializer(PublicationSerializer):
+    class Meta(PublicationSerializer.Meta):
+        model = Publication
+        fields = (
+            "uuid",
+            "url_publicatie_extern",
+            "officiele_titel",
+            "verkorte_titel",
+            "omschrijving",
+            "informatie_categorieen",
+            "di_woo_informatie_categorieen",
+            "onderwerpen",
+            "publisher",
+            "verantwoordelijke",
+            "opsteller",
+            "kenmerken",
+            "gepubliceerd_op",
+            "laatst_gewijzigd_datum",
+            "datum_begin_geldigheid",
+            "datum_einde_geldigheid",
+            "inzage_procedure",
+        )

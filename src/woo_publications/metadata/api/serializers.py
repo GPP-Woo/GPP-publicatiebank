@@ -71,6 +71,17 @@ class OrganisationSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
 
+class OrganisationResearchSerializer(serializers.ModelSerializer[Organisation]):
+    class Meta:  # pyright: ignore
+        model = Organisation
+        fields = (
+            "uuid",
+            "identifier",
+            "naam",
+            "oorsprong",
+        )
+
+
 class ThemeSerializer(serializers.ModelSerializer):
     sub_themes = serializers.ListField(
         source="get_children",

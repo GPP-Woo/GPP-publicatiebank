@@ -12,7 +12,7 @@
 
 {% block content_nl %}
 <p>
-    De Publicatiebank en bijhorende API bevatten en ontsluiten
+    De Publicatiebank en bijhorende API's bevatten en ontsluiten
     overheidsdocumenten in het kader van de Wet Open Overheid (WOO).
     Deze registratiecomponent maakt het mogelijk voor:
 </p>
@@ -30,7 +30,7 @@
 
 {% block content_en %}
 <p>
-    The publications database and accompanying API contain and expose
+    The publications database and accompanying API's contain and expose
     government documents intended for publication in the context of
     the "Open Government Law", for which the Dutch abbreviation is "WOO".
     This registration component enables:
@@ -46,6 +46,13 @@
     For production purposes you need to connect a publication component.
 </p>
 {% endblock content_en %}
+
+{% block api_links %}
+
+    <a href="{% url 'index-application' %} " class="button">Standard API</a>
+    <a href="{% url 'index-researcher' %}" class="button">Researcher API</a>
+
+{% endblock %}
 
 
 {% block license_link %}https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md{% endblock %}

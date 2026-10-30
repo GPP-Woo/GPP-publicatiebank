@@ -162,19 +162,19 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         pdf_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(pdf.uuid)}
+            "standard:document-download", kwargs={"uuid": str(pdf.uuid)}
         )
         open_document_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(open_document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(open_document.uuid)}
         )
         ms_document_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(ms_document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(ms_document.uuid)}
         )
         zip_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(zip_file.uuid)}
+            "standard:document-download", kwargs={"uuid": str(zip_file.uuid)}
         )
         html_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(html_file.uuid)}
+            "standard:document-download", kwargs={"uuid": str(html_file.uuid)}
         )
         rtf_file_download_url = reverse(
             "api:document-download", kwargs={"uuid": str(rtf_file.uuid)}

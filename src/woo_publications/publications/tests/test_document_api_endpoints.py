@@ -66,8 +66,10 @@ class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITes
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:document-list")
-        detail_endpoint = reverse("api:document-detail", kwargs={"uuid": str(uuid4())})
+        list_endpoint = reverse("standard:document-list")
+        detail_endpoint = reverse(
+            "standard:document-detail", kwargs={"uuid": str(uuid4())}
+        )
 
         with self.subTest(action="list"):
             response = self.client.get(list_endpoint, headers={})
@@ -96,9 +98,9 @@ class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITes
 
     def test_api_key_result_in_301_with_wrong_credentials(self):
         document = DocumentFactory.create()
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
         detail_url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -154,7 +156,9 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 ontvangstdatum=None,
             )
 
-        response = self.client.get(reverse("api:document-list"), headers=AUDIT_HEADERS)
+        response = self.client.get(
+            reverse("standard:document-list"), headers=AUDIT_HEADERS
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -245,7 +249,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # registratiedatum
         with self.subTest("creatiedatum_ascending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "creatiedatum"},
                 headers=AUDIT_HEADERS,
             )
@@ -259,7 +263,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("creatiedatum_descending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "-creatiedatum"},
                 headers=AUDIT_HEADERS,
             )
@@ -274,7 +278,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # Officiele titel
         with self.subTest("officiele_title_ascending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "officiele_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -288,7 +292,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("officiele_title_descending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "-officiele_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -303,7 +307,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         # short titel
         with self.subTest("verkorte_titel_ascending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "verkorte_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -317,7 +321,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("verkorte_titel_descending"):
             response = self.client.get(
-                reverse("api:document-list"),
+                reverse("standard:document-list"),
                 {"sorteer": "-verkorte_titel"},
                 headers=AUDIT_HEADERS,
             )
@@ -354,7 +358,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
         response = self.client.get(
-            reverse("api:document-list"),
+            reverse("standard:document-list"),
             {"publicatie": str(publication.uuid)},
             headers=AUDIT_HEADERS,
         )
@@ -389,7 +393,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             )
 
         response = self.client.get(
-            reverse("api:document-list"),
+            reverse("standard:document-list"),
             {"identifier": "document-1"},
             headers=AUDIT_HEADERS,
         )
@@ -414,7 +418,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
             publicatie__revoked=True,
             publicatiestatus=PublicationStatusOptions.revoked,
         )
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("filter on published publications"):
             response = self.client.get(
@@ -488,7 +492,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-26T12:00:00-00:00"):
             document3 = DocumentFactory.create()
 
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("gte specific tests"):
             with self.subTest("filter on gte date is exact match"):
@@ -611,7 +615,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         DocumentFactory.create(creatiedatum="2024-09-26")
         document4 = DocumentFactory.create(creatiedatum="2024-09-28")
 
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("gte specific tests"):
             with self.subTest("filter on gte date is exact match"):
@@ -736,7 +740,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         with freeze_time("2024-09-26T12:00:00-00:00"):
             document3 = DocumentFactory.create()
 
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("gte specific tests"):
             with self.subTest("filter on gte date is exact match"):
@@ -884,7 +888,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         document5 = DocumentFactory.create(publicatie=publication5)
         document6 = DocumentFactory.create(publicatie=publication6)
 
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("filter on a single information category"):
             response = self.client.get(
@@ -955,7 +959,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
         incomplete_document = DocumentFactory.create(upload_complete=False)
 
-        list_url = reverse("api:document-list")
+        list_url = reverse("standard:document-list")
 
         with self.subTest("no filters provided return all documents"):
             response = self.client.get(
@@ -1019,7 +1023,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
                 creatiedatum="2024-01-01",
             )
         detail_url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -1061,7 +1065,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         document = DocumentFactory.create(with_registered_document=True)
 
         with self.subTest("list endpoint"):
-            endpoint = reverse("api:document-list")
+            endpoint = reverse("standard:document-list")
 
             response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -1071,7 +1075,7 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
         with self.subTest("detail endpoint"):
             detail_url = reverse(
-                "api:document-detail",
+                "standard:document-detail",
                 kwargs={"uuid": str(document.uuid)},
             )
 
@@ -1083,7 +1087,9 @@ class DocumentApiReadTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
 
 
 class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch(
+        "woo_publications.publications.api.viewsets.application.index_document.delay"
+    )
     def test_update_document_schedules_index_update_task(
         self,
         mock_index_document_delay: MagicMock,
@@ -1109,7 +1115,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         }
 
         detail_url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -1129,7 +1135,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         )
         self.assertEqual(response_data["creatiedatum"], "2008-02-23")
         download_path = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document_delay.assert_called_once_with(
             document_id=document.pk,
@@ -1151,7 +1157,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         }
 
         detail_url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -1169,7 +1175,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
             document=document, kenmerk="kenmerk 1", bron="bron 1"
         )
         detail_url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -1254,7 +1260,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
         )
         with self.subTest("validate duplicated items given"):
             url = reverse(
-                "api:document-detail",
+                "standard:document-detail",
                 kwargs={"uuid": str(document.uuid)},
             )
             data = {
@@ -1274,7 +1280,7 @@ class DocumentApiMetaDataUpdateTests(TokenAuthMixin, APITestCase):
 
         with self.subTest("other publication is allowed to have same item"):
             url = reverse(
-                "api:document-detail",
+                "standard:document-detail",
                 kwargs={"uuid": str(document2.uuid)},
             )
             data = {
@@ -1364,7 +1370,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         kwargs.setdefault("ignore_hosts", ("invalid-domain",))
         return super()._get_vcr_kwargs(**kwargs)
 
-    @patch("woo_publications.publications.api.viewsets.process_source_document.delay")
+    @patch(
+        "woo_publications.publications.api.viewsets.application.process_source_document.delay"
+    )
     def test_create_document_results_in_document_in_external_api(
         self, mock_process_source_document_delay: MagicMock
     ):
@@ -1373,7 +1381,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             informatie_categorieen=[self.information_category],
             verantwoordelijke=organisation,
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
@@ -1411,7 +1419,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             file_part_url = file_parts[0]["url"]
             self.assertEqual(
                 file_part_url,
-                "http://host.docker.internal:8000/api/v2/documenten/"
+                "http://host.docker.internal:8000/standard/api/v3/documenten/"
                 f"{document.uuid}/bestandsdelen/{file_parts[0]['uuid']}",
             )
 
@@ -1433,7 +1441,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             informatie_categorieen=[self.information_category],
             verantwoordelijke=organisation,
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
@@ -1463,7 +1471,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             verantwoordelijke=organisation,
             publicatiestatus=PublicationStatusOptions.concept,
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
@@ -1506,7 +1514,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         publication = PublicationFactory.create(
             informatie_categorieen=[self.information_category]
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
         body = {
             "publicatie": publication.uuid,
             "officieleTitel": "Testdocument WOO-P + Open Zaak",
@@ -1540,8 +1548,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             ).exists()
         )
 
-    @patch("woo_publications.publications.api.viewsets.strip_metadata.si")
-    @patch("woo_publications.publications.api.viewsets.index_document.si")
+    @patch("woo_publications.publications.api.viewsets.application.strip_metadata.si")
+    @patch("woo_publications.publications.api.viewsets.application.index_document.si")
     def test_upload_file_parts(
         self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
@@ -1554,14 +1562,14 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
             },
         )
         download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(document.uuid)}
         )
 
         with self.captureOnCommitCallbacks(execute=True):
@@ -1613,8 +1621,8 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         with self.subTest("file type is set of unknown file"):
             self.assertEqual(document.bestandsformaat, "text/plain")
 
-    @patch("woo_publications.publications.api.viewsets.strip_metadata.si")
-    @patch("woo_publications.publications.api.viewsets.index_document.si")
+    @patch("woo_publications.publications.api.viewsets.application.strip_metadata.si")
+    @patch("woo_publications.publications.api.viewsets.application.index_document.si")
     def test_upload_file_parts_pdf(
         self, mock_index_document: MagicMock, mock_strip_metadata: MagicMock
     ):
@@ -1628,14 +1636,14 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
             },
         )
         download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(document.uuid)}
+            "standard:document-download", kwargs={"uuid": str(document.uuid)}
         )
 
         with self.captureOnCommitCallbacks(execute=True):
@@ -1665,7 +1673,9 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
 
     @patch("woo_publications.publications.models.Document.set_file_type")
-    @patch("woo_publications.publications.api.viewsets.index_document.delay")
+    @patch(
+        "woo_publications.publications.api.viewsets.application.index_document.delay"
+    )
     def test_upload_with_multiple_parts(
         self, mock_index_document_delay: MagicMock, mock_set_file_type: MagicMock
     ):
@@ -1679,7 +1689,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
@@ -1723,7 +1733,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
@@ -1755,7 +1765,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
@@ -1786,7 +1796,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.zgw_document is not None
         endpoint = reverse(
-            "api:document-filepart-detail",
+            "standard:document-filepart-detail",
             kwargs={
                 "uuid": document.uuid,
                 "part_uuid": document.zgw_document.file_parts[0].uuid,
@@ -1808,9 +1818,11 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             )
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-    @patch("woo_publications.publications.api.viewsets.index_document.si")
-    @patch("woo_publications.publications.api.viewsets.strip_metadata.si")
-    @patch("woo_publications.publications.api.viewsets.process_source_document.si")
+    @patch("woo_publications.publications.api.viewsets.application.index_document.si")
+    @patch("woo_publications.publications.api.viewsets.application.strip_metadata.si")
+    @patch(
+        "woo_publications.publications.api.viewsets.application.process_source_document.si"
+    )
     def test_create_document_with_external_document_url(
         self,
         mock_process_source_document: MagicMock,
@@ -1840,7 +1852,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             informatie_categorieen=[self.information_category],
             verantwoordelijke=organisation,
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
         body = {
             "identifier": "WOO-P/0042",
             "publicatie": publication.uuid,
@@ -1875,7 +1887,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
                 base_url="http://host.docker.internal:8000/",
             )
             download_url = reverse(
-                "api:document-download", kwargs={"uuid": document.uuid}
+                "standard:document-download", kwargs={"uuid": document.uuid}
             )
             mock_index_document.assert_called_once_with(
                 document_id=document.id,
@@ -1914,7 +1926,7 @@ class DocumentApiCreateTests(VCRMixin, TokenAuthMixin, APITestCase):
             informatie_categorieen=[self.information_category],
             verantwoordelijke=organisation,
         )
-        endpoint = reverse("api:document-list")
+        endpoint = reverse("standard:document-list")
 
         with self.subTest("validate document_url is provided"):
             response = self.client.post(
@@ -2067,7 +2079,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
             uuid=document.zgw_document.file_parts[0].uuid,
             file=SimpleUploadedFile("dummy.txt", b"aAaAa"),
         )
-        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -2129,7 +2141,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
                 upload_complete=True,
             )
 
-        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -2144,7 +2156,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.document_service is None
         assert document.document_uuid is None
-        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -2161,7 +2173,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
             build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
         )
 
-        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -2174,7 +2186,7 @@ class DocumentDownloadTests(VCRMixin, TokenAuthMixin, APITestCase):
         )
         assert document.document_service is None
         assert document.document_uuid is None
-        endpoint = reverse("api:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -2208,7 +2220,7 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
     ):
         document = DocumentFactory.create(document_service=None, document_uuid=None)
         url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -2231,7 +2243,7 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
             officiele_titel="doc-1",
         )
         url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -2277,7 +2289,7 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
             document_uuid=none_existing_openzaak_document_uuid,
         )
         url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -2338,7 +2350,7 @@ class DocumentApiDeleteTests(VCRMixin, TokenAuthMixin, APITestCase):
             document_service=self.service, document_uuid=openzaak_document.uuid
         )
         url = reverse(
-            "api:document-detail",
+            "standard:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 

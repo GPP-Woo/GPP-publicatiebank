@@ -21,9 +21,9 @@ class ThemeAPIAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("api:theme-list")
+        list_endpoint = reverse("standard:theme-list")
         detail_endpoint = reverse(
-            "api:theme-detail", kwargs={"uuid": str(uuid.uuid4())}
+            "standard:theme-detail", kwargs={"uuid": str(uuid.uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -38,9 +38,9 @@ class ThemeAPIAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
 
     def test_api_key_result_in_401_with_wrong_credentials(self):
         theme = ThemeFactory.create()
-        list_url = reverse("api:theme-list")
+        list_url = reverse("standard:theme-list")
         detail_url = reverse(
-            "api:theme-detail",
+            "standard:theme-detail",
             kwargs={"uuid": str(theme.uuid)},
         )
 
@@ -59,7 +59,7 @@ class ThemeTests(TokenAuthMixin, APITestCase):
             naam="second item",
             parent=parent_theme,
         )
-        list_url = reverse("api:theme-list")
+        list_url = reverse("standard:theme-list")
 
         response = self.client.get(list_url, headers=AUDIT_HEADERS)
 
@@ -92,7 +92,7 @@ class ThemeTests(TokenAuthMixin, APITestCase):
             naam="item one",
         )
         list_url = reverse(
-            "api:theme-detail",
+            "standard:theme-detail",
             kwargs={"uuid": str(theme.uuid)},
         )
 
@@ -112,7 +112,7 @@ class ThemeTests(TokenAuthMixin, APITestCase):
 
     def test_detail_theme_wrong_uuid(self):
         list_url = reverse(
-            "api:theme-detail",
+            "standard:theme-detail",
             kwargs={"uuid": uuid.uuid4()},
         )
 

@@ -177,6 +177,18 @@ class Topic(models.Model):
                 )
             )
 
+    @property
+    def get_published_publication_uuids(
+        self,
+    ) -> models.QuerySet[Publication, UUID]:
+        return (
+            self.publication_set.filter(
+                publicatiestatus=PublicationStatusOptions.published
+            )
+            .only("uuid")
+            .values_list("uuid", flat=True)
+        )
+
 
 class Publication(ConcurrentTransitionMixin, models.Model):
     id: int  # implicitly provided by django
@@ -1034,7 +1046,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Creates the absolute document URI for the document-download endpoint.
         """
         return reverse(
-            "api:document-download", kwargs={"uuid": str(self.uuid)}, request=request
+            "standard:document-download",
+            kwargs={"uuid": str(self.uuid)},
+            request=request,
         )
 
     @property
@@ -1100,7 +1114,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
             for part in zgw_document.file_parts:
                 part.url = build_absolute_uri(
                     reverse(
-                        "api:document-filepart-detail",
+                        "standard:document-filepart-detail",
                         kwargs={
                             "uuid": self.uuid,
                             "part_uuid": part.uuid,

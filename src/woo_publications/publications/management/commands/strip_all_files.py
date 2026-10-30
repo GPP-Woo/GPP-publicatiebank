@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         # Check if the provided base_url is correct.
         try:
-            test_url = urljoin(base_url, reverse("api:api-root"))
+            test_url = urljoin(base_url, reverse("standard:api-root"))
             response = requests.get(test_url)
             response.raise_for_status()
         except requests.RequestException:
