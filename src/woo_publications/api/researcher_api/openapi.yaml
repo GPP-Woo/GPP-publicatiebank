@@ -9,8 +9,918 @@ info:
   license:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
-paths: {}
-components: {}
+paths:
+  /api/v1/documenten:
+    get:
+      operationId: documentenList
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        documenten.
+      summary: Alle beschikbare documenten.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: query
+        name: laatstGewijzigdDatumVanaf
+        schema:
+          type: string
+          format: date-time
+        description: Filter on altered items after or on the given value.
+      tags:
+      - Documenten
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDocumentResearcherList'
+          description: ''
+  /api/v1/documenten/{uuid}:
+    get:
+      operationId: documentenRetrieve
+      description: Haal een specifiek document op.
+      summary: Haal een specifiek document op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Documenten
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResearcher'
+          description: ''
+  /api/v1/documenten/{uuid}/download:
+    get:
+      operationId: documentenDownloadRetrieve
+      description: |-
+        Download de inhoud van het document als binaire data. Dit endpoint geeft geen JSON terug, in de plaats daarvan wordt de bestandsinhoud direct gestreamed.
+
+        Je kan enkel bestanden downloaden waarvan de upload naar de achterliggende Documenten-API voltooid is.
+      summary: Download de binaire bestandsdata
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Documenten
+      responses:
+        '200':
+          headers:
+            Content-Length:
+              schema:
+                type: string
+              description: Totale grootte (in bytes) van de download.
+            Content-Disposition:
+              schema:
+                type: string
+              description: Markeert het bestand als 'bijlage' en bevat de bestandsnaam
+                van het document.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: De binaire bestandsinhoud.
+        '409':
+          description: Conflict - het document is (nog) niet beschikbaar voor download.
+        '502':
+          description: Bad gateway - kon de inhoud niet streamen.
+  /api/v1/informatiecategorieen:
+    get:
+      operationId: informatiecategorieenList
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        informatiecategorieën.
+      summary: Alle beschikbare informatiecategorieën.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      tags:
+      - Informatiecategorieën
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInformationCategoryList'
+          description: ''
+  /api/v1/informatiecategorieen/{uuid}:
+    get:
+      operationId: informatiecategorieenRetrieve
+      description: Haal een specifiieke informatiecategorie op.
+      summary: Haal een specifiieke informatiecategorie op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Informatiecategorieën
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformationCategory'
+          description: ''
+  /api/v1/onderwerpen:
+    get:
+      operationId: onderwerpenList
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        onderwerpen.
+      summary: Alle beschikbare onderwerpen.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: query
+        name: laatstGewijzigdDatumVanaf
+        schema:
+          type: string
+          format: date-time
+        description: Filter on altered items after or on the given value.
+      tags:
+      - Onderwerpen
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTopicResearcherList'
+          description: ''
+  /api/v1/onderwerpen/{uuid}:
+    get:
+      operationId: onderwerpenRetrieve
+      description: Haal een specifiek onderwerp op.
+      summary: Haal een specifiek onderwerp op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Onderwerpen
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicResearcher'
+          description: ''
+  /api/v1/organisaties:
+    get:
+      operationId: organisatiesList
+      description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
+      summary: Alle beschikbare organisaties.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      tags:
+      - Organisaties
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrganisationResearchList'
+          description: ''
+  /api/v1/organisaties/{uuid}:
+    get:
+      operationId: organisatiesRetrieve
+      description: Haal een specifieke organisatie op.
+      summary: Haal een specifieke organisatie op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Organisaties
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationResearch'
+          description: ''
+  /api/v1/publicaties:
+    get:
+      operationId: publicatiesList
+      description: Returns a paginated result list of existing publications.
+      summary: Alle beschikbare publicaties.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: query
+        name: laatstGewijzigdDatumVanaf
+        schema:
+          type: string
+          format: date-time
+        description: Filter on altered items after or on the given value.
+      tags:
+      - Publicaties
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationResearcherList'
+          description: ''
+  /api/v1/publicaties/{uuid}:
+    get:
+      operationId: publicatiesRetrieve
+      description: Haal een specifieke publicatie op.
+      summary: Haal een specifieke publicatie op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Publicaties
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationResearcher'
+          description: ''
+  /api/v1/themas:
+    get:
+      operationId: themasList
+      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
+        thema's.
+      summary: Alle beschikbare thema's.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      tags:
+      - Themas
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedThemeList'
+          description: ''
+  /api/v1/themas/{uuid}:
+    get:
+      operationId: themasRetrieve
+      description: Haal een specifiek thema op.
+      summary: Haal een specifiek thema op.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Themas
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theme'
+          description: ''
+components:
+  schemas:
+    BeschikbaarRechtsmiddelEnum:
+      enum:
+      - zienswijze
+      - bezwaar
+      type: string
+      description: |-
+        * `zienswijze` - Perspective
+        * `bezwaar` - Objection
+    DocumentIdentifier:
+      type: object
+      properties:
+        kenmerk:
+          type: string
+          title: Identificatie
+          description: De identificatie die (samen met de bron) het document uniek
+            herleidbaar maakt.
+          maxLength: 40
+        bron:
+          type: string
+          description: Geeft aan in welk systeem het kenmerk leeft en waar het vandaan
+            komt.
+          maxLength: 40
+      required:
+      - bron
+      - kenmerk
+    DocumentResearcher:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier:
+          type: string
+          title: Identificatie
+          description: De (primaire) unieke identificatie.
+          maxLength: 255
+          deprecated: true
+        publicatie:
+          type: string
+          format: uuid
+          description: De unieke identificatie van de publicatie.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentIdentifier'
+          description: De set aan identificatiekenmerken horend bij dit document.
+        creatiedatum:
+          type: string
+          format: date
+          description: De datum waarop het document ontstaan is. Niet te verwarren
+            met de registratiedatum - de creatiedatum valt typisch *voor* de registratiedatum.
+        ontvangstdatum:
+          type: string
+          format: date-time
+          nullable: true
+          description: Indien van toepassing, datum wanneer het document door of namens
+            de organisatie in ontvangst is genomen.
+        datumOndertekend:
+          type: string
+          format: date-time
+          nullable: true
+          title: Datum ondertekening
+          description: Indien van toepassing, datum waarop het document (door alle
+            partijen) ondertekend is.
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer het document laatst gewijzigd
+            is in de database.
+        bestandsformaat:
+          type: string
+          description: TODO - placeholder accepting anything, in the future this will
+            be validated against a reference value list.
+          maxLength: 255
+        bestandsnaam:
+          type: string
+          description: Bestandsnaam 'op de harde schijf' van het document, bijvoorbeeld
+            'gelakt-verslag.pdf'.
+          maxLength: 255
+        bestandsomvang:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Bestandsgrootte op de harde schijf, in bytes.
+        documentUrl:
+          type: string
+          format: uri
+      required:
+      - creatiedatum
+      - documentUrl
+      - gepubliceerdOp
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publicatie
+      - uuid
+    InformationCategory:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        identifier:
+          type: string
+          format: uri
+          readOnly: true
+          title: Identificatie
+          description: De unieke IRI waarmee deze categorie gedefinieerd is in de
+            overheid.nl waardelijst. Voor zelf-toegevoegde items wordt een identificatie
+            gegenereerd.
+        naam:
+          type: string
+          maxLength: 80
+        naamMeervoud:
+          type: string
+          maxLength: 80
+        definitie:
+          type: string
+        omschrijving:
+          type: string
+          description: De beknopte toelichting die aan medewerkers en burgers getoond
+            wordt.
+        oorsprong:
+          allOf:
+          - $ref: '#/components/schemas/InformationCategoryOorsprongEnum'
+          description: |-
+            Geeft aan waar de categorie gedefinieerd is, waar de gegevens opgehaald worden en hoe de identificatie dient geïnterpreteerd te worden. Als een waardelijst als oorsprong gebruikt wordt, dan kan de categorie niet bewerkt of verwijderd worden.
+
+            * `waardelijst` - Waardelijst
+            * `zelf_toegevoegd` - Zelf-toegevoegd item
+        order:
+          type: integer
+          readOnly: true
+          title: Volgorde
+          description: Heeft invloed op de (standaard-)sortering van categorieën in
+            de resultaten.
+      required:
+      - identifier
+      - naam
+      - order
+    InformationCategoryOorsprongEnum:
+      enum:
+      - waardelijst
+      - zelf_toegevoegd
+      type: string
+      description: |-
+        * `waardelijst` - Waardelijst
+        * `zelf_toegevoegd` - Zelf-toegevoegd item
+    NestedInzageProcedure:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        urlBekendmaking:
+          type: string
+          format: uri
+          title: Announcement URL
+          description: The online location where the announcement is published, for
+            example on 'officielebekendmakingen.nl'.
+          maxLength: 1000
+        toelichting:
+          type: string
+          title: Omschrijving
+          description: The description of the announcement.
+        beschikbaarRechtsmiddel:
+          allOf:
+          - $ref: '#/components/schemas/BeschikbaarRechtsmiddelEnum'
+          title: Available legal procedure
+          description: |-
+            The legal procedure that a citizen can employ to oppose the (predisposed) decision.
+
+            * `zienswijze` - Perspective
+            * `bezwaar` - Objection
+        urlReactieformulier:
+          type: string
+          format: uri
+          title: Legal notice URL
+          description: "The URL to the web form where citizens can submit the legal
+            procedure. \n\n This field gets populated based on the 'beschikbaar_rechtsmiddel'
+            field and the global config. If you do not want to this field to get populated
+            in this fashion ensure to provide it yourself."
+          maxLength: 1000
+        datumBeginInzagetermijn:
+          type: string
+          format: date
+          title: Inzagetermijn in effect from
+          description: The date when the inspection period starts.
+        datumEindeInzagetermijn:
+          type: string
+          format: date
+          title: Datum einde geldigheid
+          description: The date when the inspection period comes to an end.If the
+            end date falls on a saturday, sunday or holiday we automatically push
+            the date back to the first available workday.
+        automatischIntrekken:
+          type: boolean
+          title: Automatically withdraw
+          description: When enabled, ensure that the publication gets redacted on
+            the configured end date.
+      required:
+      - beschikbaarRechtsmiddel
+      - datumBeginInzagetermijn
+      - datumEindeInzagetermijn
+      - toelichting
+      - uuid
+    OrganisationResearch:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        identifier:
+          type: string
+          format: uri
+          readOnly: true
+          title: Identificatie
+          description: De unieke IRI waarmee deze organisatie gedefinieerd is in de
+            overheid.nl waardelijsten. Voor zelf-toegevoegde items wordt een identificatie
+            gegenereerd.
+        naam:
+          type: string
+          maxLength: 255
+        oorsprong:
+          allOf:
+          - $ref: '#/components/schemas/OrganisationResearchOorsprongEnum'
+          description: |-
+            Geeft aan waar de organisatie gedefinieerd is, waar de gegevens opgehaald worden en hoe de identificatie dient geïnterpreteerd te worden. Als een waardelijst als oorsprong gebruikt wordt, dan kan de organisatie niet bewerkt of verwijderd worden.
+
+            * `gemeentelijst` - Register gemeenten compleet
+            * `solijst` - Register samenwerkingsorganisaties compleet
+            * `oorglijst` - Register overige overheidsorganisaties compleet
+            * `caribischelijst` - Register Caribische openbare lichamen compleet
+            * `provincielijst` - Register provincies compleet
+            * `waterschaplijst` - Register waterschappen compleet
+            * `zbolijst` - Register zbo's compleet
+            * `zelf_toegevoegd` - Zelf-toegevoegd item
+      required:
+      - identifier
+      - naam
+    OrganisationResearchOorsprongEnum:
+      enum:
+      - gemeentelijst
+      - solijst
+      - oorglijst
+      - caribischelijst
+      - provincielijst
+      - waterschaplijst
+      - zbolijst
+      - zelf_toegevoegd
+      type: string
+      description: |-
+        * `gemeentelijst` - Register gemeenten compleet
+        * `solijst` - Register samenwerkingsorganisaties compleet
+        * `oorglijst` - Register overige overheidsorganisaties compleet
+        * `caribischelijst` - Register Caribische openbare lichamen compleet
+        * `provincielijst` - Register provincies compleet
+        * `waterschaplijst` - Register waterschappen compleet
+        * `zbolijst` - Register zbo's compleet
+        * `zelf_toegevoegd` - Zelf-toegevoegd item
+    PaginatedDocumentResearcherList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentResearcher'
+    PaginatedInformationCategoryList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InformationCategory'
+    PaginatedOrganisationResearchList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganisationResearch'
+    PaginatedPublicationResearcherList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationResearcher'
+    PaginatedThemeList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Theme'
+    PaginatedTopicResearcherList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicResearcher'
+    PublicationIdentifier:
+      type: object
+      properties:
+        kenmerk:
+          type: string
+          title: Identificatie
+          description: De identificatie die (samen met de bron) de publicatie uniek
+            herleidbaar maakt.
+          maxLength: 40
+        bron:
+          type: string
+          description: Geeft aan in welk systeem het kenmerk leeft en waar het vandaan
+            komt.
+          maxLength: 40
+      required:
+      - bron
+      - kenmerk
+    PublicationResearcher:
+      type: object
+      description: |-
+        Base serializer for publication read and write operations.
+
+        This base class defines the shared logic that should be kept in sync between read
+        and write operations for consistent API documentation (and behaviour).
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        urlPublicatieExtern:
+          oneOf:
+          - type: string
+            format: uri
+          - enum:
+            - ''
+            type: string
+          readOnly: true
+          title: externe publicatie-URL.
+          description: De URL die verwijst naar de UI van de externe applicatie waar
+            de publicatie publiek toegankelijk is. Dit vereist dat de algemene configuratieparameter
+            ingevuld is, anders wordt er een lege string teruggestuurd.
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        verkorteTitel:
+          type: string
+          maxLength: 255
+        omschrijving:
+          type: string
+        informatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: De informatiecategorie verduidelijkt de soort informatie die
+            in de publicatie voorkomt.
+        diWooInformatieCategorieen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+          description: De informatiecategorieën voor in de sitemap.
+        onderwerpen:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Onderwerpen gaan over maatschappelijk relevante informatie
+            die meerdere publicaties omvatten. Ze kunnen tientallen jaren relevant
+            blijven en overstijgen de typische levensduur van een enkele publicatie.
+        publisher:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die de publicatie publiceert.
+        verantwoordelijke:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die verantwoordelijk is voor de publicatie en
+            haar inhoud.
+        opsteller:
+          type: string
+          format: uuid
+          nullable: true
+          description: De organisatie die de publicatie en haar inhoud opgesteld heeft.
+        kenmerken:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationIdentifier'
+          description: De set aan identificatiekenmerken horend bij deze publicatie.
+        gepubliceerdOp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Systeemdatum en -tijd wanneer de publicatie gepubliceerd werd.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer de publicatie laatst gewijzigd
+            is in de database.
+        datumBeginGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            in werking treden.
+        datumEindeGeldigheid:
+          type: string
+          format: date
+          nullable: true
+          description: De datum waarop de rechten en plichten vastgelegd in deze documenten
+            (zijn) komen te vervallen.
+        inzageProcedure:
+          allOf:
+          - $ref: '#/components/schemas/NestedInzageProcedure'
+          readOnly: true
+          nullable: true
+          description: The inzage procedure attached to this publication.
+      required:
+      - diWooInformatieCategorieen
+      - gepubliceerdOp
+      - informatieCategorieen
+      - inzageProcedure
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publisher
+      - urlPublicatieExtern
+      - uuid
+    Theme:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        identifier:
+          type: string
+          format: uri
+          readOnly: true
+          title: Identificatie
+          description: De unieke IRI waarmee het thema in de overheid.nl waardenlijst
+            gedefinieerd is. Voor zelf-toegevoegde items wordt een identificatie gegenereerd.
+        naam:
+          type: string
+          maxLength: 80
+        subThemes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Theme'
+          description: De subthema's die binnen het huidige thema bestaan.
+      required:
+      - identifier
+      - naam
+      - subThemes
+    TopicResearcher:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        officieleTitel:
+          type: string
+          title: Officiële titel
+          maxLength: 255
+        omschrijving:
+          type: string
+        afbeelding:
+          type: string
+          format: uri
+          pattern: (?:jpg|jpeg|png|gif|webp)$
+        publicaties:
+          type: array
+          items:
+            type: string
+            format: uuid
+          readOnly: true
+          description: De publicatie die aan dit onderwerp gekoppeld is.
+        laatstGewijzigdDatum:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Laatst gewijzigd op
+          description: Systeemdatum en -tijd wanneer het onderwerp laatst gewijzigd
+            is in de database.
+      required:
+      - afbeelding
+      - laatstGewijzigdDatum
+      - officieleTitel
+      - publicaties
+      - uuid
+tags:
+- name: Documenten
+- name: Informatiecategorieën
+- name: Onderwerpen
+- name: Organisaties
+- name: Publicaties
+- name: Themas
 externalDocs:
   description: Functional and technical documentation
   url: https://gpp-publicatiebank.readthedocs.io/
