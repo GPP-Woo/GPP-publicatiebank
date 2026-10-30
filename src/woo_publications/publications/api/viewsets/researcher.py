@@ -7,6 +7,8 @@ from drf_spectacular.utils import (
 )
 from rest_framework import viewsets
 
+from woo_publications.api.pagination import CursorPagination
+
 from ...constants import PublicationStatusOptions
 from ...models import (
     Document,
@@ -50,7 +52,8 @@ class DocumentViewSet(
     serializer_class = DocumentResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-creatiedatum"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -77,7 +80,8 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PublicationResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -102,6 +106,7 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TopicResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"

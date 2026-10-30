@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
+from woo_publications.api.pagination import CursorPagination
+
 from ...models import InformationCategory, Organisation, Theme
 from ..serializers import (
     InformationCategorySerializer,
@@ -29,7 +31,8 @@ class InformationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InformationCategorySerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-order"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -50,7 +53,8 @@ class OrganisationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OrganisationResearchSerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-pk"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -71,7 +75,8 @@ class ThemeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ThemeSerializer
     authentication_classes = ()
     permission_classes = ()
-    pagination_class = None
+    pagination_class = CursorPagination
+    pagination_ordering = "-path"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 

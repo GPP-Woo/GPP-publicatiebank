@@ -18,6 +18,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from woo_publications.api.pagination import DynamicPageSizePagination
 from woo_publications.contrib.documents_api.client import DocumentsAPIError
 from woo_publications.logging.api_tools import AuditTrailRetrieveMixin
 from woo_publications.logging.logevent import audit_api_document_delete
@@ -108,6 +109,7 @@ class DocumentViewSet(
     queryset = Document.objects.order_by("-creatiedatum")
     serializer_class = DocumentSerializer
     filterset_class = DocumentFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -308,6 +310,7 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
         "eigenaar", "eigenaar_groep", "publicationidentifier_set"
     ).order_by("-registratiedatum")
     filterset_class = PublicationFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -338,6 +341,7 @@ class TopicViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = TopicSerializer
     filterset_class = TopicFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -373,5 +377,6 @@ class InzageProcedureViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     queryset = InzageProcedure.objects.order_by("-pk")
     serializer_class = InzageProcedureSerializer
     filterset_class = InzageProcedureFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"

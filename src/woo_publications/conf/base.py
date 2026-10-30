@@ -377,10 +377,6 @@ REST_FRAMEWORK = {
     # # Exception handling
     "EXCEPTION_HANDLER": "woo_publications.api.views.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    "PAGE_SIZE": 10,
-    "DEFAULT_PAGINATION_CLASS": (
-        "woo_publications.api.pagination.DynamicPageSizePagination"
-    ),
 }
 
 API_VERSION = "3.0.0"
