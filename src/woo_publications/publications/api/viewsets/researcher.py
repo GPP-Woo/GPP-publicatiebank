@@ -15,6 +15,7 @@ from ...models import (
     Publication,
     Topic,
 )
+from ..filters import ResearcherFilterSet
 from ..mixins import DocumentDownloadMixin
 from ..serializers.document import (
     DocumentResearcherSerializer,
@@ -52,6 +53,7 @@ class DocumentViewSet(
     serializer_class = DocumentResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
+    filterset_class = ResearcherFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-creatiedatum"
     lookup_field = "uuid"
@@ -80,6 +82,7 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PublicationResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
+    filterset_class = ResearcherFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"
@@ -106,6 +109,7 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TopicResearcherSerializer
     authentication_classes = ()
     permission_classes = ()
+    filterset_class = ResearcherFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"

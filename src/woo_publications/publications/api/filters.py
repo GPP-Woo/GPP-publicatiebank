@@ -339,3 +339,11 @@ class InzageProcedureFilterSet(FilterSet):
             "represents a publication."
         ),
     )
+
+
+class ResearcherFilterSet(FilterSet):
+    laatst_gewijzigd_datum_vanaf = filters.DateTimeFilter(
+        help_text=_("Filter on altered items after or on the given value."),
+        field_name="laatst_gewijzigd_datum",
+        lookup_expr="gte",
+    )
