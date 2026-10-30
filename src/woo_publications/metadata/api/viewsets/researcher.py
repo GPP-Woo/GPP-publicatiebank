@@ -32,7 +32,7 @@ class InformationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = ()
     permission_classes = ()
     pagination_class = CursorPagination
-    pagination_ordering = "-order"
+    pagination_ordering = "order"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
