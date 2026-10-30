@@ -15,5 +15,6 @@ class CursorPagination(DRFCursorPagination):
 
     def get_ordering(self, request, queryset, view):
         ordering_field = getattr(view, "pagination_ordering", self.ordering)
+        assert isinstance(ordering_field, str)
 
         return (ordering_field,)

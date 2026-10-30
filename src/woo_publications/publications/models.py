@@ -182,7 +182,7 @@ class Topic(models.Model):
         self,
     ) -> models.QuerySet[Publication, UUID]:
         return (
-            self.publication_set.filter(
+            self.publication_set.filter(  # pyright: ignore[reportAttributeAccessIssue]
                 publicatiestatus=PublicationStatusOptions.published
             )
             .only("uuid")

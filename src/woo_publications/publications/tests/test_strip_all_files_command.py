@@ -177,7 +177,7 @@ class StripAllFilesTest(VCRMixin, TestCase):
             "standard:document-download", kwargs={"uuid": str(html_file.uuid)}
         )
         rtf_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(rtf_file.uuid)}
+            "standard:document-download", kwargs={"uuid": str(rtf_file.uuid)}
         )
 
         mock_index_document.assert_has_calls(
