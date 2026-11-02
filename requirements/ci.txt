@@ -479,7 +479,7 @@ pikepdf==10.17.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.txt

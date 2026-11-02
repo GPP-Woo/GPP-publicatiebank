@@ -531,7 +531,7 @@ pikepdf==10.17.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   -c requirements/ci.txt
     #   -r requirements/ci.txt
