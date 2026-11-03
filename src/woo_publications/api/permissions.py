@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.utils import timezone
+
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.request import Request
 
@@ -30,6 +32,9 @@ class TokenAuthPermission(BasePermission):
             return False
 
         assert isinstance(token.permissions, list)
+
+        if token.expire_date and token.expire_date <= timezone.now().date():
+            return False
 
         if (
             request.method in SAFE_METHODS

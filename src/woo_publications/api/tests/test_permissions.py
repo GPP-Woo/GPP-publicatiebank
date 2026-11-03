@@ -1,3 +1,5 @@
+import datetime
+
 from django.urls import path
 
 from rest_framework import status, views
@@ -92,6 +94,9 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         cls.read_token = TokenAuthFactory.create(read_permission=True).token
         cls.write_token = TokenAuthFactory.create(write_permission=True).token
         cls.read_write_token = TokenAuthFactory.create(read_write_permission=True).token
+        cls.expired_token = TokenAuthFactory.create(
+            read_write_permission=True, expire_date=datetime.date(1970, 1, 1)
+        ).token
 
     def test_get_endpoint(self):
         with self.subTest("no token given"):
@@ -114,6 +119,12 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         with self.subTest("token with wrong permission"):
             response = self.client.get(
                 "/whatever", headers={"Authorization": f"Token {self.write_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("token with expired date"):
+            response = self.client.get(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -153,6 +164,12 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        with self.subTest("token with expired date"):
+            response = self.client.post(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         with self.subTest("token with correct permission"):
             response = self.client.post(
                 "/whatever", headers={"Authorization": f"Token {self.write_token}"}
@@ -189,6 +206,12 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        with self.subTest("token with expired date"):
+            response = self.client.put(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         with self.subTest("token with correct permission"):
             response = self.client.put(
                 "/whatever", headers={"Authorization": f"Token {self.write_token}"}
@@ -222,6 +245,12 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         with self.subTest("token with wrong permission"):
             response = self.client.delete(
                 "/whatever", headers={"Authorization": f"Token {self.read_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("token with expired date"):
+            response = self.client.delete(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
