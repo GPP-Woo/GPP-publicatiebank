@@ -10,15 +10,29 @@ on:
   pull_request:
   workflow_dispatch:
 
+# least privilege as default, should be overridden per job if necessary
+permissions:
+  contents: read
+
 jobs:
-  oas-shared-wf:
-    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@v6
+  oas:
+    name: Checks
+
+    strategy:
+      matrix:
+        component:
+          - application
+          - researcher
+
+    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@31eaea25acd18bb681fe0d01b2452c3dd8d299b9 # v7.0.0
     with:
       python-version: '3.12'
       django-settings-module: woo_publications.conf.ci
-      oas-generate-command: ./bin/generate_api_schema.sh
-      schema-path: src/woo_publications/api/openapi.yaml
-      oas-artifact-name: gpp-publicatiebank-oas
+      oas-generate-command: >2
+        bin/generate_api_schema.sh ${{ matrix.component }}
+        src/woo_publications/api/${{ matrix.component }}_api/openapi.yaml
+      schema-path: src/woo_publications/api/${{ matrix.component }}_api/openapi.yaml
+      oas-artifact-name: ${{ matrix.component }}-api-oas
       node-version-file: '.nvmrc'
       spectral-version: '^6.15.0'
       openapi-to-postman-version: '^5.0.0'
