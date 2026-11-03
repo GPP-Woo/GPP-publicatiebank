@@ -57,6 +57,12 @@ class Application(models.Model):  # noqa: DJ008
         ),
         blank=True,
     )
+    expire_date = models.DateField(
+        _("expire date"),
+        help_text=_("The date when the token will no longer be available."),
+        blank=True,
+        null=True,
+    )
     last_modified = models.DateTimeField(
         _("last modified"),
         auto_now=True,
@@ -69,6 +75,14 @@ class Application(models.Model):  # noqa: DJ008
     class Meta:
         verbose_name = _("application API key")
         verbose_name_plural = _("application API keys")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["token"],
+                condition=~models.Q(token=""),
+                name="unique_token",
+                violation_error_message="The value of 'token' has to be unique.",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         if not self.token:
