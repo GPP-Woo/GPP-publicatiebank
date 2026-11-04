@@ -1,3 +1,5 @@
+import datetime
+
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -20,7 +22,8 @@ class ApplicationAdminTest(WebTest):
         cls.user = UserFactory.create(superuser=True)
 
     def test_list_view_does_not_show_token(self):
-        application = TokenAuthFactory.create()
+        application_1 = TokenAuthFactory.create()
+        application_2 = TokenAuthFactory.create(expire_date=datetime.date(1970, 1, 1))
         response = self.app.get(
             reverse(
                 "admin:api_application_changelist",
@@ -31,12 +34,15 @@ class ApplicationAdminTest(WebTest):
         self.assertEqual(response.status_code, 200)
 
         # test the amount of rows present
-        self.assertContains(response, "field-active", 1)
-        self.assertNotContains(response, application.token)
+        self.assertContains(response, "field-active", 2)
+        self.assertNotContains(response, application_1.token)
+        self.assertNotContains(response, application_2.token)
+        self.assertContains(response, "/static/admin/img/icon-yes.svg", 1)
+        self.assertContains(response, "/static/admin/img/icon-no.svg", 1)
 
     @override_settings(LANGUAGE_CODE="nl")
     def test_detail_view_does_not_show_token(self):
-        application = TokenAuthFactory.create()
+        application = TokenAuthFactory.create(viewed_token_at=timezone.now())
         response = self.app.get(
             reverse(
                 "admin:api_application_change",
