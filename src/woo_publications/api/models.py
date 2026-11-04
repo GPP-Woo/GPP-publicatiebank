@@ -71,6 +71,12 @@ class Application(models.Model):  # noqa: DJ008
     created = models.DateTimeField(
         _("created"), auto_now_add=True, help_text=_("Date when the token was created")
     )
+    viewed_token_at = models.DateTimeField(
+        _("created"),
+        help_text=_("Date when the token was viewed in the admin."),
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("application API key")
