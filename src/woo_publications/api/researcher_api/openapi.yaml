@@ -10,7 +10,7 @@ info:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
 paths:
-  /api/v1/documenten:
+  /documenten:
     get:
       operationId: documentenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -38,7 +38,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDocumentResearcherList'
           description: ''
-  /api/v1/documenten/{uuid}:
+  /documenten/{uuid}:
     get:
       operationId: documentenRetrieve
       description: Haal een specifiek document op.
@@ -59,7 +59,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentResearcher'
           description: ''
-  /api/v1/documenten/{uuid}/download:
+  /documenten/{uuid}/download:
     get:
       operationId: documentenDownloadRetrieve
       description: |-
@@ -98,7 +98,7 @@ paths:
           description: Conflict - het document is (nog) niet beschikbaar voor download.
         '502':
           description: Bad gateway - kon de inhoud niet streamen.
-  /api/v1/informatiecategorieen:
+  /informatiecategorieen:
     get:
       operationId: informatiecategorieenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -120,7 +120,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedInformationCategoryList'
           description: ''
-  /api/v1/informatiecategorieen/{uuid}:
+  /informatiecategorieen/{uuid}:
     get:
       operationId: informatiecategorieenRetrieve
       description: Haal een specifiieke informatiecategorie op.
@@ -141,7 +141,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
-  /api/v1/onderwerpen:
+  /onderwerpen:
     get:
       operationId: onderwerpenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -169,7 +169,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTopicResearcherList'
           description: ''
-  /api/v1/onderwerpen/{uuid}:
+  /onderwerpen/{uuid}:
     get:
       operationId: onderwerpenRetrieve
       description: Haal een specifiek onderwerp op.
@@ -190,7 +190,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TopicResearcher'
           description: ''
-  /api/v1/organisaties:
+  /organisaties:
     get:
       operationId: organisatiesList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
@@ -211,7 +211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrganisationResearchList'
           description: ''
-  /api/v1/organisaties/{uuid}:
+  /organisaties/{uuid}:
     get:
       operationId: organisatiesRetrieve
       description: Haal een specifieke organisatie op.
@@ -232,7 +232,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganisationResearch'
           description: ''
-  /api/v1/publicaties:
+  /publicaties:
     get:
       operationId: publicatiesList
       description: Returns a paginated result list of existing publications.
@@ -259,7 +259,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPublicationResearcherList'
           description: ''
-  /api/v1/publicaties/{uuid}:
+  /publicaties/{uuid}:
     get:
       operationId: publicatiesRetrieve
       description: Haal een specifieke publicatie op.
@@ -280,7 +280,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationResearcher'
           description: ''
-  /api/v1/themas:
+  /themas:
     get:
       operationId: themasList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -302,7 +302,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedThemeList'
           description: ''
-  /api/v1/themas/{uuid}:
+  /themas/{uuid}:
     get:
       operationId: themasRetrieve
       description: Haal een specifiek thema op.

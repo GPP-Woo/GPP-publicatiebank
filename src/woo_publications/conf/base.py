@@ -382,11 +382,6 @@ REST_FRAMEWORK = {
 API_VERSION = "3.0.0"
 RESEARCHER_API_VERSION = "1.0.0"
 
-EXCLUDED_API_PATH_PREFIXES = ("/api/v1",)
-assert isinstance(EXCLUDED_API_PATH_PREFIXES, str | tuple), (
-    "`EXCLUDED_API_PATH_PREFIXES` must be a string or a tuple."
-)
-
 SPECTACULAR_SETTINGS = {
     "REDOC_DIST": "SIDECAR",
     "POSTPROCESSING_HOOKS": [
@@ -394,11 +389,10 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
         "maykin_common.drf_spectacular.hooks.remove_invalid_url_defaults",
     ],
-    "PREPROCESSING_HOOKS": [
-        "woo_publications.api.drf_spectacular.hooks.remove_excluded_api_paths",
-    ],
     "SERVE_INCLUDE_SCHEMA": False,
     "CAMELIZE_NAMES": True,
+    "SCHEMA_PATH_PREFIX": r"/v[0-9]+",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
     "TOS": None,
     "CONTACT": {
         "url": "https://github.com/GPP-Woo/GPP-publicatiebank",

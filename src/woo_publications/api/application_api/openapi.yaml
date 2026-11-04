@@ -58,9 +58,9 @@ info:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
 paths:
-  /api/v2/accounts/organisatie-eenheden:
+  /accounts/organisatie-eenheden:
     get:
-      operationId: v2AccountsOrganisatieEenhedenList
+      operationId: accountsOrganisatieEenhedenList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisatie-eenheden.
       summary: Alle beschikbare organisatie-eenheden.
       parameters:
@@ -113,9 +113,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrganisationUnitList'
           description: ''
-  /api/v2/accounts/organisatie-eenheden/{identifier}:
+  /accounts/organisatie-eenheden/{identifier}:
     get:
-      operationId: v2AccountsOrganisatieEenhedenRetrieve
+      operationId: accountsOrganisatieEenhedenRetrieve
       description: Haal een specifieke organisatie-eenheid op.
       summary: Haal een specifieke organisatie-eenheid op.
       parameters:
@@ -162,7 +162,7 @@ paths:
                 $ref: '#/components/schemas/OrganisationUnit'
           description: ''
     put:
-      operationId: v2AccountsOrganisatieEenhedenUpdate
+      operationId: accountsOrganisatieEenhedenUpdate
       description: |-
         Werk de metadata van een specifieke organisatie-eenheid bij.
 
@@ -219,7 +219,7 @@ paths:
                 $ref: '#/components/schemas/OrganisationUnit'
           description: ''
     patch:
-      operationId: v2AccountsOrganisatieEenhedenPartialUpdate
+      operationId: accountsOrganisatieEenhedenPartialUpdate
       description: |-
         Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk bij.
 
@@ -275,9 +275,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganisationUnit'
           description: ''
-  /api/v2/documenten:
+  /documenten:
     get:
-      operationId: v2DocumentenList
+      operationId: documentenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
         documenten.
       summary: Alle beschikbare documenten.
@@ -463,7 +463,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedDocumentList'
           description: ''
     post:
-      operationId: v2DocumentenCreate
+      operationId: documentenCreate
       description: |-
         Het registreren van een document zorgt ervoor dat de metadata vastgelegd wordt en geeft informatie terug aan de client zodat de bestandsinhoud geüpload kan worden.
 
@@ -520,9 +520,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreate'
           description: ''
-  /api/v2/documenten/{uuid}:
+  /documenten/{uuid}:
     get:
-      operationId: v2DocumentenRetrieve
+      operationId: documentenRetrieve
       description: Haal een specifiek document op.
       summary: Haal een specifiek document op.
       parameters:
@@ -570,7 +570,7 @@ paths:
                 $ref: '#/components/schemas/Document'
           description: ''
     put:
-      operationId: v2DocumentenUpdate
+      operationId: documentenUpdate
       description: Werk de metadata van een specifiek document bij.
       summary: Werk de metadata van een specifiek document bij.
       parameters:
@@ -624,7 +624,7 @@ paths:
                 $ref: '#/components/schemas/DocumentUpdate'
           description: ''
     patch:
-      operationId: v2DocumentenPartialUpdate
+      operationId: documentenPartialUpdate
       description: Werk de metadata van een specifiek document gedeeltelijk bij.
       summary: Werk de metadata van een specifiek document gedeeltelijk bij.
       parameters:
@@ -677,7 +677,7 @@ paths:
                 $ref: '#/components/schemas/DocumentUpdate'
           description: ''
     delete:
-      operationId: v2DocumentenDestroy
+      operationId: documentenDestroy
       description: Vernietig een specifiek document.
       summary: Vernietig een specifiek document.
       parameters:
@@ -720,9 +720,9 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/documenten/{uuid}/bestandsdelen/{partUuid}:
+  /documenten/{uuid}/bestandsdelen/{partUuid}:
     put:
-      operationId: v2DocumentenBestandsdelenUpdate
+      operationId: documentenBestandsdelenUpdate
       description: |-
         Upload de binaire data voor een bestandsdeel. De response van de document create endpoint geeft een lijst van verwachtte bestandsdelen terug die naar dit endpoint verwijzen. De client moet het bestand opknippen in de verwachtte bestandsdeelgroottes en dan elk stuk individueel uploaden.
 
@@ -786,9 +786,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentStatus'
           description: ''
-  /api/v2/documenten/{uuid}/download:
+  /documenten/{uuid}/download:
     get:
-      operationId: v2DocumentenDownloadRetrieve
+      operationId: documentenDownloadRetrieve
       description: |-
         Download de inhoud van het document als binaire data. Dit endpoint geeft geen JSON terug, in de plaats daarvan wordt de bestandsinhoud direct gestreamed.
 
@@ -853,9 +853,9 @@ paths:
           description: Conflict - het document is (nog) niet beschikbaar voor download.
         '502':
           description: Bad gateway - kon de inhoud niet streamen.
-  /api/v2/informatiecategorieen:
+  /informatiecategorieen:
     get:
-      operationId: v2InformatiecategorieenList
+      operationId: informatiecategorieenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
         informatiecategorieën.
       summary: Alle beschikbare informatiecategorieën.
@@ -922,9 +922,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedInformationCategoryList'
           description: ''
-  /api/v2/informatiecategorieen/{uuid}:
+  /informatiecategorieen/{uuid}:
     get:
-      operationId: v2InformatiecategorieenRetrieve
+      operationId: informatiecategorieenRetrieve
       description: Haal een specifiieke informatiecategorie op.
       summary: Haal een specifiieke informatiecategorie op.
       parameters:
@@ -971,9 +971,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
-  /api/v2/inzageprocedure:
+  /inzageprocedure:
     get:
-      operationId: v2InzageprocedureList
+      operationId: inzageprocedureList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
         inzageprocedures.
       summary: Alle beschikbare inzageprocedures.
@@ -1035,7 +1035,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedInzageProcedureList'
           description: ''
     post:
-      operationId: v2InzageprocedureCreate
+      operationId: inzageprocedureCreate
       description: Maak een inzageprocedure aan.
       summary: Maak een inzageprocedure aan.
       parameters:
@@ -1082,9 +1082,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/InzageProcedure'
           description: ''
-  /api/v2/inzageprocedure/{uuid}:
+  /inzageprocedure/{uuid}:
     get:
-      operationId: v2InzageprocedureRetrieve
+      operationId: inzageprocedureRetrieve
       description: Haal een specifieke inzageprocedure op.
       summary: Haal een specifieke inzageprocedure op.
       parameters:
@@ -1132,7 +1132,7 @@ paths:
                 $ref: '#/components/schemas/InzageProcedure'
           description: ''
     put:
-      operationId: v2InzageprocedureUpdate
+      operationId: inzageprocedureUpdate
       description: Werk een inzageprocedure (in zijn geheel) bij.
       summary: Werk een inzageprocedure (in zijn geheel) bij.
       parameters:
@@ -1186,7 +1186,7 @@ paths:
                 $ref: '#/components/schemas/InzageProcedure'
           description: ''
     patch:
-      operationId: v2InzageprocedurePartialUpdate
+      operationId: inzageprocedurePartialUpdate
       description: Werk een inzageprocedure (gedeeltelijk) bij.
       summary: Werk een inzageprocedure (gedeeltelijk) bij.
       parameters:
@@ -1239,7 +1239,7 @@ paths:
                 $ref: '#/components/schemas/InzageProcedure'
           description: ''
     delete:
-      operationId: v2InzageprocedureDestroy
+      operationId: inzageprocedureDestroy
       description: Verwijder een inzageprocedure.
       summary: Verwijder een inzageprocedure.
       parameters:
@@ -1282,9 +1282,9 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/onderwerpen:
+  /onderwerpen:
     get:
-      operationId: v2OnderwerpenList
+      operationId: onderwerpenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
         onderwerpen.
       summary: Alle beschikbare onderwerpen.
@@ -1370,9 +1370,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTopicList'
           description: ''
-  /api/v2/onderwerpen/{uuid}:
+  /onderwerpen/{uuid}:
     get:
-      operationId: v2OnderwerpenRetrieve
+      operationId: onderwerpenRetrieve
       description: Haal een specifiek onderwerp op.
       summary: Haal een specifiek onderwerp op.
       parameters:
@@ -1419,9 +1419,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Topic'
           description: ''
-  /api/v2/organisaties:
+  /organisaties:
     get:
-      operationId: v2OrganisatiesList
+      operationId: organisatiesList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
       summary: Alle beschikbare organisaties.
       parameters:
@@ -1527,7 +1527,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedOrganisationList'
           description: ''
     post:
-      operationId: v2OrganisatiesCreate
+      operationId: organisatiesCreate
       description: Maak een organisatie aan.
       summary: Maak een organisatie aan.
       parameters:
@@ -1573,9 +1573,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v2/organisaties/{uuid}:
+  /organisaties/{uuid}:
     get:
-      operationId: v2OrganisatiesRetrieve
+      operationId: organisatiesRetrieve
       description: Haal een specifieke organisatie op.
       summary: Haal een specifieke organisatie op.
       parameters:
@@ -1623,7 +1623,7 @@ paths:
                 $ref: '#/components/schemas/Organisation'
           description: ''
     put:
-      operationId: v2OrganisatiesUpdate
+      operationId: organisatiesUpdate
       description: Werk een organisatie (in zijn geheel) bij.
       summary: Werk een organisatie (in zijn geheel) bij.
       parameters:
@@ -1676,7 +1676,7 @@ paths:
                 $ref: '#/components/schemas/Organisation'
           description: ''
     patch:
-      operationId: v2OrganisatiesPartialUpdate
+      operationId: organisatiesPartialUpdate
       description: Werk een organisatie (gedeeltelijk) bij.
       summary: Werk een organisatie (gedeeltelijk) bij.
       parameters:
@@ -1728,9 +1728,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v2/publicaties:
+  /publicaties:
     get:
-      operationId: v2PublicatiesList
+      operationId: publicatiesList
       description: |-
         Geeft een gepagineerde lijst van bestaande publicaties terug.
 
@@ -1938,7 +1938,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedPublicationReadList'
           description: ''
     post:
-      operationId: v2PublicatiesCreate
+      operationId: publicatiesCreate
       description: |-
         Maak een publicatie aan.
 
@@ -1987,9 +1987,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationRead'
           description: ''
-  /api/v2/publicaties/{uuid}:
+  /publicaties/{uuid}:
     get:
-      operationId: v2PublicatiesRetrieve
+      operationId: publicatiesRetrieve
       description: Haal een specifieke publicatie op.
       summary: Haal een specifieke publicatie op.
       parameters:
@@ -2037,7 +2037,7 @@ paths:
                 $ref: '#/components/schemas/PublicationRead'
           description: ''
     put:
-      operationId: v2PublicatiesUpdate
+      operationId: publicatiesUpdate
       description: |-
         Update een publicatie voledig.
 
@@ -2093,7 +2093,7 @@ paths:
                 $ref: '#/components/schemas/PublicationRead'
           description: ''
     patch:
-      operationId: v2PublicatiesPartialUpdate
+      operationId: publicatiesPartialUpdate
       description: Werk een publicatie (gedeeltelijk) bij.
       summary: Werk een publicatie (gedeeltelijk) bij.
       parameters:
@@ -2146,7 +2146,7 @@ paths:
                 $ref: '#/components/schemas/PublicationRead'
           description: ''
     delete:
-      operationId: v2PublicatiesDestroy
+      operationId: publicatiesDestroy
       description: Vernietig een publicatie.
       summary: Vernietig een publicatie.
       parameters:
@@ -2189,9 +2189,9 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/themas:
+  /themas:
     get:
-      operationId: v2ThemasList
+      operationId: themasList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
         thema's.
       summary: Alle beschikbare thema's.
@@ -2245,2245 +2245,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedThemeList'
           description: ''
-  /api/v2/themas/{uuid}:
+  /themas/{uuid}:
     get:
-      operationId: v2ThemasRetrieve
-      description: Haal een specifiek thema op.
-      summary: Haal een specifiek thema op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Themas
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Theme'
-          description: ''
-  /api/v3/accounts/organisatie-eenheden:
-    get:
-      operationId: v3AccountsOrganisatieEenhedenList
-      description: Geeft een lijst (met paginering) terug van alle bestaande organisatie-eenheden.
-      summary: Alle beschikbare organisatie-eenheden.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - Organisatie-eenheden
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedOrganisationUnitList'
-          description: ''
-  /api/v3/accounts/organisatie-eenheden/{identifier}:
-    get:
-      operationId: v3AccountsOrganisatieEenhedenRetrieve
-      description: Haal een specifieke organisatie-eenheid op.
-      summary: Haal een specifieke organisatie-eenheid op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: identifier
-        schema:
-          type: string
-        required: true
-      tags:
-      - Organisatie-eenheden
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrganisationUnit'
-          description: ''
-    put:
-      operationId: v3AccountsOrganisatieEenhedenUpdate
-      description: |-
-        Werk de metadata van een specifieke organisatie-eenheid bij.
-
-        The volgende attributen mogen niet aangepast worden na de initiële creatie:
-        * `identifier`
-      summary: Werk de metadata van een specifieke organisatie-eenheid bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: identifier
-        schema:
-          type: string
-        required: true
-      tags:
-      - Organisatie-eenheden
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OrganisationUnit'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrganisationUnit'
-          description: ''
-    patch:
-      operationId: v3AccountsOrganisatieEenhedenPartialUpdate
-      description: |-
-        Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk bij.
-
-        The volgende attributen mogen niet aangepast worden na de initiële creatie:
-        * `identifier`
-      summary: Werk de metadata van een specifieke organisatie-eenheid gedeeltelijk
-        bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: identifier
-        schema:
-          type: string
-        required: true
-      tags:
-      - Organisatie-eenheden
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedOrganisationUnit'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrganisationUnit'
-          description: ''
-  /api/v3/documenten:
-    get:
-      operationId: v3DocumentenList
-      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
-        documenten.
-      summary: Alle beschikbare documenten.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: query
-        name: creatiedatumTot
-        schema:
-          type: string
-          format: date
-        description: Filter documenten op creatiedatum voor de opgegeven datumtijd.
-      - in: query
-        name: creatiedatumTotEnMet
-        schema:
-          type: string
-          format: date
-        description: Filter documenten op creatiedatum op of voor de opgegeven datumtijd.
-      - in: query
-        name: creatiedatumVanaf
-        schema:
-          type: string
-          format: date
-        description: Filter documenten op creatiedatum op of na de opgegeven datumtijd.
-      - in: query
-        name: identifier
-        schema:
-          type: string
-        description: Search the document based on the identifier field.
-      - in: query
-        name: informatieCategorieen
-        schema:
-          type: array
-          items:
-            type: string
-        description: |-
-          Filter documenten die binnen een bepaalde informatiecategorie vallen. Als je meerdere categorieën opgeeft, dan krijg je alle documenten die aan één van deze categorieën gerelateerd zijn.
-
-          De filterwaarden zijn UUIDs van de categorieën. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: true
-        style: form
-      - in: query
-        name: isGereedVoorPublicatie
-        schema:
-          type: boolean
-        description: Filter documenten op basis van of ze volledig geüpload zijn of
-          niet.
-      - in: query
-        name: laatstGewijzigdDatumTot
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op laastste wijzigingsdatum voor de opgegeven
-          datumtijd.
-      - in: query
-        name: laatstGewijzigdDatumTotEnMet
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op laastste wijzigingsdatum op of voor de opgegeven
-          datumtijd.
-      - in: query
-        name: laatstGewijzigdDatumVanaf
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op laastste wijzigingsdatum op of na de opgegeven
-          datumtijd.
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
-        name: publicatie
-        schema:
-          type: string
-          format: uuid
-        description: Filter documenten op basis van de unieke publicatie-identificatie
-          (UUID) waartoe ze horen.
-      - in: query
-        name: publicatiestatus
-        schema:
-          type: array
-          items:
-            type: string
-            title: Status
-            enum:
-            - concept
-            - gepubliceerd
-            - ingetrokken
-        description: |-
-          Filter documenten op publicatiestatus.
-
-          * `gepubliceerd` - Gepubliceerd
-          * `concept` - Concept
-          * `ingetrokken` - Ingetrokken
-        explode: true
-        style: form
-      - in: query
-        name: registratiedatumTot
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op registratiedatum voor de opgegeven datumtijd.
-      - in: query
-        name: registratiedatumTotEnMet
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op registratiedatum op of voor de opgegeven
-          datumtijd.
-      - in: query
-        name: registratiedatumVanaf
-        schema:
-          type: string
-          format: date-time
-        description: Filter documenten op registratiedatum op of na de opgegeven datumtijd.
-      - in: query
-        name: sorteer
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - -creatiedatum
-            - -officiele_titel
-            - -verkorte_titel
-            - creatiedatum
-            - officiele_titel
-            - verkorte_titel
-        description: |-
-          Sorteren op.
-
-          * `creatiedatum` - Creatiedatum
-          * `-creatiedatum` - Creatiedatum (aflopend)
-          * `officiele_titel` - Officiele titel
-          * `-officiele_titel` - Officiele titel (aflopend)
-          * `verkorte_titel` - Verkorte titel
-          * `-verkorte_titel` - Verkorte titel (aflopend)
-        explode: false
-        style: form
-      tags:
-      - Documenten
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedDocumentList'
-          description: ''
-    post:
-      operationId: v3DocumentenCreate
-      description: |-
-        Het registreren van een document zorgt ervoor dat de metadata vastgelegd wordt en geeft informatie terug aan de client zodat de bestandsinhoud geüpload kan worden.
-
-        Het document (= de metadata) wordt meteen vastgelegd in de achterliggende Documenten-API, en je krijgt een lijst van bestandsdelen terug in het antwoord waarmee je de eigenlijke bestandsinhoud kan uploaden.
-
-        Merk op dat de record in de achterliggende Documenten-API vergrendeld is tot dat alle bestandsdelen toegevoegd zijn.
-
-        **NOTE**
-        Je moet hiervoor een aantal algemene instellingen doen in de beheeromgeving. Met name:
-
-        * een Documenten-API-service instellen en selecteren
-        * een organisatie-RSIN instellen om te gebruiken voor geregistreerde documenten
-      summary: Registreer de metadata van een document.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      tags:
-      - Documenten
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentCreate'
-      security:
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentCreate'
-          description: ''
-  /api/v3/documenten/{uuid}:
-    get:
-      operationId: v3DocumentenRetrieve
-      description: Haal een specifiek document op.
-      summary: Haal een specifiek document op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Document'
-          description: ''
-    put:
-      operationId: v3DocumentenUpdate
-      description: Werk de metadata van een specifiek document bij.
-      summary: Werk de metadata van een specifiek document bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentUpdate'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentUpdate'
-          description: ''
-    patch:
-      operationId: v3DocumentenPartialUpdate
-      description: Werk de metadata van een specifiek document gedeeltelijk bij.
-      summary: Werk de metadata van een specifiek document gedeeltelijk bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedDocumentUpdate'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentUpdate'
-          description: ''
-    delete:
-      operationId: v3DocumentenDestroy
-      description: Vernietig een specifiek document.
-      summary: Vernietig een specifiek document.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      security:
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/v3/documenten/{uuid}/bestandsdelen/{partUuid}:
-    put:
-      operationId: v3DocumentenBestandsdelenUpdate
-      description: |-
-        Upload de binaire data voor een bestandsdeel. De response van de document create endpoint geeft een lijst van verwachtte bestandsdelen terug die naar dit endpoint verwijzen. De client moet het bestand opknippen in de verwachtte bestandsdeelgroottes en dan elk stuk individueel uploaden.
-
-        Eenmaal alle bestandsdelen voor het document ontvangen zijn, zal het document automatisch ontgrendeld worden in de achterliggende Documenten-API en dan is het document klaar voor gebruik.
-
-        **NOTE** dit endpoint verwacht `multipart/form-data` gegevens in plaats van JSON - op deze manier kan de base64-encoding overhead voorkomen worden.
-      summary: Bestandsdeel uploaden
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: partUuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/FilePart'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentStatus'
-          description: ''
-  /api/v3/documenten/{uuid}/download:
-    get:
-      operationId: v3DocumentenDownloadRetrieve
-      description: |-
-        Download de inhoud van het document als binaire data. Dit endpoint geeft geen JSON terug, in de plaats daarvan wordt de bestandsinhoud direct gestreamed.
-
-        Je kan enkel bestanden downloaden waarvan de upload naar de achterliggende Documenten-API voltooid is.
-      summary: Download de binaire bestandsdata
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Documenten
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          headers:
-            Content-Length:
-              schema:
-                type: string
-              description: Totale grootte (in bytes) van de download.
-            Content-Disposition:
-              schema:
-                type: string
-              description: Markeert het bestand als 'bijlage' en bevat de bestandsnaam
-                van het document.
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
-          description: De binaire bestandsinhoud.
-        '409':
-          description: Conflict - het document is (nog) niet beschikbaar voor download.
-        '502':
-          description: Bad gateway - kon de inhoud niet streamen.
-  /api/v3/informatiecategorieen:
-    get:
-      operationId: v3InformatiecategorieenList
-      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
-        informatiecategorieën.
-      summary: Alle beschikbare informatiecategorieën.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: query
-        name: identifier
-        schema:
-          type: string
-          format: uri
-          title: Identificatie
-        description: Zoek een informatiecategorie op basis van de unieke IRI die een
-          specifieke categorie identificeert.
-      - in: query
-        name: naam
-        schema:
-          type: string
-        description: Zoek informatiecategorieën op basis van de categorienaam.
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - Informatiecategorieën
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedInformationCategoryList'
-          description: ''
-  /api/v3/informatiecategorieen/{uuid}:
-    get:
-      operationId: v3InformatiecategorieenRetrieve
-      description: Haal een specifiieke informatiecategorie op.
-      summary: Haal een specifiieke informatiecategorie op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Informatiecategorieën
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InformationCategory'
-          description: ''
-  /api/v3/inzageprocedure:
-    get:
-      operationId: v3InzageprocedureList
-      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
-        inzageprocedures.
-      summary: Alle beschikbare inzageprocedures.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
-        name: publicatie
-        schema:
-          type: string
-          format: uuid
-        description: Filter inzageprocedures op basis van de unieke publicatie-identificatie
-          (UUID) waartoe ze horen.
-      tags:
-      - Inzage Procedure
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedInzageProcedureList'
-          description: ''
-    post:
-      operationId: v3InzageprocedureCreate
-      description: Maak een inzageprocedure aan.
-      summary: Maak een inzageprocedure aan.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      tags:
-      - Inzage Procedure
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InzageProcedure'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InzageProcedure'
-          description: ''
-  /api/v3/inzageprocedure/{uuid}:
-    get:
-      operationId: v3InzageprocedureRetrieve
-      description: Haal een specifieke inzageprocedure op.
-      summary: Haal een specifieke inzageprocedure op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Inzage Procedure
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InzageProcedure'
-          description: ''
-    put:
-      operationId: v3InzageprocedureUpdate
-      description: Werk een inzageprocedure (in zijn geheel) bij.
-      summary: Werk een inzageprocedure (in zijn geheel) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Inzage Procedure
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InzageProcedure'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InzageProcedure'
-          description: ''
-    patch:
-      operationId: v3InzageprocedurePartialUpdate
-      description: Werk een inzageprocedure (gedeeltelijk) bij.
-      summary: Werk een inzageprocedure (gedeeltelijk) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Inzage Procedure
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedInzageProcedure'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InzageProcedure'
-          description: ''
-    delete:
-      operationId: v3InzageprocedureDestroy
-      description: Verwijder een inzageprocedure.
-      summary: Verwijder een inzageprocedure.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Inzage Procedure
-      security:
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/v3/onderwerpen:
-    get:
-      operationId: v3OnderwerpenList
-      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
-        onderwerpen.
-      summary: Alle beschikbare onderwerpen.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
-        name: publicaties
-        schema:
-          type: array
-          items:
-            type: string
-            format: uuid
-        description: |-
-          Filter onderwerpen die bij een bepaald onderwerp horen. Als je meerdere publicaties opgeeft, dan krijg je alle onderwerpen die aan één van deze publicaties gerelateerd zijn.
-
-          De filterwaarden zijn de UUIDs van de publicaties. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: false
-        style: form
-      - in: query
-        name: publicatiestatus
-        schema:
-          type: array
-          items:
-            type: string
-            title: Status
-            enum:
-            - concept
-            - gepubliceerd
-            - ingetrokken
-        description: |-
-          Filter onderwerpen op publicatiestatus.
-
-          * `gepubliceerd` - Gepubliceerd
-          * `concept` - Concept
-          * `ingetrokken` - Ingetrokken
-        explode: true
-        style: form
-      tags:
-      - Onderwerpen
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedTopicList'
-          description: ''
-  /api/v3/onderwerpen/{uuid}:
-    get:
-      operationId: v3OnderwerpenRetrieve
-      description: Haal een specifiek onderwerp op.
-      summary: Haal een specifiek onderwerp op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Onderwerpen
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Topic'
-          description: ''
-  /api/v3/organisaties:
-    get:
-      operationId: v3OrganisatiesList
-      description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
-      summary: Alle beschikbare organisaties.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: query
-        name: identifier
-        schema:
-          type: string
-          format: uri
-          title: Identificatie
-        description: Zoek een organisatie op basis van de unieke IRI die een specifieke
-          organisatie identificeert.
-      - in: query
-        name: isActief
-        schema:
-          type: string
-          enum:
-          - alle
-          - 'false'
-          - 'true'
-        description: |-
-          Filter de organisaties op hun actief-status:
-
-          * `true` - Haal alle actieve organisaties op (standaard).
-          * `false` - Haal alle inactieve organisaties op.
-          * `alle` - Haal alle organisaties op, ongeacht of ze actief zijn of niet.
-      - in: query
-        name: naam
-        schema:
-          type: string
-        description: Zoek organisaties op basis van de organisatienaam. Je kan op
-          delen van de naam zoeken, en het zoeken is niet hoofdlettergevoelig.
-      - in: query
-        name: oorsprong
-        schema:
-          type: string
-          enum:
-          - caribischelijst
-          - gemeentelijst
-          - oorglijst
-          - provincielijst
-          - solijst
-          - waterschaplijst
-          - zbolijst
-          - zelf_toegevoegd
-        description: |-
-          Zoek organisaties op basis van de oorsprong van de gegevens.
-
-          * `gemeentelijst` - Register gemeenten compleet
-          * `solijst` - Register samenwerkingsorganisaties compleet
-          * `oorglijst` - Register overige overheidsorganisaties compleet
-          * `caribischelijst` - Register Caribische openbare lichamen compleet
-          * `provincielijst` - Register provincies compleet
-          * `waterschaplijst` - Register waterschappen compleet
-          * `zbolijst` - Register zbo's compleet
-          * `zelf_toegevoegd` - Zelf-toegevoegd item
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - Organisaties
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedOrganisationList'
-          description: ''
-    post:
-      operationId: v3OrganisatiesCreate
-      description: Maak een organisatie aan.
-      summary: Maak een organisatie aan.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      tags:
-      - Organisaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organisation'
-      security:
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-          description: ''
-  /api/v3/organisaties/{uuid}:
-    get:
-      operationId: v3OrganisatiesRetrieve
-      description: Haal een specifieke organisatie op.
-      summary: Haal een specifieke organisatie op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Organisaties
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-          description: ''
-    put:
-      operationId: v3OrganisatiesUpdate
-      description: Werk een organisatie (in zijn geheel) bij.
-      summary: Werk een organisatie (in zijn geheel) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Organisaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organisation'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-          description: ''
-    patch:
-      operationId: v3OrganisatiesPartialUpdate
-      description: Werk een organisatie (gedeeltelijk) bij.
-      summary: Werk een organisatie (gedeeltelijk) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Organisaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedOrganisation'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-          description: ''
-  /api/v3/publicaties:
-    get:
-      operationId: v3PublicatiesList
-      description: |-
-        Geeft een gepagineerde lijst van bestaande publicaties terug.
-
-        **Opmerking**: wanneer je tegelijk op `eigenaar` en `eigenaarGroep` filtert, dan worden de publicaties waar één van beide condities geldt teruggegeven. De parameters hebben OF-gedrag wanneer ze gecombineerd worden.
-      summary: Alle beschikbare publicaties.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: query
-        name: archiefactiedatumTot
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op archiefactiedatum voor de opgegeven datumtijd.
-      - in: query
-        name: archiefactiedatumTotEnMet
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op archiefactiedatum op of voor de opgegeven
-          datumtijd.
-      - in: query
-        name: archiefactiedatumVanaf
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op archiefactiedatum op of na de opgegeven
-          datumtijd.
-      - in: query
-        name: archiefnominatie
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - blijvend_bewaren
-            - vernietigen
-        description: |-
-          Filter publicaties op archiefnominatie.
-
-          * `blijvend_bewaren` - Blijvend bewaren
-          * `vernietigen` - Vernietigen
-        explode: true
-        style: form
-      - in: query
-        name: bron
-        schema:
-          type: string
-        description: Filter publicaties op basis van de opgegeven kenmerkbron.
-      - in: query
-        name: eigenaar
-        schema:
-          type: string
-        description: Filter publicaties op basis van de identificatie van de eigenaar.
-      - in: query
-        name: eigenaarGroep
-        schema:
-          type: string
-        description: Filter publicaties op basis van de identificatie van de eigenaar
-          (groep).
-      - in: query
-        name: informatieCategorieen
-        schema:
-          type: array
-          items:
-            type: string
-        description: |-
-          Filter publicaties die binnen een bepaalde informatiecategorie vallen. Als je meerdere categorieën opgeeft, dan krijg je alle publicaties die aan één van deze categorieën gerelateerd zijn.
-
-          De filterwaarden zijn UUIDs van de categorieën. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: true
-        style: form
-      - in: query
-        name: kenmerk
-        schema:
-          type: string
-        description: Filter publicaties op basis van het opgegeven kenmerk.
-      - in: query
-        name: onderwerpen
-        schema:
-          type: array
-          items:
-            type: string
-            format: uuid
-        description: |-
-          Filter publicaties die bij een bepaald onderwerp horen. Als je meerdere onderwerpen opgeeft, dan krijg je alle publicaties die aan één van deze onderwerpen gerelateerd zijn.
-
-          De filterwaarden zijn de UUIDs van de onderwerpen. Gebruik komma's om meerdere waarden van elkaar te scheiden.
-        explode: false
-        style: form
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
-        name: publicatiestatus
-        schema:
-          type: array
-          items:
-            type: string
-            title: Status
-            enum:
-            - concept
-            - gepubliceerd
-            - ingetrokken
-        description: |-
-          Filter publicaties op publicatiestatus.
-
-          * `gepubliceerd` - Gepubliceerd
-          * `concept` - Concept
-          * `ingetrokken` - Ingetrokken
-        explode: true
-        style: form
-      - in: query
-        name: registratiedatumTot
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op registratiedatum voor de opgegeven datumtijd.
-      - in: query
-        name: registratiedatumTotEnMet
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op registratiedatum op of voor de opgegeven
-          datumtijd.
-      - in: query
-        name: registratiedatumVanaf
-        schema:
-          type: string
-          format: date-time
-        description: Filter publicaties op registratiedatum op of na de opgegeven
-          datumtijd.
-      - in: query
-        name: search
-        schema:
-          type: string
-        description: Doorzoek publicaties op officiële en verkorte titel (niet hoofdlettergevoelig
-          en zoekt op delen van de zoekterm).
-      - in: query
-        name: sorteer
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - -officiele_titel
-            - -registratiedatum
-            - -verkorte_titel
-            - officiele_titel
-            - registratiedatum
-            - verkorte_titel
-        description: |-
-          Sorteren op.
-
-          * `registratiedatum` - Registratiedatum
-          * `-registratiedatum` - Registratiedatum (aflopend)
-          * `officiele_titel` - Officiele titel
-          * `-officiele_titel` - Officiele titel (aflopend)
-          * `verkorte_titel` - Verkorte titel
-          * `-verkorte_titel` - Verkorte titel (aflopend)
-        explode: false
-        style: form
-      tags:
-      - Publicaties
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedPublicationReadList'
-          description: ''
-    post:
-      operationId: v3PublicatiesCreate
-      description: |-
-        Maak een publicatie aan.
-
-        Bij het aanmaken van een conceptpublicatie is het enige verplichte veld  `officieleTitel`.
-      summary: Maak een publicatie aan.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      tags:
-      - Publicaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicationWrite'
-      security:
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicationRead'
-          description: ''
-  /api/v3/publicaties/{uuid}:
-    get:
-      operationId: v3PublicatiesRetrieve
-      description: Haal een specifieke publicatie op.
-      summary: Haal een specifieke publicatie op.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Publicaties
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicationRead'
-          description: ''
-    put:
-      operationId: v3PublicatiesUpdate
-      description: |-
-        Update een publicatie voledig.
-
-        Bij het updaten van een conceptpublicatie is het enige verplichte veld  `officieleTitel`.
-      summary: Werk een publicatie (in zijn geheel) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Publicaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicationWrite'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicationRead'
-          description: ''
-    patch:
-      operationId: v3PublicatiesPartialUpdate
-      description: Werk een publicatie (gedeeltelijk) bij.
-      summary: Werk een publicatie (gedeeltelijk) bij.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Publicaties
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPublicationWrite'
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicationRead'
-          description: ''
-    delete:
-      operationId: v3PublicatiesDestroy
-      description: Vernietig een publicatie.
-      summary: Vernietig een publicatie.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - Publicaties
-      security:
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/v3/themas:
-    get:
-      operationId: v3ThemasList
-      description: Geeft een resultatenlijst (met paginering) terug van de bestaande
-        thema's.
-      summary: Alle beschikbare thema's.
-      parameters:
-      - in: header
-        name: Audit-Remarks
-        schema:
-          type: string
-        description: |2
-
-          Any additional information describing the action performed by the user.
-        required: true
-      - in: header
-        name: Audit-User-ID
-        schema:
-          type: string
-        description: |2
-
-          The system identifier that uniquely identifies the user performing the action.
-          Ideally, this is obtained from some Identity and Access Management
-          infrastructure. With OpenID Connect, this would typically be the `sub` claim.
-        required: true
-      - in: header
-        name: Audit-User-Representation
-        schema:
-          type: string
-        description: |2
-
-          The display name of the user performing the action, to make them recognizable.
-        required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - Themas
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedThemeList'
-          description: ''
-  /api/v3/themas/{uuid}:
-    get:
-      operationId: v3ThemasRetrieve
+      operationId: themasRetrieve
       description: Haal een specifiek thema op.
       summary: Haal een specifiek thema op.
       parameters:
