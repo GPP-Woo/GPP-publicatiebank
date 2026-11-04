@@ -2,14 +2,17 @@
 Release notes
 =============
 
-Unreleased
-==========
+3.0.0 (2026-10-26)
+==================
+
+The release candidate is now released as stable version. It also strips the metadata of
+RTF files and no longer doubles the size of PDF files when stripping their metadata.
 
 Upgrade procedure
 -----------------
 
-These points complement the "Configure a Catalogi API" step of the 3.0.0-rc.0 upgrade
-procedure below.
+When upgrading from 2.x, follow the upgrade procedure of 3.0.0-rc.0 below. These points
+complement its "Configure a Catalogi API" step.
 
 * **Until the Catalogi API is configured, document uploads fail.** Direct uploads fail
   with an HTTP 500 error, uploads from a URL fail in the background task. Uploads for
@@ -41,12 +44,25 @@ procedure below.
 * Afterwards, the ZTC service in Open Zaak that pointed to GPP-publicatiebank (see
   :issue:`394`) is no longer used and can be removed.
 
+* [:issue:`389`] Existing published RTF documents are not stripped automatically. Run
+  ``python src/manage.py strip_all_files --base-url <url>`` (see 2.1.0-rc.0) to strip
+  them.
+
 Features
 --------
 
+* [:issue:`389`] The metadata of RTF files is now stripped as well.
+* [:issue:`528`] Renaming an information category, in the admin or with
+  ``load_information_categories``, now also updates the description of its
+  informatieobjecttype in the Catalogi API.
 * [:issue:`526`] Added the ``setup_catalogi_api`` management command to set up the
   Catalogi API for an existing installation.
 * [:issue:`501`] The inspection procedure list in the admin now links to the audit logs.
+
+Bugfixes
+--------
+
+* [:issue:`495`] Fixed PDF files doubling in size when their metadata was stripped.
 
 Documentation
 -------------
@@ -57,6 +73,16 @@ Documentation
   fields in the admin documentation.
 * Fixed the commands to load the information categories and organisations in the
   installation instructions.
+
+Project maintenance
+-------------------
+
+* [:issue:`495`] Replaced ``pypdf`` with ``pikepdf`` for stripping PDF files and added
+  ``santanico`` for stripping RTF files. Files are now stripped while streaming, which
+  lowers the memory peaks.
+* Upgraded ``certifi`` to 2026.10.23, which removes the eMudhra root certificates
+  "emSign ECC Root CA - G3", "emSign Root CA - C1" and "emSign ECC Root CA - C3".
+* Fixed a flaky test for revoking publications.
 
 3.0.0-rc.0 (2026-10-12)
 =======================

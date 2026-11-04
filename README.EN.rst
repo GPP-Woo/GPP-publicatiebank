@@ -2,7 +2,7 @@
 Public documents registration
 =============================
 
-:Version: 3.0.0-rc.0
+:Version: 3.0.0
 :Source: https://github.com/GPP-Woo/GPP-publicatiebank
 :Keywords: WOO, Public Documents, NL, Open Data
 
@@ -48,10 +48,10 @@ Version         Release date    API specification
 ==============  ==============  =============================
 latest          n/a             `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/main/src/woo_publications/api/openapi.yaml>`_,
                                 `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/main/src/woo_publications/api/openapi.yaml>`_,
-                                (`changes <https://github.com/GPP-Woo/GPP-publicatiebank/compare/3.0.0-rc.0..main>`_)
-3.0.0           2026-10-12      `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/3.0.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
-                                `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/3.0.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
-                                (`changes <https://github.com/GPP-Woo/GPP-publicatiebank/compare/2.1.0..3.0.0-rc.0>`_)
+                                (`changes <https://github.com/GPP-Woo/GPP-publicatiebank/compare/3.0.0..main>`_)
+3.0.0           2026-10-26      `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/3.0.0/src/woo_publications/api/openapi.yaml>`_,
+                                `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/3.0.0/src/woo_publications/api/openapi.yaml>`_,
+                                (`changes <https://github.com/GPP-Woo/GPP-publicatiebank/compare/2.1.0..3.0.0>`_)
 2.1.0           2026-04-22      `ReDoc <https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/2.1.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
                                 `Swagger <https://petstore.swagger.io/?url=https://raw.githubusercontent.com/GPP-Woo/GPP-publicatiebank/2.1.0-rc.0/src/woo_publications/api/openapi.yaml>`_,
                                 (`changes <https://github.com/GPP-Woo/GPP-publicatiebank/compare/2.0.0..2.1.0-rc.0>`_)
