@@ -33,10 +33,7 @@ class ApplicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         return True
 
     def response_add(self, request, obj, post_url_continue=None):
-        if not obj.viewed_token_at:
-            return redirect("admin:token_view", object_id=obj.pk)
-
-        return super().response_add(request, obj, post_url_continue)
+        return redirect("admin:token_view", object_id=obj.pk)
 
     def render_change_form(self, request, context, *args, **kwargs):
         if not context.get("original"):
