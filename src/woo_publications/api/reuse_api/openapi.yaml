@@ -914,6 +914,8 @@ components:
       - officieleTitel
       - publicaties
       - uuid
+servers:
+- url: /reuse/api/v1
 tags:
 - name: Documenten
 - name: Informatiecategorieën

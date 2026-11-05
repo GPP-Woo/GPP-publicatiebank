@@ -22,9 +22,9 @@ jobs:
       matrix:
         component:
           - application
-          - researcher
+          - reuse
 
-    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@31eaea25acd18bb681fe0d01b2452c3dd8d299b9 # v7.0.0
+    uses: maykinmedia/open-api-workflows/.github/workflows/oas.yml@v6
     with:
       python-version: '3.12'
       django-settings-module: woo_publications.conf.ci
@@ -38,3 +38,4 @@ jobs:
       openapi-to-postman-version: '^5.0.0'
       postman-artifact-name: gpp-publicatiebank-postman-collection
       openapi-generator-version: '^2.20.0'
+

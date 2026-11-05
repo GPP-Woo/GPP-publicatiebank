@@ -69,6 +69,7 @@ purposes:
 
 """
     ),
+    "SERVERS": [{"url": "/api/v3"}],
     "VERSION": settings.API_VERSION,
     # TODO: remove this in favor for automated tag detection #478
     "TAGS": [
