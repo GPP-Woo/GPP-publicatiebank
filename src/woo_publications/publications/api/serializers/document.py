@@ -377,7 +377,7 @@ class DocumentUpdateSerializer(DocumentSerializer):
         return document
 
 
-class DocumentResearcherSerializer(DocumentSerializer):
+class DocumentReuseSerializer(DocumentSerializer):
     document_url = serializers.URLField(
         source="source_url",
         label=_("document URL"),

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GPP Publications - Researcher API
+  title: GPP Publications - Reuse API
   version: 1.0.0
   description: TODO
   contact:
@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDocumentResearcherList'
+                $ref: '#/components/schemas/PaginatedDocumentReuseList'
           description: ''
   /documenten/{uuid}:
     get:
@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentResearcher'
+                $ref: '#/components/schemas/DocumentReuse'
           description: ''
   /documenten/{uuid}/download:
     get:
@@ -167,7 +167,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTopicResearcherList'
+                $ref: '#/components/schemas/PaginatedTopicReuseList'
           description: ''
   /onderwerpen/{uuid}:
     get:
@@ -188,7 +188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TopicResearcher'
+                $ref: '#/components/schemas/TopicReuse'
           description: ''
   /organisaties:
     get:
@@ -257,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPublicationResearcherList'
+                $ref: '#/components/schemas/PaginatedPublicationReuseList'
           description: ''
   /publicaties/{uuid}:
     get:
@@ -278,7 +278,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicationResearcher'
+                $ref: '#/components/schemas/PublicationReuse'
           description: ''
   /themas:
     get:
@@ -350,7 +350,7 @@ components:
       required:
       - bron
       - kenmerk
-    DocumentResearcher:
+    DocumentReuse:
       type: object
       properties:
         uuid:
@@ -601,7 +601,7 @@ components:
         * `waterschaplijst` - Register waterschappen compleet
         * `zbolijst` - Register zbo's compleet
         * `zelf_toegevoegd` - Zelf-toegevoegd item
-    PaginatedDocumentResearcherList:
+    PaginatedDocumentReuseList:
       type: object
       required:
       - results
@@ -619,7 +619,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/DocumentResearcher'
+            $ref: '#/components/schemas/DocumentReuse'
     PaginatedInformationCategoryList:
       type: object
       required:
@@ -658,7 +658,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrganisationResearch'
-    PaginatedPublicationResearcherList:
+    PaginatedPublicationReuseList:
       type: object
       required:
       - results
@@ -676,7 +676,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/PublicationResearcher'
+            $ref: '#/components/schemas/PublicationReuse'
     PaginatedThemeList:
       type: object
       required:
@@ -696,7 +696,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Theme'
-    PaginatedTopicResearcherList:
+    PaginatedTopicReuseList:
       type: object
       required:
       - results
@@ -714,7 +714,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/TopicResearcher'
+            $ref: '#/components/schemas/TopicReuse'
     PublicationIdentifier:
       type: object
       properties:
@@ -732,7 +732,7 @@ components:
       required:
       - bron
       - kenmerk
-    PublicationResearcher:
+    PublicationReuse:
       type: object
       description: |-
         Base serializer for publication read and write operations.
@@ -875,7 +875,7 @@ components:
       - identifier
       - naam
       - subThemes
-    TopicResearcher:
+    TopicReuse:
       type: object
       properties:
         uuid:

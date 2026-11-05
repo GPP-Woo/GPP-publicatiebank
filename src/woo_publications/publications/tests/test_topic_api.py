@@ -30,9 +30,9 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
     def test_403_when_audit_headers_are_missing(self):
         user = UserFactory.create()
         self.client.force_authenticate(user=user)
-        list_endpoint = reverse("standard:topic-list")
+        list_endpoint = reverse("application:topic-list")
         detail_endpoint = reverse(
-            "standard:topic-detail", kwargs={"uuid": str(uuid4())}
+            "application:topic-detail", kwargs={"uuid": str(uuid4())}
         )
 
         with self.subTest(action="list"):
@@ -48,9 +48,9 @@ class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCa
     @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
     def test_api_key_result_in_401_with_wrong_credentials(self):
         topic = TopicFactory.create()
-        list_url = reverse("standard:topic-list")
+        list_url = reverse("application:topic-list")
         detail_url = reverse(
-            "standard:topic-detail",
+            "application:topic-detail",
             kwargs={"uuid": str(topic.uuid)},
         )
 
@@ -81,7 +81,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         publication2 = PublicationFactory.create(onderwerpen=[topic2])
 
         response = self.client.get(
-            reverse("standard:topic-list"), headers=AUDIT_HEADERS
+            reverse("application:topic-list"), headers=AUDIT_HEADERS
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -124,7 +124,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         publication2 = PublicationFactory.create(onderwerpen=[topic2])
         publication3 = PublicationFactory.create(onderwerpen=[topic3, topic4])
 
-        list_url = reverse("standard:topic-list")
+        list_url = reverse("application:topic-list")
 
         with self.subTest("filter on a single publication"):
             response = self.client.get(
@@ -179,7 +179,7 @@ class TopicApiTestsCase(TokenAuthMixin, APITestCaseMixin, APITestCase):
         )
         concept = TopicFactory.create(publicatiestatus=PublicationStatusOptions.concept)
         revoked = TopicFactory.create(publicatiestatus=PublicationStatusOptions.revoked)
-        list_url = reverse("standard:topic-list")
+        list_url = reverse("application:topic-list")
 
         with self.subTest("filter on published topics"):
             response = self.client.get(

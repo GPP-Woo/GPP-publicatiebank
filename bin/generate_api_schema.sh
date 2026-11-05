@@ -21,10 +21,10 @@ if [ "$1" = "" ]; then
 fi
 
 case "$1" in
-    application|researcher)
+    application|reuse)
         ;;
     *)
-        echo "The valid first argument options are 'application' and 'researcher'."
+        echo "The valid first argument options are 'application' and 'reuse'."
         exit 1
 esac
 

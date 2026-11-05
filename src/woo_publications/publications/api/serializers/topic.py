@@ -29,7 +29,7 @@ class TopicSerializer(serializers.ModelSerializer[Topic]):
         )
 
 
-class TopicResearcherSerializer(TopicSerializer):
+class TopicReuseSerializer(TopicSerializer):
     publicaties = serializers.ListField(
         child=serializers.UUIDField(),
         source="get_published_publication_uuids",

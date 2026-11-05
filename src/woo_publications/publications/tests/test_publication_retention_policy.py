@@ -378,7 +378,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
             toelichting_bewaartermijn="toelichting",
         )
         organisation = OrganisationFactory.create(is_actief=True)
-        url = reverse("standard:publication-list")
+        url = reverse("application:publication-list")
 
         data = {
             "informatieCategorieen": [str(ic.uuid)],
@@ -419,7 +419,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
             toelichting_bewaartermijn="toelichting",
         )
         organisation = OrganisationFactory.create(is_actief=True)
-        url = reverse("standard:publication-list")
+        url = reverse("application:publication-list")
 
         data = {
             "informatieCategorieen": [str(ic.uuid)],
@@ -475,7 +475,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
             toelichting_bewaartermijn="NOT REPLACED",
         )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -532,7 +532,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
                 toelichting_bewaartermijn="NOT REPLACED",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -591,7 +591,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
                 toelichting_bewaartermijn="NOT REPLACED",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -649,7 +649,7 @@ class TestPublicationsApiRetentionPolicy(TokenAuthMixin, APITestCaseMixin, APITe
                 toelichting_bewaartermijn="NOT REPLACED",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 

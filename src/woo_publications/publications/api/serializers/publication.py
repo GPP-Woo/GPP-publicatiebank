@@ -566,7 +566,7 @@ class PublicationWriteSerializer(
         return publication
 
 
-class PublicationResearcherSerializer(PublicationSerializer):
+class PublicationReuseSerializer(PublicationSerializer):
     class Meta(PublicationSerializer.Meta):
         model = Publication
         fields = (

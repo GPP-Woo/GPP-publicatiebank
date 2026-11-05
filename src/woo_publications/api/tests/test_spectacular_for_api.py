@@ -9,7 +9,7 @@ from parametrize.parametrize import parametrize
 
 
 class SpectacularForApiTestCase(SimpleTestCase):
-    @parametrize("component", ["application", "researcher"])
+    @parametrize("component", ["application", "reuse"])
     def test_oas_generation(self, component: str):
         oas_file = (
             Path(settings.DJANGO_PROJECT_DIR)

@@ -62,7 +62,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -89,7 +89,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
         )
         topic = TopicFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
-        url = reverse("standard:publication-list")
+        url = reverse("application:publication-list")
         data = {
             "informatieCategorieen": [str(ic.uuid)],
             "onderwerpen": [str(topic.uuid)],
@@ -168,7 +168,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 omschrijving="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
         data = {
@@ -260,7 +260,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             )
 
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
         data = {
@@ -399,7 +399,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
             )
 
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
         data = {
@@ -518,7 +518,7 @@ class PublicationLoggingTests(TokenAuthMixin, APITestCase):
                 toelichting_bewaartermijn="extra data",
             )
         detail_url = reverse(
-            "standard:publication-detail",
+            "application:publication-detail",
             kwargs={"uuid": str(publication.uuid)},
         )
 
@@ -578,7 +578,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
         assert not TimelineLogProxy.objects.exists()
         document = DocumentFactory.create(officiele_titel="title one")
         detail_url = reverse(
-            "standard:document-detail",
+            "application:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -611,7 +611,7 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             )
 
         detail_url = reverse(
-            "standard:document-detail",
+            "application:document-detail",
             kwargs={"uuid": str(document.uuid)},
         )
 
@@ -681,7 +681,9 @@ class DocumentLoggingTests(TokenAuthMixin, APITestCase):
             with_registered_document=True,
             upload_complete=True,
         )
-        endpoint = reverse("standard:document-download", kwargs={"uuid": document.uuid})
+        endpoint = reverse(
+            "application:document-download", kwargs={"uuid": document.uuid}
+        )
 
         response = self.client.get(endpoint, headers=AUDIT_HEADERS)
 
@@ -712,7 +714,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
             datum_einde_inzagetermijn=datetime.date(2025, 1, 1),
         )
         detail_url = reverse(
-            "standard:inzageprocedure-detail",
+            "application:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 
@@ -733,7 +735,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
         assert InzageProcedure.objects.count() == 0
 
         publication = PublicationFactory.create(officiele_titel="Lorem Ipsum")
-        url = reverse("standard:inzageprocedure-list")
+        url = reverse("application:inzageprocedure-list")
         body = {
             "publicatie": str(publication.uuid),
             "urlBekendmaking": "https://www.example.com/bekendmaking",
@@ -788,7 +790,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
             automatisch_intrekken=False,
         )
         detail_url = reverse(
-            "standard:inzageprocedure-detail",
+            "application:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
         body = {
@@ -845,7 +847,7 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
         )
 
         detail_url = reverse(
-            "standard:inzageprocedure-detail",
+            "application:inzageprocedure-detail",
             kwargs={"uuid": str(inzage_procedure.uuid)},
         )
 

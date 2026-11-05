@@ -80,7 +80,7 @@ def strip_all_files(base_url: str) -> int:
         if document.has_to_strip_metadata:
             # Create the full document url.
             download_url = reverse(
-                "standard:document-download", kwargs={"uuid": str(document.uuid)}
+                "application:document-download", kwargs={"uuid": str(document.uuid)}
             )
             document_url = urljoin(base_url, download_url)
 

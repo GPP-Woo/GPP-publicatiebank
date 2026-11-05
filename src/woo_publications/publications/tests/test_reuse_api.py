@@ -93,7 +93,7 @@ class PublicationApiTestCase(APITestCase):
         revoked.publicatiestatus = PublicationStatusOptions.revoked
         revoked.save()
 
-        response = self.client.get(reverse("researcher:publication-list"))
+        response = self.client.get(reverse("reuse:publication-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
@@ -142,7 +142,7 @@ class PublicationApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is exact match"):
             response = self.client.get(
-                reverse("researcher:publication-list"),
+                reverse("reuse:publication-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
             )
 
@@ -155,7 +155,7 @@ class PublicationApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is before latest change"):
             response = self.client.get(
-                reverse("researcher:publication-list"),
+                reverse("reuse:publication-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
             )
 
@@ -210,9 +210,7 @@ class PublicationApiTestCase(APITestCase):
 
         with self.subTest("published publication shows up"):
             response = self.client.get(
-                reverse(
-                    "researcher:publication-detail", kwargs={"uuid": published.uuid}
-                )
+                reverse("reuse:publication-detail", kwargs={"uuid": published.uuid})
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -249,13 +247,13 @@ class PublicationApiTestCase(APITestCase):
 
         with self.subTest("concept publication does not show up"):
             response = self.client.get(
-                reverse("researcher:publication-detail", kwargs={"uuid": concept.uuid})
+                reverse("reuse:publication-detail", kwargs={"uuid": concept.uuid})
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         with self.subTest("revoked publication does not show up"):
             response = self.client.get(
-                reverse("researcher:publication-detail", kwargs={"uuid": revoked.uuid})
+                reverse("reuse:publication-detail", kwargs={"uuid": revoked.uuid})
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -310,7 +308,7 @@ class DocumentApiTestCase(APITestCase):
         publication_revoked.revoke(user=UserFactory.create())
         publication_revoked.save()
 
-        response = self.client.get(reverse("researcher:document-list"))
+        response = self.client.get(reverse("reuse:document-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
@@ -355,7 +353,7 @@ class DocumentApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is exact match"):
             response = self.client.get(
-                reverse("researcher:document-list"),
+                reverse("reuse:document-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
             )
 
@@ -368,7 +366,7 @@ class DocumentApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is before latest change"):
             response = self.client.get(
-                reverse("researcher:document-list"),
+                reverse("reuse:document-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
             )
 
@@ -424,7 +422,7 @@ class DocumentApiTestCase(APITestCase):
         with self.subTest("published document show up"):
             response = self.client.get(
                 reverse(
-                    "researcher:document-detail",
+                    "reuse:document-detail",
                     kwargs={"uuid": document_published.uuid},
                 ),
             )
@@ -453,7 +451,7 @@ class DocumentApiTestCase(APITestCase):
         with self.subTest("concept document does not show up"):
             response = self.client.get(
                 reverse(
-                    "researcher:document-detail",
+                    "reuse:document-detail",
                     kwargs={"uuid": document_concept.uuid},
                 )
             )
@@ -462,7 +460,7 @@ class DocumentApiTestCase(APITestCase):
         with self.subTest("revoked document does not show up"):
             response = self.client.get(
                 reverse(
-                    "researcher:document-detail",
+                    "reuse:document-detail",
                     kwargs={"uuid": document_revoked.uuid},
                 )
             )
@@ -497,7 +495,7 @@ class TopicApiTestCase(APITestCase):
         publication_revoked.revoke(user=UserFactory.create())
         publication_revoked.save()
 
-        response = self.client.get(reverse("researcher:topic-list"))
+        response = self.client.get(reverse("reuse:topic-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
@@ -524,7 +522,7 @@ class TopicApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is exact match"):
             response = self.client.get(
-                reverse("researcher:topic-list"),
+                reverse("reuse:topic-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-26T12:00:00-00:00"},
             )
 
@@ -537,7 +535,7 @@ class TopicApiTestCase(APITestCase):
 
         with self.subTest("filter on gte date is before latest change"):
             response = self.client.get(
-                reverse("researcher:topic-list"),
+                reverse("reuse:topic-list"),
                 {"laatstGewijzigdDatumVanaf": "2024-09-25T00:00:00-00:00"},
             )
 
@@ -562,7 +560,7 @@ class TopicApiTestCase(APITestCase):
 
         with self.subTest("published topics show up"):
             response = self.client.get(
-                reverse("researcher:topic-detail", kwargs={"uuid": published.uuid})
+                reverse("reuse:topic-detail", kwargs={"uuid": published.uuid})
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -578,13 +576,13 @@ class TopicApiTestCase(APITestCase):
 
         with self.subTest("concept topic does not show up"):
             response = self.client.get(
-                reverse("researcher:topic-detail", kwargs={"uuid": concept.uuid})
+                reverse("reuse:topic-detail", kwargs={"uuid": concept.uuid})
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         with self.subTest("revoked topic does not show up"):
             response = self.client.get(
-                reverse("researcher:topic-detail", kwargs={"uuid": revoked.uuid})
+                reverse("reuse:topic-detail", kwargs={"uuid": revoked.uuid})
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -604,7 +602,7 @@ class OrganisationApiTests(APITestCase):
             is_actief=True,
         )
 
-        response = self.client.get(reverse("researcher:organisation-list"))
+        response = self.client.get(reverse("reuse:organisation-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         expected_data = {
@@ -631,7 +629,7 @@ class OrganisationApiTests(APITestCase):
 
         with self.subTest("active org shows up"):
             response = self.client.get(
-                reverse("researcher:organisation-detail", kwargs={"uuid": active.uuid})
+                reverse("reuse:organisation-detail", kwargs={"uuid": active.uuid})
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -645,9 +643,7 @@ class OrganisationApiTests(APITestCase):
 
         with self.subTest("inactive org does not show up"):
             response = self.client.get(
-                reverse(
-                    "researcher:organisation-detail", kwargs={"uuid": inactive.uuid}
-                )
+                reverse("reuse:organisation-detail", kwargs={"uuid": inactive.uuid})
             )
 
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -673,7 +669,7 @@ class InformationCategoryTests(APITestCase):
             oorsprong=InformationCategoryOrigins.custom_entry,
         )
 
-        response = self.client.get(reverse("researcher:informationcategory-list"))
+        response = self.client.get(reverse("reuse:informationcategory-list"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -716,7 +712,7 @@ class InformationCategoryTests(APITestCase):
             oorsprong=InformationCategoryOrigins.value_list,
         )
         detail_url = reverse(
-            "researcher:informationcategory-detail",
+            "reuse:informationcategory-detail",
             kwargs={"uuid": str(information_category.uuid)},
         )
 
@@ -749,7 +745,7 @@ class ThemeTests(APITestCase):
             naam="second item",
             parent=parent_theme,
         )
-        list_url = reverse("researcher:theme-list")
+        list_url = reverse("reuse:theme-list")
 
         response = self.client.get(list_url, headers=AUDIT_HEADERS)
 
@@ -782,7 +778,7 @@ class ThemeTests(APITestCase):
             naam="item one",
         )
         list_url = reverse(
-            "researcher:theme-detail",
+            "reuse:theme-detail",
             kwargs={"uuid": str(theme.uuid)},
         )
 

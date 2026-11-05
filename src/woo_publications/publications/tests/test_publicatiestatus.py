@@ -49,7 +49,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         """
         Assert that a publication can be created with an initial status.
         """
-        endpoint = reverse("standard:publication-list")
+        endpoint = reverse("application:publication-list")
         information_category = InformationCategoryFactory.create()
         organisation = OrganisationFactory.create(is_actief=True)
         base = {
@@ -112,7 +112,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication1.uuid}
+                "application:publication-detail", kwargs={"uuid": publication1.uuid}
             )
 
             with freeze_time("2024-09-25T14:00:00-00:00"):
@@ -138,7 +138,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication2.uuid}
+                "application:publication-detail", kwargs={"uuid": publication2.uuid}
             )
 
             response = self.client.patch(
@@ -158,7 +158,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication3.uuid}
+                "application:publication-detail", kwargs={"uuid": publication3.uuid}
             )
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
@@ -180,7 +180,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication1.uuid}
+                "application:publication-detail", kwargs={"uuid": publication1.uuid}
             )
 
             response = self.client.patch(
@@ -201,7 +201,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication2.uuid}
+                "application:publication-detail", kwargs={"uuid": publication2.uuid}
             )
 
             response = self.client.patch(
@@ -222,7 +222,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                     informatie_categorieen=[information_category],
                 )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication3.uuid}
+                "application:publication-detail", kwargs={"uuid": publication3.uuid}
             )
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
@@ -246,7 +246,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication1.uuid}
+                "application:publication-detail", kwargs={"uuid": publication1.uuid}
             )
 
             response = self.client.patch(
@@ -264,7 +264,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 informatie_categorieen=[information_category],
             )
             endpoint = reverse(
-                "standard:publication-detail", kwargs={"uuid": publication2.uuid}
+                "application:publication-detail", kwargs={"uuid": publication2.uuid}
             )
 
             response = self.client.patch(
@@ -300,7 +300,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
             publicatiestatus=PublicationStatusOptions.concept,
         )
         endpoint = reverse(
-            "standard:publication-detail", kwargs={"uuid": publication.uuid}
+            "application:publication-detail", kwargs={"uuid": publication.uuid}
         )
 
         with (
@@ -320,7 +320,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         mock_index_publication.assert_called_once_with(publication_id=publication.pk)
         download_path = reverse(
-            "standard:document-download", kwargs={"uuid": str(document.uuid)}
+            "application:document-download", kwargs={"uuid": str(document.uuid)}
         )
         mock_index_document.assert_called_once_with(
             document_id=document.pk,
@@ -356,7 +356,7 @@ class PublicationStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITe
                 publicatiestatus=PublicationStatusOptions.revoked,
             )
         endpoint = reverse(
-            "standard:publication-detail", kwargs={"uuid": publication.uuid}
+            "application:publication-detail", kwargs={"uuid": publication.uuid}
         )
 
         with (
@@ -419,7 +419,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
         documents in a revoked publication must not be possible at all.
         """
         information_category = InformationCategoryFactory.create()
-        endpoint = reverse("standard:document-list")
+        endpoint = reverse("application:document-list")
         base = {
             "officieleTitel": "Test",
             "creatiedatum": "2024-11-05",
@@ -510,7 +510,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
             publicatiestatus=PublicationStatusOptions.concept,
         )
         endpoint = reverse(
-            "standard:document-detail", kwargs={"uuid": concept_document.uuid}
+            "application:document-detail", kwargs={"uuid": concept_document.uuid}
         )
 
         with self.subTest("publish (blocked)"):
@@ -561,7 +561,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 publicatiestatus=PublicationStatusOptions.published,
             )
             endpoint = reverse(
-                "standard:document-detail", kwargs={"uuid": published_document1.uuid}
+                "application:document-detail", kwargs={"uuid": published_document1.uuid}
             )
 
             response = self.client.patch(
@@ -580,7 +580,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 publicatiestatus=PublicationStatusOptions.published,
             )
             endpoint = reverse(
-                "standard:document-detail", kwargs={"uuid": published_document2.uuid}
+                "application:document-detail", kwargs={"uuid": published_document2.uuid}
             )
 
             response = self.client.patch(
@@ -607,7 +607,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 publicatiestatus=PublicationStatusOptions.published,
             )
             endpoint = reverse(
-                "standard:document-detail", kwargs={"uuid": published_document3.uuid}
+                "application:document-detail", kwargs={"uuid": published_document3.uuid}
             )
             body = self.client.get(endpoint, headers=AUDIT_HEADERS).json()
 
@@ -641,7 +641,7 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 "publication_status": document.publicatie.publicatiestatus
             }
             endpoint = reverse(
-                "standard:document-detail", kwargs={"uuid": document.uuid}
+                "application:document-detail", kwargs={"uuid": document.uuid}
             )
 
             with self.subTest("concept (blocked)", **document_subtest_kwargs):
@@ -690,7 +690,9 @@ class DocumentStateTransitionAPITests(TokenAuthMixin, APITestCaseMixin, APITestC
                 publicatie__publicatiestatus=PublicationStatusOptions.published,
                 publicatiestatus=PublicationStatusOptions.published,
             )
-        endpoint = reverse("standard:document-detail", kwargs={"uuid": document.uuid})
+        endpoint = reverse(
+            "application:document-detail", kwargs={"uuid": document.uuid}
+        )
 
         with (
             self.captureOnCommitCallbacks(execute=True),
@@ -855,7 +857,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         publication.refresh_from_db()
         document.refresh_from_db()
         download_url = reverse(
-            "standard:document-download", kwargs={"uuid": str(document.uuid)}
+            "application:document-download", kwargs={"uuid": str(document.uuid)}
         )
         self.assertEqual(
             publication.publicatiestatus, PublicationStatusOptions.published
@@ -1026,7 +1028,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         self.assertEqual(add_response.status_code, 302)
         added_item = Document.objects.get()
         download_url = reverse(
-            "standard:document-download", kwargs={"uuid": str(added_item.uuid)}
+            "application:document-download", kwargs={"uuid": str(added_item.uuid)}
         )
         self.assertEqual(
             added_item.publicatiestatus, PublicationStatusOptions.published
@@ -1092,7 +1094,7 @@ class PublicationStateTransitionAdminTests(WebTest):
         self.assertEqual(str(document.gepubliceerd_op), "2024-09-25 14:00:00+00:00")
         self.assertEqual(document.ingetrokken_op, None)
         download_url = reverse(
-            "standard:document-download", kwargs={"uuid": str(document.uuid)}
+            "application:document-download", kwargs={"uuid": str(document.uuid)}
         )
         self.assertEqual(document.publicatiestatus, PublicationStatusOptions.published)
         mock_index_document_delay.assert_called_once_with(

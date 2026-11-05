@@ -15,16 +15,16 @@ from ...models import (
     Publication,
     Topic,
 )
-from ..filters import ResearcherFilterSet
+from ..filters import ReuseFilterSet
 from ..mixins import DocumentDownloadMixin
 from ..serializers.document import (
-    DocumentResearcherSerializer,
+    DocumentReuseSerializer,
 )
 from ..serializers.publication import (
-    PublicationResearcherSerializer,
+    PublicationReuseSerializer,
 )
 from ..serializers.topic import (
-    TopicResearcherSerializer,
+    TopicReuseSerializer,
 )
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -50,10 +50,10 @@ class DocumentViewSet(
         publicatie__publicatiestatus=PublicationStatusOptions.published,
         upload_complete=True,
     ).order_by("-creatiedatum")
-    serializer_class = DocumentResearcherSerializer
+    serializer_class = DocumentReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ResearcherFilterSet
+    filterset_class = ReuseFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-creatiedatum"
     lookup_field = "uuid"
@@ -79,10 +79,10 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
         .filter(publicatiestatus=PublicationStatusOptions.published)
         .order_by("-registratiedatum")
     )
-    serializer_class = PublicationResearcherSerializer
+    serializer_class = PublicationReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ResearcherFilterSet
+    filterset_class = ReuseFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"
@@ -106,10 +106,10 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
         .filter(publicatiestatus=PublicationStatusOptions.published)
         .order_by("-registratiedatum")
     )
-    serializer_class = TopicResearcherSerializer
+    serializer_class = TopicReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ResearcherFilterSet
+    filterset_class = ReuseFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"

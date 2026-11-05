@@ -31,24 +31,23 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     # TODO remove in future release
-    path("api/", include("woo_publications.api.urls")),
-    path("researcher/api/", include("woo_publications.api.researcher_api.urls")),
-    path("standard/api/", include("woo_publications.api.application_api.urls")),
+    path("api/", include("woo_publications.api.application_api.urls")),
+    path("hergebruik/api/", include("woo_publications.api.reuse_api.urls")),
     path(
-        "standard/",
+        "hergebruik/",
         ComponentIndexView.as_view(
             template_name="api_index.html",
-            component="standard",
+            component="application",
         ),
         name="index-application",
     ),
     path(
-        "researcher/",
+        "reuse/",
         ComponentIndexView.as_view(
             template_name="api_index.html",
-            component="researcher",
+            component="reuse",
         ),
-        name="index-researcher",
+        name="index-reuse",
     ),
     # Simply show the index template.
     path("", TemplateView.as_view(template_name="index.html"), name="root"),
