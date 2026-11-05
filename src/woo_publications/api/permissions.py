@@ -7,7 +7,7 @@ from rest_framework.request import Request
 
 from woo_publications.api.drf_spectacular.headers import ALL_AUDIT_PARAMETERS
 
-from .constants import PermissionOptions
+from .constants import ApiOptions, PermissionOptions
 from .models import Application
 
 if TYPE_CHECKING:
@@ -23,6 +23,8 @@ class AuditHeaderPermission(BasePermission):
 
 
 class TokenAuthPermission(BasePermission):
+    api_name = "CHANGE MY VALUE TO AN 'ApiOptions''"
+
     def has_permission(self, request, view) -> bool:
         token = request.auth
 
@@ -30,17 +32,27 @@ class TokenAuthPermission(BasePermission):
             return False
 
         assert isinstance(token.permissions, list)
+        assert isinstance(token.api_access, list)
 
-        if (
-            request.method in SAFE_METHODS
-            and PermissionOptions.read in token.permissions
-        ):
-            return True
+        if self.api_name in token.api_access:
+            if (
+                request.method in SAFE_METHODS
+                and PermissionOptions.read in token.permissions
+            ):
+                return True
 
-        if (
-            request.method not in SAFE_METHODS
-            and PermissionOptions.write in token.permissions
-        ):
-            return True
+            if (
+                request.method not in SAFE_METHODS
+                and PermissionOptions.write in token.permissions
+            ):
+                return True
 
         return False
+
+
+class ApplicationTokenAuthPermission(TokenAuthPermission):
+    api_name = ApiOptions.application
+
+
+class ReuseTokenAuthPermission(TokenAuthPermission):
+    api_name = ApiOptions.reuse
