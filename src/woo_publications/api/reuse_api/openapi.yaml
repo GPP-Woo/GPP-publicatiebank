@@ -31,6 +31,8 @@ paths:
         description: Filter on altered items after or on the given value.
       tags:
       - Documenten
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -52,6 +54,8 @@ paths:
         required: true
       tags:
       - Documenten
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -76,6 +80,8 @@ paths:
         required: true
       tags:
       - Documenten
+      security:
+      - tokenAuth: []
       responses:
         '200':
           headers:
@@ -113,6 +119,8 @@ paths:
           type: string
       tags:
       - Informatiecategorieën
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -134,6 +142,8 @@ paths:
         required: true
       tags:
       - Informatiecategorieën
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -162,6 +172,8 @@ paths:
         description: Filter on altered items after or on the given value.
       tags:
       - Onderwerpen
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -183,6 +195,8 @@ paths:
         required: true
       tags:
       - Onderwerpen
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -204,6 +218,8 @@ paths:
           type: string
       tags:
       - Organisaties
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -225,6 +241,8 @@ paths:
         required: true
       tags:
       - Organisaties
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -252,6 +270,8 @@ paths:
         description: Filter on altered items after or on the given value.
       tags:
       - Publicaties
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -273,6 +293,8 @@ paths:
         required: true
       tags:
       - Publicaties
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -295,6 +317,8 @@ paths:
           type: string
       tags:
       - Themas
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -316,6 +340,8 @@ paths:
         required: true
       tags:
       - Themas
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -914,6 +940,12 @@ components:
       - officieleTitel
       - publicaties
       - uuid
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
 servers:
 - url: /reuse/api/v1
 tags:
