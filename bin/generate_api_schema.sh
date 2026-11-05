@@ -37,6 +37,7 @@ src/manage.py spectacular_for_api \
     --file ${OUTPUT_FILE:-$SCHEMA_PATH/openapi.yaml} \
     --lang="nl-nl" \
     --validate \
+    --fail-on-warn \
     --component $1_api
 
 echo "Done."

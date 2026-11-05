@@ -428,12 +428,14 @@ components:
           minimum: 0
           format: int64
           description: Bestandsgrootte op de harde schijf, in bytes.
-        documentUrl:
+        downloadUrl:
           type: string
           format: uri
+          readOnly: true
+          description: URL to download the binary contents of the document.
       required:
       - creatiedatum
-      - documentUrl
+      - downloadUrl
       - gepubliceerdOp
       - laatstGewijzigdDatum
       - officieleTitel

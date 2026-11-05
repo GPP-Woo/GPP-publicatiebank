@@ -341,7 +341,7 @@ class InzageProcedureFilterSet(FilterSet):
     )
 
 
-class ReuseFilterSet(FilterSet):
+class LastModifiedFilterSet(FilterSet):
     laatst_gewijzigd_datum_vanaf = filters.DateTimeFilter(
         help_text=_("Filter on altered items after or on the given value."),
         field_name="laatst_gewijzigd_datum",

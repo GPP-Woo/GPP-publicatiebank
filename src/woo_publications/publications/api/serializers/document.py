@@ -378,9 +378,11 @@ class DocumentUpdateSerializer(DocumentSerializer):
 
 
 class DocumentReuseSerializer(DocumentSerializer):
-    document_url = serializers.URLField(
-        source="source_url",
-        label=_("document URL"),
+    download_url = serializers.HyperlinkedIdentityField(
+        view_name="reuse:document-download",
+        lookup_field="uuid",
+        label=_("download URL"),
+        help_text=_("URL to download the binary contents of the document."),
     )
 
     class Meta(DocumentSerializer.Meta):
@@ -400,5 +402,5 @@ class DocumentReuseSerializer(DocumentSerializer):
             "bestandsformaat",
             "bestandsnaam",
             "bestandsomvang",
-            "document_url",
+            "download_url",
         )

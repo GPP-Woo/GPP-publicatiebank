@@ -1,3 +1,5 @@
+from django.contrib.postgres.expressions import ArraySubquery
+from django.db.models import OuterRef
 from django.utils.translation import gettext_lazy as _
 
 import structlog
@@ -15,7 +17,7 @@ from ...models import (
     Publication,
     Topic,
 )
-from ..filters import ReuseFilterSet
+from ..filters import LastModifiedFilterSet
 from ..mixins import DocumentDownloadMixin
 from ..serializers.document import (
     DocumentReuseSerializer,
@@ -49,13 +51,13 @@ class DocumentViewSet(
         publicatiestatus=PublicationStatusOptions.published,
         publicatie__publicatiestatus=PublicationStatusOptions.published,
         upload_complete=True,
-    ).order_by("-creatiedatum")
+    ).order_by("-pk")
     serializer_class = DocumentReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ReuseFilterSet
+    filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
-    pagination_ordering = "-creatiedatum"
+    pagination_ordering = "-pk"
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -82,7 +84,7 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PublicationReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ReuseFilterSet
+    filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"
@@ -104,12 +106,23 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Topic.objects.prefetch_related("publication_set")
         .filter(publicatiestatus=PublicationStatusOptions.published)
+        .prefetch_related("publication_set")
+        .annotate(
+            published_topic_uuids=ArraySubquery(
+                Publication.objects.filter(
+                    onderwerpen=OuterRef("pk"),
+                    publicatiestatus=PublicationStatusOptions.published,
+                )
+                .order_by("pk")
+                .values("uuid")
+            )
+        )
         .order_by("-registratiedatum")
     )
     serializer_class = TopicReuseSerializer
     authentication_classes = ()
     permission_classes = ()
-    filterset_class = ReuseFilterSet
+    filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     pagination_ordering = "-registratiedatum"
     lookup_field = "uuid"

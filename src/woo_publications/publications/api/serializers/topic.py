@@ -32,7 +32,7 @@ class TopicSerializer(serializers.ModelSerializer[Topic]):
 class TopicReuseSerializer(TopicSerializer):
     publicaties = serializers.ListField(
         child=serializers.UUIDField(),
-        source="get_published_publication_uuids",
+        source="published_topic_uuids",
         help_text=_("The publication attached to this topic."),
         read_only=True,
     )

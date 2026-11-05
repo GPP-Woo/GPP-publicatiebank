@@ -294,7 +294,6 @@ class DocumentApiTestCase(APITestCase):
                 creatiedatum="2024-01-01",
                 datum_ondertekend=None,
                 ontvangstdatum=timezone.now(),
-                source_url="https://www.example.com/bla",
                 upload_complete=True,
             )
 
@@ -327,7 +326,7 @@ class DocumentApiTestCase(APITestCase):
             "bestandsformaat": "unknown",
             "bestandsnaam": "unknown.bin",
             "bestandsomvang": 0,
-            "documentUrl": "https://www.example.com/bla",
+            "downloadUrl": f"http://testserver/hergebruik/api/v1/documenten/{document_published.uuid}/download",
         }
         self.assertEqual(response.json()["results"], [expected_data])
 
@@ -405,7 +404,6 @@ class DocumentApiTestCase(APITestCase):
                 creatiedatum="2024-01-01",
                 datum_ondertekend=None,
                 ontvangstdatum=timezone.now(),
-                source_url="https://www.example.com/bla",
                 upload_complete=True,
             )
 
@@ -444,7 +442,7 @@ class DocumentApiTestCase(APITestCase):
                 "bestandsformaat": "unknown",
                 "bestandsnaam": "unknown.bin",
                 "bestandsomvang": 0,
-                "documentUrl": "https://www.example.com/bla",
+                "downloadUrl": f"http://testserver/hergebruik/api/v1/documenten/{document_published.uuid}/download",
             }
             self.assertEqual(response.json(), expected_data)
 
