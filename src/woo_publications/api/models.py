@@ -96,11 +96,6 @@ class Application(models.Model):  # noqa: DJ008
             )
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = self.generate_token()
-        return super().save(*args, **kwargs)
-
     def generate_token(self):
         return binascii.hexlify(os.urandom(20)).decode()
 

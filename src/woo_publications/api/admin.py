@@ -67,6 +67,7 @@ class ApplicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         if application.viewed_token_at:
             raise Http404("Token already viewed")
 
+        token = application.get_and_set_token()
         application.viewed_token_at = timezone.now()
         application.save()
 
@@ -75,6 +76,7 @@ class ApplicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
             "title": _("Applicatie-API-Key  Token:"),
             "opts": self.model._meta,
             "application": application,
+            "token": token,
             "cl": {"opts": self.model._meta},
             "url_prefix": request.build_absolute_uri("/")[
                 :-1
