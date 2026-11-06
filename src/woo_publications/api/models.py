@@ -78,7 +78,7 @@ class Application(models.Model):  # noqa: DJ008
         _("created"), auto_now_add=True, help_text=_("Date when the token was created")
     )
     viewed_token_at = models.DateTimeField(
-        _("created"),
+        _("token viewed at"),
         help_text=_("Date when the token was viewed in the admin."),
         blank=True,
         null=True,

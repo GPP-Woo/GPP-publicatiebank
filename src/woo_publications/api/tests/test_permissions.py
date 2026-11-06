@@ -146,7 +146,7 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             response = self.client.get(
                 "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(
                 response.json()["detail"],
                 "The token has expired, please contact support to gain a new one.",
@@ -208,7 +208,7 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             response = self.client.post(
                 "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(
                 response.json()["detail"],
                 "The token has expired, please contact support to gain a new one.",
@@ -270,7 +270,7 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             response = self.client.put(
                 "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(
                 response.json()["detail"],
                 "The token has expired, please contact support to gain a new one.",
@@ -332,7 +332,7 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
             response = self.client.delete(
                 "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(
                 response.json()["detail"],
                 "The token has expired, please contact support to gain a new one.",

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path
@@ -8,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 
 from woo_publications.logging.admin_tools import AdminAuditLogMixin
 
+from ..logging.logevent import audit_admin_read
+from ..typing import is_authenticated_request
 from .models import Application
 
 
@@ -58,18 +61,25 @@ class ApplicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
         ]
         return custom_urls + default_urls
 
+    @transaction.atomic
     def token_view_endpoint(self, request: HttpRequest, object_id: int) -> HttpResponse:
-        if not self.has_view_permission(request):
+        assert is_authenticated_request(request)
+
+        if not self.has_view_permission(request) or not self.has_add_permission(
+            request
+        ):
             raise PermissionDenied
 
-        application = get_object_or_404(Application, pk=object_id)
+        application = get_object_or_404(
+            Application.objects.select_for_update(), pk=object_id
+        )
 
-        if application.viewed_token_at:
+        if application.viewed_token_at or application.token:
             raise Http404("Token already viewed")
 
         token = application.get_and_set_token()
         application.viewed_token_at = timezone.now()
-        application.save()
+        application.save(update_fields=["viewed_token_at", "token"])
 
         context = {
             **self.admin_site.each_context(request),
@@ -82,4 +92,7 @@ class ApplicationAdmin(AdminAuditLogMixin, admin.ModelAdmin):
                 :-1
             ],  # strip off the trailing slash
         }
+
+        audit_admin_read(content_object=application, django_user=request.user)
+
         return render(request, "admin/token.html", context)

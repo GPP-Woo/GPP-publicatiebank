@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.request import Request
 
@@ -36,7 +36,7 @@ class TokenAuthPermission(BasePermission):
         assert isinstance(token.permissions, list)
 
         if token.expire_date and token.expire_date <= timezone.now().date():
-            raise PermissionDenied(
+            raise NotAuthenticated(
                 detail=_(
                     "The token has expired, please contact support to gain a new one."
                 ),

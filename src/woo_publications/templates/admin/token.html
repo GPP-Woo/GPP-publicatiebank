@@ -11,7 +11,21 @@
 
 {% block search %}{% endblock %}
 
-{% block result_list %}{{ token }}{% endblock %}
+{% block result_list %}
+    <div>
+        {% trans "This token is only visible once, after you close the page you cannot view it again." %}
+
+        <fieldset class="module aligned collapse open">
+            <details>
+                <summary>
+                    {% trans "API key:" %}
+                </summary>
+                {{ token }}
+            </details>
+        </fieldset>
+    </div>
+
+{% endblock %}
 
 {% block pagination %}{% endblock %}
 {% block filters %}{% endblock %}
