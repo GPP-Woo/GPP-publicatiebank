@@ -2,15 +2,11 @@ from typing import override
 from uuid import UUID
 
 from django.db import transaction
-from django.http import StreamingHttpResponse
-from django.utils.http import content_disposition_header
 from django.utils.translation import gettext_lazy as _
 
 import structlog
 from celery import chain
 from drf_spectacular.utils import (
-    OpenApiParameter,
-    OpenApiResponse,
     extend_schema,
     extend_schema_view,
 )
@@ -22,26 +18,35 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from woo_publications.api.exceptions import BadGateway, Conflict
-from woo_publications.contrib.documents_api.client import DocumentsAPIError, get_client
+from woo_publications.api.pagination import DynamicPageSizePagination
+from woo_publications.contrib.documents_api.client import DocumentsAPIError
 from woo_publications.logging.api_tools import AuditTrailRetrieveMixin
 from woo_publications.logging.logevent import audit_api_document_delete
 from woo_publications.logging.service import (
     AuditTrailViewSetMixin,
-    audit_api_download,
     extract_audit_parameters,
 )
 
-from ..constants import DocumentDeliveryMethods
-from ..models import Document, InzageProcedure, Publication, Topic
-from ..tasks import index_document, process_source_document, strip_metadata
-from .filters import (
+from ...constants import DocumentDeliveryMethods
+from ...models import (
+    Document,
+    InzageProcedure,
+    Publication,
+    Topic,
+)
+from ...tasks import (
+    index_document,
+    process_source_document,
+    strip_metadata,
+)
+from ..filters import (
     DocumentFilterSet,
     InzageProcedureFilterSet,
     PublicationFilterSet,
     TopicFilterSet,
 )
-from .serializers import (
+from ..mixins import DocumentDownloadMixin
+from ..serializers import (
     DocumentCreateSerializer,
     DocumentSerializer,
     DocumentStatusSerializer,
@@ -97,12 +102,14 @@ logger = structlog.stdlib.get_logger(__name__)
     ),
 )
 class DocumentViewSet(
+    DocumentDownloadMixin,
     AuditTrailViewSetMixin,
     viewsets.ModelViewSet,
 ):
     queryset = Document.objects.order_by("-creatiedatum")
     serializer_class = DocumentSerializer
     filterset_class = DocumentFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -254,100 +261,6 @@ class DocumentViewSet(
         )
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(
-        summary=_("Download the binary file contents"),
-        description=_(
-            "Download the binary content of the document. The endpoint does not return "
-            "JSON data, but instead the file content is streamed.\n\n"
-            "You can only download the content of files that are completely uploaded "
-            "in the upstream API."
-        ),
-        responses={
-            (status.HTTP_200_OK, "application/octet-stream"): OpenApiResponse(
-                description=_("The binary file contents."),
-                response=bytes,
-            ),
-            status.HTTP_409_CONFLICT: OpenApiResponse(
-                description=_(
-                    "Conflict - the document is not (yet) available for download."
-                ),
-            ),
-            status.HTTP_502_BAD_GATEWAY: OpenApiResponse(
-                description=_("Bad gateway - failure to stream content."),
-            ),
-        },
-        parameters=[
-            OpenApiParameter(
-                name="Content-Length",
-                type=str,
-                location=OpenApiParameter.HEADER,
-                description=_("Total size in bytes of the download."),
-                response=[200],
-            ),
-            OpenApiParameter(
-                name="Content-Disposition",
-                type=str,
-                location=OpenApiParameter.HEADER,
-                description=_(
-                    "Marks the file as attachment and includes the filename."
-                ),
-                response=[200],
-            ),
-        ],
-    )
-    @action(detail=True, methods=["get"], url_name="download")
-    def download(self, request: Request, *args, **kwargs) -> StreamingHttpResponse:
-        document = self.get_object()
-        assert isinstance(document, Document)
-
-        if not document.upload_complete:
-            raise Conflict(detail=_("The document upload is not yet completed."))
-
-        assert document.document_service is not None, (
-            "Document must exist in upstream API"
-        )
-
-        with get_client(document.document_service) as client:
-            upstream_response, streaming_content = client.download_document(
-                uuid=document.document_uuid
-            )
-
-        if upstream_response.status_code != status.HTTP_200_OK:
-            raise BadGateway(detail=_("Could not download from the upstream."))
-
-        content_type = (
-            "application/octet-stream"
-            if document.bestandsformaat == "unknown"
-            else document.bestandsformaat
-        )
-
-        response = StreamingHttpResponse(
-            streaming_content,
-            content_type=content_type,
-            headers={
-                "Content-Length": upstream_response.headers.get(
-                    "Content-Length", str(document.bestandsomvang)
-                ),
-                "Content-Disposition": content_disposition_header(
-                    as_attachment=True,
-                    filename=document.bestandsnaam,
-                ),
-                # nginx-specific header that prevents files being buffered, instead
-                # they will be sent synchronously to the nginx client.
-                "X-Accel-Buffering": "no",
-            },
-        )
-
-        user_id, user_repr, remarks = extract_audit_parameters(request)
-        audit_api_download(
-            content_object=document,
-            user_id=user_id,
-            user_display=user_repr,
-            remarks=remarks,
-        )
-
-        return response
-
 
 @extend_schema(tags=["Publicaties"])
 @extend_schema_view(
@@ -397,6 +310,7 @@ class PublicationViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
         "eigenaar", "eigenaar_groep", "publicationidentifier_set"
     ).order_by("-registratiedatum")
     filterset_class = PublicationFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -427,6 +341,7 @@ class TopicViewSet(AuditTrailRetrieveMixin, viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = TopicSerializer
     filterset_class = TopicFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
 
@@ -462,5 +377,6 @@ class InzageProcedureViewSet(AuditTrailViewSetMixin, viewsets.ModelViewSet):
     queryset = InzageProcedure.objects.order_by("-pk")
     serializer_class = InzageProcedureSerializer
     filterset_class = InzageProcedureFilterSet
+    pagination_class = DynamicPageSizePagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"

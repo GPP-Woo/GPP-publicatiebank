@@ -1034,7 +1034,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Creates the absolute document URI for the document-download endpoint.
         """
         return reverse(
-            "api:document-download", kwargs={"uuid": str(self.uuid)}, request=request
+            "application:document-download",
+            kwargs={"uuid": str(self.uuid)},
+            request=request,
         )
 
     @property
@@ -1100,7 +1102,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
             for part in zgw_document.file_parts:
                 part.url = build_absolute_uri(
                     reverse(
-                        "api:document-filepart-detail",
+                        "application:document-filepart-detail",
                         kwargs={
                             "uuid": self.uuid,
                             "part_uuid": part.uuid,
