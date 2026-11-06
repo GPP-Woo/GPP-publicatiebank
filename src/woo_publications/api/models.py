@@ -1,6 +1,8 @@
 import binascii
 import os
 
+from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -18,6 +20,10 @@ PERMISSION_SCHEMA = {
         ],
     },
 }
+
+
+def generate_token():
+    return binascii.hexlify(os.urandom(20)).decode()
 
 
 class Application(models.Model):  # noqa: DJ008
@@ -97,3 +103,9 @@ class Application(models.Model):  # noqa: DJ008
 
     def generate_token(self):
         return binascii.hexlify(os.urandom(20)).decode()
+
+    def get_and_set_token(self) -> str:
+        token = self.generate_token()
+        self.token = make_password(token, settings.API_TOKEN_SALT)
+
+        return token

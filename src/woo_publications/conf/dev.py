@@ -11,6 +11,10 @@ os.environ.setdefault(
     "SECRET_KEY",
     "django-insecure-fgggi4*bl2wdg$&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8",
 )
+os.environ.setdefault(
+    "API_TOKEN_SALT",
+    "django-insecure-fgggi4*bl2wdg",
+)
 os.environ.setdefault("IS_HTTPS", "no")
 os.environ.setdefault("VERSION_TAG", "dev")
 
