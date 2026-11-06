@@ -97,6 +97,7 @@ ENV RELEASE=${RELEASE} \
     DJANGO_SETTINGS_MODULE=woo_publications.conf.docker
 
 ARG SECRET_KEY=dummy
+ARG API_TOKEN_SALT=dummy
 
 LABEL org.label-schema.vcs-ref=$COMMIT_HASH \
       org.label-schema.vcs-url="https://github.com/GPP-Woo/GPP-publicatiebank" \

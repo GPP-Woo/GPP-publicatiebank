@@ -92,13 +92,15 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        cls.read_token = TokenAuthFactory.create(read_permission=True).token
-        cls.write_token = TokenAuthFactory.create(write_permission=True).token
-        cls.read_write_token = TokenAuthFactory.create(read_write_permission=True).token
+        cls.no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        cls.read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        cls.write_token = TokenAuthFactory.create(write_permission=True).raw_token
+        cls.read_write_token = TokenAuthFactory.create(
+            read_write_permission=True
+        ).raw_token
         cls.expired_token = TokenAuthFactory.create(
             read_write_permission=True, expire_date=datetime.date(1970, 1, 1)
-        ).token
+        ).raw_token
 
     def test_get_endpoint(self):
         with self.subTest("no token given"):

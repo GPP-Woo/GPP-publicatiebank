@@ -35,7 +35,9 @@ class ApplicationAdminTest(WebTest):
 
         # test the amount of rows present
         self.assertContains(response, "field-active", 2)
+        self.assertNotContains(response, application_1.raw_token)
         self.assertNotContains(response, application_1.token)
+        self.assertNotContains(response, application_2.raw_token)
         self.assertNotContains(response, application_2.token)
         self.assertContains(response, "/static/admin/img/icon-yes.svg", 1)
         self.assertContains(response, "/static/admin/img/icon-no.svg", 1)
@@ -67,6 +69,7 @@ class ApplicationAdminTest(WebTest):
         self.assertContains(response, "Opslaan en opnieuw bewerken")
         # assert token not on page
         self.assertNotIn("token", form_fields)
+        self.assertNotContains(response, application.raw_token)
         self.assertNotContains(response, application.token)
 
         response = form.submit(name="_save")
@@ -158,9 +161,13 @@ class ApplicationTokenAdminTests(WebTest):
 
     def test_token_shown_on_screen(self):
         user = UserFactory.create(superuser=True)
-        application = TokenAuthFactory.create()
+        application = Application.objects.create()
         url = reverse("admin:token_view", kwargs={"object_id": application.pk})
+
+        self.assertFalse(application.token)
 
         response = self.app.get(url, user=user)
 
-        self.assertContains(response, application.token)
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertTrue(application.token)

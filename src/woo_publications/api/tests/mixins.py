@@ -18,8 +18,8 @@ class APIKeyUnAuthorizedMixin:
     client: APIClient
 
     def assertWrongApiKeyProhibitsGetEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        write_token = TokenAuthFactory.create(write_permission=True).token
+        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        write_token = TokenAuthFactory.create(write_permission=True).raw_token
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -64,8 +64,8 @@ class APIKeyUnAuthorizedMixin:
             )
 
     def assertWrongApiKeyProhibitsPostEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        read_token = TokenAuthFactory.create(read_permission=True).token
+        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        read_token = TokenAuthFactory.create(read_permission=True).raw_token
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -110,8 +110,8 @@ class APIKeyUnAuthorizedMixin:
             )
 
     def assertWrongApiKeyProhibitsPatchEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        read_token = TokenAuthFactory.create(read_permission=True).token
+        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        read_token = TokenAuthFactory.create(read_permission=True).raw_token
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -156,8 +156,8 @@ class APIKeyUnAuthorizedMixin:
             )
 
     def assertWrongApiKeyProhibitsPutEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        read_token = TokenAuthFactory.create(read_permission=True).token
+        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        read_token = TokenAuthFactory.create(read_permission=True).raw_token
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -202,8 +202,8 @@ class APIKeyUnAuthorizedMixin:
             )
 
     def assertWrongApiKeyProhibitsDeleteEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        read_token = TokenAuthFactory.create(read_permission=True).token
+        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        read_token = TokenAuthFactory.create(read_permission=True).raw_token
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -291,4 +291,4 @@ class TokenAuthMixin:
     def setUp(self):
         super().setUp()  # pyright: ignore[reportAttributeAccessIssue]
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token_auth.token}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token_auth.raw_token}")
