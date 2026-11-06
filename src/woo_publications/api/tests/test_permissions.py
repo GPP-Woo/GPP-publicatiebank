@@ -11,7 +11,12 @@ from rest_framework.test import (
 
 from ..authorization import TokenAuthentication
 from ..drf_spectacular.headers import ALL_AUDIT_PARAMETERS
-from ..permissions import AuditHeaderPermission, TokenAuthPermission
+from ..permissions import (
+    ApplicationTokenAuthPermission,
+    AuditHeaderPermission,
+    ReuseTokenAuthPermission,
+    TokenAuthPermission,
+)
 from .factories import TokenAuthFactory
 
 request_factory = APIRequestFactory()
@@ -59,7 +64,7 @@ class AuditHeadersPermissionTests(APISimpleTestCase):
         self.assertFalse(result)
 
 
-class TestAutorizationAndPermissionView(views.APIView):
+class BaseTestAutorizationAndPermissionView(views.APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (TokenAuthPermission,)
 
@@ -80,18 +85,36 @@ class TestAutorizationAndPermissionView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ApplicationTestAuthorizationAndPermissionView(
+    BaseTestAutorizationAndPermissionView
+):
+    permission_classes = (ApplicationTokenAuthPermission,)
+
+
+class ReuseTestAuthorizationAndPermissionView(BaseTestAutorizationAndPermissionView):
+    permission_classes = (ReuseTokenAuthPermission,)
+
+
 class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
     urlpatterns = [
-        path("whatever", TestAutorizationAndPermissionView.as_view()),
+        path("whatever", ApplicationTestAuthorizationAndPermissionView.as_view()),
     ]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        cls.read_token = TokenAuthFactory.create(read_permission=True).token
-        cls.write_token = TokenAuthFactory.create(write_permission=True).token
-        cls.read_write_token = TokenAuthFactory.create(read_write_permission=True).token
+        cls.no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).token
+        cls.read_token = TokenAuthFactory.create(
+            read_permission=True, full_api_access=True
+        ).token
+        cls.write_token = TokenAuthFactory.create(
+            write_permission=True, full_api_access=True
+        ).token
+        cls.read_write_token = TokenAuthFactory.create(
+            read_write_permission=True, full_api_access=True
+        ).token
 
     def test_get_endpoint(self):
         with self.subTest("no token given"):
@@ -113,19 +136,22 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
 
         with self.subTest("token with wrong permission"):
             response = self.client.get(
-                "/whatever", headers={"Authorization": f"Token {self.write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("token with correct permission"):
             response = self.client.get(
-                "/whatever", headers={"Authorization": f"Token {self.read_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("token with all permissions"):
             response = self.client.get(
-                "/whatever", headers={"Authorization": f"Token {self.read_write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -149,19 +175,22 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
 
         with self.subTest("token with wrong permission"):
             response = self.client.post(
-                "/whatever", headers={"Authorization": f"Token {self.read_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("token with correct permission"):
             response = self.client.post(
-                "/whatever", headers={"Authorization": f"Token {self.write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest("token with all permissions"):
             response = self.client.post(
-                "/whatever", headers={"Authorization": f"Token {self.read_write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -185,19 +214,22 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
 
         with self.subTest("token with wrong permission"):
             response = self.client.put(
-                "/whatever", headers={"Authorization": f"Token {self.read_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("token with correct permission"):
             response = self.client.put(
-                "/whatever", headers={"Authorization": f"Token {self.write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("token with all permissions"):
             response = self.client.put(
-                "/whatever", headers={"Authorization": f"Token {self.read_write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -221,18 +253,193 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
 
         with self.subTest("token with wrong permission"):
             response = self.client.delete(
-                "/whatever", headers={"Authorization": f"Token {self.read_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("token with correct permission"):
             response = self.client.delete(
-                "/whatever", headers={"Authorization": f"Token {self.write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.subTest("token with all permissions"):
             response = self.client.delete(
-                "/whatever", headers={"Authorization": f"Token {self.read_write_token}"}
+                "/whatever",
+                headers={"Authorization": f"Token {self.read_write_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class ApiAccessibilityTest(URLPatternsTestCase, APITestCase):
+    urlpatterns = [
+        path(
+            "test_application", ApplicationTestAuthorizationAndPermissionView.as_view()
+        ),
+        path("test_reuse", ReuseTestAuthorizationAndPermissionView.as_view()),
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.read_application = TokenAuthFactory.create(
+            read_permission=True, application_api_access=True
+        ).token
+        cls.write_application = TokenAuthFactory.create(
+            write_permission=True, application_api_access=True
+        ).token
+        cls.read_reuse = TokenAuthFactory.create(
+            read_permission=True, reuse_api_access=True
+        ).token
+        cls.write_reuse = TokenAuthFactory.create(
+            write_permission=True, reuse_api_access=True
+        ).token
+        cls.full_access = TokenAuthFactory.create(
+            read_write_permission=True, full_api_access=True
+        ).token
+
+    def test_application_read_endpoint(self):
+        with self.subTest("application access with read permission"):
+            response = self.client.get(
+                "/test_application",
+                headers={"Authorization": f"Token {self.read_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("application access with write permission"):
+            response = self.client.get(
+                "/test_application",
+                headers={"Authorization": f"Token {self.write_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with read permission"):
+            response = self.client.get(
+                "/test_application",
+                headers={"Authorization": f"Token {self.read_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with write permission"):
+            response = self.client.get(
+                "/test_application",
+                headers={"Authorization": f"Token {self.write_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("full access with full permission"):
+            response = self.client.get(
+                "/test_application",
+                headers={"Authorization": f"Token {self.full_access}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_application_write_endpoint(self):
+        with self.subTest("application access with read permission"):
+            response = self.client.post(
+                "/test_application",
+                headers={"Authorization": f"Token {self.read_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("application access with write permission"):
+            response = self.client.post(
+                "/test_application",
+                headers={"Authorization": f"Token {self.write_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        with self.subTest("reuse access with read permission"):
+            response = self.client.post(
+                "/test_application",
+                headers={"Authorization": f"Token {self.read_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with write permission"):
+            response = self.client.post(
+                "/test_application",
+                headers={"Authorization": f"Token {self.write_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("full access with full permission"):
+            response = self.client.post(
+                "/test_application",
+                headers={"Authorization": f"Token {self.full_access}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_reuse_read_endpoint(self):
+        with self.subTest("application access with read permission"):
+            response = self.client.get(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.read_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("application access with write permission"):
+            response = self.client.get(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.write_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with read permission"):
+            response = self.client.get(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.read_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("reuse access with write permission"):
+            response = self.client.get(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.write_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("full access with full permission"):
+            response = self.client.get(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.full_access}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reuse_write_endpoint(self):
+        with self.subTest("application access with read permission"):
+            response = self.client.post(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.read_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("application access with write permission"):
+            response = self.client.post(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.write_application}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with read permission"):
+            response = self.client.post(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.read_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("reuse access with write permission"):
+            response = self.client.post(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.write_reuse}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        with self.subTest("full access with full permission"):
+            response = self.client.post(
+                "/test_reuse",
+                headers={"Authorization": f"Token {self.full_access}"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)

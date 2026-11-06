@@ -13,6 +13,8 @@ from woo_publications.accounts.tests.factories import (
     OrganisationMemberFactory,
     UserFactory,
 )
+from woo_publications.api.constants import ApiOptions
+from woo_publications.api.tests.mixins import APIKeyUnAuthorizedMixin, TokenAuthMixin
 from woo_publications.constants import ArchiveNominationChoices
 from woo_publications.metadata.constants import (
     InformationCategoryOrigins,
@@ -41,7 +43,23 @@ AUDIT_HEADERS = {
 }
 
 
-class PublicationApiTestCase(APITestCase):
+class PublicationApiAuthorizationAndPermissionTests(
+    APIKeyUnAuthorizedMixin, APITestCase
+):
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        publication = PublicationFactory.create()
+        list_url = reverse("reuse:publication-list")
+        detail_url = reverse(
+            "reuse:publication-detail",
+            kwargs={"uuid": str(publication.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
+class PublicationApiTestCase(TokenAuthMixin, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -258,7 +276,21 @@ class PublicationApiTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class DocumentApiTestCase(APITestCase):
+class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCase):
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        document = DocumentFactory.create()
+        list_url = reverse("reuse:document-list")
+        detail_url = reverse(
+            "reuse:document-detail",
+            kwargs={"uuid": str(document.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
+class DocumentApiTestCase(TokenAuthMixin, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -465,8 +497,23 @@ class DocumentApiTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCase):
+    @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        topic = TopicFactory.create()
+        list_url = reverse("reuse:topic-list")
+        detail_url = reverse(
+            "reuse:topic-detail",
+            kwargs={"uuid": str(topic.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-class TopicApiTestCase(APITestCase):
+class TopicApiTestCase(TokenAuthMixin, APITestCase):
     def test_list_topics(self):
         with freeze_time("2024-09-25T12:00:00-00:00"):
             published = TopicFactory.create(
@@ -585,7 +632,23 @@ class TopicApiTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class OrganisationApiTests(APITestCase):
+class OrganisationApiAuthorizationAndPermissionTests(
+    APIKeyUnAuthorizedMixin, APITestCase
+):
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        organisation = OrganisationFactory.create()
+        list_url = reverse("reuse:organisation-list")
+        detail_url = reverse(
+            "reuse:organisation-detail",
+            kwargs={"uuid": str(organisation.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
+class OrganisationApiTests(TokenAuthMixin, APITestCase):
     def test_list_organisations(self):
         OrganisationFactory.create(
             naam="id",
@@ -647,7 +710,23 @@ class OrganisationApiTests(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class InformationCategoryTests(APITestCase):
+class InformationCategoryApiAuthorizationAndPermissionTests(
+    APIKeyUnAuthorizedMixin, APITestCase
+):
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        information_category = InformationCategoryFactory.create()
+        list_url = reverse("reuse:informationcategory-list")
+        detail_url = reverse(
+            "reuse:informationcategory-detail",
+            kwargs={"uuid": str(information_category.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
+class InformationCategoryTests(TokenAuthMixin, APITestCase):
     def test_list_informatie_categorie(self):
         information_category = InformationCategoryFactory.create(
             identifier="https://www.example.com/waardenlijsten/1",
@@ -732,7 +811,21 @@ class InformationCategoryTests(APITestCase):
         self.assertEqual(data, expected_data)
 
 
-class ThemeTests(APITestCase):
+class ThemeApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCase):
+    def test_api_key_result_in_401_with_wrong_credentials(self):
+        theme = ThemeFactory.create()
+        list_url = reverse("reuse:theme-list")
+        detail_url = reverse(
+            "reuse:theme-detail",
+            kwargs={"uuid": str(theme.uuid)},
+        )
+
+        # read
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(list_url, ApiOptions.reuse)
+        self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
+
+
+class ThemeTests(TokenAuthMixin, APITestCase):
     def test_list_theme(self):
         parent_theme = ThemeFactory.create(
             identifier="https://www.example.com/thema/1",

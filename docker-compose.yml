@@ -97,7 +97,6 @@ services:
     ulimits: *ulimits
     environment:
       - DJANGO_SETTINGS_MODULE=woo_search.conf.docker
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
       - DB_NAME=gppzoeken
       - DB_USER=gppzoeken
       - DB_HOST=db
@@ -143,6 +142,7 @@ services:
     ulimits: *ulimits
     environment: &web_env
       - DJANGO_SETTINGS_MODULE=woo_publications.conf.docker
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
       - SECRET_KEY=${SECRET_KEY:-django-insecure-fgggi4*bl2wdg&@0&)t7ewy5-2!b3l4lhx4_+^zpw%x2i28v8}
       - DB_NAME=woo_publications
       - DB_USER=woo_publications
