@@ -25,7 +25,7 @@ Daarnaast vraagt de wet om ook documenten openbaar te maken die buiten deze *inf
 
 Overigens gelden op de plicht tot openbaarmaking ook een aantal uitzonderingen (hoofdstuk 5 van de wet). Raadpleeg voor meer informatie over de wet de jurist en/of informatiebeheerder van je eigen organisatie.
 
-Voor de aansluiting op de landelijke `Woo-index`_ wordt ten zeerste geadviseerd om documenten te voorzien van metadata conform de `DiWoo`_-standaard. Deze standaard vereist onder meer dat in de metadata wordt vastgelegd op grond van welke *informatiecategorie(ën)* het document actief openbaar is gemaakt.
+Voor de aansluiting op de landelijke `Generieke Woo-Voorziening (GWV)`_, waarvan de website open.overheid.nl is, wordt ten zeerste geadviseerd om documenten te voorzien van metadata conform de `DiWoo`_-standaard. Deze standaard vereist onder meer dat in de metadata wordt vastgelegd op grond van welke *informatiecategorie(ën)* het document actief openbaar is gemaakt.
 
 De 17 *informatiecategorieën* zijn opgenomen in de landelijke waardelijst `Woo informatiecategorieën`_. Deze lijst is al standaard opgenomen in het publicatiebank-component. Daarnaast bestaat de mogelijkheid, zoals we hieronder zullen beschrijven, om in het kader van de *inspanningsverplichting* hier voor de eigen organisatie *extra informatiecategorieën* aan toe te voegen.
 
@@ -33,7 +33,7 @@ In het publicatiebank-component leggen we de *informatiecategorieën* vast op de
 
 Elke *informatiecategorie* heeft een eigen *informatieobjecttype* in de Catalogi API (bijvoorbeeld die van Open Zaak). De Documenten API vereist dat elk document een informatieobjecttype heeft; de documenten van een *publicatie* krijgen het informatieobjecttype van de informatiecategorie van die publicatie. Het informatieobjecttype wordt automatisch aangemaakt wanneer een informatiecategorie wordt aangemaakt, mits de Catalogi API is ingesteld in de :ref:`algemene instellingen <admin_configuratie_index_alg_inst>`.
 
-.. warning:: Let op! Bij gebruik van het GPP-burgerportaal zullen zelf-toegevoegde informatiecategorieën op de landelijke `Woo-index`_ getoond worden als de informatiecategorie "inspanningsverplichting art 3.1 Woo". De landelijke Woo-index ondersteunt immers alleen de landelijke waardelijst.
+.. warning:: Let op! Bij gebruik van het GPP-burgerportaal zullen zelf-toegevoegde informatiecategorieën op de landelijke `Generieke Woo-Voorziening (GWV)`_ getoond worden als de informatiecategorie "inspanningsverplichting art 3.1 Woo". De GWV ondersteunt immers alleen de landelijke waardelijst.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -128,7 +128,7 @@ vastgelegd, zodat ook voor de burger inzichtelijk is van welke organisatie een
 publicatie is. Ook zijn deze gegevens relevant om (op termijn) te toetsen in hoeverre
 iedere organisatie voldoet aan de wettelijke openbaarmakingsplicht.
 
-De landelijke `Woo-index`_ veronderstelt het gebruik van landelijke waardelijsten.
+De landelijke `Generieke Woo-Voorziening (GWV)`_ veronderstelt het gebruik van landelijke waardelijsten.
 Deze worden bijgehouden door het `Register van Overheidsorganisaties (ROO) <https://organisaties.overheid.nl/>`_.
 Standaard staan organisaties uit de volgende officiële waardelijsten al in het
 “Woo Publicaties”-component ingelezen:
@@ -143,7 +143,7 @@ Standaard staan organisaties uit de volgende officiële waardelijsten al in het
 
 .. warning:: Let op! In de admin-interface bestaat de mogelijkheid om *extra organisaties*
    toe te voegen. Hieraan gekoppelde publicaties zullen niet gevonden worden
-   via de landelijke `Woo-index`_! Zij kunnen wel gevonden worden via het burgerportaal
+   via de landelijke `Generieke Woo-Voorziening (GWV)`_! Zij kunnen wel gevonden worden via het burgerportaal
    van het GPP-Woo.
 
 Beheerscherm
@@ -213,13 +213,13 @@ Thema's
 Toelichting
 ~~~~~~~~~~~
 
-Om de vindbaarheid van openbare documenten te bevorderen ondersteunt de `DiWoo`_-standaard het toekennen van een of meerdere *thema's* aan openbare documenten. Hiervoor is een landelijke waardelijst gedefinieerd: `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Op de `Woo-index`_ kan een burger zoeken naar openbare documenten, die aan een bepaald thema gekoppeld zijn.
+Om de vindbaarheid van openbare documenten te bevorderen ondersteunt de `DiWoo`_-standaard het toekennen van een of meerdere *thema's* aan openbare documenten. Hiervoor is een landelijke waardelijst gedefinieerd: `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Op de `Generieke Woo-Voorziening (GWV)`_ kan een burger zoeken naar openbare documenten, die aan een bepaald thema gekoppeld zijn.
 
 De landelijke thema-lijst is ook standaard ingelezen in en wordt ontsloten met het "Woo-publicaties"-component, zodat deze gebruikt kan worden bij het registreren en vindbaar maken van openbare documenten.
 
 Het is de bedoeling dat in het publicatiebank-component de *thema's* op de *publicatie* vastgelegd worden. Dezelfde *thema's* gelden dan voor de daaraan gekoppelde *documenten*. Dit is nog niet beschikbaar (zie de waarschuwing hierboven).
 
-De `DiWoo`_-standaard ondersteunt alleen het gebruik van de landelijke waardelijst `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Ook op de `Woo-index`_ kan alleen op deze *thema's*  gezocht worden naar openbare documenten.
+De `DiWoo`_-standaard ondersteunt alleen het gebruik van de landelijke waardelijst `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Ook op de `Generieke Woo-Voorziening (GWV)`_ kan alleen op deze *thema's*  gezocht worden naar openbare documenten.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -252,7 +252,7 @@ Op een *thema* zijn de volgende gegevens beschikbaar.
 
 
 .. _Wet open overheid: https://wetten.overheid.nl/BWBR0045754/
-.. _Woo-index: https://open.overheid.nl/
+.. _Generieke Woo-Voorziening (GWV): https://open.overheid.nl/
 .. _DiWoo: https://standaarden.overheid.nl/diwoo/metadata
 .. _Woo informatiecategorieën: https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Fscw_woo_informatiecategorieen
 .. _Thema-indeling voor Officiële Publicaties (TOP-lijst): https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Fscw_toplijst

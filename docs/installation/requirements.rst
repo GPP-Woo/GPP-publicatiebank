@@ -181,9 +181,9 @@ some implementation details are relevant and they are listed below.
 Allow streaming of document downloads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Uploaded documents in the API are also downloaded again - especially by the National
-Search Index (DiWoo) which indexes the documents, but ultimately also by interested
-parties like citizens, journalists...
+Uploaded documents in the API are also downloaded again - especially by the national
+`Generieke Woo-Voorziening (GWV) <https://open.overheid.nl/>`_ which indexes the
+documents, but ultimately also by interested parties like citizens, journalists...
 
 Our download API endpoint (``/api/v2/documenten/:uuid/download``) sends a response
 header ``X-Accel-Buffering: no`` to the reverse proxy to promote synchronous streaming
