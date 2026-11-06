@@ -45,7 +45,7 @@ development machine.
    .. code-block:: bash
 
        git clone git@github.com:GPP-Woo/GPP-publicatiebank.git
-       cd registratie-component
+       cd GPP-publicatiebank
 
 3. Install all required (backend) libraries.
    **Tip:** You can use the ``bootstrap.py`` script to install the requirements

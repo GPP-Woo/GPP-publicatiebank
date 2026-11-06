@@ -34,13 +34,27 @@ binary content of the documents is persisted in a Documenten API (VNG standard).
 Typically, we leverage Open Zaak for this (in development).
 
 Publication and document resources have a particular publication status - at the time of
-writing these are ``concept``, ``published`` and ``revoked``. Published resources are
+writing these are ``concept``, ``gepubliceerd`` (published) and ``ingetrokken``
+(revoked). Published resources are
 pushed to the GPP-zoeken API to be included in an Elastic Search index to power the
 GPP Burgerportaal for search. When a resource is revoked, it is removed from the index
 again.
 
 Index operations (and by extension the interaction with GPP-zoeken) is done
 asynchronously using Celery tasks, after the database transaction is committed.
+
+A publication can have an inspection procedure ("inzageprocedure"). When its
+inspection period has ended, the publication can be revoked automatically by a periodic
+Celery task, which is scheduled by Celery beat.
+
+**Document types**
+
+The Documents API requires a document type ("informatieobjecttype") for every document.
+These are managed in a Catalogi API - with Open Zaak, the Catalogi API of the same
+instance as the Documents API. Every information category has its own
+informatieobjecttype, and there is a default informatieobjecttype for documents of
+publications without an information category. See
+:ref:`configuration_services_catalogi_api`.
 
 Document uploads
 ----------------

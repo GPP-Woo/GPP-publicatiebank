@@ -95,6 +95,7 @@ Optional
 * ``ENVIRONMENT_BACKGROUND_COLOR``:  Defaults to: ``orange``.
 * ``ENVIRONMENT_FOREGROUND_COLOR``:  Defaults to: ``black``.
 * ``SHOW_ENVIRONMENT``:  Defaults to: ``True``.
+* ``DOCUMENTS_API_SLOW_OPERATIONS_TIMEOUT``: Read timeout (in seconds) for Documents API calls whose duration scales with document size and storage speed: uploading a file part, and unlocking a document (which merges the uploaded parts server-side). A higher timeout configured on the Documents API service itself takes precedence. Defaults to: ``300``.
 * ``SENDFILE_BACKEND``:  Defaults to: ``django_sendfile.backends.nginx``.
 * ``CELERY_TASK_HARD_TIME_LIMIT``:  Defaults to: ``300``.
 * ``CELERY_TASK_SOFT_TIME_LIMIT``:  Defaults to: ``60``.

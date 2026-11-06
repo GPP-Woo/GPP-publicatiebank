@@ -25,9 +25,14 @@ Algemene instellingen
 Toelichting
 ~~~~~~~~~~~
 
-Omdat de GPP-publicatiebank gebruik maakt van de Documenten API uit de "API's voor
-Zaakgericht Werken"-standaard zijn er een aantal aspecten die globaal ingesteld moeten
-worden om gebruik te kunnen maken van deze API.
+Omdat de GPP-publicatiebank gebruik maakt van de Documenten API en de Catalogi API uit
+de "API's voor Zaakgericht Werken"-standaard zijn er een aantal aspecten die globaal
+ingesteld moeten worden om gebruik te kunnen maken van deze API's.
+
+.. warning:: Sinds versie 3.0.0 is een Catalogi API verplicht. Zolang de
+   ``Catalogi API-service`` niet is ingesteld, mislukt het uploaden van documenten. Stel
+   deze daarom direct na de installatie of upgrade in. Zie
+   :ref:`configuration_services_catalogi_api` voor een stappenplan.
 
 De voordelen van hergebruik binnen het API-landschap wegen (naar onze mening) op tegen
 deze ongemakken.
@@ -47,7 +52,7 @@ en aan te passen. Hier zien we:
 De volgende instellingen zijn beschikbaar, waarbij verplichte velden **dikgedrukt**
 worden weergegeven.
 
-* ``Documenten API service``. Een keuzemenu om de relevante
+* ``Documenten API-service``. Een keuzemenu om de relevante
   :ref:`service <admin_configuratie_index_services>` met verbindingsparameters te
   selecteren. Mits je de nodige rechten hebt kan je hier ook:
 
@@ -57,8 +62,10 @@ worden weergegeven.
   Deze instelling is noodzakelijk voor de verbinding met de achterliggende Documenten
   API.
 
-* ``Organisatie-RSIN``. Het RSIN van de default organisatie (in de praktijk: de gemeente) die
+* ``RSIN organisatie``. Het RSIN van de default organisatie (in de praktijk: de gemeente) die
   de bronhouder is van de te publiceren documenten. Deze wordt gebruikt wanneer op de :ref:`organisatie <admin_metadata_index_organisations>` geen RSIN is ingevuld.
+  Het RSIN moet ingevuld zijn voordat de Catalogi API ingesteld kan worden, omdat de
+  catalogus voor dit RSIN aangemaakt wordt.
 
 * ``GPP-zoeken service``. Een keuzemenu om de relevante
   :ref:`service <admin_configuratie_index_services>` met verbindingsparameters te
@@ -112,17 +119,20 @@ worden weergegeven.
 
 * ``GPP-app publicatie-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in de GPP-app (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieIntern``).
 
-* ``GPP-burgerportaal publication-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
+* ``GPP-burgerportaal publicatie-URL-sjabloon``. Het sjabloon waarmee op basis van het UUID de URL gegenereerd kan worden waarmee de :ref:`publicatie <admin_publicaties_index_publicaties>` te openen is in het GPP-burgerportaal (of passend alternatief). Deze URL wordt live gegenereerd en opgenomen in de response na het aanroepen van de API (``urlPublicatieExtern``).
 
 * ``Reactieformulier-URL zienswijze``. De standaard-URL van het reactieformulier van een
   :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
   ``Beschikbaar rechtsmiddel`` "zienswijze". Deze wordt gebruikt als bij de
-  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld. Dit veld is verplicht.
 
 * ``Reactieformulier-URL bezwaar``. De standaard-URL van het reactieformulier van een
   :ref:`inzageprocedure <admin_publicaties_index_inzage_procedure>` met
   ``Beschikbaar rechtsmiddel`` "bezwaar". Deze wordt gebruikt als bij de
-  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld.
+  inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld. Dit veld is verplicht.
+
+  Wanneer je deze standaard-URL's voor het eerst opslaat, worden ze ook ingevuld bij
+  bestaande inzageprocedures die nog geen ``Reactieformulier-URL`` hebben.
 
 .. _admin_configuratie_index_applicatiegroepen:
 

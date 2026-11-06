@@ -24,6 +24,8 @@ as:
        "Documenten API", or:
     #. Upload the binary file content of the document.
 
+#. Optionally, register an inspection procedure ("inzageprocedure") for the
+   publication.
 #. Publish the publication, or point an end-user to the GPP-app to finalize the details
    and publish it.
 #. GPP-Publicatiebank sends it to the search index and makes it available for citizens.
@@ -96,6 +98,30 @@ For the remaining metadata properties:
 
 * ``publicatie``: use the ``uuid`` returned from the ``Publicatie`` resource created in
   the previous step.
+
+.. note:: Since version 3.0.0, ``eigenaar`` of a ``Document`` is read-only: a document
+   always has the owner of its publication. Values sent on create or update are ignored,
+   and the ``eigenaar`` filter of the documents list has been removed.
+
+Registering an inspection procedure
+===================================
+
+API operation: ``inzageprocedureCreate``.
+
+A publication can have one inspection procedure ("inzageprocedure"), which records how
+and until when citizens can respond to the (intended) decision: the announcement URL,
+an explanation, the available legal remedy (``zienswijze`` or ``bezwaar``), the reaction
+form URL and the inspection period.
+
+* ``publicatie``: use the ``uuid`` of the publication.
+* When you don't provide a reaction form URL, the default URL for the legal remedy from
+  the global configuration is used.
+* The end of the inspection period is automatically moved to the next working day when
+  it falls in a weekend or on a Dutch public holiday.
+* With ``automatischIntrekken``, the publication is revoked automatically when the
+  inspection period has ended.
+
+The inspection procedure is also included (read-only) in the ``Publicatie`` resource.
 
 Publish the ``Publicatie``
 ==========================
