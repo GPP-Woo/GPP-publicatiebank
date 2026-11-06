@@ -1,0 +1,31 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls admin_list %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:api_application_change' application.pk  %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% trans "Token" %}
+</div>
+{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block result_list %}
+    <div>
+        {% trans "This token is only visible once, after you close the page you cannot view it again." %}
+
+        <fieldset class="module aligned collapse open">
+            <details>
+                <summary>
+                    {% trans "API key:" %}
+                </summary>
+                {{ token }}
+            </details>
+        </fieldset>
+    </div>
+
+{% endblock %}
+
+{% block pagination %}{% endblock %}
+{% block filters %}{% endblock %}

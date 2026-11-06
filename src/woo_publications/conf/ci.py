@@ -6,6 +6,9 @@ from django.core.paginator import UnorderedObjectListWarning
 
 os.environ.setdefault("IS_HTTPS", "no")
 os.environ.setdefault("SECRET_KEY", "for-testing-purposes-only")
+os.environ.setdefault(
+    "API_TOKEN_SALT", "a-pinch-of-sodium-chloride-for-testing-purposes-only"
+)
 os.environ.setdefault("LOG_REQUESTS", "no")
 
 from .base import *  # noqa isort:skip

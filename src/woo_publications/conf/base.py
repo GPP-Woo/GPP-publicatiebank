@@ -497,6 +497,13 @@ purposes:
     },
 }
 
+
+# SECURITY WARNING: keep the API token salt used in production secret!
+API_TOKEN_SALT = config("API_TOKEN_SALT")
+assert API_TOKEN_SALT and "$" not in API_TOKEN_SALT, (
+    "API_TOKEN_SALT must be provided and cannot contain $."
+)
+
 #
 # DJANGO-SENDFILE2
 #

@@ -1,3 +1,6 @@
+import datetime
+
+from django.test import override_settings
 from django.urls import path
 
 from rest_framework import status, views
@@ -80,6 +83,7 @@ class TestAutorizationAndPermissionView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@override_settings(LANGUAGE_CODE="en")
 class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
     urlpatterns = [
         path("whatever", TestAutorizationAndPermissionView.as_view()),
@@ -88,21 +92,34 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.no_permission_token = TokenAuthFactory.create(permissions=[]).token
-        cls.read_token = TokenAuthFactory.create(read_permission=True).token
-        cls.write_token = TokenAuthFactory.create(write_permission=True).token
-        cls.read_write_token = TokenAuthFactory.create(read_write_permission=True).token
+        cls.no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
+        cls.read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        cls.write_token = TokenAuthFactory.create(write_permission=True).raw_token
+        cls.read_write_token = TokenAuthFactory.create(
+            read_write_permission=True
+        ).raw_token
+        cls.expired_token = TokenAuthFactory.create(
+            read_write_permission=True, expire_date=datetime.date(1970, 1, 1)
+        ).raw_token
 
     def test_get_endpoint(self):
         with self.subTest("no token given"):
             response = self.client.get("/whatever")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Authentication credentials were not provided.",
+            )
 
         with self.subTest("none existing token"):
             response = self.client.get(
                 "/whatever", headers={"Authorization": "Token broken"}
             )
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Invalid token.",
+            )
 
         with self.subTest("token with no permission"):
             response = self.client.get(
@@ -110,12 +127,30 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
                 headers={"Authorization": f"Token {self.no_permission_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
 
         with self.subTest("token with wrong permission"):
             response = self.client.get(
                 "/whatever", headers={"Authorization": f"Token {self.write_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
+
+        with self.subTest("token with expired date"):
+            response = self.client.get(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "The token has expired, please contact support to gain a new one.",
+            )
 
         with self.subTest("token with correct permission"):
             response = self.client.get(
@@ -133,12 +168,20 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         with self.subTest("no token given"):
             response = self.client.post("/whatever")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Authentication credentials were not provided.",
+            )
 
         with self.subTest("none existing token"):
             response = self.client.post(
                 "/whatever", headers={"Authorization": "Token broken"}
             )
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Invalid token.",
+            )
 
         with self.subTest("token with no permission"):
             response = self.client.post(
@@ -146,12 +189,30 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
                 headers={"Authorization": f"Token {self.no_permission_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
 
         with self.subTest("token with wrong permission"):
             response = self.client.post(
                 "/whatever", headers={"Authorization": f"Token {self.read_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
+
+        with self.subTest("token with expired date"):
+            response = self.client.post(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "The token has expired, please contact support to gain a new one.",
+            )
 
         with self.subTest("token with correct permission"):
             response = self.client.post(
@@ -169,12 +230,20 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         with self.subTest("no token given"):
             response = self.client.put("/whatever")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Authentication credentials were not provided.",
+            )
 
         with self.subTest("none existing token"):
             response = self.client.put(
                 "/whatever", headers={"Authorization": "Token broken"}
             )
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Invalid token.",
+            )
 
         with self.subTest("token with no permission"):
             response = self.client.put(
@@ -182,12 +251,30 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
                 headers={"Authorization": f"Token {self.no_permission_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
 
         with self.subTest("token with wrong permission"):
             response = self.client.put(
                 "/whatever", headers={"Authorization": f"Token {self.read_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
+
+        with self.subTest("token with expired date"):
+            response = self.client.put(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "The token has expired, please contact support to gain a new one.",
+            )
 
         with self.subTest("token with correct permission"):
             response = self.client.put(
@@ -205,12 +292,20 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
         with self.subTest("no token given"):
             response = self.client.delete("/whatever")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Authentication credentials were not provided.",
+            )
 
         with self.subTest("none existing token"):
             response = self.client.delete(
                 "/whatever", headers={"Authorization": "Token broken"}
             )
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "Invalid token.",
+            )
 
         with self.subTest("token with no permission"):
             response = self.client.delete(
@@ -218,12 +313,30 @@ class ApiTokenAuthorizationAndPermissionTests(URLPatternsTestCase, APITestCase):
                 headers={"Authorization": f"Token {self.no_permission_token}"},
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
 
         with self.subTest("token with wrong permission"):
             response = self.client.delete(
                 "/whatever", headers={"Authorization": f"Token {self.read_token}"}
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(
+                response.json()["detail"],
+                "You do not have permission to perform this action.",
+            )
+
+        with self.subTest("token with expired date"):
+            response = self.client.delete(
+                "/whatever", headers={"Authorization": f"Token {self.expired_token}"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json()["detail"],
+                "The token has expired, please contact support to gain a new one.",
+            )
 
         with self.subTest("token with correct permission"):
             response = self.client.delete(

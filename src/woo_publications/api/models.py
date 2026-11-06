@@ -1,6 +1,8 @@
 import binascii
 import os
 
+from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -20,8 +22,12 @@ PERMISSION_SCHEMA = {
 }
 
 
+def generate_token():
+    return binascii.hexlify(os.urandom(20)).decode()
+
+
 class Application(models.Model):  # noqa: DJ008
-    token = models.CharField(_("token"), max_length=40)
+    token = models.CharField(_("token"), max_length=128)
     permissions = ArrayField(
         models.CharField(max_length=20, choices=PermissionOptions.choices),
         verbose_name=_("permissions"),
@@ -57,6 +63,12 @@ class Application(models.Model):  # noqa: DJ008
         ),
         blank=True,
     )
+    expire_date = models.DateField(
+        _("expire date"),
+        help_text=_("The date when the token will no longer be available."),
+        blank=True,
+        null=True,
+    )
     last_modified = models.DateTimeField(
         _("last modified"),
         auto_now=True,
@@ -65,15 +77,30 @@ class Application(models.Model):  # noqa: DJ008
     created = models.DateTimeField(
         _("created"), auto_now_add=True, help_text=_("Date when the token was created")
     )
+    viewed_token_at = models.DateTimeField(
+        _("token viewed at"),
+        help_text=_("Date when the token was viewed in the admin."),
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("application API key")
         verbose_name_plural = _("application API keys")
-
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = self.generate_token()
-        return super().save(*args, **kwargs)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["token"],
+                condition=~models.Q(token=""),
+                name="unique_token",
+                violation_error_message="The value of 'token' has to be unique.",
+            )
+        ]
 
     def generate_token(self):
         return binascii.hexlify(os.urandom(20)).decode()
+
+    def get_and_set_token(self) -> str:
+        token = self.generate_token()
+        self.token = make_password(token, settings.API_TOKEN_SALT)
+
+        return token
