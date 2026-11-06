@@ -27,7 +27,7 @@ def generate_token():
 
 
 class Application(models.Model):  # noqa: DJ008
-    token = models.CharField(_("token"), max_length=40)
+    token = models.CharField(_("token"), max_length=128)
     permissions = ArrayField(
         models.CharField(max_length=20, choices=PermissionOptions.choices),
         verbose_name=_("permissions"),
