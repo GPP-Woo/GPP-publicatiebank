@@ -26,12 +26,12 @@ class SchemaType(TypedDict):
     items: ItemsType
 
 
-def schema(choice: list[tuple[str, StrOrPromise]]) -> SchemaType:
+def schema(choices: list[tuple[str, StrOrPromise]]) -> SchemaType:
     return {
         "type": "list",
         "items": {
             "type": "string",
-            "choices": [{"title": label, "value": value} for value, label in choice],
+            "choices": [{"title": label, "value": value} for value, label in choices],
         },
     }
 
@@ -50,7 +50,7 @@ class Application(models.Model):  # noqa: DJ008
         models.CharField(max_length=20, choices=PermissionOptions.choices),
         verbose_name=_("permissions"),
         help_text=_("The permissions this API token has access to."),
-        schema=schema(choice=PermissionOptions.choices),
+        schema=schema(choices=PermissionOptions.choices),
         blank=True,
         default=list,
     )
@@ -58,7 +58,7 @@ class Application(models.Model):  # noqa: DJ008
         models.CharField(max_length=20, choices=ApiOptions.choices),
         verbose_name=_("API access"),
         help_text=_("The APIs this token has access to."),
-        schema=schema(choice=ApiOptions.choices),
+        schema=schema(choices=ApiOptions.choices),
         blank=True,
         default=list,
     )
