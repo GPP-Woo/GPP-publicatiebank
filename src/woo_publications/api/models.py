@@ -1,23 +1,39 @@
 from hashlib import sha256
 from secrets import token_hex
+from typing import Literal, TypedDict
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from django_jsonform.models.fields import ArrayField
+from django_stubs_ext import StrOrPromise
 
-from .constants import PermissionOptions
+from .constants import ApiOptions, PermissionOptions
 
-PERMISSION_SCHEMA = {
-    "type": "list",
-    "items": {
-        "type": "string",
-        "choices": [
-            {"title": label, "value": value}
-            for value, label in PermissionOptions.choices
-        ],
-    },
-}
+
+class ChoiceType(TypedDict):
+    title: StrOrPromise
+    value: StrOrPromise
+
+
+class ItemsType(TypedDict):
+    type: Literal["string"]
+    choices: list[ChoiceType]
+
+
+class SchemaType(TypedDict):
+    type: Literal["list"]
+    items: ItemsType
+
+
+def schema(choice: list[tuple[str, StrOrPromise]]) -> SchemaType:
+    return {
+        "type": "list",
+        "items": {
+            "type": "string",
+            "choices": [{"title": label, "value": value} for value, label in choice],
+        },
+    }
 
 
 def generate_token() -> str:
@@ -34,7 +50,15 @@ class Application(models.Model):  # noqa: DJ008
         models.CharField(max_length=20, choices=PermissionOptions.choices),
         verbose_name=_("permissions"),
         help_text=_("The permissions this API token has access to."),
-        schema=PERMISSION_SCHEMA,
+        schema=schema(choice=PermissionOptions.choices),
+        blank=True,
+        default=list,
+    )
+    api_access = ArrayField(
+        models.CharField(max_length=20, choices=ApiOptions.choices),
+        verbose_name=_("API access"),
+        help_text=_("The APIs this token has access to."),
+        schema=schema(choice=ApiOptions.choices),
         blank=True,
         default=list,
     )
