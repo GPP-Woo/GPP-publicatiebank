@@ -177,13 +177,13 @@ class TokenAuthPermissionTests(URLPatternsTestCase, APITestCase):
                 permission_class = (
                     ApplicationTestAuthorizationAndPermissionView.permission_classes[0]
                 )
-                permission_view = ApplicationTestAuthorizationAndPermissionView
+                permission_view = ApplicationTestAuthorizationAndPermissionView()
                 url = "test_application"
             case ApiOptions.reuse:
                 permission_class = (
                     ReuseTestAuthorizationAndPermissionView.permission_classes[0]
                 )
-                permission_view = ReuseTestAuthorizationAndPermissionView
+                permission_view = ReuseTestAuthorizationAndPermissionView()
                 url = "test_reuse"
             case _:
                 assert_never(api)
@@ -201,8 +201,7 @@ class TokenAuthPermissionTests(URLPatternsTestCase, APITestCase):
         )
 
         result = permission_class().has_permission(
-            request=request,
-            view=permission_view,  # pyright: ignore[reportArgumentType]
+            request=request, view=permission_view
         )
 
         self.assertEqual(result, api in api_access and permission in permissions)
@@ -212,19 +211,14 @@ class TokenAuthPermissionTests(URLPatternsTestCase, APITestCase):
         list(
             product(
                 ["get", "post", "put", "patch", "delete"],
-                ["test_application", "test_reuse"],
+                ["/test_application", "/test_reuse"],
             )
         ),
     )
     def test_fake_token_has_no_access(self, action, url):
-        with self.subTest("application access with read permission"):
-            self.client.request()
-            request = getattr(self.client, action)
-            response = request(
-                "/test_reuse",
-                headers={"Authorization": "Token does-not-exist"},
-            )
-            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        request = getattr(self.client, action)
+        response = request(url, headers={"Authorization": "Token does-not-exist"})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 @override_settings(LANGUAGE_CODE="en")
