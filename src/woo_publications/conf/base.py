@@ -362,7 +362,7 @@ REST_FRAMEWORK = {
         "woo_publications.api.authorization.TokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "woo_publications.api.permissions.TokenAuthPermission",
+        "woo_publications.api.permissions.ApplicationTokenAuthPermission",
         "woo_publications.api.permissions.AuditHeaderPermission",
     ),
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",

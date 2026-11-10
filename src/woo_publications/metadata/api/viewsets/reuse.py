@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
 from woo_publications.api.pagination import CursorPagination
+from woo_publications.api.permissions import ReuseTokenAuthPermission
 
 from ...models import InformationCategory, Organisation, Theme
 from ..serializers import (
@@ -29,8 +30,7 @@ from ..serializers import (
 class InformationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = InformationCategory.objects.order_by("-pk")
     serializer_class = InformationCategorySerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
     pagination_class = CursorPagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
@@ -50,8 +50,7 @@ class InformationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class OrganisationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Organisation.objects.filter(is_actief=True).order_by("-pk")
     serializer_class = OrganisationResearchSerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
     pagination_class = CursorPagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
@@ -71,8 +70,7 @@ class OrganisationViewSet(viewsets.ReadOnlyModelViewSet):
 class ThemeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Theme.objects.all().order_by("-pk")
     serializer_class = ThemeSerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
     pagination_class = CursorPagination
     lookup_field = "uuid"
     lookup_value_converter = "uuid"
