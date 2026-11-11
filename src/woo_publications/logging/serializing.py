@@ -3,7 +3,7 @@ from itertools import chain
 from django.db import models
 
 
-def model_to_dict(instance):
+def model_to_dict(instance, ignore_fields: tuple = ()):
     """
     Modified version of django.forms.model_to_dict.
 
@@ -13,6 +13,9 @@ def model_to_dict(instance):
     opts = instance._meta
     data = {}
     for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
+        if f.name in ignore_fields:
+            continue
+
         value = f.value_from_object(instance)
         match f:
             case models.ManyToManyField():
@@ -26,5 +29,5 @@ def model_to_dict(instance):
     return data
 
 
-def serialize_instance(instance: models.Model):
-    return model_to_dict(instance)
+def serialize_instance(instance: models.Model, ignore_fields: tuple = ()):
+    return model_to_dict(instance, ignore_fields=ignore_fields)
