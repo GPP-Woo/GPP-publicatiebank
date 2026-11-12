@@ -9,13 +9,13 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.34.2
+      - python-requests/2.33.1
     method: GET
-    uri: http://host.docker.internal:8000/api/v2/
+    uri: http://host.docker.internal:8000/api/v3/
   response:
     body:
       string: "{\n    \"openapi\": \"3.0.3\",\n    \"info\": {\n        \"title\":
-        \"GPP Publications\",\n        \"version\": \"2.1.0 (1)\",\n        \"description\":
+        \"GPP Publications\",\n        \"version\": \"3.0.0 (1)\",\n        \"description\":
         \"\\n## Documentatie\\n\\nDe GPP-publicatiebank API stelt client-applicaties
         in staat om publicaties van documenten te raadplegen en te beheren in het
         kader van een open overheid. Deze API-documentatie bevat drie logische 'domeinen'.\\n\\n###
@@ -48,7 +48,7 @@ interactions:
         {\n            \"url\": \"https://github.com/GPP-Woo/GPP-publicatiebank\",\n
         \           \"email\": \"support@maykinmedia.nl\"\n        },\n        \"license\":
         {\n            \"name\": \"EUPL\",\n            \"url\": \"https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md\"\n
-        \       }\n    },\n    \"paths\": {\n        \"/api/v2/accounts/organisatie-eenheden\":
+        \       }\n    },\n    \"paths\": {\n        \"/accounts/organisatie-eenheden\":
         {\n            \"get\": {\n                \"operationId\": \"accountsOrganisatieEenhedenList\",\n
         \               \"description\": \"Geeft een lijst (met paginering) terug
         van alle bestaande organisatie-eenheden.\",\n                \"summary\":
@@ -87,7 +87,7 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/PaginatedOrganisationUnitList\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/accounts/organisatie-eenheden/{identifier}\":
+        \           }\n        },\n        \"/accounts/organisatie-eenheden/{identifier}\":
         {\n            \"get\": {\n                \"operationId\": \"accountsOrganisatieEenhedenRetrieve\",\n
         \               \"description\": \"Haal een specifieke organisatie-eenheid
         op.\",\n                \"summary\": \"Haal een specifieke organisatie-eenheid
@@ -198,7 +198,7 @@ interactions:
         \"#/components/schemas/OrganisationUnit\"\n                                }\n
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
-        \       \"/api/v2/documenten\": {\n            \"get\": {\n                \"operationId\":
+        \       \"/documenten\": {\n            \"get\": {\n                \"operationId\":
         \"documentenList\",\n                \"description\": \"Geeft een resultatenlijst
         (met paginering) terug van de bestaande documenten.\",\n                \"summary\":
         \"Alle beschikbare documenten.\",\n                \"parameters\": [\n                    {\n
@@ -251,9 +251,10 @@ interactions:
         \"query\",\n                        \"name\": \"isGereedVoorPublicatie\",\n
         \                       \"schema\": {\n                            \"type\":
         \"boolean\"\n                        },\n                        \"description\":
-        \"Filter documents that are either fully uploaded or not.\"\n                    },\n
-        \                   {\n                        \"in\": \"query\",\n                        \"name\":
-        \"laatstGewijzigdDatumTot\",\n                        \"schema\": {\n                            \"type\":
+        \"Filter documenten op basis van of ze volledig ge\xFCpload zijn of niet.\"\n
+        \                   },\n                    {\n                        \"in\":
+        \"query\",\n                        \"name\": \"laatstGewijzigdDatumTot\",\n
+        \                       \"schema\": {\n                            \"type\":
         \"string\",\n                            \"format\": \"date-time\"\n                        },\n
         \                       \"description\": \"Filter documenten op laastste wijzigingsdatum
         voor de opgegeven datumtijd.\"\n                    },\n                    {\n
@@ -370,7 +371,7 @@ interactions:
         \"#/components/schemas/DocumentCreate\"\n                                }\n
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
-        \       \"/api/v2/documenten/{uuid}\": {\n            \"get\": {\n                \"operationId\":
+        \       \"/documenten/{uuid}\": {\n            \"get\": {\n                \"operationId\":
         \"documentenRetrieve\",\n                \"description\": \"Haal een specifiek
         document op.\",\n                \"summary\": \"Haal een specifiek document
         op.\",\n                \"parameters\": [\n                    {\n                        \"in\":
@@ -506,29 +507,29 @@ interactions:
         []\n                    }\n                ],\n                \"responses\":
         {\n                    \"204\": {\n                        \"description\":
         \"No response body\"\n                    }\n                }\n            }\n
-        \       },\n        \"/api/v2/documenten/{uuid}/bestandsdelen/{partUuid}\":
-        {\n            \"put\": {\n                \"operationId\": \"documentenBestandsdelenUpdate\",\n
-        \               \"description\": \"Upload de binaire data voor een bestandsdeel.
-        De response van de document create endpoint geeft een lijst van verwachtte
-        bestandsdelen terug die naar dit endpoint verwijzen. De client moet het bestand
-        opknippen in de verwachtte bestandsdeelgroottes en dan elk stuk individueel
-        uploaden.\\n\\nEenmaal alle bestandsdelen voor het document ontvangen zijn,
-        zal het document automatisch ontgrendeld worden in de achterliggende Documenten-API
-        en dan is het document klaar voor gebruik.\\n\\n**NOTE** dit endpoint verwacht
-        `multipart/form-data` gegevens in plaats van JSON - op deze manier kan de
-        base64-encoding overhead voorkomen worden.\",\n                \"summary\":
-        \"Bestandsdeel uploaden\",\n                \"parameters\": [\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
-        \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
-        \"string\"\n                        },\n                        \"description\":
-        \"\\nAny additional information describing the action performed by the user.\\n\",\n
-        \                       \"required\": true\n                    },\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
-        \"Audit-User-ID\",\n                        \"schema\": {\n                            \"type\":
-        \"string\"\n                        },\n                        \"description\":
-        \"\\nThe system identifier that uniquely identifies the user performing the
-        action.\\nIdeally, this is obtained from some Identity and Access Management\\ninfrastructure.
-        With OpenID Connect, this would typically be the `sub` claim.\\n\",\n                        \"required\":
+        \       },\n        \"/documenten/{uuid}/bestandsdelen/{partUuid}\": {\n            \"put\":
+        {\n                \"operationId\": \"documentenBestandsdelenUpdate\",\n                \"description\":
+        \"Upload de binaire data voor een bestandsdeel. De response van de document
+        create endpoint geeft een lijst van verwachtte bestandsdelen terug die naar
+        dit endpoint verwijzen. De client moet het bestand opknippen in de verwachtte
+        bestandsdeelgroottes en dan elk stuk individueel uploaden.\\n\\nEenmaal alle
+        bestandsdelen voor het document ontvangen zijn, zal het document automatisch
+        ontgrendeld worden in de achterliggende Documenten-API en dan is het document
+        klaar voor gebruik.\\n\\n**NOTE** dit endpoint verwacht `multipart/form-data`
+        gegevens in plaats van JSON - op deze manier kan de base64-encoding overhead
+        voorkomen worden.\",\n                \"summary\": \"Bestandsdeel uploaden\",\n
+        \               \"parameters\": [\n                    {\n                        \"in\":
+        \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
+        {\n                            \"type\": \"string\"\n                        },\n
+        \                       \"description\": \"\\nAny additional information describing
+        the action performed by the user.\\n\",\n                        \"required\":
+        true\n                    },\n                    {\n                        \"in\":
+        \"header\",\n                        \"name\": \"Audit-User-ID\",\n                        \"schema\":
+        {\n                            \"type\": \"string\"\n                        },\n
+        \                       \"description\": \"\\nThe system identifier that uniquely
+        identifies the user performing the action.\\nIdeally, this is obtained from
+        some Identity and Access Management\\ninfrastructure. With OpenID Connect,
+        this would typically be the `sub` claim.\\n\",\n                        \"required\":
         true\n                    },\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-User-Representation\",\n
         \                       \"schema\": {\n                            \"type\":
@@ -555,24 +556,24 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/DocumentStatus\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/documenten/{uuid}/download\":
-        {\n            \"get\": {\n                \"operationId\": \"documentenDownloadRetrieve\",\n
-        \               \"description\": \"Download de inhoud van het document als
-        binaire data. Dit endpoint geeft geen JSON terug, in de plaats daarvan wordt
-        de bestandsinhoud direct gestreamed.\\n\\nJe kan enkel bestanden downloaden
-        waarvan de upload naar de achterliggende Documenten-API voltooid is.\",\n
-        \               \"summary\": \"Download de binaire bestandsdata\",\n                \"parameters\":
-        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
-        \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
-        \"string\"\n                        },\n                        \"description\":
-        \"\\nAny additional information describing the action performed by the user.\\n\",\n
-        \                       \"required\": true\n                    },\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
-        \"Audit-User-ID\",\n                        \"schema\": {\n                            \"type\":
-        \"string\"\n                        },\n                        \"description\":
-        \"\\nThe system identifier that uniquely identifies the user performing the
-        action.\\nIdeally, this is obtained from some Identity and Access Management\\ninfrastructure.
-        With OpenID Connect, this would typically be the `sub` claim.\\n\",\n                        \"required\":
+        \           }\n        },\n        \"/documenten/{uuid}/download\": {\n            \"get\":
+        {\n                \"operationId\": \"documentenDownloadRetrieve\",\n                \"description\":
+        \"Download de inhoud van het document als binaire data. Dit endpoint geeft
+        geen JSON terug, in de plaats daarvan wordt de bestandsinhoud direct gestreamed.\\n\\nJe
+        kan enkel bestanden downloaden waarvan de upload naar de achterliggende Documenten-API
+        voltooid is.\",\n                \"summary\": \"Download de binaire bestandsdata\",\n
+        \               \"parameters\": [\n                    {\n                        \"in\":
+        \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
+        {\n                            \"type\": \"string\"\n                        },\n
+        \                       \"description\": \"\\nAny additional information describing
+        the action performed by the user.\\n\",\n                        \"required\":
+        true\n                    },\n                    {\n                        \"in\":
+        \"header\",\n                        \"name\": \"Audit-User-ID\",\n                        \"schema\":
+        {\n                            \"type\": \"string\"\n                        },\n
+        \                       \"description\": \"\\nThe system identifier that uniquely
+        identifies the user performing the action.\\nIdeally, this is obtained from
+        some Identity and Access Management\\ninfrastructure. With OpenID Connect,
+        this would typically be the `sub` claim.\\n\",\n                        \"required\":
         true\n                    },\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-User-Representation\",\n
         \                       \"schema\": {\n                            \"type\":
@@ -604,8 +605,8 @@ interactions:
         niet beschikbaar voor download.\"\n                    },\n                    \"502\":
         {\n                        \"description\": \"Bad gateway - kon de inhoud
         niet streamen.\"\n                    }\n                }\n            }\n
-        \       },\n        \"/api/v2/informatiecategorieen\": {\n            \"get\":
-        {\n                \"operationId\": \"informatiecategorieenList\",\n                \"description\":
+        \       },\n        \"/informatiecategorieen\": {\n            \"get\": {\n
+        \               \"operationId\": \"informatiecategorieenList\",\n                \"description\":
         \"Geeft een resultatenlijst (met paginering) terug van de bestaande informatiecategorie\xEBn.\",\n
         \               \"summary\": \"Alle beschikbare informatiecategorie\xEBn.\",\n
         \               \"parameters\": [\n                    {\n                        \"in\":
@@ -653,8 +654,8 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/PaginatedInformationCategoryList\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/informatiecategorieen/{uuid}\":
-        {\n            \"get\": {\n                \"operationId\": \"informatiecategorieenRetrieve\",\n
+        \           }\n        },\n        \"/informatiecategorieen/{uuid}\": {\n
+        \           \"get\": {\n                \"operationId\": \"informatiecategorieenRetrieve\",\n
         \               \"description\": \"Haal een specifiieke informatiecategorie
         op.\",\n                \"summary\": \"Haal een specifiieke informatiecategorie
         op.\",\n                \"parameters\": [\n                    {\n                        \"in\":
@@ -687,11 +688,11 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/InformationCategory\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/inzageprocedure\": {\n            \"get\":
+        \           }\n        },\n        \"/inzageprocedure\": {\n            \"get\":
         {\n                \"operationId\": \"inzageprocedureList\",\n                \"description\":
-        \"Returns a paginated result list of existing access procedures.\",\n                \"summary\":
-        \"All available access procedures.\",\n                \"parameters\": [\n
-        \                   {\n                        \"in\": \"header\",\n                        \"name\":
+        \"Geeft een resultatenlijst (met paginering) terug van de bestaande inzageprocedures.\",\n
+        \               \"summary\": \"Alle beschikbare inzageprocedures.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
         \"\\nAny additional information describing the action performed by the user.\\n\",\n
@@ -720,8 +721,8 @@ interactions:
         \                       \"in\": \"query\",\n                        \"name\":
         \"publicatie\",\n                        \"schema\": {\n                            \"type\":
         \"string\",\n                            \"format\": \"uuid\"\n                        },\n
-        \                       \"description\": \"Search the access procedure based
-        on the unique identifier (UUID) that represents a publication.\"\n                    }\n
+        \                       \"description\": \"Filter inzageprocedures op basis
+        van de unieke publicatie-identificatie (UUID) waartoe ze horen.\"\n                    }\n
         \               ],\n                \"tags\": [\n                    \"Inzage
         Procedure\"\n                ],\n                \"security\": [\n                    {\n
         \                       \"tokenAuth\": []\n                    }\n                ],\n
@@ -731,8 +732,8 @@ interactions:
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
         \           },\n            \"post\": {\n                \"operationId\":
-        \"inzageprocedureCreate\",\n                \"description\": \"Create an access
-        procedure.\",\n                \"summary\": \"Create an access procedure.\",\n
+        \"inzageprocedureCreate\",\n                \"description\": \"Maak een inzageprocedure
+        aan.\",\n                \"summary\": \"Maak een inzageprocedure aan.\",\n
         \               \"parameters\": [\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
         {\n                            \"type\": \"string\"\n                        },\n
@@ -763,22 +764,21 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/InzageProcedure\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/inzageprocedure/{uuid}\": {\n
-        \           \"get\": {\n                \"operationId\": \"inzageprocedureRetrieve\",\n
-        \               \"description\": \"Retrieve an specific access procedure.\",\n
-        \               \"summary\": \"Retrieve an specific access procedure.\",\n
-        \               \"parameters\": [\n                    {\n                        \"in\":
-        \"header\",\n                        \"name\": \"Audit-Remarks\",\n                        \"schema\":
-        {\n                            \"type\": \"string\"\n                        },\n
-        \                       \"description\": \"\\nAny additional information describing
-        the action performed by the user.\\n\",\n                        \"required\":
-        true\n                    },\n                    {\n                        \"in\":
-        \"header\",\n                        \"name\": \"Audit-User-ID\",\n                        \"schema\":
-        {\n                            \"type\": \"string\"\n                        },\n
-        \                       \"description\": \"\\nThe system identifier that uniquely
-        identifies the user performing the action.\\nIdeally, this is obtained from
-        some Identity and Access Management\\ninfrastructure. With OpenID Connect,
-        this would typically be the `sub` claim.\\n\",\n                        \"required\":
+        \           }\n        },\n        \"/inzageprocedure/{uuid}\": {\n            \"get\":
+        {\n                \"operationId\": \"inzageprocedureRetrieve\",\n                \"description\":
+        \"Haal een specifieke inzageprocedure op.\",\n                \"summary\":
+        \"Haal een specifieke inzageprocedure op.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
+        \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
+        \"string\"\n                        },\n                        \"description\":
+        \"\\nAny additional information describing the action performed by the user.\\n\",\n
+        \                       \"required\": true\n                    },\n                    {\n
+        \                       \"in\": \"header\",\n                        \"name\":
+        \"Audit-User-ID\",\n                        \"schema\": {\n                            \"type\":
+        \"string\"\n                        },\n                        \"description\":
+        \"\\nThe system identifier that uniquely identifies the user performing the
+        action.\\nIdeally, this is obtained from some Identity and Access Management\\ninfrastructure.
+        With OpenID Connect, this would typically be the `sub` claim.\\n\",\n                        \"required\":
         true\n                    },\n                    {\n                        \"in\":
         \"header\",\n                        \"name\": \"Audit-User-Representation\",\n
         \                       \"schema\": {\n                            \"type\":
@@ -798,9 +798,10 @@ interactions:
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
         \           },\n            \"put\": {\n                \"operationId\": \"inzageprocedureUpdate\",\n
-        \               \"description\": \"Update an access procedure entirely.\",\n
-        \               \"summary\": \"Update an access procedure entirely.\",\n                \"parameters\":
-        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
+        \               \"description\": \"Werk een inzageprocedure (in zijn geheel)
+        bij.\",\n                \"summary\": \"Werk een inzageprocedure (in zijn
+        geheel) bij.\",\n                \"parameters\": [\n                    {\n
+        \                       \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
         \"\\nAny additional information describing the action performed by the user.\\n\",\n
@@ -834,10 +835,10 @@ interactions:
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
         \           },\n            \"patch\": {\n                \"operationId\":
-        \"inzageprocedurePartialUpdate\",\n                \"description\": \"Update
-        an access procedure partially.\",\n                \"summary\": \"Update an
-        access procedure partially.\",\n                \"parameters\": [\n                    {\n
-        \                       \"in\": \"header\",\n                        \"name\":
+        \"inzageprocedurePartialUpdate\",\n                \"description\": \"Werk
+        een inzageprocedure (gedeeltelijk) bij.\",\n                \"summary\": \"Werk
+        een inzageprocedure (gedeeltelijk) bij.\",\n                \"parameters\":
+        [\n                    {\n                        \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
         \"\\nAny additional information describing the action performed by the user.\\n\",\n
@@ -871,8 +872,8 @@ interactions:
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            },\n            \"delete\":
         {\n                \"operationId\": \"inzageprocedureDestroy\",\n                \"description\":
-        \"Destroy an access procedure.\",\n                \"summary\": \"Destroy
-        an access procedure.\",\n                \"parameters\": [\n                    {\n
+        \"Verwijder een inzageprocedure.\",\n                \"summary\": \"Verwijder
+        een inzageprocedure.\",\n                \"parameters\": [\n                    {\n
         \                       \"in\": \"header\",\n                        \"name\":
         \"Audit-Remarks\",\n                        \"schema\": {\n                            \"type\":
         \"string\"\n                        },\n                        \"description\":
@@ -899,7 +900,7 @@ interactions:
         []\n                    }\n                ],\n                \"responses\":
         {\n                    \"204\": {\n                        \"description\":
         \"No response body\"\n                    }\n                }\n            }\n
-        \       },\n        \"/api/v2/onderwerpen\": {\n            \"get\": {\n                \"operationId\":
+        \       },\n        \"/onderwerpen\": {\n            \"get\": {\n                \"operationId\":
         \"onderwerpenList\",\n                \"description\": \"Geeft een resultatenlijst
         (met paginering) terug van de bestaande onderwerpen.\",\n                \"summary\":
         \"Alle beschikbare onderwerpen.\",\n                \"parameters\": [\n                    {\n
@@ -957,7 +958,7 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/PaginatedTopicList\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/onderwerpen/{uuid}\": {\n            \"get\":
+        \           }\n        },\n        \"/onderwerpen/{uuid}\": {\n            \"get\":
         {\n                \"operationId\": \"onderwerpenRetrieve\",\n                \"description\":
         \"Haal een specifiek onderwerp op.\",\n                \"summary\": \"Haal
         een specifiek onderwerp op.\",\n                \"parameters\": [\n                    {\n
@@ -990,7 +991,7 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/Topic\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/organisaties\": {\n            \"get\":
+        \           }\n        },\n        \"/organisaties\": {\n            \"get\":
         {\n                \"operationId\": \"organisatiesList\",\n                \"description\":
         \"Geeft een lijst (met paginering) terug van alle bestaande organisaties.\",\n
         \               \"summary\": \"Alle beschikbare organisaties.\",\n                \"parameters\":
@@ -1093,7 +1094,7 @@ interactions:
         \"#/components/schemas/Organisation\"\n                                }\n
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
-        \       \"/api/v2/organisaties/{uuid}\": {\n            \"get\": {\n                \"operationId\":
+        \       \"/organisaties/{uuid}\": {\n            \"get\": {\n                \"operationId\":
         \"organisatiesRetrieve\",\n                \"description\": \"Haal een specifieke
         organisatie op.\",\n                \"summary\": \"Haal een specifieke organisatie
         op.\",\n                \"parameters\": [\n                    {\n                        \"in\":
@@ -1199,7 +1200,7 @@ interactions:
         \"#/components/schemas/Organisation\"\n                                }\n
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
-        \       \"/api/v2/publicaties\": {\n            \"get\": {\n                \"operationId\":
+        \       \"/publicaties\": {\n            \"get\": {\n                \"operationId\":
         \"publicatiesList\",\n                \"description\": \"Geeft een gepagineerde
         lijst van bestaande publicaties terug.\\n\\n**Opmerking**: wanneer je tegelijk
         op `eigenaar` en `eigenaarGroep` filtert, dan worden de publicaties waar \xE9\xE9n
@@ -1378,7 +1379,7 @@ interactions:
         \"#/components/schemas/PublicationRead\"\n                                }\n
         \                           }\n                        },\n                        \"description\":
         \"\"\n                    }\n                }\n            }\n        },\n
-        \       \"/api/v2/publicaties/{uuid}\": {\n            \"get\": {\n                \"operationId\":
+        \       \"/publicaties/{uuid}\": {\n            \"get\": {\n                \"operationId\":
         \"publicatiesRetrieve\",\n                \"description\": \"Haal een specifieke
         publicatie op.\",\n                \"summary\": \"Haal een specifieke publicatie
         op.\",\n                \"parameters\": [\n                    {\n                        \"in\":
@@ -1514,7 +1515,7 @@ interactions:
         []\n                    }\n                ],\n                \"responses\":
         {\n                    \"204\": {\n                        \"description\":
         \"No response body\"\n                    }\n                }\n            }\n
-        \       },\n        \"/api/v2/themas\": {\n            \"get\": {\n                \"operationId\":
+        \       },\n        \"/themas\": {\n            \"get\": {\n                \"operationId\":
         \"themasList\",\n                \"description\": \"Geeft een resultatenlijst
         (met paginering) terug van de bestaande thema's.\",\n                \"summary\":
         \"Alle beschikbare thema's.\",\n                \"parameters\": [\n                    {\n
@@ -1552,7 +1553,7 @@ interactions:
         {\n                                    \"$ref\": \"#/components/schemas/PaginatedThemeList\"\n
         \                               }\n                            }\n                        },\n
         \                       \"description\": \"\"\n                    }\n                }\n
-        \           }\n        },\n        \"/api/v2/themas/{uuid}\": {\n            \"get\":
+        \           }\n        },\n        \"/themas/{uuid}\": {\n            \"get\":
         {\n                \"operationId\": \"themasRetrieve\",\n                \"description\":
         \"Haal een specifiek thema op.\",\n                \"summary\": \"Haal een
         specifiek thema op.\",\n                \"parameters\": [\n                    {\n
@@ -1596,7 +1597,7 @@ interactions:
         bewaren\\n* `vernietigen` - Vernietigen\"\n            },\n            \"BeschikbaarRechtsmiddelEnum\":
         {\n                \"enum\": [\n                    \"zienswijze\",\n                    \"bezwaar\"\n
         \               ],\n                \"type\": \"string\",\n                \"description\":
-        \"* `zienswijze` - Perspective\\n* `bezwaar` - Objection\"\n            },\n
+        \"* `zienswijze` - Zienswijze\\n* `bezwaar` - Bezwaar\"\n            },\n
         \           \"BlankEnum\": {\n                \"enum\": [\n                    \"\"\n
         \               ]\n            },\n            \"ConceptPublicationWrite\":
         {\n                \"type\": \"object\",\n                \"description\":
@@ -1754,9 +1755,10 @@ interactions:
         [\n                            {\n                                \"$ref\":
         \"#/components/schemas/NestedInzageProcedure\"\n                            }\n
         \                       ],\n                        \"readOnly\": true,\n
-        \                       \"nullable\": true,\n                        \"description\":
-        \"The inzage procedure attached to this publication.\"\n                    }\n
-        \               },\n                \"required\": [\n                    \"diWooInformatieCategorieen\",\n
+        \                       \"nullable\": true,\n                        \"title\":
+        \"inzageprocedure\",\n                        \"description\": \"De inzageprocedure
+        horend bij deze publicatie.\"\n                    }\n                },\n
+        \               \"required\": [\n                    \"diWooInformatieCategorieen\",\n
         \                   \"gepubliceerdOp\",\n                    \"ingetrokkenOp\",\n
         \                   \"inzageProcedure\",\n                    \"laatstGewijzigdDatum\",\n
         \                   \"officieleTitel\",\n                    \"registratiedatum\",\n
@@ -1828,8 +1830,8 @@ interactions:
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/Eigenaar\"\n                            }\n                        ],\n
         \                       \"readOnly\": true,\n                        \"nullable\":
-        true,\n                        \"description\": \"The creator of the document,
-        derived from the audit headers.\"\n                    },\n                    \"registratiedatum\":
+        true,\n                        \"description\": \"De aanmaker van het document,
+        afgeleid uit de audit-headers.\"\n                    },\n                    \"registratiedatum\":
         {\n                        \"type\": \"string\",\n                        \"format\":
         \"date-time\",\n                        \"readOnly\": true,\n                        \"title\":
         \"Geregistreerd op\",\n                        \"description\": \"Systeemdatum
@@ -1931,8 +1933,8 @@ interactions:
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/Eigenaar\"\n                            }\n                        ],\n
         \                       \"readOnly\": true,\n                        \"nullable\":
-        true,\n                        \"description\": \"The creator of the document,
-        derived from the audit headers.\"\n                    },\n                    \"registratiedatum\":
+        true,\n                        \"description\": \"De aanmaker van het document,
+        afgeleid uit de audit-headers.\"\n                    },\n                    \"registratiedatum\":
         {\n                        \"type\": \"string\",\n                        \"format\":
         \"date-time\",\n                        \"readOnly\": true,\n                        \"title\":
         \"Geregistreerd op\",\n                        \"description\": \"Systeemdatum
@@ -2056,7 +2058,7 @@ interactions:
         \                           {\n                                \"$ref\": \"#/components/schemas/Eigenaar\"\n
         \                           }\n                        ],\n                        \"readOnly\":
         true,\n                        \"nullable\": true,\n                        \"description\":
-        \"The creator of the document, derived from the audit headers.\"\n                    },\n
+        \"De aanmaker van het document, afgeleid uit de audit-headers.\"\n                    },\n
         \                   \"registratiedatum\": {\n                        \"type\":
         \"string\",\n                        \"format\": \"date-time\",\n                        \"readOnly\":
         true,\n                        \"title\": \"Geregistreerd op\",\n                        \"description\":
@@ -2167,88 +2169,85 @@ interactions:
         \                       \"format\": \"uuid\",\n                        \"description\":
         \"De unieke identificatie van de publicatie.\"\n                    },\n                    \"urlBekendmaking\":
         {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Announcement URL\",\n                        \"description\":
-        \"The online location where the announcement is published, for example on
+        \"uri\",\n                        \"title\": \"Bekendmakings-URL\",\n                        \"description\":
+        \"De online locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld op
         'officielebekendmakingen.nl'.\",\n                        \"maxLength\": 1000\n
         \                   },\n                    \"toelichting\": {\n                        \"type\":
         \"string\",\n                        \"title\": \"Omschrijving\",\n                        \"description\":
-        \"The description of the announcement.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
+        \"De toelichting bij de bekendmaking.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/BeschikbaarRechtsmiddelEnum\"\n                            }\n
-        \                       ],\n                        \"title\": \"Available
-        legal procedure\",\n                        \"description\": \"The legal procedure
-        that a citizen can employ to oppose the (predisposed) decision.\\n\\n* `zienswijze`
-        - Perspective\\n* `bezwaar` - Objection\"\n                    },\n                    \"urlReactieformulier\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Legal notice URL\",\n                        \"description\":
-        \"The URL to the web form where citizens can submit the legal procedure. \\n\\n
-        This field gets populated based on the 'beschikbaar_rechtsmiddel' field and
-        the global config. If you do not want to this field to get populated in this
-        fashion ensure to provide it yourself.\",\n                        \"maxLength\":
-        1000\n                    },\n                    \"datumBeginInzagetermijn\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"date\",\n                        \"title\": \"Inzagetermijn in effect from\",\n
-        \                       \"description\": \"The date when the inspection period
-        starts.\"\n                    },\n                    \"datumEindeInzagetermijn\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"date\",\n                        \"title\": \"Datum einde geldigheid\",\n
-        \                       \"description\": \"The date when the inspection period
-        comes to an end.If the end date falls on a saturday, sunday or holiday we
-        automatically push the date back to the first available workday.\"\n                    },\n
-        \                   \"automatischIntrekken\": {\n                        \"type\":
-        \"boolean\",\n                        \"title\": \"Automatically withdraw\",\n
-        \                       \"description\": \"When enabled, ensure that the publication
-        gets redacted on the configured end date.\"\n                    }\n                },\n
-        \               \"required\": [\n                    \"beschikbaarRechtsmiddel\",\n
-        \                   \"datumBeginInzagetermijn\",\n                    \"datumEindeInzagetermijn\",\n
-        \                   \"publicatie\",\n                    \"toelichting\",\n
-        \                   \"uuid\"\n                ]\n            },\n            \"NestedInzageProcedure\":
-        {\n                \"type\": \"object\",\n                \"properties\":
-        {\n                    \"uuid\": {\n                        \"type\": \"string\",\n
-        \                       \"format\": \"uuid\",\n                        \"readOnly\":
-        true\n                    },\n                    \"urlBekendmaking\": {\n
+        \                       ],\n                        \"description\": \"Het
+        rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.\\n\\n*
+        `zienswijze` - Zienswijze\\n* `bezwaar` - Bezwaar\"\n                    },\n
+        \                   \"urlReactieformulier\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"title\":
+        \"Reactieformulier-URL\",\n                        \"description\": \"De URL
+        naar het webformulier waarmee burgers het rechtsmiddel kunnen indienen. \\n\\n
+        Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel' en
+        de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+        wordt, geef het dan zelf op.\",\n                        \"maxLength\": 1000\n
+        \                   },\n                    \"datumBeginInzagetermijn\": {\n
         \                       \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Announcement URL\",\n                        \"description\":
-        \"The online location where the announcement is published, for example on
-        'officielebekendmakingen.nl'.\",\n                        \"maxLength\": 1000\n
-        \                   },\n                    \"toelichting\": {\n                        \"type\":
-        \"string\",\n                        \"title\": \"Omschrijving\",\n                        \"description\":
-        \"The description of the announcement.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
-        {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
-        \"#/components/schemas/BeschikbaarRechtsmiddelEnum\"\n                            }\n
-        \                       ],\n                        \"title\": \"Available
-        legal procedure\",\n                        \"description\": \"The legal procedure
-        that a citizen can employ to oppose the (predisposed) decision.\\n\\n* `zienswijze`
-        - Perspective\\n* `bezwaar` - Objection\"\n                    },\n                    \"urlReactieformulier\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Legal notice URL\",\n                        \"description\":
-        \"The URL to the web form where citizens can submit the legal procedure. \\n\\n
-        This field gets populated based on the 'beschikbaar_rechtsmiddel' field and
-        the global config. If you do not want to this field to get populated in this
-        fashion ensure to provide it yourself.\",\n                        \"maxLength\":
-        1000\n                    },\n                    \"datumBeginInzagetermijn\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"date\",\n                        \"title\": \"Inzagetermijn in effect from\",\n
-        \                       \"description\": \"The date when the inspection period
-        starts.\"\n                    },\n                    \"datumEindeInzagetermijn\":
+        \"date\",\n                        \"description\": \"De datum waarop de inzagetermijn
+        begint.\"\n                    },\n                    \"datumEindeInzagetermijn\":
         {\n                        \"type\": \"string\",\n                        \"format\":
         \"date\",\n                        \"title\": \"Datum einde geldigheid\",\n
-        \                       \"description\": \"The date when the inspection period
-        comes to an end.If the end date falls on a saturday, sunday or holiday we
-        automatically push the date back to the first available workday.\"\n                    },\n
+        \                       \"description\": \"De datum waarop de inzagetermijn
+        eindigt. Als de einddatum op een zaterdag, zondag of feestdag valt, wordt
+        deze automatisch verschoven naar de eerstvolgende werkdag.\"\n                    },\n
         \                   \"automatischIntrekken\": {\n                        \"type\":
-        \"boolean\",\n                        \"title\": \"Automatically withdraw\",\n
-        \                       \"description\": \"When enabled, ensure that the publication
-        gets redacted on the configured end date.\"\n                    }\n                },\n
-        \               \"required\": [\n                    \"beschikbaarRechtsmiddel\",\n
-        \                   \"datumBeginInzagetermijn\",\n                    \"datumEindeInzagetermijn\",\n
+        \"boolean\",\n                        \"description\": \"Indien aangevinkt,
+        wordt de publicatie op de ingestelde einddatum automatisch ingetrokken.\"\n
+        \                   }\n                },\n                \"required\": [\n
+        \                   \"beschikbaarRechtsmiddel\",\n                    \"datumBeginInzagetermijn\",\n
+        \                   \"datumEindeInzagetermijn\",\n                    \"publicatie\",\n
         \                   \"toelichting\",\n                    \"uuid\"\n                ]\n
-        \           },\n            \"Organisation\": {\n                \"type\":
+        \           },\n            \"NestedInzageProcedure\": {\n                \"type\":
         \"object\",\n                \"properties\": {\n                    \"uuid\":
         {\n                        \"type\": \"string\",\n                        \"format\":
         \"uuid\",\n                        \"readOnly\": true\n                    },\n
-        \                   \"identifier\": {\n                        \"type\": \"string\",\n
-        \                       \"format\": \"uri\",\n                        \"readOnly\":
+        \                   \"urlBekendmaking\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"title\":
+        \"Bekendmakings-URL\",\n                        \"description\": \"De online
+        locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld op 'officielebekendmakingen.nl'.\",\n
+        \                       \"maxLength\": 1000\n                    },\n                    \"toelichting\":
+        {\n                        \"type\": \"string\",\n                        \"title\":
+        \"Omschrijving\",\n                        \"description\": \"De toelichting
+        bij de bekendmaking.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
+        {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
+        \"#/components/schemas/BeschikbaarRechtsmiddelEnum\"\n                            }\n
+        \                       ],\n                        \"description\": \"Het
+        rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.\\n\\n*
+        `zienswijze` - Zienswijze\\n* `bezwaar` - Bezwaar\"\n                    },\n
+        \                   \"urlReactieformulier\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"title\":
+        \"Reactieformulier-URL\",\n                        \"description\": \"De URL
+        naar het webformulier waarmee burgers het rechtsmiddel kunnen indienen. \\n\\n
+        Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel' en
+        de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+        wordt, geef het dan zelf op.\",\n                        \"maxLength\": 1000\n
+        \                   },\n                    \"datumBeginInzagetermijn\": {\n
+        \                       \"type\": \"string\",\n                        \"format\":
+        \"date\",\n                        \"description\": \"De datum waarop de inzagetermijn
+        begint.\"\n                    },\n                    \"datumEindeInzagetermijn\":
+        {\n                        \"type\": \"string\",\n                        \"format\":
+        \"date\",\n                        \"title\": \"Datum einde geldigheid\",\n
+        \                       \"description\": \"De datum waarop de inzagetermijn
+        eindigt. Als de einddatum op een zaterdag, zondag of feestdag valt, wordt
+        deze automatisch verschoven naar de eerstvolgende werkdag.\"\n                    },\n
+        \                   \"automatischIntrekken\": {\n                        \"type\":
+        \"boolean\",\n                        \"description\": \"Indien aangevinkt,
+        wordt de publicatie op de ingestelde einddatum automatisch ingetrokken.\"\n
+        \                   }\n                },\n                \"required\": [\n
+        \                   \"beschikbaarRechtsmiddel\",\n                    \"datumBeginInzagetermijn\",\n
+        \                   \"datumEindeInzagetermijn\",\n                    \"toelichting\",\n
+        \                   \"uuid\"\n                ]\n            },\n            \"Organisation\":
+        {\n                \"type\": \"object\",\n                \"properties\":
+        {\n                    \"uuid\": {\n                        \"type\": \"string\",\n
+        \                       \"format\": \"uuid\",\n                        \"readOnly\":
+        true\n                    },\n                    \"identifier\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"readOnly\":
         true,\n                        \"title\": \"Identificatie\",\n                        \"description\":
         \"De unieke IRI waarmee deze organisatie gedefinieerd is in de overheid.nl
         waardelijsten. Voor zelf-toegevoegde items wordt een identificatie gegenereerd.\"\n
@@ -2474,7 +2473,7 @@ interactions:
         \                           {\n                                \"$ref\": \"#/components/schemas/Eigenaar\"\n
         \                           }\n                        ],\n                        \"readOnly\":
         true,\n                        \"nullable\": true,\n                        \"description\":
-        \"The creator of the document, derived from the audit headers.\"\n                    },\n
+        \"De aanmaker van het document, afgeleid uit de audit-headers.\"\n                    },\n
         \                   \"registratiedatum\": {\n                        \"type\":
         \"string\",\n                        \"format\": \"date-time\",\n                        \"readOnly\":
         true,\n                        \"title\": \"Geregistreerd op\",\n                        \"description\":
@@ -2498,44 +2497,42 @@ interactions:
         \"string\",\n                        \"format\": \"uuid\",\n                        \"description\":
         \"De unieke identificatie van de publicatie.\"\n                    },\n                    \"urlBekendmaking\":
         {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Announcement URL\",\n                        \"description\":
-        \"The online location where the announcement is published, for example on
+        \"uri\",\n                        \"title\": \"Bekendmakings-URL\",\n                        \"description\":
+        \"De online locatie waar de bekendmaking gepubliceerd is, bijvoorbeeld op
         'officielebekendmakingen.nl'.\",\n                        \"maxLength\": 1000\n
         \                   },\n                    \"toelichting\": {\n                        \"type\":
         \"string\",\n                        \"title\": \"Omschrijving\",\n                        \"description\":
-        \"The description of the announcement.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
+        \"De toelichting bij de bekendmaking.\"\n                    },\n                    \"beschikbaarRechtsmiddel\":
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/BeschikbaarRechtsmiddelEnum\"\n                            }\n
-        \                       ],\n                        \"title\": \"Available
-        legal procedure\",\n                        \"description\": \"The legal procedure
-        that a citizen can employ to oppose the (predisposed) decision.\\n\\n* `zienswijze`
-        - Perspective\\n* `bezwaar` - Objection\"\n                    },\n                    \"urlReactieformulier\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uri\",\n                        \"title\": \"Legal notice URL\",\n                        \"description\":
-        \"The URL to the web form where citizens can submit the legal procedure. \\n\\n
-        This field gets populated based on the 'beschikbaar_rechtsmiddel' field and
-        the global config. If you do not want to this field to get populated in this
-        fashion ensure to provide it yourself.\",\n                        \"maxLength\":
-        1000\n                    },\n                    \"datumBeginInzagetermijn\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"date\",\n                        \"title\": \"Inzagetermijn in effect from\",\n
-        \                       \"description\": \"The date when the inspection period
-        starts.\"\n                    },\n                    \"datumEindeInzagetermijn\":
+        \                       ],\n                        \"description\": \"Het
+        rechtsmiddel dat een burger kan inzetten tegen het (voorgenomen) besluit.\\n\\n*
+        `zienswijze` - Zienswijze\\n* `bezwaar` - Bezwaar\"\n                    },\n
+        \                   \"urlReactieformulier\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"title\":
+        \"Reactieformulier-URL\",\n                        \"description\": \"De URL
+        naar het webformulier waarmee burgers het rechtsmiddel kunnen indienen. \\n\\n
+        Dit veld wordt ingevuld op basis van het veld 'beschikbaar_rechtsmiddel' en
+        de algemene instellingen. Wil je niet dat dit veld op deze manier ingevuld
+        wordt, geef het dan zelf op.\",\n                        \"maxLength\": 1000\n
+        \                   },\n                    \"datumBeginInzagetermijn\": {\n
+        \                       \"type\": \"string\",\n                        \"format\":
+        \"date\",\n                        \"description\": \"De datum waarop de inzagetermijn
+        begint.\"\n                    },\n                    \"datumEindeInzagetermijn\":
         {\n                        \"type\": \"string\",\n                        \"format\":
         \"date\",\n                        \"title\": \"Datum einde geldigheid\",\n
-        \                       \"description\": \"The date when the inspection period
-        comes to an end.If the end date falls on a saturday, sunday or holiday we
-        automatically push the date back to the first available workday.\"\n                    },\n
+        \                       \"description\": \"De datum waarop de inzagetermijn
+        eindigt. Als de einddatum op een zaterdag, zondag of feestdag valt, wordt
+        deze automatisch verschoven naar de eerstvolgende werkdag.\"\n                    },\n
         \                   \"automatischIntrekken\": {\n                        \"type\":
-        \"boolean\",\n                        \"title\": \"Automatically withdraw\",\n
-        \                       \"description\": \"When enabled, ensure that the publication
-        gets redacted on the configured end date.\"\n                    }\n                }\n
-        \           },\n            \"PatchedOrganisation\": {\n                \"type\":
-        \"object\",\n                \"properties\": {\n                    \"uuid\":
-        {\n                        \"type\": \"string\",\n                        \"format\":
-        \"uuid\",\n                        \"readOnly\": true\n                    },\n
-        \                   \"identifier\": {\n                        \"type\": \"string\",\n
-        \                       \"format\": \"uri\",\n                        \"readOnly\":
+        \"boolean\",\n                        \"description\": \"Indien aangevinkt,
+        wordt de publicatie op de ingestelde einddatum automatisch ingetrokken.\"\n
+        \                   }\n                }\n            },\n            \"PatchedOrganisation\":
+        {\n                \"type\": \"object\",\n                \"properties\":
+        {\n                    \"uuid\": {\n                        \"type\": \"string\",\n
+        \                       \"format\": \"uuid\",\n                        \"readOnly\":
+        true\n                    },\n                    \"identifier\": {\n                        \"type\":
+        \"string\",\n                        \"format\": \"uri\",\n                        \"readOnly\":
         true,\n                        \"title\": \"Identificatie\",\n                        \"description\":
         \"De unieke IRI waarmee deze organisatie gedefinieerd is in de overheid.nl
         waardelijsten. Voor zelf-toegevoegde items wordt een identificatie gegenereerd.\"\n
@@ -2766,9 +2763,10 @@ interactions:
         {\n                        \"allOf\": [\n                            {\n                                \"$ref\":
         \"#/components/schemas/NestedInzageProcedure\"\n                            }\n
         \                       ],\n                        \"readOnly\": true,\n
-        \                       \"nullable\": true,\n                        \"description\":
-        \"The inzage procedure attached to this publication.\"\n                    }\n
-        \               },\n                \"required\": [\n                    \"archiefactiedatum\",\n
+        \                       \"nullable\": true,\n                        \"title\":
+        \"inzageprocedure\",\n                        \"description\": \"De inzageprocedure
+        horend bij deze publicatie.\"\n                    }\n                },\n
+        \               \"required\": [\n                    \"archiefactiedatum\",\n
         \                   \"archiefnominatie\",\n                    \"bronBewaartermijn\",\n
         \                   \"datumBeginGeldigheid\",\n                    \"datumEindeGeldigheid\",\n
         \                   \"diWooInformatieCategorieen\",\n                    \"eigenaar\",\n
@@ -2973,9 +2971,10 @@ interactions:
         [\n                            {\n                                \"$ref\":
         \"#/components/schemas/NestedInzageProcedure\"\n                            }\n
         \                       ],\n                        \"readOnly\": true,\n
-        \                       \"nullable\": true,\n                        \"description\":
-        \"The inzage procedure attached to this publication.\"\n                    }\n
-        \               },\n                \"required\": [\n                    \"diWooInformatieCategorieen\",\n
+        \                       \"nullable\": true,\n                        \"title\":
+        \"inzageprocedure\",\n                        \"description\": \"De inzageprocedure
+        horend bij deze publicatie.\"\n                    }\n                },\n
+        \               \"required\": [\n                    \"diWooInformatieCategorieen\",\n
         \                   \"gepubliceerdOp\",\n                    \"informatieCategorieen\",\n
         \                   \"ingetrokkenOp\",\n                    \"inzageProcedure\",\n
         \                   \"laatstGewijzigdDatum\",\n                    \"officieleTitel\",\n
@@ -3062,20 +3061,20 @@ interactions:
       Content-Disposition:
       - inline; filename="GPP Publications (1).json"
       Content-Length:
-      - '246679'
+      - '246175'
       Content-Type:
       - application/vnd.oai.openapi+json
       Cross-Origin-Opener-Policy:
       - same-origin
       Date:
-      - Fri, 09 Oct 2026 17:29:35 GMT
+      - Thu, 05 Nov 2026 17:00:28 GMT
       Referrer-Policy:
       - same-origin
       Server:
       - WSGIServer/0.2 CPython/3.12.7
       Server-Timing:
-      - TimerPanel_utime;dur=58.19799999999997;desc="User CPU time", TimerPanel_stime;dur=2.1300000000001873;desc="System
-        CPU time", TimerPanel_total;dur=60.32800000000016;desc="Total CPU time", TimerPanel_total_time;dur=60.351727001034305;desc="Elapsed
+      - TimerPanel_utime;dur=79.7150000000002;desc="User CPU time", TimerPanel_stime;dur=6.800999999999391;desc="System
+        CPU time", TimerPanel_total;dur=86.5159999999996;desc="Total CPU time", TimerPanel_total_time;dur=82.64210500055924;desc="Elapsed
         time", SQLPanel_sql_time;dur=0;desc="SQL 0 queries", CachePanel_total_time;dur=0;desc="Cache
         0 Calls"
       Vary:
@@ -3085,7 +3084,7 @@ interactions:
       X-Frame-Options:
       - DENY
       djdt-request-id:
-      - f2e3c8c1a38549fbb68e559c16875802
+      - b4ee1f26ed6348c99149945849f73382
     status:
       code: 200
       message: OK

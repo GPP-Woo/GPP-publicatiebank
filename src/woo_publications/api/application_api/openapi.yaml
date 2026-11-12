@@ -58,7 +58,7 @@ info:
     name: EUPL
     url: https://github.com/GPP-Woo/GPP-publicatiebank/blob/main/LICENSE.md
 paths:
-  /api/v2/accounts/organisatie-eenheden:
+  /accounts/organisatie-eenheden:
     get:
       operationId: accountsOrganisatieEenhedenList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisatie-eenheden.
@@ -113,7 +113,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrganisationUnitList'
           description: ''
-  /api/v2/accounts/organisatie-eenheden/{identifier}:
+  /accounts/organisatie-eenheden/{identifier}:
     get:
       operationId: accountsOrganisatieEenhedenRetrieve
       description: Haal een specifieke organisatie-eenheid op.
@@ -275,7 +275,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganisationUnit'
           description: ''
-  /api/v2/documenten:
+  /documenten:
     get:
       operationId: documentenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -520,7 +520,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreate'
           description: ''
-  /api/v2/documenten/{uuid}:
+  /documenten/{uuid}:
     get:
       operationId: documentenRetrieve
       description: Haal een specifiek document op.
@@ -720,7 +720,7 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/documenten/{uuid}/bestandsdelen/{partUuid}:
+  /documenten/{uuid}/bestandsdelen/{partUuid}:
     put:
       operationId: documentenBestandsdelenUpdate
       description: |-
@@ -786,7 +786,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentStatus'
           description: ''
-  /api/v2/documenten/{uuid}/download:
+  /documenten/{uuid}/download:
     get:
       operationId: documentenDownloadRetrieve
       description: |-
@@ -853,7 +853,7 @@ paths:
           description: Conflict - het document is (nog) niet beschikbaar voor download.
         '502':
           description: Bad gateway - kon de inhoud niet streamen.
-  /api/v2/informatiecategorieen:
+  /informatiecategorieen:
     get:
       operationId: informatiecategorieenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -922,7 +922,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedInformationCategoryList'
           description: ''
-  /api/v2/informatiecategorieen/{uuid}:
+  /informatiecategorieen/{uuid}:
     get:
       operationId: informatiecategorieenRetrieve
       description: Haal een specifiieke informatiecategorie op.
@@ -971,7 +971,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InformationCategory'
           description: ''
-  /api/v2/inzageprocedure:
+  /inzageprocedure:
     get:
       operationId: inzageprocedureList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -1082,7 +1082,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InzageProcedure'
           description: ''
-  /api/v2/inzageprocedure/{uuid}:
+  /inzageprocedure/{uuid}:
     get:
       operationId: inzageprocedureRetrieve
       description: Haal een specifieke inzageprocedure op.
@@ -1282,7 +1282,7 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/onderwerpen:
+  /onderwerpen:
     get:
       operationId: onderwerpenList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -1370,7 +1370,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTopicList'
           description: ''
-  /api/v2/onderwerpen/{uuid}:
+  /onderwerpen/{uuid}:
     get:
       operationId: onderwerpenRetrieve
       description: Haal een specifiek onderwerp op.
@@ -1419,7 +1419,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Topic'
           description: ''
-  /api/v2/organisaties:
+  /organisaties:
     get:
       operationId: organisatiesList
       description: Geeft een lijst (met paginering) terug van alle bestaande organisaties.
@@ -1573,7 +1573,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v2/organisaties/{uuid}:
+  /organisaties/{uuid}:
     get:
       operationId: organisatiesRetrieve
       description: Haal een specifieke organisatie op.
@@ -1728,7 +1728,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organisation'
           description: ''
-  /api/v2/publicaties:
+  /publicaties:
     get:
       operationId: publicatiesList
       description: |-
@@ -1987,7 +1987,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationRead'
           description: ''
-  /api/v2/publicaties/{uuid}:
+  /publicaties/{uuid}:
     get:
       operationId: publicatiesRetrieve
       description: Haal een specifieke publicatie op.
@@ -2189,7 +2189,7 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/themas:
+  /themas:
     get:
       operationId: themasList
       description: Geeft een resultatenlijst (met paginering) terug van de bestaande
@@ -2245,7 +2245,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedThemeList'
           description: ''
-  /api/v2/themas/{uuid}:
+  /themas/{uuid}:
     get:
       operationId: themasRetrieve
       description: Haal een specifiek thema op.
@@ -4428,6 +4428,8 @@ components:
       in: header
       name: Authorization
       description: Token-based authentication with required prefix "Token"
+servers:
+- url: /api/v3
 tags:
 - name: Catalogi API
 - name: Documenten

@@ -164,6 +164,9 @@ class Topic(models.Model):
     class Meta:
         verbose_name = _("topic")
         verbose_name_plural = _("topics")
+        indexes = [
+            models.Index(fields=["laatst_gewijzigd_datum"]),
+        ]
 
     def __str__(self):
         return self.officiele_titel
@@ -368,6 +371,9 @@ class Publication(ConcurrentTransitionMixin, models.Model):
     class Meta:
         verbose_name = _("publication")
         verbose_name_plural = _("publications")
+        indexes = [
+            models.Index(fields=["laatst_gewijzigd_datum"]),
+        ]
         constraints = [
             models.CheckConstraint(
                 check=(
@@ -837,6 +843,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
     class Meta:
         verbose_name = _("document")
         verbose_name_plural = _("documents")
+        indexes = [
+            models.Index(fields=["laatst_gewijzigd_datum"]),
+        ]
         constraints = [
             models.CheckConstraint(
                 check=(_DOCUMENT_NOT_SET | _DOCUMENT_SET),
@@ -1034,7 +1043,9 @@ class Document(ConcurrentTransitionMixin, models.Model):
         Creates the absolute document URI for the document-download endpoint.
         """
         return reverse(
-            "api:document-download", kwargs={"uuid": str(self.uuid)}, request=request
+            "application:document-download",
+            kwargs={"uuid": str(self.uuid)},
+            request=request,
         )
 
     @property
@@ -1100,7 +1111,7 @@ class Document(ConcurrentTransitionMixin, models.Model):
             for part in zgw_document.file_parts:
                 part.url = build_absolute_uri(
                     reverse(
-                        "api:document-filepart-detail",
+                        "application:document-filepart-detail",
                         kwargs={
                             "uuid": self.uuid,
                             "part_uuid": part.uuid,
