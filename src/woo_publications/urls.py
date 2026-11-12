@@ -8,6 +8,8 @@ from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 
+from maykin_common.api_reference.views import ComponentIndexView
+
 handler500 = "maykin_common.views.server_error"
 admin.site.enable_nav_sidebar = False
 admin.site.site_header = _("GPP publications")
@@ -28,7 +30,24 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
-    path("api/", include("woo_publications.api.urls")),
+    path("api/", include("woo_publications.api.application_api.urls")),
+    path("hergebruik/api/", include("woo_publications.api.reuse_api.urls")),
+    path(
+        "api/",
+        ComponentIndexView.as_view(
+            template_name="api_index.html",
+            component="application",
+        ),
+        name="index-application",
+    ),
+    path(
+        "hergebruik/",
+        ComponentIndexView.as_view(
+            template_name="api_index.html",
+            component="reuse",
+        ),
+        name="index-reuse",
+    ),
     # Simply show the index template.
     path("", TemplateView.as_view(template_name="index.html"), name="root"),
     path("auth/oidc/", include("mozilla_django_oidc.urls")),
