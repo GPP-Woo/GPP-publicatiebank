@@ -6,6 +6,8 @@ from drf_spectacular.utils import (
 )
 from rest_framework import mixins, viewsets
 
+from woo_publications.api.pagination import DynamicPageSizePagination
+
 from ..models import OrganisationUnit
 from .serializers import OrganisationUnitSerializer
 
@@ -47,3 +49,4 @@ class OrganisationUnitViewSet(
     lookup_field = "identifier"
     lookup_value_converter = "slug"
     serializer_class = OrganisationUnitSerializer
+    pagination_class = DynamicPageSizePagination
