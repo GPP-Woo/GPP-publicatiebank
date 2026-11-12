@@ -162,10 +162,13 @@ class DocumentSerializer(serializers.ModelSerializer[Document]):
 
     def get_fields(self):
         fields = super().get_fields()
-        assert fields["publicatiestatus"].help_text
-        fsm_field = Document._meta.get_field("publicatiestatus")
-        assert isinstance(fsm_field, FSMField)
-        fields["publicatiestatus"].help_text += _get_fsm_help_text(fsm_field)
+
+        if publicatiestatus := fields.get("publicatiestatus"):
+            assert publicatiestatus.help_text
+            fsm_field = Document._meta.get_field("publicatiestatus")
+            assert isinstance(fsm_field, FSMField)
+            publicatiestatus.help_text += _get_fsm_help_text(fsm_field)
+
         return fields
 
     def validate_kenmerken(self, value: Sequence[Kenmerk]) -> Sequence[Kenmerk]:
@@ -372,3 +375,32 @@ class DocumentUpdateSerializer(DocumentSerializer):
             )
 
         return document
+
+
+class DocumentReuseSerializer(DocumentSerializer):
+    download_url = serializers.HyperlinkedIdentityField(
+        view_name="reuse:document-download",
+        lookup_field="uuid",
+        label=_("download URL"),
+        help_text=_("URL to download the binary contents of the document."),
+    )
+
+    class Meta(DocumentSerializer.Meta):
+        fields = (
+            "uuid",
+            "identifier",
+            "publicatie",
+            "officiele_titel",
+            "verkorte_titel",
+            "omschrijving",
+            "kenmerken",
+            "creatiedatum",
+            "ontvangstdatum",
+            "datum_ondertekend",
+            "gepubliceerd_op",
+            "laatst_gewijzigd_datum",
+            "bestandsformaat",
+            "bestandsnaam",
+            "bestandsomvang",
+            "download_url",
+        )
