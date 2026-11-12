@@ -3,7 +3,7 @@ from itertools import chain
 from django.db import models
 
 
-def model_to_dict(instance, ignore_fields: tuple = ()):
+def model_to_dict(instance, ignore_fields: tuple[str, ...] = ()):
     """
     Modified version of django.forms.model_to_dict.
 
@@ -29,5 +29,5 @@ def model_to_dict(instance, ignore_fields: tuple = ()):
     return data
 
 
-def serialize_instance(instance: models.Model, ignore_fields: tuple = ()):
+def serialize_instance(instance: models.Model, ignore_fields: tuple[str, ...] = ()):
     return model_to_dict(instance, ignore_fields=ignore_fields)

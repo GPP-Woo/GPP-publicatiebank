@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 from django.db.migrations.state import StateApps
-from django_jsonform.models.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField
 
 
 def scrub_logged_tokens(apps: StateApps, _):
@@ -17,7 +17,7 @@ def scrub_logged_tokens(apps: StateApps, _):
             models.F("extra_data"),
             models.Value(
                 ["object_data", "token"],
-                output_field=ArrayField(models.TextField()),  # pyright:ignore[reportArgumentType]
+                output_field=ArrayField(models.TextField()),
             ),
             template="%(expressions)s",
             arg_joiner=" #- ",

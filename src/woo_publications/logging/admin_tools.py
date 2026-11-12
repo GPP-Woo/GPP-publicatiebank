@@ -27,7 +27,7 @@ class AdminAuditLogMixin:
     """
 
     model: type[models.Model]
-    ignore_logging_fields: tuple = ()
+    ignore_logging_fields: tuple[str, ...] = ()
 
     def log_addition(self, request, obj, message):
         assert isinstance(request.user, User)
