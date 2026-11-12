@@ -162,22 +162,22 @@ class StripAllFilesTest(VCRMixin, TestCase):
         )
 
         pdf_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(pdf.uuid)}
+            "application:document-download", kwargs={"uuid": str(pdf.uuid)}
         )
         open_document_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(open_document.uuid)}
+            "application:document-download", kwargs={"uuid": str(open_document.uuid)}
         )
         ms_document_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(ms_document.uuid)}
+            "application:document-download", kwargs={"uuid": str(ms_document.uuid)}
         )
         zip_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(zip_file.uuid)}
+            "application:document-download", kwargs={"uuid": str(zip_file.uuid)}
         )
         html_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(html_file.uuid)}
+            "application:document-download", kwargs={"uuid": str(html_file.uuid)}
         )
         rtf_file_download_url = reverse(
-            "api:document-download", kwargs={"uuid": str(rtf_file.uuid)}
+            "application:document-download", kwargs={"uuid": str(rtf_file.uuid)}
         )
 
         mock_index_document.assert_has_calls(
