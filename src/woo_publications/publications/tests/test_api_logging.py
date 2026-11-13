@@ -876,3 +876,34 @@ class InzageProcedureApiLoggingTests(TokenAuthMixin, APITestCase):
             "_cached_object_repr": "Lorem Ipsum",
         }
         self.assertEqual(log.extra_data, expected_data)
+
+
+class ReuseApiLoggingTests(TokenAuthMixin, APITestCase):
+    @patch("woo_publications.publications.api.mixins.audit_api_download")
+    @patch("woo_publications.publications.api.mixins.get_client")
+    def test_audit_api_download_not_triggered(
+        self, mock_get_client, mock_audit_api_download
+    ):
+        class MockResponse:
+            headers = {"Content-Length": 0}
+            status_code = 200
+
+        # mock out the actual download, we don't care about the main result, only about
+        # the audit logs
+        mock_download = (
+            mock_get_client.return_value.__enter__.return_value.download_document
+        )
+        mock_download.return_value = (MockResponse(), (b"",))
+        information_category = InformationCategoryFactory.create()
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[information_category],
+            bestandsomvang=5,
+            with_registered_document=True,
+            upload_complete=True,
+        )
+        endpoint = reverse("reuse:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        mock_audit_api_download.assert_not_called()

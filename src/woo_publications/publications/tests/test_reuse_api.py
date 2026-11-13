@@ -1,6 +1,10 @@
 import datetime
 import tempfile
+import uuid
+from collections.abc import Iterator
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import StreamingHttpResponse
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -15,7 +19,13 @@ from woo_publications.accounts.tests.factories import (
 )
 from woo_publications.api.constants import ApiOptions
 from woo_publications.api.tests.mixins import APIKeyUnAuthorizedMixin, TokenAuthMixin
+from woo_publications.config.models import GlobalConfiguration
 from woo_publications.constants import ArchiveNominationChoices
+from woo_publications.contrib.catalogi_api.tests.constants import (
+    DEFAULT_CATALOGUS,
+    DEFAULT_IOT,
+)
+from woo_publications.contrib.tests.factories import ServiceFactory
 from woo_publications.metadata.constants import (
     InformationCategoryOrigins,
     OrganisationOrigins,
@@ -35,6 +45,7 @@ from woo_publications.publications.tests.factories import (
     PublicationFactory,
     TopicFactory,
 )
+from woo_publications.utils.tests.vcr import VCRMixin
 
 AUDIT_HEADERS = {
     "AUDIT_USER_REPRESENTATION": "Ophidian",
@@ -308,13 +319,31 @@ class DocumentApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITes
         self.assertWrongApiKeyProhibitsGetEndpointAccess(detail_url, ApiOptions.reuse)
 
 
-class DocumentApiTestCase(TokenAuthMixin, APITestCase):
+class DocumentApiTestCase(VCRMixin, TokenAuthMixin, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.organisation_member = OrganisationMemberFactory.create(
             identifier=AUDIT_HEADERS["AUDIT_USER_ID"],
             naam=AUDIT_HEADERS["AUDIT_USER_REPRESENTATION"],
+        )
+
+        cls.service = document_service = ServiceFactory.create(
+            for_documents_api_docker_compose=True
+        )
+        catalogi_service = ServiceFactory.create(for_catalogi_api_docker_compose=True)
+        config = GlobalConfiguration.get_solo()
+        config.documents_api_service = document_service
+        config.catalogi_api_service = catalogi_service
+        config.organisation_rsin = "000000000"
+        config.catalogus_url = DEFAULT_CATALOGUS
+        config.default_iot_url = DEFAULT_IOT
+        config.save()
+
+        cls.information_category = InformationCategoryFactory.create(
+            uuid="ed78b0dc-e5d6-4259-9eae-04e02be2167b",
+            iot_url=DEFAULT_IOT,
+            iot_uuid=uuid.UUID("4220d404-caed-4769-9e46-f4ef469a8744"),
         )
 
     def test_list_documents(self):
@@ -513,6 +542,34 @@ class DocumentApiTestCase(TokenAuthMixin, APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_download_document(self):
+        document = DocumentFactory.create(
+            publicatie__informatie_categorieen=[self.information_category],
+            bestandsomvang=5,
+        )
+        document.register_in_documents_api(
+            build_absolute_uri=lambda path: f"http://host.docker.internal:8000{path}",
+        )
+        assert document.zgw_document is not None
+        document.upload_part_data(
+            uuid=document.zgw_document.file_parts[0].uuid,
+            file=SimpleUploadedFile("dummy.txt", b"aAaAa"),
+        )
+        endpoint = reverse("reuse:document-download", kwargs={"uuid": document.uuid})
+
+        response = self.client.get(endpoint, headers=AUDIT_HEADERS)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert isinstance(response, StreamingHttpResponse)
+        self.assertTrue(response.streaming)
+        self.assertEqual(response["Content-Length"], "5")
+        self.assertIn("Content-Disposition", response)
+        self.assertEqual(response["content-type"], "application/octet-stream")
+
+        assert isinstance(response.streaming_content, Iterator)
+        content = b"".join(response.streaming_content)
+        self.assertEqual(content, b"aAaAa")
 
 
 class TopicApiAuthorizationAndPermissionTests(APIKeyUnAuthorizedMixin, APITestCase):

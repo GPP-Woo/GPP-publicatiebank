@@ -13,6 +13,7 @@ from rest_framework.request import Request
 
 from woo_publications.api.exceptions import BadGateway, Conflict
 from woo_publications.contrib.documents_api.client import get_client
+from woo_publications.logging.api_tools import AuditTrailViewSetMixin
 from woo_publications.logging.service import (
     audit_api_download,
     extract_audit_parameters,
@@ -106,12 +107,15 @@ class DocumentDownloadMixin:
             },
         )
 
-        user_id, user_repr, remarks = extract_audit_parameters(request)
-        audit_api_download(
-            content_object=document,
-            user_id=user_id,
-            user_display=user_repr,
-            remarks=remarks,
-        )
+        # TODO: remove this check when Audit logging is enabled
+        #   for the reuse and application API
+        if isinstance(self, AuditTrailViewSetMixin):
+            user_id, user_repr, remarks = extract_audit_parameters(request)
+            audit_api_download(
+                content_object=document,
+                user_id=user_id,
+                user_display=user_repr,
+                remarks=remarks,
+            )
 
         return response
