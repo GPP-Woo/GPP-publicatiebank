@@ -9,8 +9,8 @@ from ..models import generate_token
 
 
 class HashTokenMigrationTest(MigratorTestCase):
-    migrate_from = ("api", "0004_application_viewed_token_at")
-    migrate_to = ("api", "0005_alter_application_token")
+    migrate_from = ("api", "0005_application_viewed_token_at")
+    migrate_to = ("api", "0006_alter_application_token")
 
     def prepare(self):
         Application = self.old_state.apps.get_model("api", "application")

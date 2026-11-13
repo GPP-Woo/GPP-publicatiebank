@@ -65,6 +65,7 @@ class ApplicationAuditLogAdminTest(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["application_form"]
+        form["api_access"].force_value([])
         form["permissions"].force_value([])
         form["initial-permissions"].force_value([])
         form["contact_person"] = "Maddie Caffrey"
@@ -95,6 +96,7 @@ class ApplicationAuditLogAdminTest(WebTest):
                     "created": "2026-11-11T11:11:11Z",
                     "expire_date": "2030-01-01",
                     "permissions": [],
+                    "api_access": [],
                     "phone_number": "0123456789",
                     "last_modified": "2026-11-11T11:11:11Z",
                     "contact_person": "Maddie Caffrey",
@@ -137,6 +139,7 @@ class ApplicationAuditLogAdminTest(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["application_form"]
+        form["api_access"].force_value([])
         form["permissions"].force_value([])
         form["initial-permissions"].force_value([])
         form["contact_person"] = "Jackie Buckalew"
@@ -177,6 +180,7 @@ class ApplicationAuditLogAdminTest(WebTest):
                     "created": "2025-11-11T11:11:11Z",
                     "expire_date": "2030-01-01",
                     "permissions": [],
+                    "api_access": [],
                     "phone_number": "0123456789",
                     "last_modified": "2026-11-11T11:11:11Z",
                     "contact_person": "Jackie Buckalew",
@@ -228,6 +232,7 @@ class ApplicationAuditLogAdminTest(WebTest):
                 "created": "2026-11-11T11:11:11Z",
                 "expire_date": "2030-01-01",
                 "permissions": ["read", "write"],
+                "api_access": [],
                 "phone_number": "0123456789",
                 "last_modified": "2026-11-11T11:11:11Z",
                 "contact_person": "Daniel Hodsdon",

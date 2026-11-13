@@ -56,6 +56,7 @@ class ApplicationAdminTest(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["application_form"]
+        form["api_access"].force_value([])
         form["initial-permissions"].force_value([])
         form["permissions"].force_value([])
         form_fields = [field for field in form.fields.keys()]
@@ -88,6 +89,7 @@ class ApplicationAdminTest(WebTest):
         self.assertEqual(response.status_code, 200)
 
         form = response.forms["application_form"]
+        form["api_access"].force_value([])
         form["permissions"].force_value([])
         form["initial-permissions"].force_value([])
         form["contact_person"] = "some user"

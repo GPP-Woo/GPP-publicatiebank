@@ -11,7 +11,7 @@ def backfill_viewed_token_at(apps: StateApps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api", "0003_application_expire_date_application_unique_token"),
+        ("api", "0004_application_expire_date_application_unique_token"),
     ]
 
     operations = [
