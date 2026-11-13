@@ -22,11 +22,13 @@ Hier wordt de logging getoond van:
 * :ref:`admin_publicaties_index_publicaties`
 * :ref:`admin_publicaties_index_documenten`
 * :ref:`admin_publicaties_index_onderwerpen`
+* :ref:`admin_publicaties_index_inzage_procedure`
 * :ref:`admin_metadata_index_information_categories`
 * :ref:`admin_metadata_index_organisations`
 * :ref:`admin_metadata_index_themes`
 * :ref:`admin_accounts_index_users` (degene die direct toegang hebben tot dit component)
 * :ref:`admin_accounts_index_employees`
+* :ref:`admin_accounts_index_organisation_units`
 * :ref:`admin_api_access_index_apikeys`
 
 Daarop worden de volgende handelingen gelogd. 
@@ -37,7 +39,10 @@ Daarop worden de volgende handelingen gelogd.
 * Wijzigingen van records (update / patch)
 * Verwijdering / vernietiging van records (delete)
 
-Zowel handelingen uitgevoerd via de admin-interface als via de API worden gelogd.
+Zowel handelingen uitgevoerd via de admin-interface als via de API worden gelogd. Ook
+handelingen die het systeem zelf op de achtergrond uitvoert, zoals het
+:ref:`automatisch intrekken <admin_publicaties_index_inzage_procedure>` van publicaties
+na afloop van de inzagetermijn, worden gelogd.
 
 Op het beheerscherm zijn de volgende acties mogelijk:
 

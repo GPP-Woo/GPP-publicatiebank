@@ -25,13 +25,15 @@ Daarnaast vraagt de wet om ook documenten openbaar te maken die buiten deze *inf
 
 Overigens gelden op de plicht tot openbaarmaking ook een aantal uitzonderingen (hoofdstuk 5 van de wet). Raadpleeg voor meer informatie over de wet de jurist en/of informatiebeheerder van je eigen organisatie.
 
-Voor de aansluiting op de landelijke `Woo-index`_ wordt ten zeerste geadviseerd om documenten te voorzien van metadata conform de `DiWoo`_-standaard. Deze standaard vereist onder meer dat in de metadata wordt vastgelegd op grond van welke *informatiecategorie(ën)* het document actief openbaar is gemaakt.
+Voor de aansluiting op de landelijke `Generieke Woo-Voorziening (GWV)`_, waarvan de website open.overheid.nl is, wordt ten zeerste geadviseerd om documenten te voorzien van metadata conform de `DiWoo`_-standaard. Deze standaard vereist onder meer dat in de metadata wordt vastgelegd op grond van welke *informatiecategorie(ën)* het document actief openbaar is gemaakt.
 
 De 17 *informatiecategorieën* zijn opgenomen in de landelijke waardelijst `Woo informatiecategorieën`_. Deze lijst is al standaard opgenomen in het publicatiebank-component. Daarnaast bestaat de mogelijkheid, zoals we hieronder zullen beschrijven, om in het kader van de *inspanningsverplichting* hier voor de eigen organisatie *extra informatiecategorieën* aan toe te voegen.
 
-In het publicatiebank-component leggen we de *informatiecategorieën* vast op de *publicatie* (in ontwikkeling). Dezelfde *informatiecategorieën* gelden voor de daaraan gekoppelde *documenten*.
+In het publicatiebank-component leggen we de *informatiecategorieën* vast op de *publicatie*. Dezelfde *informatiecategorieën* gelden voor de daaraan gekoppelde *documenten*.
 
-.. warning:: Let op! Bij gebruik van het GPP-burgerportaal zullen zelf-toegevoegde informatiecategorieën op de landelijke `Woo-index`_ getoond worden als de informatiecategorie "inspanningsverplichting art 3.1 Woo". De landelijke Woo-index ondersteunt immers alleen de landelijke waardelijst.
+Elke *informatiecategorie* heeft een eigen *informatieobjecttype* in de Catalogi API (bijvoorbeeld die van Open Zaak). De Documenten API vereist dat elk document een informatieobjecttype heeft; de documenten van een *publicatie* krijgen het informatieobjecttype van de informatiecategorie van die publicatie. Het informatieobjecttype wordt automatisch aangemaakt wanneer een informatiecategorie wordt aangemaakt, mits de Catalogi API is ingesteld in de :ref:`algemene instellingen <admin_configuratie_index_alg_inst>`.
+
+.. warning:: Let op! Bij gebruik van het GPP-burgerportaal zullen zelf-toegevoegde informatiecategorieën op de landelijke `Generieke Woo-Voorziening (GWV)`_ getoond worden als de informatiecategorie "inspanningsverplichting art 3.1 Woo". De GWV ondersteunt immers alleen de landelijke waardelijst.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -44,10 +46,10 @@ Daarnaast bestaat er de mogelijkheid om voor de eigen organisatie *extra informa
 Op het beheerscherm zijn de volgende acties mogelijk:
 
 * Rechtboven zit een knop **informatiecategorie toevoegen** waarmee een *informatiecategorie* toegevoegd kan worden.
-* Rechtboven zit een knop **toon API-resource-URLS** waarmee de lijst *informatiecategorieën* met resource-URI's wordt getoond. (technisch)
+* Rechtboven zit een knop **Toon API-resource-URLs** waarmee de lijst *informatiecategorieën* met de URL's van hun informatieobjecttypen in de Catalogi API wordt getoond. (technisch, zie :ref:`admin_metadata_index_information_categories_iot`)
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee naar *informatiecategorieën* gezocht kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere informatiecategorieën**. Op dit moment wordt alleen de actie **Geselecteerde informatiecategorieën verwijderen** ondersteund. Merk op dat het mogelijk is om in de lijst één of meerdere *informatiecategorieën* aan te vinken.
-* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
+* Onder de (bulk-)actie staat de lijst met *informatiecategorieën*. Door op de kolomtitels te klikken kan de lijst **alfabetisch geordend** worden. Met de pijltjes in de rechter kolom kan de volgorde van de *informatiecategorieën* aangepast worden.
 * Rechts naast de lijst bestaat de mogelijkheid om deze te **filteren op oorsprong**.
 * Bij een *informatiecategorie* kan op de `naam` geklikt worden om **de details in te zien** en deze eventueel **te wijzigen**.
 * Bij een *informatiecategorie* kan op **Toon logs** (op één na rechter kolom) geklikt worden om direct de :ref:`audit trail<admin_logging_index>` in te zien.
@@ -65,9 +67,9 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 
 **Algemene velden**
 
-* ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant". Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
-* ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten". Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
-* ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*. Wanneer de informatiecategorie als ``oorsprong`` "Waadelijst heeft, dan is de waarde van dit veld niet te wijzigen.
+* ``Naam``. De naam van de *informatiecategorie*, bijvoorbeeld "convenant". Wanneer de informatiecategorie als ``oorsprong`` "Waardelijst" heeft, dan is de waarde van dit veld niet te wijzigen. Wijzig je de naam van een zelf-toegevoegde informatiecategorie, dan wordt ook de omschrijving van het bijbehorende informatieobjecttype in de Catalogi API aangepast.
+* ``Naam meervoud``. De meervoudsvorm van de naam, bijvoorbeeld "convenanten". Wanneer de informatiecategorie als ``oorsprong`` "Waardelijst" heeft, dan is de waarde van dit veld niet te wijzigen.
+* ``Definitie``. De (mogelijk landelijke) definitie van de *informatiecategorie*. Wanneer de informatiecategorie als ``oorsprong`` "Waardelijst" heeft, dan is de waarde van dit veld niet te wijzigen.
 * ``Omschrijving``. De beknopte toelichting die aan medewerkers en burgers getoond wordt.
 * ``Oorsprong``. Een niet-wijzigbaar, automatisch toegekende aanduiding van op welke wijze de *informatiecategorie* is toegevoegd; via de landelijke waardelijst of zelf toegevoegd.
 * ``Identificatie``. De unieke IRI waarmee deze categorie gedefinieerd is in de landelijke waardelijst. Voor zelf-toegevoegde items wordt een identificatie gegenereerd.
@@ -82,6 +84,26 @@ Op een informatiecategorie zijn de volgende gegevens beschikbaar. Op het scherm 
 * ``Toelichting bewaartermijn``. Extra informatie die de (informatie-)beheerder kan aangeven.
 
 .. Tip:: Wanneer de ``Archiefnominatie`` permanent te bewaren is, dan dient de ``Bewaartermijn`` 10 of 20 jaar te zijn, conform de **vigerende** Archiefwet.
+
+**Catalogi API**
+
+* ``Informatieobjecttype-URL``. De URL van het informatieobjecttype van deze *informatiecategorie* in de Catalogi API. Deze wordt automatisch ingevuld. Bij zelf-toegevoegde informatiecategorieën kan deze handmatig gecorrigeerd worden; bij informatiecategorieën uit de waardelijst is dit veld niet te wijzigen.
+* ``Informatieobjecttype-UUID``. Het UUID van het informatieobjecttype in de Catalogi API. Ook dit veld wordt automatisch ingevuld.
+
+Laat je de ``Informatieobjecttype-URL`` leeg bij het opslaan, dan wordt op de achtergrond een (nieuw) informatieobjecttype aangemaakt in de Catalogi API.
+
+.. _admin_metadata_index_information_categories_iot:
+
+Resource-URL's van informatieobjecttypen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Via de knop **Toon API-resource-URLs** op het beheerscherm van de *informatiecategorieën* open je een overzicht van alle *informatiecategorieën*, gegroepeerd op oorsprong, met de URL van hun informatieobjecttype in de Catalogi API.
+
+Deze URL's heb je nodig wanneer je in de Documenten API (bijvoorbeeld in Open Zaak) autorisaties per informatieobjecttype instelt voor de GPP-publicatiebank. Vergeet daarbij niet ook het standaard-informatieobjecttype uit de :ref:`algemene instellingen <admin_configuratie_index_alg_inst>` te autoriseren. Zie ook :ref:`installation_requirements`.
+
+Hebben alle *informatiecategorieën* een informatieobjecttype, dan staat rechtsboven ook de knop **Documenten API synchroniseren**. Hiermee wordt op de achtergrond het informatieobjecttype van alle bestaande documenten in de Documenten API aangepast naar het informatieobjecttype van hun informatiecategorie. Gebruik deze knop wanneer de automatische synchronisatie, bijvoorbeeld na een upgrade naar versie 3.0.0, onderbroken is.
+
+.. note:: Zolang niet alle *informatiecategorieën* een informatieobjecttype hebben, is de knop **Documenten API synchroniseren** niet zichtbaar. Controleer dan of de Catalogi API goed is ingesteld en of er een Celery worker draait.
 
 .. _admin_metadata_index_organisations:
 
@@ -106,9 +128,9 @@ vastgelegd, zodat ook voor de burger inzichtelijk is van welke organisatie een
 publicatie is. Ook zijn deze gegevens relevant om (op termijn) te toetsen in hoeverre
 iedere organisatie voldoet aan de wettelijke openbaarmakingsplicht.
 
-De landelijke `Woo-index`_ veronderstelt het gebruik van landelijke waardelijsten.
+De landelijke `Generieke Woo-Voorziening (GWV)`_ veronderstelt het gebruik van landelijke waardelijsten.
 Deze worden bijgehouden door het `Register van Overheidsorganisaties (ROO) <https://organisaties.overheid.nl/>`_.
-Standaard staan organisaties uit de volgende drie officiële waardelijsten al in het
+Standaard staan organisaties uit de volgende officiële waardelijsten al in het
 “Woo Publicaties”-component ingelezen:
 
 * `Gemeenten <https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Frwc_gemeenten_compleet>`_
@@ -121,7 +143,7 @@ Standaard staan organisaties uit de volgende drie officiële waardelijsten al in
 
 .. warning:: Let op! In de admin-interface bestaat de mogelijkheid om *extra organisaties*
    toe te voegen. Hieraan gekoppelde publicaties zullen niet gevonden worden
-   via de landelijke `Woo-index`_! Zij kunnen wel gevonden worden via het burgerportaal
+   via de landelijke `Generieke Woo-Voorziening (GWV)`_! Zij kunnen wel gevonden worden via het burgerportaal
    van het GPP-Woo.
 
 Beheerscherm
@@ -130,7 +152,7 @@ Beheerscherm
 In het beheerscherm van de *organisaties* wordt een lijst getoond van alle
 *organisaties* die zijn opgeslagen in het publicatiebank-component.
 
-Standaard staan organisaties uit drie officiële waardelijsten hier al in (zie toelichting
+Standaard staan organisaties uit de officiële waardelijsten hier al in (zie toelichting
 hierboven).
 
 Deze zijn te herkennen via de *Oorsprong* kolom. Organisaties uit de waardelijsten kunnen
@@ -191,13 +213,13 @@ Thema's
 Toelichting
 ~~~~~~~~~~~
 
-Om de vindbaarheid van openbare documenten te bevorderen ondersteunt de `DiWoo`_-standaard het toekennen van een of meerdere *thema's* aan openbare documenten. Hiervoor is een landelijke waardelijst gedefinieerd: `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Op de `Woo-index`_ kan een burger zoeken naar openbare documenten, die aan een bepaald thema gekoppeld zijn.
+Om de vindbaarheid van openbare documenten te bevorderen ondersteunt de `DiWoo`_-standaard het toekennen van een of meerdere *thema's* aan openbare documenten. Hiervoor is een landelijke waardelijst gedefinieerd: `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Op de `Generieke Woo-Voorziening (GWV)`_ kan een burger zoeken naar openbare documenten, die aan een bepaald thema gekoppeld zijn.
 
 De landelijke thema-lijst is ook standaard ingelezen in en wordt ontsloten met het "Woo-publicaties"-component, zodat deze gebruikt kan worden bij het registreren en vindbaar maken van openbare documenten.
 
-In het publicatiebank-component leggen we de *thema's* vast op de *publicatie* (in ontwikkeling). Dezelfde *thema's* gelden voor de daaraan gekoppelde *documenten*.
+Het is de bedoeling dat in het publicatiebank-component de *thema's* op de *publicatie* vastgelegd worden. Dezelfde *thema's* gelden dan voor de daaraan gekoppelde *documenten*. Dit is nog niet beschikbaar (zie de waarschuwing hierboven).
 
-De `DiWoo`_-standaard ondersteunt alleen het gebruik van de landelijke waardelijst `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Ook op de `Woo-index`_ kan alleen op deze *thema's*  gezocht worden naar openbare documenten.
+De `DiWoo`_-standaard ondersteunt alleen het gebruik van de landelijke waardelijst `Thema-indeling voor Officiële Publicaties (TOP-lijst)`_. Ook op de `Generieke Woo-Voorziening (GWV)`_ kan alleen op deze *thema's*  gezocht worden naar openbare documenten.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -230,7 +252,7 @@ Op een *thema* zijn de volgende gegevens beschikbaar.
 
 
 .. _Wet open overheid: https://wetten.overheid.nl/BWBR0045754/
-.. _Woo-index: https://open.overheid.nl/
+.. _Generieke Woo-Voorziening (GWV): https://open.overheid.nl/
 .. _DiWoo: https://standaarden.overheid.nl/diwoo/metadata
 .. _Woo informatiecategorieën: https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Fscw_woo_informatiecategorieen
 .. _Thema-indeling voor Officiële Publicaties (TOP-lijst): https://standaarden.overheid.nl/tooi/waardelijsten/work?work_uri=https%3A%2F%2Fidentifier.overheid.nl%2Ftooi%2Fset%2Fscw_toplijst
