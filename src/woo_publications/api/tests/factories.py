@@ -19,3 +19,10 @@ class TokenAuthFactory(factory.django.DjangoModelFactory):
                 PermissionOptions.write,
             ]
         )
+
+    @factory.post_generation
+    def generate_token(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        self.raw_token = self.get_and_set_token()  # pyright: ignore[reportAttributeAccessIssue]

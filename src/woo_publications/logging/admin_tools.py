@@ -27,13 +27,16 @@ class AdminAuditLogMixin:
     """
 
     model: type[models.Model]
+    ignore_logging_fields: tuple[str, ...] = ()
 
     def log_addition(self, request, obj, message):
         assert isinstance(request.user, User)
         audit_admin_create(
             content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(obj),
+            object_data=serialize_instance(
+                obj, ignore_fields=self.ignore_logging_fields
+            ),
         )
 
         return super().log_addition(  # pyright: ignore[reportAttributeAccessIssue]
@@ -45,7 +48,9 @@ class AdminAuditLogMixin:
         audit_admin_update(
             content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(obj),
+            object_data=serialize_instance(
+                obj, ignore_fields=self.ignore_logging_fields
+            ),
         )
 
         return super().log_change(  # pyright: ignore[reportAttributeAccessIssue]
@@ -57,7 +62,9 @@ class AdminAuditLogMixin:
         audit_admin_delete(
             content_object=obj,
             django_user=request.user,
-            object_data=serialize_instance(obj),
+            object_data=serialize_instance(
+                obj, ignore_fields=self.ignore_logging_fields
+            ),
         )
 
         return super().log_deletion(  # pyright: ignore[reportAttributeAccessIssue]
