@@ -11,6 +11,7 @@ from rest_framework import viewsets
 
 from woo_publications.api.pagination import CursorPagination
 from woo_publications.api.permissions import ReuseTokenAuthPermission
+from woo_publications.api.throttling import AnonRateThrottle, ReuseRateThrottle
 
 from ...constants import PublicationStatusOptions
 from ...models import (
@@ -55,6 +56,7 @@ class DocumentViewSet(
     ).order_by("-pk")
     serializer_class = DocumentReuseSerializer
     permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"
@@ -90,6 +92,7 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = PublicationReuseSerializer
     permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"
@@ -126,6 +129,7 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = TopicReuseSerializer
     permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"

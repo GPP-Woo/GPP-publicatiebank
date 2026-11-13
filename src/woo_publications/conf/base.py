@@ -374,9 +374,12 @@ REST_FRAMEWORK = {
     "ALLOWED_VERSIONS": ("1", "2", "3"),
     "VERSION_PARAM": "version",
     #
-    # # Exception handling
+    # Exception handling
     "EXCEPTION_HANDLER": "woo_publications.api.views.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    # Throttling
+    "DEFAULT_THROTTLE_RATES": {"anon": "30/hour", "reuse": "200/hour"},
+    "NUM_PROXIES": NUM_PROXIES,
 }
 
 API_VERSION = "3.0.0"
