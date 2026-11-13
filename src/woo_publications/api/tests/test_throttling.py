@@ -1,3 +1,4 @@
+from django.test import SimpleTestCase
 from django.urls import path
 
 from freezegun import freeze_time
@@ -8,6 +9,8 @@ from rest_framework.test import (
     APITestCase,
     URLPatternsTestCase,
 )
+
+from woo_publications.api.reuse_api.urls import router
 
 from ..authorization import TokenAuthentication
 from ..throttling import AnonRateThrottle, ReuseRateThrottle
@@ -126,3 +129,21 @@ class ThrottlingTests(URLPatternsTestCase, APITestCase):
 
             response = self.client.get("/brrr")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class ReuseAPIThrottlingTests(SimpleTestCase):
+    def test_throttling_classes_configured(self):
+        viewsets: set = set()
+
+        for url_patterns in router.urls:
+            viewset = url_patterns.callback.cls  # pyright: ignore
+            # ensures that we won't track viewsets and such from libaries like DRF
+            if viewset.__module__.startswith("woo_publications"):
+                viewsets.add(viewset)
+
+        for viewset in viewsets:
+            with self.subTest(viewset=viewset.__name__):
+                throttling_classes = viewset.throttle_classes
+                # check to see if the Anon and Reuse throttling classes are registered.
+                self.assertIn(AnonRateThrottle, throttling_classes)
+                self.assertIn(ReuseRateThrottle, throttling_classes)
