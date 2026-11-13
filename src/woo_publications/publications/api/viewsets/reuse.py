@@ -10,6 +10,8 @@ from drf_spectacular.utils import (
 from rest_framework import viewsets
 
 from woo_publications.api.pagination import CursorPagination
+from woo_publications.api.permissions import ReuseTokenAuthPermission
+from woo_publications.api.throttling import AnonRateThrottle, ReuseRateThrottle
 
 from ...constants import PublicationStatusOptions
 from ...models import (
@@ -53,8 +55,8 @@ class DocumentViewSet(
         upload_complete=True,
     ).order_by("-pk")
     serializer_class = DocumentReuseSerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"
@@ -89,8 +91,8 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
         .order_by("-pk")
     )
     serializer_class = PublicationReuseSerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"
@@ -126,8 +128,8 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
         .order_by("-pk")
     )
     serializer_class = TopicReuseSerializer
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = (ReuseTokenAuthPermission,)
+    throttle_classes = (ReuseRateThrottle, AnonRateThrottle)
     filterset_class = LastModifiedFilterSet
     pagination_class = CursorPagination
     lookup_field = "uuid"

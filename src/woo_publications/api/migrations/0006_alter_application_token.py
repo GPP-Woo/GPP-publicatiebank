@@ -21,7 +21,7 @@ def hash_passwords(apps: StateApps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api", "0004_application_viewed_token_at"),
+        ("api", "0005_application_viewed_token_at"),
     ]
 
     operations = [

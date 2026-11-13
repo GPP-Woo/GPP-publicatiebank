@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, assert_never
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from woo_publications.typing import JSONObject
 
+from ..constants import ApiOptions
 from .factories import TokenAuthFactory
 
 AUDIT_HEADERS = {
@@ -17,9 +18,27 @@ AUDIT_HEADERS = {
 class APIKeyUnAuthorizedMixin:
     client: APIClient
 
-    def assertWrongApiKeyProhibitsGetEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
-        write_token = TokenAuthFactory.create(write_permission=True).raw_token
+    def assertWrongApiKeyProhibitsGetEndpointAccess(
+        self, url, api_access_granted: ApiOptions = ApiOptions.application
+    ):
+        no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).raw_token
+        write_token = TokenAuthFactory.create(
+            write_permission=True, full_api_access=True
+        ).raw_token
+
+        match api_access_granted:
+            case ApiOptions.application:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, reuse_api_access=True
+                ).raw_token
+            case ApiOptions.reuse:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, application_api_access=True
+                ).raw_token
+            case _:
+                assert_never(api_access_granted)
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -63,9 +82,41 @@ class APIKeyUnAuthorizedMixin:
                 response.status_code, status.HTTP_403_FORBIDDEN
             )
 
-    def assertWrongApiKeyProhibitsPostEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
-        read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
+            "token with wrong api access"
+        ):
+            response = self.client.get(
+                url,
+                headers={
+                    "Authorization": f"Token {wrong_api_access_token}",
+                    **AUDIT_HEADERS,
+                },
+            )
+            self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
+                response.status_code, status.HTTP_403_FORBIDDEN
+            )
+
+    def assertWrongApiKeyProhibitsPostEndpointAccess(
+        self, url, api_access_granted: ApiOptions = ApiOptions.application
+    ):
+        no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).raw_token
+        read_token = TokenAuthFactory.create(
+            read_permission=True, full_api_access=True
+        ).raw_token
+
+        match api_access_granted:
+            case ApiOptions.application:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, reuse_api_access=True
+                ).raw_token
+            case ApiOptions.reuse:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, application_api_access=True
+                ).raw_token
+            case _:
+                assert_never(api_access_granted)
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -109,9 +160,41 @@ class APIKeyUnAuthorizedMixin:
                 response.status_code, status.HTTP_403_FORBIDDEN
             )
 
-    def assertWrongApiKeyProhibitsPatchEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
-        read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
+            "token with wrong api access"
+        ):
+            response = self.client.post(
+                url,
+                headers={
+                    "Authorization": f"Token {wrong_api_access_token}",
+                    **AUDIT_HEADERS,
+                },
+            )
+            self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
+                response.status_code, status.HTTP_403_FORBIDDEN
+            )
+
+    def assertWrongApiKeyProhibitsPatchEndpointAccess(
+        self, url, api_access_granted: ApiOptions = ApiOptions.application
+    ):
+        no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).raw_token
+        read_token = TokenAuthFactory.create(
+            read_permission=True, full_api_access=True
+        ).raw_token
+
+        match api_access_granted:
+            case ApiOptions.application:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, reuse_api_access=True
+                ).raw_token
+            case ApiOptions.reuse:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, application_api_access=True
+                ).raw_token
+            case _:
+                assert_never(api_access_granted)
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -155,9 +238,41 @@ class APIKeyUnAuthorizedMixin:
                 response.status_code, status.HTTP_403_FORBIDDEN
             )
 
-    def assertWrongApiKeyProhibitsPutEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
-        read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
+            "token with wrong api access"
+        ):
+            response = self.client.patch(
+                url,
+                headers={
+                    "Authorization": f"Token {wrong_api_access_token}",
+                    **AUDIT_HEADERS,
+                },
+            )
+            self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
+                response.status_code, status.HTTP_403_FORBIDDEN
+            )
+
+    def assertWrongApiKeyProhibitsPutEndpointAccess(
+        self, url, api_access_granted: ApiOptions = ApiOptions.application
+    ):
+        no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).raw_token
+        read_token = TokenAuthFactory.create(
+            read_permission=True, full_api_access=True
+        ).raw_token
+
+        match api_access_granted:
+            case ApiOptions.application:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, reuse_api_access=True
+                ).raw_token
+            case ApiOptions.reuse:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, application_api_access=True
+                ).raw_token
+            case _:
+                assert_never(api_access_granted)
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -201,9 +316,41 @@ class APIKeyUnAuthorizedMixin:
                 response.status_code, status.HTTP_403_FORBIDDEN
             )
 
-    def assertWrongApiKeyProhibitsDeleteEndpointAccess(self, url):
-        no_permission_token = TokenAuthFactory.create(permissions=[]).raw_token
-        read_token = TokenAuthFactory.create(read_permission=True).raw_token
+        with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
+            "token with wrong api access"
+        ):
+            response = self.client.put(
+                url,
+                headers={
+                    "Authorization": f"Token {wrong_api_access_token}",
+                    **AUDIT_HEADERS,
+                },
+            )
+            self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
+                response.status_code, status.HTTP_403_FORBIDDEN
+            )
+
+    def assertWrongApiKeyProhibitsDeleteEndpointAccess(
+        self, url, api_access_granted: ApiOptions = ApiOptions.application
+    ):
+        no_permission_token = TokenAuthFactory.create(
+            permissions=[], full_api_access=True
+        ).raw_token
+        read_token = TokenAuthFactory.create(
+            read_permission=True, full_api_access=True
+        ).raw_token
+
+        match api_access_granted:
+            case ApiOptions.application:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, reuse_api_access=True
+                ).raw_token
+            case ApiOptions.reuse:
+                wrong_api_access_token = TokenAuthFactory.create(
+                    read_write_permission=True, application_api_access=True
+                ).raw_token
+            case _:
+                assert_never(api_access_granted)
 
         with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
             "no token given"
@@ -242,6 +389,20 @@ class APIKeyUnAuthorizedMixin:
         ):
             response = self.client.delete(
                 url, headers={"Authorization": f"Token {read_token}", **AUDIT_HEADERS}
+            )
+            self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
+                response.status_code, status.HTTP_403_FORBIDDEN
+            )
+
+        with self.subTest(  # pyright: ignore[reportAttributeAccessIssue]
+            "token with wrong api access"
+        ):
+            response = self.client.delete(
+                url,
+                headers={
+                    "Authorization": f"Token {wrong_api_access_token}",
+                    **AUDIT_HEADERS,
+                },
             )
             self.assertEqual(  # pyright: ignore[reportAttributeAccessIssue]
                 response.status_code, status.HTTP_403_FORBIDDEN
@@ -286,7 +447,9 @@ class TokenAuthMixin:
     def setUpTestData(cls):
         super().setUpTestData()  # pyright: ignore[reportAttributeAccessIssue]
 
-        cls.token_auth = TokenAuthFactory.create(read_write_permission=True)
+        cls.token_auth = TokenAuthFactory.create(
+            read_write_permission=True, full_api_access=True
+        )
 
     def setUp(self):
         super().setUp()  # pyright: ignore[reportAttributeAccessIssue]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -11,7 +11,7 @@ from rest_framework.request import Request
 
 from woo_publications.api.drf_spectacular.headers import ALL_AUDIT_PARAMETERS
 
-from .constants import PermissionOptions
+from .constants import ApiOptions, PermissionOptions
 from .models import Application
 
 if TYPE_CHECKING:
@@ -27,6 +27,8 @@ class AuditHeaderPermission(BasePermission):
 
 
 class TokenAuthPermission(BasePermission):
+    api_name: ClassVar[ApiOptions]
+
     def has_permission(self, request, view) -> bool:
         token = request.auth
 
@@ -34,6 +36,10 @@ class TokenAuthPermission(BasePermission):
             return False
 
         assert isinstance(token.permissions, list)
+        assert isinstance(token.api_access, list)
+
+        if self.api_name not in token.api_access:
+            return False
 
         if token.expire_date and token.expire_date <= timezone.localdate():
             raise NotAuthenticated(
@@ -55,3 +61,11 @@ class TokenAuthPermission(BasePermission):
             return True
 
         return False
+
+
+class ApplicationTokenAuthPermission(TokenAuthPermission):
+    api_name = ApiOptions.application
+
+
+class ReuseTokenAuthPermission(TokenAuthPermission):
+    api_name = ApiOptions.reuse

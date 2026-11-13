@@ -4,9 +4,8 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("api", "0002_alter_application_contact_person"),
+        ("api", "0003_application_api_access"),
     ]
 
     operations = [
