@@ -102,8 +102,12 @@ systeem.
 .. note:: Een aantal groepen zijn "vastgezet" in de applicatie en wijzigingen aan deze
    groepen worden teruggedraaid bij updates:
 
-   * Technisch beheer
-   * Functioneel beheer
+   * ``TechnischBeheer``
+   * ``FunctioneelBeheer``
+
+   Gebruik je Single Sign On (SSO) met OpenID Connect, zorg dan dat de rollen/groepen in
+   je identity provider exact deze namen hebben (zonder spatie). Zie ook
+   :ref:`configuration_admin_oidc`.
 
 Op dit scherm zijn een aantal acties mogelijk:
 
@@ -139,9 +143,9 @@ Organisatieleden
 ----------------
 
 Een *organisatielid* bevat de minimale velden om een medewerker te kunnen relateren: de
-unieke identificatie en de weergavenaam. Organisatieleden zijn eigenaar van publicaties
-en documenten. De gegevens worden gevuld via de beheeromgeving of (automatisch) via de
-API.
+unieke identificatie en de weergavenaam. Organisatieleden zijn eigenaar van publicaties.
+De documenten van een publicatie hebben altijd dezelfde eigenaar als de publicatie. De
+gegevens worden gevuld via de beheeromgeving of (automatisch) via de API.
 
 In het beheerscherm van de *organisatieleden* zie je een lijst van alle
 *organisatieleden*-registraties. Op dit scherm zijn de volgende acties mogelijk:
@@ -185,14 +189,14 @@ Organisatie-eenheden
 
 Een *organisatie-eenheid* bevat de minimale velden om een organisatie-eenheid te kunnen
 relateren: de unieke identificatie en de weergavenaam. Organisatie-eenheden kunnen (ook)
-eigenaar zijn van publicaties en documenten, naast het organisatielid. De gegevens
+eigenaar zijn van publicaties, naast het organisatielid. De gegevens
 worden gevuld via de beheeromgeving of (automatisch) via de API.
 
 In het beheerscherm van de *organisatie-eenheden* zie je een lijst van alle
 *organisatie-eenheden*-registraties. Op dit scherm zijn de volgende acties mogelijk:
 
-* Rechtboven zit een knop **organisatie-eenheid toevoegen** waarmee een groep toegevoegd
-  kan worden.
+* Rechtboven zit een knop **organisatie-eenheid toevoegen** waarmee een organisatie-eenheid
+  toegevoegd kan worden.
 * Bovenaan zit een zoekveld met een knop **Zoeken** waarmee in de registraties gezocht
   kan worden.
 * Daaronder zit de mogelijkheid om **eenzelfde actie uit te voeren over meerdere organisatie-eenheden**.
@@ -203,7 +207,7 @@ In het beheerscherm van de *organisatie-eenheden* zie je een lijst van alle
   kolomtitels te klikken kan de lijst **alfabetisch geordend** worden.
 
 Wanneer bij een *organisatie-eenheid*-registratie op de `identificatie` wordt geklikt, wordt
-een scherm geopend met de *medewerker*-details. Hierop zien we:
+een scherm geopend met de *organisatie-eenheid*-details. Hierop zien we:
 
 * **Alle metadatavelden**. Deze lichten we hieronder toe.
 * Rechtsboven een knop **Toon logs**. Deze toont de volledige
@@ -220,7 +224,7 @@ worden verplichte velden **dikgedrukt** weergegeven.
 
 * ``Naam``. De weergavenaam van een *organisatie-eenheid*.
 * ``Identificatie``. Het unieke kenmerk dat intern aan het *organisatie-eenheid* is toegekend.
-  Deze kan je niet wijzigen voor bestaande objecten. De waarde wordt typisch aangelever
+  Deze kan je niet wijzigen voor bestaande objecten. De waarde wordt typisch aangeleverd
   door de GPP-app via de API.
 
 .. _admin_accounts_index_totpdevices:

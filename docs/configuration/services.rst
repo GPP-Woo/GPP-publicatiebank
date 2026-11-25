@@ -67,6 +67,12 @@ Configuration in the registration component
 
 8. Save the changes.
 
+.. note:: Since version 3.0.0, GPP-Publicatiebank also requires a
+   :ref:`Catalogi API <configuration_services_catalogi_api>`. The general configuration
+   can only be saved when the Documents API, Catalogi API and GPP-zoeken services are
+   all selected, so add the three services first and then fill out the general
+   configuration once.
+
 .. _configuration_services_catalogi_api:
 
 Catalogi API configuration
@@ -116,9 +122,35 @@ Configuration in the registration component
    the background every information category gets its own informatieobjecttype and the
    existing documents are updated. A Celery worker must be running for this.
 
-With Open Zaak, the command ``python src/manage.py setup_catalogi_api`` performs these
-steps for you. It creates the service from the Documents API service, using the same
-credentials, and runs the same setup.
+9. Check the information categories: navigate to **Metadata** > **Information
+   categories** and click **View API resource URLs**. Every information category should
+   show the URL of its informatieobjecttype. If one has no URL, open that information
+   category and save it again. Once all of them have a URL, the **Sync Document API**
+   button appears, which updates the existing documents again if that was interrupted.
+
+.. warning:: Until the Catalogi API is configured, document uploads fail. Direct uploads
+   fail with an HTTP 500 error, uploads from a URL fail in the background task.
+
+**Using the management command**
+
+With Open Zaak, the ``setup_catalogi_api`` management command performs these steps for
+you on an installation that was upgraded from 2.x. On a new installation the general
+configuration can't be saved without a Catalogi API service, so follow the steps above
+instead. Run the command in a container (or Kubernetes pod) of GPP-publicatiebank:
+
+.. code-block:: bash
+
+    python src/manage.py setup_catalogi_api
+
+If no Catalogi API service is configured yet, it creates one from the Documents API
+service, with the same credentials, and selects it in the global configuration. It then
+runs the same setup as saving the global configuration. Requirements:
+
+* The Documents API service is configured in the global configuration and its API root
+  ends with ``/documenten/api/v1/`` (Open Zaak).
+* The organisation RSIN is set in the global configuration.
+* The Catalogi API is not set up yet - the command stops if both the catalogus URL and
+  the default informatieobjecttype URL are already filled in.
 
 GPP-Zoeken configuration
 ------------------------
