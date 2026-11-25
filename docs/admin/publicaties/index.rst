@@ -69,7 +69,7 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 
 **Beschrijving**
 
-* ``Publicatie``. Het *document* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*. Na het aanmaken kan de *publicatie* niet meer gewijzigd worden.
+* ``Publicatie``. Het *document* moet hier gekoppeld worden aan een bestaande of nieuwe *publicatie*. Na het aanmaken van het document kan deze koppeling niet meer gewijzigd worden.
 * ``Officiële titel``. De (mogelijk uitgebreide) officiële titel van het document. (DiWoo: ``officieleTitel``)
 * ``Verkorte titel``. De verkorte titel / citeertitel van het document. (DiWoo: ``verkorteTitel``)
 * ``Omschrijving``. Een beknopte omschrijving / samenvatting van de inhoud van het document. (DiWoo: ``omschrijving``)
@@ -114,7 +114,8 @@ Op een *document*-registratie zijn de volgende metadata beschikbaar. Op het sche
 
     In de Documenten API krijgt elk document een *informatieobjecttype*. Dit is het
     informatieobjecttype van de :ref:`informatiecategorie <admin_metadata_index_information_categories>`
-    van de bijbehorende *publicatie*. Heeft de publicatie geen informatiecategorie, dan
+    van de bijbehorende *publicatie*. Heeft de publicatie meerdere informatiecategorieën,
+    dan wordt de eerste gebruikt. Heeft de publicatie geen informatiecategorie, dan
     wordt het standaard-informatieobjecttype uit de
     :ref:`algemene instellingen <admin_configuratie_index_alg_inst>` gebruikt. Hiervoor
     moet een Catalogi API geconfigureerd zijn; zonder Catalogi API mislukt het uploaden
@@ -342,7 +343,7 @@ Op een *inzageprocedure*-registratie zijn de volgende metadata beschikbaar. Op h
 * ``Datum einde inzagetermijn``. De datum waarop de inzagetermijn eindigt. Valt deze
   datum in een weekend of op een feestdag, dan wordt de eerstvolgende werkdag gebruikt.
 * ``Automatisch intrekken``. Een vinkje dat aangeeft of de publicatie automatisch
-  ingetrokken moet worden wanneer de inzagetermijn verstreken is.
+  ingetrokken moet worden op de einddatum van de inzagetermijn (zie de toelichting hieronder).
 
 .. note::
 

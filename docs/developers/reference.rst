@@ -31,20 +31,19 @@ that have been (or are in the process of) been made publicly accessible.
 
 The metadata is stored in a relations database (see the schema below), while the actual
 binary content of the documents is persisted in a Documenten API (VNG standard).
-Typically, we leverage Open Zaak for this (in development).
+Typically, we leverage Open Zaak for this.
 
 Publication and document resources have a particular publication status - at the time of
 writing these are ``concept``, ``gepubliceerd`` (published) and ``ingetrokken``
-(revoked). Published resources are
-pushed to the GPP-zoeken API to be included in an Elastic Search index to power the
-GPP Burgerportaal for search. When a resource is revoked, it is removed from the index
-again.
+(revoked). Published resources are pushed to the GPP-zoeken API to be included in an
+Elastic Search index to power the GPP Burgerportaal for search. When a resource is
+revoked, it is removed from the index again.
 
 Index operations (and by extension the interaction with GPP-zoeken) is done
 asynchronously using Celery tasks, after the database transaction is committed.
 
-A publication can have an inspection procedure ("inzageprocedure"). When its
-inspection period has ended, the publication can be revoked automatically by a periodic
+A publication can have an inspection procedure ("inzageprocedure"). On the end date of
+its inspection period, the publication can be revoked automatically by a periodic
 Celery task, which is scheduled by Celery beat.
 
 **Document types**

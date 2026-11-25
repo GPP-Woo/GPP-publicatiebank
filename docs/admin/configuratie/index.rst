@@ -29,13 +29,13 @@ Omdat de GPP-publicatiebank gebruik maakt van de Documenten API en de Catalogi A
 de "API's voor Zaakgericht Werken"-standaard zijn er een aantal aspecten die globaal
 ingesteld moeten worden om gebruik te kunnen maken van deze API's.
 
+De voordelen van hergebruik binnen het API-landschap wegen (naar onze mening) op tegen
+deze ongemakken.
+
 .. warning:: Sinds versie 3.0.0 is een Catalogi API verplicht. Zolang de
    ``Catalogi API-service`` niet is ingesteld, mislukt het uploaden van documenten. Stel
    deze daarom direct na de installatie of upgrade in. Zie
    :ref:`configuration_services_catalogi_api` voor een stappenplan.
-
-De voordelen van hergebruik binnen het API-landschap wegen (naar onze mening) op tegen
-deze ongemakken.
 
 Beheerscherm
 ~~~~~~~~~~~~
@@ -131,8 +131,8 @@ worden weergegeven.
   ``Beschikbaar rechtsmiddel`` "bezwaar". Deze wordt gebruikt als bij de
   inzageprocedure zelf geen ``Reactieformulier-URL`` is ingevuld. Dit veld is verplicht.
 
-  Wanneer je deze standaard-URL's voor het eerst opslaat, worden ze ook ingevuld bij
-  bestaande inzageprocedures die nog geen ``Reactieformulier-URL`` hebben.
+Wanneer je deze standaard-URL's voor het eerst opslaat, worden ze ook ingevuld bij
+bestaande inzageprocedures die nog geen ``Reactieformulier-URL`` hebben.
 
 .. _admin_configuratie_index_applicatiegroepen:
 

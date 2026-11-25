@@ -28,7 +28,7 @@ Every document in the Documents API has a document type ("informatieobjecttype")
 The Woo Publications component gives every
 :ref:`information category <admin_metadata_index_information_categories>` its own
 informatieobjecttype in the :ref:`Catalogi API <installation_requirements_catalogi_api>`,
-and documents get the informatieobjecttype of the information category of their
+and documents get the informatieobjecttype of the (first) information category of their
 publication. The permissions to the Documents API are based on these document types.
 
 **Permission scopes**
@@ -123,7 +123,7 @@ variables.
 * ``/celery_worker.sh`` - the background task workers, e.g. for synchronising with
   GPP-zoeken and stripping document metadata. You can run as many replicas as needed.
 * ``/celery_beat.sh`` - the scheduler for periodic tasks, such as automatically
-  revoking publications when their inspection period ("inzagetermijn") has ended.
+  revoking publications on the end date of their inspection period ("inzagetermijn").
 * ``/celery_flower.sh`` - optional, a web interface to monitor the background tasks.
 
 .. warning:: Run **exactly one** Celery beat process. Without it, periodic tasks are
@@ -182,7 +182,7 @@ Allow streaming of document downloads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Uploaded documents in the API are also downloaded again - especially by the national
-`Generieke Woo-Voorziening (GWV) <https://open.overheid.nl/>`_ which indexes the
+`Generieke Woo-voorziening (GWV) <https://open.overheid.nl/>`_ which indexes the
 documents, but ultimately also by interested parties like citizens, journalists...
 
 Our download API endpoint (``/api/v2/documenten/:uuid/download``) sends a response

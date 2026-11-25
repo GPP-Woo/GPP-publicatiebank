@@ -42,7 +42,7 @@ Daarop worden de volgende handelingen gelogd.
 Zowel handelingen uitgevoerd via de admin-interface als via de API worden gelogd. Ook
 handelingen die het systeem zelf op de achtergrond uitvoert, zoals het
 :ref:`automatisch intrekken <admin_publicaties_index_inzage_procedure>` van publicaties
-na afloop van de inzagetermijn, worden gelogd.
+op de einddatum van de inzagetermijn, worden gelogd.
 
 Op het beheerscherm zijn de volgende acties mogelijk:
 

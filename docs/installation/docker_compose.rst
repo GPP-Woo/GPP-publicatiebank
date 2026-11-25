@@ -21,7 +21,8 @@ for anything other than testing. For example, it includes:
 
 Besides GPP-publicatiebank (``web``, ``celery``, ``celery-beat`` and ``celery-flower``),
 the stack contains a PostgreSQL database, Redis, Open Zaak (which provides the Documents
-API and the Catalogi API) and GPP-zoeken with Elasticsearch.
+API and the Catalogi API) and the GPP-zoeken API. Elasticsearch is not configured in
+this dev stack.
 
 .. _`WSL`: https://docs.microsoft.com/en-us/windows/wsl/
 
@@ -63,25 +64,31 @@ Getting started
 3. Navigate to ``http://127.0.0.1:8000/admin/``, where you can log in with the
    ``admin`` username and ``admin`` password.
 
-4. Set up the Catalogi API. Since version 3.0.0, document uploads fail until this is
-   done:
+4. Configure the services. Since version 3.0.0, document uploads fail until the Catalogi
+   API is set up. The fixtures only provide the Documents API service, and the global
+   configuration can only be saved when all three services are selected.
 
-   a. In the admin, navigate to **Configuratie** > **Algemene instellingen**, fill in
-      the ``RSIN organisatie`` and the default reaction form URLs
-      (``Reactieformulier-URL zienswijze`` and ``Reactieformulier-URL bezwaar``), select
-      the Documents API service and save. At this point, an error message that the
-      Catalogi API service is not available is expected.
+   a. In the admin, navigate to **Configuratie** > **Services** and add two services
+      (label and slug of your choice):
+
+      * Catalogi API: type "ZTC (Zaaktypen)", API root
+        ``http://openzaak.docker.internal:8001/catalogi/api/v1/``, authorization type
+        "ZGW client_id + secret", client ID ``woo-publications-dev`` and secret
+        ``insecure-yQL9Rzh4eHGVmYx5w3J2gu`` (the same credentials as the Documents API
+        service).
+      * GPP-zoeken: type "ORC (Overige)", API root
+        ``http://gpp-zoeken-web:8000/api/v1/``, authorization type "API key", header key
+        ``Authorization`` and header value ``Token insecure-RySD8u5xkb9PH6AJtaZV4Y``.
+
+   b. Navigate to **Configuratie** > **Algemene instellingen**, select the three
+      services, fill in the ``RSIN organisatie`` and the default reaction form URLs
+      (``Reactieformulier-URL zienswijze`` and ``Reactieformulier-URL bezwaar``) and
+      save. Saving creates the catalogus and the default informatieobjecttype. The
+      information categories get their informatieobjecttype in the background.
 
       .. note:: The Open Zaak instance of the stack already has a catalogus for RSIN
          ``100000198``. If you use this RSIN, also fill in the ``Catalogus-URL``
          ``http://openzaak.docker.internal:8001/catalogi/api/v1/catalogussen/770dcb62-2469-4353-a2a7-e619df7e061f``.
-
-   b. Run the setup command, which creates the Catalogi API service from the Documents
-      API service of Open Zaak:
-
-      .. code:: bash
-
-         docker compose exec web python src/manage.py setup_catalogi_api
 
    See :ref:`configuration_services_catalogi_api` for more details.
 

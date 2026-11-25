@@ -68,8 +68,10 @@ Configuration in the registration component
 8. Save the changes.
 
 .. note:: Since version 3.0.0, GPP-Publicatiebank also requires a
-   :ref:`Catalogi API <configuration_services_catalogi_api>`. Configure it right after
-   the Documents API.
+   :ref:`Catalogi API <configuration_services_catalogi_api>`. The general configuration
+   can only be saved when the Documents API, Catalogi API and GPP-zoeken services are
+   all selected, so add the three services first and then fill out the general
+   configuration once.
 
 .. _configuration_services_catalogi_api:
 
@@ -122,8 +124,9 @@ Configuration in the registration component
 
 9. Check the information categories: navigate to **Metadata** > **Information
    categories** and click **View API resource URLs**. Every information category should
-   show the URL of its informatieobjecttype. If the background synchronisation was
-   interrupted, click **Sync Document API** to try again.
+   show the URL of its informatieobjecttype. If one has no URL, open that information
+   category and save it again. Once all of them have a URL, the **Sync Document API**
+   button appears, which updates the existing documents again if that was interrupted.
 
 .. warning:: Until the Catalogi API is configured, document uploads fail. Direct uploads
    fail with an HTTP 500 error, uploads from a URL fail in the background task.
@@ -131,7 +134,9 @@ Configuration in the registration component
 **Using the management command**
 
 With Open Zaak, the ``setup_catalogi_api`` management command performs these steps for
-you. Run it in a container (or Kubernetes pod) of GPP-publicatiebank:
+you on an installation that was upgraded from 2.x. On a new installation the general
+configuration can't be saved without a Catalogi API service, so follow the steps above
+instead. Run the command in a container (or Kubernetes pod) of GPP-publicatiebank:
 
 .. code-block:: bash
 

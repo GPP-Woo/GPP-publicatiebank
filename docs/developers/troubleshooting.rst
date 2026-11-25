@@ -30,14 +30,17 @@ Creating documents fails with an HTTP 500 error
 
 **Likely solution**
 
-Configure the Catalogi API. With the Open Zaak instance from ``docker compose``, set the
-organisation RSIN in the global configuration and run:
+Configure the Catalogi API: add a Catalogi API service for the Open Zaak instance from
+``docker compose`` (``http://openzaak.docker.internal:8001/catalogi/api/v1/``, with the
+same credentials as the Documents API service), select it in the global configuration
+and save. See :ref:`configuration_services_catalogi_api` for the details.
+
+If your global configuration dates from before version 3.0.0, so the Documents API
+service and the organisation RSIN are already set, you can run this instead:
 
 .. code-block:: bash
 
     src/manage.py setup_catalogi_api
-
-See :ref:`configuration_services_catalogi_api` for the details.
 
 **Cause**
 
@@ -57,6 +60,7 @@ need to have this entry in your ``/etc/hosts`` file - see :ref:`install_etc_host
 
 **Cause**
 
-The Documents API and Catalogi API services in the development fixtures point to
-``http://openzaak.docker.internal:8001/``. When GPP-publicatiebank runs with
-``runserver`` on the host system, this hostname must resolve to ``127.0.0.1``.
+The Documents API service in the docker compose fixtures, and a Catalogi API service
+for the same Open Zaak instance, point to ``http://openzaak.docker.internal:8001/``.
+When GPP-publicatiebank runs with ``runserver`` on the host system, this hostname must
+resolve to ``127.0.0.1``.

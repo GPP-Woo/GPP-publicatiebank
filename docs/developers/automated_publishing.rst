@@ -118,8 +118,8 @@ form URL and the inspection period.
   the global configuration is used.
 * The end of the inspection period is automatically moved to the next working day when
   it falls in a weekend or on a Dutch public holiday.
-* With ``automatischIntrekken``, the publication is revoked automatically when the
-  inspection period has ended.
+* With ``automatischIntrekken``, the publication is revoked automatically on the end
+  date of the inspection period, shortly after midnight.
 
 The inspection procedure is also included (read-only) in the ``Publicatie`` resource.
 
